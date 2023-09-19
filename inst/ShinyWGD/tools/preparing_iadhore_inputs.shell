@@ -1,0 +1,168 @@
+#!/bin/bash
+
+prepare_gene_list() {
+	species="$1"
+	gff_file="$2"
+	outdir="$3"
+
+	output_dir="$outdir"
+	if [[ ! -e "$output_dir" ]]; then
+		mkdir -p "$output_dir"
+	fi
+
+	sp_output_dir="$output_dir/$species"
+	if [[ ! -e "$sp_output_dir" ]]; then
+		mkdir -p "$sp_output_dir"
+	fi
+
+	genelistconf="${output_dir}/${species}.geneLists"
+	echo "genome=${species}" >> "$genelistconf"
+
+
+	awk -F'\t' -v species="$species" -v sp_output_dir="$sp_output_dir" -v genelistconf="$genelistconf" '
+		function add_to_genelistconf(scaf_id, filepath) {
+			if (!(scaf_id in scaf_ids)) {
+				scaf_ids[scaf_id] = 1
+				print scaf_id " " filepath >> genelistconf
+			}
+		}
+
+		BEGIN {
+			OFS = "\t"
+		}
+		$3 == "mRNA" {
+            gene_id = $9
+            sub(/^ID=/, "", gene_id)
+            sub(/;.*/, "", gene_id)
+            scaf_id = $1
+            filename = scaf_id ".txt"
+            output_file_path = sp_output_dir "/" filename
+            filepath = "gene_lists/" species "/" filename
+            print gene_id $7 > output_file_path
+            add_to_genelistconf(scaf_id, filepath)
+        }
+	' "$gff_file"
+}
+
+get_chr_length_for_species() {
+	species="$1"
+	gff_file="$2"
+	outdir="$3"
+
+	awk -F'\t' '!/^#/ && NR>1 { print $1, $5 }' "$gff_file" |
+	sort -k1,1 -k2,2nr |
+	awk -v OFS='\t' 'BEGIN { print "seqid\tlen\tsp" }
+		!($1 in max_len) { max_len[$1] = $2 }
+		END { for (chr in max_len) print chr, max_len[chr], "'"$species"'" }
+	' > "${outdir}/${species}.Chr_len.list"
+}
+
+get_chr_gene_num_for_species() {
+	species="$1"
+	gff_file="$2"
+	outdir="$3"
+
+	awk -F'\t' '!/^#/ && NR>1 && $3 == "mRNA" { count[$1]++ } END { for (chr in count) print chr, count[chr] }' "$gff_file" |
+	awk -v OFS='\t' -v species="$species" 'BEGIN { print "seqid\tnum\tsp" }{ print $1, $2, species }' > "${outdir}/${species}.Chr_gene_num.list"
+}
+
+make_configure_iadhore_2sp() {
+	species1="$1"
+	species1_list_file="$2"
+	species2="$3"
+	species2_list_file="$4"
+	config_file="$5"
+	output_dir="$6"
+
+	if [[ -e "$config_file" ]]; then
+		rm "$config_file"
+	fi
+
+	{
+		cat "$species1_list_file"
+		cat "$species2_list_file"
+		echo "blast_table=${output_dir}/${species1}_vs_${species2}.blastp.pairs"
+		echo "table_type=pairs"
+		echo "output_path=${output_dir}"
+		echo "cluster_type=collinear"
+		echo "prob_cutoff=0.01"
+		echo "write_stats=true"
+		echo "level_2_only=false"
+		echo "multiple_hypothesis_correction=FDR"
+		echo "gap_size=35"
+		echo "cluster_gap=40"
+		echo "q_value=0.75"
+		echo "anchor_points=3"
+		echo "alignment_method=gg2"
+		echo "max_gaps_in_alignment=40"
+		echo "visualizeGHM=false"
+		echo "visualizeAlignment=false"
+		echo "verbose_output=true"
+		echo ""
+	} >> "$config_file"
+}
+
+make_configure_iadhore() {
+	species="$1"
+	species_list_file="$2"
+	config_file="$3"
+	output_dir="$4"
+
+	if [[ -e "$config_file" ]]; then
+		rm "$config_file"
+	fi
+
+	{
+		cat "$species_list_file"
+		echo "blast_table=${output_dir}/${species}_vs_${species}.blastp.pairs"
+		echo "table_type=pairs"
+		echo "output_path=${output_dir}"
+		echo "cluster_type=collinear"
+		echo "prob_cutoff=0.01"
+		echo "write_stats=true"
+		echo "level_2_only=false"
+		echo "multiple_hypothesis_correction=FDR"
+		echo "gap_size=35"
+		echo "cluster_gap=40"
+		echo "q_value=0.75"
+		echo "anchor_points=3"
+		echo "alignment_method=gg2"
+		echo "max_gaps_in_alignment=40"
+		echo "visualizeGHM=false"
+		echo "visualizeAlignment=false"
+		echo "verbose_output=true"
+		echo ""
+	} >> "$config_file"
+}
+
+preparing_file() {
+	local input_data_file="$1"
+	local work_dir="$2"
+
+    IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"
+
+	for (( i = 0; i < ${#input_data_array[@]}; i++ )); do
+		line1="${input_data_array[$i]}"
+		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
+		
+		if [[ ! -e "$gff_file" ]]; then
+			echo "Skipping $species: gff_file does not exist"
+			continue
+		fi
+
+		species=$(echo "$species" | tr ' ' '_')
+
+		gene_list_dir="$work_dir/gene_lists"
+		prepare_gene_list "$species" "$gff_file" "$gene_list_dir"
+		get_chr_length_for_species "$species" "$gff_file" "$gene_list_dir"
+		get_chr_gene_num_for_species "$species" "$gff_file" "$gene_list_dir"
+	done
+}
+
+
+if [ $# -lt 2 ]; then
+	echo "Usage: $0 <input_file> <output_dir>"
+else
+	preparing_file $1 $2
+fi
+

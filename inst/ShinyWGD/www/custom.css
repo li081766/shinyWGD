@@ -1,0 +1,91 @@
+/*.navbar {
+    font-family: 'Calibri';
+    font-size: 1.25rem;
+} */
+
+.navbar { 
+	font-family: Arial;
+	font-size: 1.5rem;
+} 
+
+
+/* .navbar-default:hover {
+    background-color: #aaaaaa !important;
+    color: yellow;
+} */
+
+
+/* .navbar-brand {
+    font-size: 1.5rem;
+} */
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: Calibri, sans-serif;
+}
+
+.title {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+body {
+    font-family: Calibri, sans-serif;
+} 
+
+.boxLike {
+    margin-top: 15px;
+    margin-right: 10px;
+    margin-left: 10px;
+    background-color: #ABBAEA;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    border: 3px solid grey;
+    border-radius: 10px;
+}
+
+.boxMargin {
+    margin-top: 10px;
+    margin-right: 10px;
+    margin-left: 10px;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+hr.setting {
+    border-top: 1.66px dashed grey; 
+    background-color: transparent;
+}
+
+hr.splitting {
+	border-top: 2.66px solid grey;
+  	border-radius: 2.66px;
+	background-color: transparent;
+}
+
+.docImage {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.shiny-progress .progress-text {
+  background-color: #eef8ff;
+  margin: 0px;
+  padding: 2px 3px;
+  opacity: 0.85;
+}
+
+.custom_icon {
+  background: url("images/ksTreeIcon.svg");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  height: 32px;
+  width: 32px;
+  display: block;
+}
+
+.floating-container {
+    float: left;
+    width: 30%;
+}
