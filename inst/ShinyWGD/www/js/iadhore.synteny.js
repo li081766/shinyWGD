@@ -31,9 +31,9 @@ script.onload = function () {
         var subjectSpecies = InputData.subject_sp;
         var scaleRatio = width / 800;
 
-        console.log("segmentInfo", segmentInfo);
+        /* console.log("segmentInfo", segmentInfo);
         console.log("queryChrInfo", queryChrInfo);
-        console.log("subjectChrInfo", subjectChrInfo);
+        console.log("subjectChrInfo", subjectChrInfo); */
 
         queryChrInfo = queryChrInfo.sort(function (a, b) {
             return b.len - a.len;

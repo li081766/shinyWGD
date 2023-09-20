@@ -1381,14 +1381,14 @@ observeEvent(input$iadhore_config_go, {
 
                             if( file.exists(ks_file) ){
                                 if( !file.exists(anchorpointout_file) ){
-                                    source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
-                                    obtain_coordiantes_for_anchorpoints_ks(
+                                    source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
+                                    obtain_coordiantes_for_anchorpoints(
                                         anchorpoints=anchorpointfile,
-                                        anchorpoints_ks=ks_file,
-                                        genes_file=genesFile,
-                                        out_file=anchorpoint_merged_file,
-                                        out_ks_file=anchorpointout_file,
-                                        species=gsub(" ", "_", querySpecies)
+                                        species1=querySpecies,
+                                        gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                                        species2=subjectSpecies,
+                                        gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
+                                        out_file=anchorpoint_merged_file
                                     )
                                 }
 
@@ -1775,14 +1775,21 @@ observeEvent(input$iadhore_config_go, {
 
                             if( file.exists(ks_file) ){
                                 if( !file.exists(anchorpointout_file) ){
-                                    source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
-                                    obtain_coordiantes_for_anchorpoints_ks(
+                                    # source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
+                                    # obtain_coordiantes_for_anchorpoints_ks(
+                                    #     anchorpoints=anchorpointfile,
+                                    #     anchorpoints_ks=ks_file,
+                                    #     genes_file=genesFile,
+                                    #     out_file=anchorpoint_merged_file,
+                                    #     out_ks_file=anchorpointout_file,
+                                    #     species=gsub(" ", "_", querySpecies)
+                                    # )
+                                    source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
+                                    obtain_coordiantes_for_anchorpoints(
                                         anchorpoints=anchorpointfile,
-                                        anchorpoints_ks=ks_file,
-                                        genes_file=genesFile,
-                                        out_file=anchorpoint_merged_file,
-                                        out_ks_file=anchorpointout_file,
-                                        species=gsub(" ", "_", querySpecies)
+                                        species1=querySpecies,
+                                        gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                                        out_file=anchorpoint_merged_file
                                     )
                                 }
 
@@ -2048,7 +2055,7 @@ observeEvent(input$iadhore_config_go, {
                                 for( multiplicon in input[[paste0("multiplicon_plot_", x)]] ){
                                     selectedAnchorPointsT <- final_anchorpoints[final_anchorpoints$multiplicon==multiplicon, ]
                                     selectedAnchorPoints <- rbind(selectedAnchorPoints, selectedAnchorPointsT)
-
+                                    # print(selectedAnchorPoints)
                                     cutoffX <- selectedAnchorPoints %>%
                                         group_by(listX) %>%
                                         summarize(min=min(startX),
@@ -2380,8 +2387,8 @@ observeEvent(input$cluster_go, {
         ksFile <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
         genesFile <- paste0(iadhoreDir, "/genes.txt")
         multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
-        anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
-        anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
+        anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.cluster.txt")
+        anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.cluster.txt")
 
         if( file.exists(ksFile) ){
             if( !file.exists(anchorpointout_file) ){
