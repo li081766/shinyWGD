@@ -362,7 +362,6 @@ analysisEachCluster <- function(
     library(dplyr)
     library(gridBase)
     library(gridExtra)
-    source(file="tools/CountOrthologs.R", local=TRUE, encoding="UTF-8")
 
     segs.df <- read.table(
         segmented_file,

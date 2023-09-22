@@ -3,6 +3,7 @@
 S3method(plot,ksv)
 export(CalHomoConcentration)
 export(CalPvalue)
+export(CountOrthologs)
 export(PeaksInKsDistributionValues)
 export(SiZer)
 export(SignifFeatureRegion)

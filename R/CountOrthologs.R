@@ -1,12 +1,17 @@
-#' Count the ortholog number in the the anchored points file
+#' Count Ortholog Genes in a Species
 #'
-#' @param atomic.df the data frame of anchored points 
-#' @param species the name of a species
+#' This function counts ortholog genes in a given species based on input data.
 #'
-#' @return
+#' @param atomic.df A data frame containing information about ortholog genes.
+#' @param species The species for which ortholog gene counts should be computed.
+#'
+#' @return A data frame summarizing the counts of ortholog genes for each chromosome.
 #' @export
 #'
 #' @examples
+#' # Example usage:
+#' ortholog_counts <- CountOrthologs(atomic.df, species="SpeciesA")
+#' print(ortholog_counts)
 CountOrthologs <- function(atomic.df, species) {
   if (length(unique(atomic.df$speciesX)) > 1) {
     stop ("atomatic.df is not ordered")
