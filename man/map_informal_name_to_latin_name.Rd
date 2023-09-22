@@ -2,19 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{map_informal_name_to_latin_name}
 \alias{map_informal_name_to_latin_name}
-\title{Remapping the temporary informal name to the Latin name}
+\title{Map Informal Names to Latin Names}
 \usage{
 map_informal_name_to_latin_name(sp_gff_info_xls)
 }
 \arguments{
-\item{sp_gff_info_xls}{A file includes the Latin name, informal name, and gff file}
+\item{sp_gff_info_xls}{The path to the Excel file containing species information.}
 }
 \value{
-A data frame includes the corresponding pair of Latin and informal name
+A data frame with "latin_name" and "informal_name" columns.
 }
 \description{
-Remapping the temporary informal name to the Latin name
+This function reads information from an Excel file (XLS) containing columns "latin_name," "informal_name," and "gff." It extracts the "latin_name" and "informal_name" columns, performs some data manipulation, and returns a data frame with these two columns.
 }
 \examples{
-names_df <- map_informal_name_to_latin_name(species_info_file[1])
+names_df <- map_informal_name_to_latin_name("species_info.xls")
 }

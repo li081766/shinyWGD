@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{create_ksrates_cmd_from_table}
 \alias{create_ksrates_cmd_from_table}
-\title{Create ksrates command Shell file}
+\title{Create Ksrates Command Files from Data Table}
 \usage{
 create_ksrates_cmd_from_table(
   data_table,
@@ -13,19 +13,25 @@ create_ksrates_cmd_from_table(
 )
 }
 \arguments{
-\item{data_table}{A data frame includes three columns: species name, proteome file, annotation file.}
+\item{data_table}{The data table containing information about species.}
 
-\item{ksratesconf}{The file of ksrates configure infomation.}
+\item{ksratesconf}{The path to the Ksrates configuration file.}
 
-\item{cmd_file}{The shell file is used to save the commmand line of ksrates.}
+\item{cmd_file}{The path to the main Ksrates command file to be generated.}
 
-\item{wgd_cmd_file}{The shell file is used to save the command line of wgd.}
+\item{wgd_cmd_file}{The path to the WGD command file to be generated.}
 
-\item{focal_species}{The name of the focal species used in ksrates.}
+\item{focal_species}{The name of the focal species.}
 }
 \description{
-Create ksrates command Shell file
+This function generates command files for running Ksrates and related analyses based on a data table and configuration file.
 }
 \examples{
- create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, wgd_cmd_sh_file, input$select_focal_species)
+create_ksrates_cmd_from_table(
+  my_data_table,
+  "ksrates_config.txt",
+  "ksrates_cmd.sh",
+  "wgd_cmd.sh",
+  "FocalSpecies"
+)
 }

@@ -2,21 +2,21 @@
 % Please edit documentation in R/utils.R
 \name{check_proteome_input}
 \alias{check_proteome_input}
-\title{Check the uploading proteome file}
+\title{Check and Process Proteome Input File}
 \usage{
 check_proteome_input(proteome_name, proteome_input)
 }
 \arguments{
-\item{proteome_name}{The prefix of the proteome file}
+\item{proteome_name}{The informal name of the proteome input file.}
 
-\item{proteome_input}{The proteome file created by Shiny uploading function}
+\item{proteome_input}{The proteome input data.}
 }
 \value{
-A proteome fasta file path includes standardized protein info.
+A string containing the processed proteome file's path.
 }
 \description{
-Check the uploading proteome file
+This function checks the type of proteome input file and processes it accordingly.
 }
 \examples{
-proteome_temp <- check_proteome_input(informal_name_temp, input[[proteome]])
+proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
 }

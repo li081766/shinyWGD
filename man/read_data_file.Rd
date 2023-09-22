@@ -2,19 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{read_data_file}
 \alias{read_data_file}
-\title{Read a upload table file}
+\title{Read Data from Uploaded File}
 \usage{
 read_data_file(uploadfile)
 }
 \arguments{
-\item{uploadfile}{The object of the file through uploading function of Shiny.}
+\item{uploadfile}{The object representing the uploaded file obtained through the Shiny upload function.}
 }
 \value{
-A data frame includes the data from the file.
+A data frame containing the data from the uploaded file.
 }
 \description{
-Read a upload table file
+This function reads data from an uploaded file in a Shiny application and returns it as a data frame.
 }
 \examples{
-read_data_file(input$upload_data_file)[["V1"]]
+data <- read_data_file(input$upload_data_file)
+column1 <- data[["V1"]]
 }

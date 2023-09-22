@@ -2,21 +2,21 @@
 % Please edit documentation in R/utils.R
 \name{check_gff_from_file}
 \alias{check_gff_from_file}
-\title{Check the annotation file from a file location}
+\title{Check and Process GFF Input File from a Specific Path}
 \usage{
 check_gff_from_file(gff_input_name, gff_input_path)
 }
 \arguments{
-\item{gff_input_name}{The prefix of the annotation file}
+\item{gff_input_name}{The informal name of the GFF input file.}
 
-\item{gff_input_path}{The path of the annotation file}
+\item{gff_input_path}{The path to the GFF input file.}
 }
 \value{
-A gff file path includes standardized annotation info.
+A string containing the processed GFF file's path.
 }
 \description{
-Check the annotation file from a file location
+This function checks the type of GFF input file specified by its path and processes it accordingly.
 }
 \examples{
-gff_temp <- check_gff_from_file(informal_name_temp, data_table[i, 3])
+gff_temp <- check_gff_from_file("MyGFF", "/path/to/my_gff.gff")
 }

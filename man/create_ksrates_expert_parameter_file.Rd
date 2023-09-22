@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{create_ksrates_expert_parameter_file}
 \alias{create_ksrates_expert_parameter_file}
-\title{Create ksrates expert parameter file}
+\title{Create ksrates Expert Parameter File}
 \usage{
 create_ksrates_expert_parameter_file(ksrates_expert_parameter_file)
 }
@@ -10,7 +10,7 @@ create_ksrates_expert_parameter_file(ksrates_expert_parameter_file)
 \item{ksrates_expert_parameter_file}{The file is used to store the ksrates expert parameter}
 }
 \description{
-Create ksrates expert parameter file
+Create ksrates Expert Parameter File
 }
 \examples{
 ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")

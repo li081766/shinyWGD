@@ -2,20 +2,20 @@
 % Please edit documentation in R/utils.R
 \name{create_ksrates_configure_file_v2}
 \alias{create_ksrates_configure_file_v2}
-\title{Creating ksrates configure file}
+\title{Create Ksrates Configuration File}
 \usage{
 create_ksrates_configure_file_v2(input, ksrates_conf_file, species_info_file)
 }
 \arguments{
 \item{input}{The Input object of Shiny.}
 
-\item{ksrates_conf_file}{The file is used to store the configure of ksrates.}
+\item{ksrates_conf_file}{The path to the Ksrates configuration file.}
 
-\item{species_info_file}{The file is used to store the updated info.}
+\item{species_info_file}{The path to the species information file.}
 }
 \description{
-Creating ksrates configure file
+This function generates a configuration file for the Ksrates pipeline based on Shiny input.
 }
 \examples{
-create_ksrates_configure_file_v2(input, ksratesconf, speciesinfoconf)
+create_ksrates_configure_file_v2(input, "ksrates_config.txt", "species_info.txt")
 }

@@ -2,21 +2,21 @@
 % Please edit documentation in R/utils.R
 \name{check_gff_input}
 \alias{check_gff_input}
-\title{Check the uploading annotation file}
+\title{Check and Prepare GFF/GTF Input File}
 \usage{
 check_gff_input(gff_input_name, gff_input_path)
 }
 \arguments{
-\item{gff_input_name}{The prefix of the annotation file}
+\item{gff_input_name}{A descriptive name for the GFF/GTF file.}
 
-\item{gff_input_path}{The annotation file created by Shiny uploading function}
+\item{gff_input_path}{The file path to the GFF/GTF file.}
 }
 \value{
-A gff file path includes standardized annotation info.
+The path to the prepared GFF file for analysis.
 }
 \description{
-Check the uploading annotation file
+This function checks the file format of a GFF/GTF input file and prepares it for analysis. It can handle both uncompressed and compressed formats.
 }
 \examples{
-check_gff_input(informal_name, input[[paste0("gff_", 1)]])
+check_gff_input("Sample GFF", input[[paste0("gff_", 1)]])
 }

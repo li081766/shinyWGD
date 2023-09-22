@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{create_ksrates_configure_file_based_on_table}
 \alias{create_ksrates_configure_file_based_on_table}
-\title{Create ksrates configure file based on the data table}
+\title{Create Ksrates Configuration File Based on Data Table}
 \usage{
 create_ksrates_configure_file_based_on_table(
   data_table,
@@ -13,25 +13,25 @@ create_ksrates_configure_file_based_on_table(
 )
 }
 \arguments{
-\item{data_table}{A data frame includes three columns: species name, proteome file, annotation file.}
+\item{data_table}{The data table containing information about species, proteomes, and GFF files.}
 
-\item{focal_species}{The name of the focal species used in ksrates}
+\item{focal_species}{The name of the focal species.}
 
-\item{newick_tree_file}{The path of newick tree file}
+\item{newick_tree_file}{The path to the Newick tree file.}
 
-\item{ksrates_conf_file}{The file is used to store the configure of ksrates.}
+\item{ksrates_conf_file}{The path to the Ksrates configuration file to be generated.}
 
-\item{species_info_file}{The file is used to store the updated info.}
+\item{species_info_file}{The path to the species information file.}
 }
 \description{
-Create ksrates configure file based on the data table
+This function generates a Ksrates configuration file based on a data table and other parameters.
 }
 \examples{
 create_ksrates_configure_file_based_on_table(
- data_table,
- input$select_focal_species,
- input$newick_tree,
- ksratesconf,
- speciesinfoconf
+  my_data_table,
+  "FocalSpecies",
+  "my_newick_tree.newick",
+  "ksrates_config.txt",
+  "species_info.txt"
 )
 }

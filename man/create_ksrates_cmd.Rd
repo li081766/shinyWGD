@@ -2,19 +2,19 @@
 % Please edit documentation in R/utils.R
 \name{create_ksrates_cmd}
 \alias{create_ksrates_cmd}
-\title{Create ksrates command Shell file}
+\title{Create Ksrates Command Files from Shiny Input}
 \usage{
 create_ksrates_cmd(input, ksratesconf, cmd_file)
 }
 \arguments{
 \item{input}{The Input object of Shiny.}
 
-\item{ksratesconf}{The file of ksrates configure infomation.}
+\item{ksratesconf}{The path to the Ksrates configuration file.}
 
-\item{cmd_file}{The shell file is used to save the commmand line of ksrates.}
+\item{cmd_file}{The path to the main Ksrates command file to be generated.}
 }
 \description{
-Create ksrates command Shell file
+Create Ksrates Command Files from Shiny Input
 }
 \examples{
 create_ksrates_cmd(input, "ksrates_conf.txt", ksrates_cmd_sh_file)

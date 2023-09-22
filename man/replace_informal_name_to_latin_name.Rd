@@ -2,21 +2,21 @@
 % Please edit documentation in R/utils.R
 \name{replace_informal_name_to_latin_name}
 \alias{replace_informal_name_to_latin_name}
-\title{Replace the infomal name to Latin name}
+\title{Replace Informal Names with Latin Names}
 \usage{
 replace_informal_name_to_latin_name(names_df, input)
 }
 \arguments{
-\item{names_df}{The data frame includes the corresponding pair of Latin and informal name}
+\item{names_df}{A data frame with "latin_name" and "informal_name" columns.}
 
-\item{input}{The informal name}
+\item{input}{The input string that may contain informal species names.}
 }
 \value{
-A string includes the Latin name
+A modified input string with informal names replaced by Latin names.
 }
 \description{
-Replace the infomal name to Latin name
+This function takes a data frame \code{names_df} containing "latin_name" and "informal_name" columns and an \code{input} string as input. It replaces informal species names in the \code{input} string with their corresponding Latin names based on the information in \code{names_df}. If the \code{input} string contains underscores ("_"), it assumes a comparison between two species and replaces both informal names. Otherwise, it replaces the informal name in the \code{input} string.
 }
 \examples{
-replace_informal_name_to_latin_name(names_df, x)
+replaced_name <- replace_informal_name_to_latin_name(names_df, "species1_species2")
 }

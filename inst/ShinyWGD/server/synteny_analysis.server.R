@@ -1344,7 +1344,7 @@ observeEvent(input$iadhore_config_go, {
             new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
             sp_gff_info_df$cdsPath <- new_cds_files
             sp_gff_info_df$gffPath <- new_gff_files
-            source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
+            # source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
             chr_num_len_df <- obtain_chromosome_length(sp_gff_info_xls)
             lapply(1:nrow(selected_df), function(x){
                 each_row <- selected_df[x, ]
@@ -1381,7 +1381,7 @@ observeEvent(input$iadhore_config_go, {
 
                             if( file.exists(ks_file) ){
                                 if( !file.exists(anchorpointout_file) ){
-                                    source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
+                                    # source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
                                     obtain_coordiantes_for_anchorpoints(
                                         anchorpoints=anchorpointfile,
                                         species1=querySpecies,
@@ -1393,7 +1393,7 @@ observeEvent(input$iadhore_config_go, {
                                 }
 
                                 if( !file.exists(multiplicon_ks_file) ){
-                                    source(file="tools/obtain_mean_ks_for_multiplicons.v2.R", local=T, encoding="UTF-8")
+                                    # source(file="tools/obtain_mean_ks_for_multiplicons.v2.R", local=T, encoding="UTF-8")
                                     obtain_mean_ks_for_each_multiplicon(
                                         multiplicon_file=multiplicon_file,
                                         anchorpoint_file=anchorpoint_merged_file,
@@ -1452,7 +1452,7 @@ observeEvent(input$iadhore_config_go, {
                                 filter(sp==gsub(" ", "_", subjectSpecies)) %>%
                                 filter(seqchr %in% subject_selected_chr_list)
 
-                            source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
+                            # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
                             depth_list <- computing_depth(
                                 anchorpoint_ks_file=anchorpointout_file,
                                 multiplicon_id=selected_multiplicons_Id,
@@ -1504,7 +1504,7 @@ observeEvent(input$iadhore_config_go, {
                             segmentsfile <- paste0(iadhoreDir, "/segments.txt")
                             segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
                             if( ! file.exists(segs_pos_file) ){
-                                source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
+                                # source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
                                 obtain_coordiantes_for_segments(
                                     seg_file=segmentsfile,
                                     sp1=gsub(" ", "_", querySpecies),
@@ -1784,7 +1784,7 @@ observeEvent(input$iadhore_config_go, {
                                     #     out_ks_file=anchorpointout_file,
                                     #     species=gsub(" ", "_", querySpecies)
                                     # )
-                                    source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
+                                    # source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
                                     obtain_coordiantes_for_anchorpoints(
                                         anchorpoints=anchorpointfile,
                                         species1=querySpecies,
@@ -1794,7 +1794,7 @@ observeEvent(input$iadhore_config_go, {
                                 }
 
                                 if( !file.exists(multiplicon_ks_file) ){
-                                    source(file="tools/obtain_mean_ks_for_multiplicons.v2.R", local=T, encoding="UTF-8")
+                                    # source(file="tools/obtain_mean_ks_for_multiplicons.R", local=T, encoding="UTF-8")
                                     obtain_mean_ks_for_each_multiplicon(
                                         multiplicon_file=multiplicon_file,
                                         anchorpoint_file=anchorpoint_merged_file,
@@ -1853,7 +1853,7 @@ observeEvent(input$iadhore_config_go, {
 
                             chr_num_df <- chr_num_len_df$num_df
 
-                            source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
+                            # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
                             depth_list <- computing_depth_paranome(
                                 anchorpoint_ks_file=anchorpointout_file,
                                 multiplicon_id=selected_multiplicons_Id,
@@ -1904,7 +1904,7 @@ observeEvent(input$iadhore_config_go, {
                             segmentsfile <- paste0(iadhoreDir, "/segments.txt")
                             segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
                             if( !file.exists(segs_pos_file) ){
-                                source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
+                                # source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
                                 obtain_coordiantes_for_segments(
                                     seg_file=segmentsfile,
                                     gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
@@ -2171,7 +2171,7 @@ observeEvent(input[["synplot_go_last"]], {
             new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
             sp_gff_info_df$cdsPath <- new_cds_files
             sp_gff_info_df$gffPath <- new_gff_files
-            source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
+            # source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
             #print(sp_gff_info_df)
             chr_num_len_df <- obtain_chromosome_length_filter(
                 sp_gff_info_df
@@ -2240,7 +2240,7 @@ observeEvent(input[["synplot_go_last"]], {
 
             segments_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.txt")
             segs_pos_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.merged_pos.txt")
-            source("tools/obtain_coordinates_for_segments.multiple_species.R", local=T, encoding="UTF-8")
+            # source("tools/obtain_coordinates_for_segments.multiple_species.R", local=T, encoding="UTF-8")
             obtain_coordinates_for_segments_multiple(
                 seg_df=selected_segs_df,
                 gff_df=sp_gff_info_df,
@@ -2394,7 +2394,7 @@ observeEvent(input$cluster_go, {
             if( !file.exists(anchorpointout_file) ){
                 Sys.sleep(.2)
                 incProgress(amount=.1, message="Mapping data...")
-                source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
+                # source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
                 obtain_coordiantes_for_anchorpoints_ks(
                     anchorpoints=anchorpointFile,
                     anchorpoints_ks=ksFile,
@@ -2426,7 +2426,7 @@ observeEvent(input$cluster_go, {
         if( !(file.exists(segmented_anchopoints_file)) ){
             Sys.sleep(.2)
             incProgress(amount=.2, message="Segmenting...")
-            source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
+            # source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
             get_segments(
                 genes_file=genesFile,
                 anchors_ks_file=anchorpointout_file,
@@ -2443,7 +2443,7 @@ observeEvent(input$cluster_go, {
         if( !file.exists(cluster_info_file) ){
             Sys.sleep(.2)
             incProgress(amount=.1, message="Clustering...")
-            source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
+            # source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
             cluster_synteny(
                 segmented_file=segmented_file,
                 segmented_anchorpoints_file=segmented_anchopoints_file,
@@ -2457,7 +2457,7 @@ observeEvent(input$cluster_go, {
 
         hcheightCutoff <- input$corRCutoff
         identified_cluster_file <- paste0(clusteringDir, "/Identified_Clusters.Num_", cutoffPoints, ".Hc_", hcheightCutoff, ".RData")
-        source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
+        # source(file="tools/clustering_synteny.R", local=TRUE, encoding="UTF-8")
         if( !(file.exists(identified_cluster_file)) ){
             Sys.sleep(.2)
             incProgress(amount=.2, message="Identifying Clusters...")

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{downloadButton_custom}
 \alias{downloadButton_custom}
-\title{Creating a custom download button}
+\title{Creating a Custom Download Button}
 \usage{
 downloadButton_custom(
   outputId,
@@ -20,30 +20,28 @@ downloadButton_custom(
 
 \item{class}{Additional CSS classes to apply to the tag, if any. Default NULL.}
 
-\item{status}{The status of the button, default primary}
+\item{status}{The status of the button; default is "primary."}
 
 \item{...}{Other arguments to pass to the container tag function.}
 
-\item{icon}{An icon() to appear on the button. Default is icon("download").}
+\item{icon}{An icon() to appear on the button; default is icon("download").}
 }
 \value{
-A HTML tag to allow users to download the object.
+An HTML tag to allow users to download the object.
 }
 \description{
-Use these functions to create a custom download button or link;
-when clicked, it will initiate a browser download.
-The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
+Use this function to create a custom download button or link. When clicked, it will initiate a browser download. The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
 }
 \examples{
-downloadButton(
+downloadButton_custom(
     outputId="wgd_ksrates_data_download",
     label="Download Analysis Data",
     width="215px",
     icon=icon("download"),
     status="secondary",
     style="background-color: #5151A2;
-           padding: 5px 10px 5px 10px;
-           margin: 5px 5px 5px 5px;
-           animation: glowingD 5000ms infinite; "
+             padding: 5px 10px 5px 10px;
+             margin: 5px 5px 5px 5px;
+             animation: glowingD 5000ms infinite; "
 )
 }

@@ -1,31 +1,46 @@
-is.not.null <- function(x) ! is.null(x)
-
-#' Creating a custom download button
+#' Check if an Object is Not NULL
 #'
-#' Use these functions to create a custom download button or link;
-#' when clicked, it will initiate a browser download.
-#' The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
+#' This function checks if an object is not NULL.
+#'
+#' @param x An R object to check.
+#'
+#' @return A logical value indicating whether the object is not NULL.
+#'
+#' @export
+#'
+#' @examples
+#' is.not.null(5)
+#' is.not.null(NULL)
+is.not.null <- function(x) {
+    !is.null(x)
+}
+
+#' Creating a Custom Download Button
+#'
+#' Use this function to create a custom download button or link. When clicked, it will initiate a browser download. The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
 #'
 #' @param outputId The name of the output slot that the downloadHandler is assigned to.
 #' @param label The label that should appear on the button.
 #' @param class Additional CSS classes to apply to the tag, if any. Default NULL.
-#' @param status The status of the button, default primary
+#' @param status The status of the button; default is "primary."
 #' @param ... Other arguments to pass to the container tag function.
-#' @param icon An icon() to appear on the button. Default is icon("download").
+#' @param icon An icon() to appear on the button; default is icon("download").
 #'
-#' @return A HTML tag to allow users to download the object.
+#' @return An HTML tag to allow users to download the object.
+#'
 #' @export
 #'
-#' @examples downloadButton(
+#' @examples
+#' downloadButton_custom(
 #'     outputId="wgd_ksrates_data_download",
 #'     label="Download Analysis Data",
 #'     width="215px",
 #'     icon=icon("download"),
 #'     status="secondary",
 #'     style="background-color: #5151A2;
-#'            padding: 5px 10px 5px 10px;
-#'            margin: 5px 5px 5px 5px;
-#'            animation: glowingD 5000ms infinite; "
+#'              padding: 5px 10px 5px 10px;
+#'              margin: 5px 5px 5px 5px;
+#'              animation: glowingD 5000ms infinite; "
 #' )
 downloadButton_custom <- function(
         outputId,
@@ -47,14 +62,19 @@ downloadButton_custom <- function(
     )
 }
 
-#' Read a upload table file
+#' Read Data from Uploaded File
 #'
-#' @param uploadfile The object of the file through uploading function of Shiny.
+#' This function reads data from an uploaded file in a Shiny application and returns it as a data frame.
 #'
-#' @return A data frame includes the data from the file.
+#' @param uploadfile The object representing the uploaded file obtained through the Shiny upload function.
+#'
+#' @return A data frame containing the data from the uploaded file.
+#'
 #' @export
 #'
-#' @examples read_data_file(input$upload_data_file)[["V1"]]
+#' @examples
+#' data <- read_data_file(input$upload_data_file)
+#' column1 <- data[["V1"]]
 read_data_file <- function(uploadfile){
     dataframe <- read.table(
         uploadfile$datapath,
@@ -66,15 +86,19 @@ read_data_file <- function(uploadfile){
     return(dataframe)
 }
 
-#' Check the uploading annotation file
+#' Check and Prepare GFF/GTF Input File
 #'
-#' @param gff_input_name The prefix of the annotation file
-#' @param gff_input_path The annotation file created by Shiny uploading function
+#' This function checks the file format of a GFF/GTF input file and prepares it for analysis. It can handle both uncompressed and compressed formats.
 #'
-#' @return A gff file path includes standardized annotation info.
+#' @param gff_input_name A descriptive name for the GFF/GTF file.
+#' @param gff_input_path The file path to the GFF/GTF file.
+#'
+#' @return The path to the prepared GFF file for analysis.
+#'
 #' @export
 #'
-#' @examples check_gff_input(informal_name, input[[paste0("gff_", 1)]])
+#' @examples
+#' check_gff_input("Sample GFF", input[[paste0("gff_", 1)]])
 check_gff_input <- function(gff_input_name, gff_input_path){
     checked_gff <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", gff_input_name, ".gff")
     if( str_detect(gff_input_path$name, ".(gff|gff3)$") ){
@@ -90,7 +114,7 @@ check_gff_input <- function(gff_input_name, gff_input_path){
         system(convertGTF_cmd)
     }
     else if( str_detect(gff_input_path$name, regex(".gtf.gz$")) ){
-        gunzipped_gtf <- file_temp(ext = ".gtf")
+        gunzipped_gtf <- file_temp(ext=".gtf")
         gunzip_gtf_cmd <- paste0("gunzip -c ", gff_input_path$datapath, " > ", gunzipped_gtf)
         system(gunzip_gtf_cmd)
         convertGTF_cmd <- paste0("gffread --keep-genes ", gunzipped_gtf, " > ", checked_gff)
@@ -107,15 +131,19 @@ check_gff_input <- function(gff_input_name, gff_input_path){
     return(checked_gff)
 }
 
-#' Check the annotation file from a file location
+#' Check and Process GFF Input File from a Specific Path
 #'
-#' @param gff_input_name The prefix of the annotation file
-#' @param gff_input_path The path of the annotation file
+#' This function checks the type of GFF input file specified by its path and processes it accordingly.
 #'
-#' @return A gff file path includes standardized annotation info.
+#' @param gff_input_name The informal name of the GFF input file.
+#' @param gff_input_path The path to the GFF input file.
+#'
+#' @return A string containing the processed GFF file's path.
+#'
 #' @export
 #'
-#' @examples gff_temp <- check_gff_from_file(informal_name_temp, data_table[i, 3])
+#' @examples
+#' gff_temp <- check_gff_from_file("MyGFF", "/path/to/my_gff.gff")
 check_gff_from_file <- function(gff_input_name, gff_input_path){
     checked_gff <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", gff_input_name, ".gff")
     if( str_detect(gff_input_path, ".(gff|gff3)$") ){
@@ -131,7 +159,7 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
         system(convertGTF_cmd)
     }
     else if( str_detect(gff_input_path, regex(".gtf.gz$")) ){
-        gunzipped_gtf <- file_temp(ext = ".gtf")
+        gunzipped_gtf <- file_temp(ext=".gtf")
         gunzip_gtf_cmd <- paste0("gunzip -c ", gff_input_path, " > ", gunzipped_gtf)
         system(gunzip_gtf_cmd)
         convertGTF_cmd <- paste0("gffread --keep-genes ", gunzipped_gtf, " > ", checked_gff)
@@ -147,15 +175,19 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
     return(checked_gff)
 }
 
-#' Check the uploading proteome file
+#' Check and Process Proteome Input File
 #'
-#' @param proteome_name The prefix of the proteome file
-#' @param proteome_input The proteome file created by Shiny uploading function
+#' This function checks the type of proteome input file and processes it accordingly.
 #'
-#' @return A proteome fasta file path includes standardized protein info.
+#' @param proteome_name The informal name of the proteome input file.
+#' @param proteome_input The proteome input data.
+#'
+#' @return A string containing the processed proteome file's path.
+#'
 #' @export
 #'
-#' @examples proteome_temp <- check_proteome_input(informal_name_temp, input[[proteome]])
+#' @examples
+#' proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
 check_proteome_input <- function(proteome_name, proteome_input){
     tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
@@ -190,15 +222,19 @@ check_proteome_input <- function(proteome_name, proteome_input){
     return(proteome_file)
 }
 
-#' Check the proteom file from the file location
+#' Check and Process Proteome Input File From a Special Path
 #'
-#' @param proteome_name The prefix of the proteome file
-#' @param proteome_input The path of the proteome file
+#' This function checks the type of proteome input file and processes it accordingly.
 #'
-#' @return A proteome fasta file path includes standardized protein info.
+#' @param proteome_name The informal name of the proteome input file.
+#' @param proteome_input The proteome input data.
+#'
+#' @return A string containing the processed proteome file's path.
+#'
 #' @export
 #'
-#' @examples proteome_temp <- check_proteome_from_file(informal_name_temp, proteome)
+#' @examples
+#' proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
 check_proteome_from_file <- function(proteome_name, proteome_input){
     tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
@@ -234,15 +270,18 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
     return(proteome_file)
 }
 
-#' Creating ksrates configure file
+#' Create Ksrates Configuration File
+#'
+#' This function generates a configuration file for the Ksrates pipeline based on Shiny input.
 #'
 #' @param input The Input object of Shiny.
-#' @param ksrates_conf_file The file is used to store the configure of ksrates.
-#' @param species_info_file The file is used to store the updated info.
+#' @param ksrates_conf_file The path to the Ksrates configuration file.
+#' @param species_info_file The path to the species information file.
 #'
 #' @export
 #'
-#' @examples create_ksrates_configure_file_v2(input, ksratesconf, speciesinfoconf)
+#' @examples
+#' create_ksrates_configure_file_v2(input, "ksrates_config.txt", "species_info.txt")
 create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_info_file){
     latin_names_temp <- c()
     fasta_filenames_temp <- c()
@@ -299,49 +338,52 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
 
     ksratesconf <- file(ksrates_conf_file, open="w")
     cat(paste0("[SPECIES]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("focal_species = ", focal_species_informal), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("newick_tree = ", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("latin_names = ", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("fasta_filenames = ", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_filename = ", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("peak_database_path = ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("ks_list_database_path = ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("focal_species=", focal_species_informal), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("newick_tree=", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("latin_names=", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("fasta_filenames=", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("peak_database_path=ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("paranome = yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("collinearity = yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_feature = mrna"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_attribute = id"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("max_number_outgroups = 4"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("consensus_mode_for_multiple_outgroups = mean among outgroups"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("paranome=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("collinearity=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_feature=mrna"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_attribute=id"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("max_number_outgroups=4"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("consensus_mode_for_multiple_outgroups=mean among outgroups"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[PARAMETERS]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("x_axis_max_limit_paralogs_plot = 5"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("bin_width_paralogs = 0.1"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("y_axis_max_limit_paralogs_plot = None"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("num_bootstrap_iterations = 200"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("divergence_colors =  Red, MediumBlue, Goldenrod, Crimson, ForestGreen, Gray, SaddleBrown, Black"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("x_axis_max_limit_orthologs_plots = 5"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("bin_width_orthologs = 0.1"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("max_ks_paralogs = 5"), append=TRUE, file=ksratesconf, sep="\n")
-    cat(paste0("max_ks_orthologs = 10"), append=TRUE, file=ksratesconf)
+    cat(paste0("x_axis_max_limit_paralogs_plot=5"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("bin_width_paralogs=0.1"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("y_axis_max_limit_paralogs_plot=None"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("num_bootstrap_iterations=200"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("divergence_colors= Red, MediumBlue, Goldenrod, Crimson, ForestGreen, Gray, SaddleBrown, Black"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("x_axis_max_limit_orthologs_plots=5"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("bin_width_orthologs=0.1"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("max_ks_paralogs=5"), append=TRUE, file=ksratesconf, sep="\n")
+    cat(paste0("max_ks_orthologs=10"), append=TRUE, file=ksratesconf)
     close(ksratesconf)
 }
 
-#' Create ksrates configure file based on the data table
+#' Create Ksrates Configuration File Based on Data Table
 #'
-#' @param data_table A data frame includes three columns: species name, proteome file, annotation file.
-#' @param focal_species The name of the focal species used in ksrates
-#' @param newick_tree_file The path of newick tree file
-#' @param ksrates_conf_file The file is used to store the configure of ksrates.
-#' @param species_info_file The file is used to store the updated info.
+#' This function generates a Ksrates configuration file based on a data table and other parameters.
+#'
+#' @param data_table The data table containing information about species, proteomes, and GFF files.
+#' @param focal_species The name of the focal species.
+#' @param newick_tree_file The path to the Newick tree file.
+#' @param ksrates_conf_file The path to the Ksrates configuration file to be generated.
+#' @param species_info_file The path to the species information file.
 #'
 #' @export
 #'
-#' @examples create_ksrates_configure_file_based_on_table(
-#'  data_table,
-#'  input$select_focal_species,
-#'  input$newick_tree,
-#'  ksratesconf,
-#'  speciesinfoconf
+#' @examples
+#' create_ksrates_configure_file_based_on_table(
+#'   my_data_table,
+#'   "FocalSpecies",
+#'   "my_newick_tree.newick",
+#'   "ksrates_config.txt",
+#'   "species_info.txt"
 #' )
 create_ksrates_configure_file_based_on_table <- function(data_table, focal_species, newick_tree_file, ksrates_conf_file, species_info_file){
     if( ncol(data_table) < 2 ){
@@ -369,7 +411,7 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
         latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
         informal_name_temp <- paste0(latin_name_list[1], i)
         if( focal_species == latin_name ){
-            focal_species_informal = informal_name_temp
+            focal_species_informal=informal_name_temp
         }
         newick_tree <- gsub(latin_name, informal_name_temp, newick_tree)
         proteome_temp <- check_proteome_from_file(
@@ -402,34 +444,34 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     close(SpeciesInfoConf)
     ksratesconf <- file(ksrates_conf_file, open="w")
     cat(paste0("[SPECIES]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("focal_species = ", focal_species_informal), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("newick_tree = ", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("latin_names = ", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("fasta_filenames = ", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_filename = ", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("peak_database_path = ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("ks_list_database_path = ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("focal_species=", focal_species_informal), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("newick_tree=", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("latin_names=", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("fasta_filenames=", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("peak_database_path=ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("paranome = yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("collinearity = yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_feature = mrna"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_attribute = id"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("max_number_outgroups = 4"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("consensus_mode_for_multiple_outgroups = mean among outgroups"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("paranome=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("collinearity=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_feature=mrna"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("gff_attribute=id"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("max_number_outgroups=4"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("consensus_mode_for_multiple_outgroups=mean among outgroups"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[PARAMETERS]"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("x_axis_max_limit_paralogs_plot = 5"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("bin_width_paralogs = 0.1"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("y_axis_max_limit_paralogs_plot = None"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("num_bootstrap_iterations = 200"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("divergence_colors =  Red, MediumBlue, Goldenrod, Crimson, ForestGreen, Gray, SaddleBrown, Black"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("x_axis_max_limit_orthologs_plots = 5"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("bin_width_orthologs = 0.1"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("max_ks_paralogs = 5"), append=TRUE, file=ksratesconf, sep="\n")
-    cat(paste0("max_ks_orthologs = 10"), append=TRUE, file=ksratesconf)
+    cat(paste0("x_axis_max_limit_paralogs_plot=5"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("bin_width_paralogs=0.1"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("y_axis_max_limit_paralogs_plot=None"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("num_bootstrap_iterations=200"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("divergence_colors= Red, MediumBlue, Goldenrod, Crimson, ForestGreen, Gray, SaddleBrown, Black"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("x_axis_max_limit_orthologs_plots=5"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("bin_width_orthologs=0.1"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("max_ks_paralogs=5"), append=TRUE, file=ksratesconf, sep="\n")
+    cat(paste0("max_ks_orthologs=10"), append=TRUE, file=ksratesconf)
     close(ksratesconf)
 }
 
-#' Create ksrates expert parameter file
+#' Create ksrates Expert Parameter File
 #'
 #' @param ksrates_expert_parameter_file The file is used to store the ksrates expert parameter
 #'
@@ -439,30 +481,39 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
 #' create_ksrates_expert_parameter_file(ksratesexpert)
 create_ksrates_expert_parameter_file <- function(ksrates_expert_parameter_file){
     expert_parameter <- file(ksrates_expert_parameter_file, open="w")
-    cat(paste0("logging_level = info"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("max_gene_family_size = 200"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("distribution_peak_estimate = mode"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("kde_bandwidth_modifier = 0.4"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("plot_adjustment_arrows = no"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("num_mixture_model_initializations = 10"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("max_mixture_model_iterations = 300"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("max_mixture_model_components = 5"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("max_mixture_model_ks = 5"), append=TRUE, file=expert_parameter, sep="\n")
-    cat(paste0("extra_paralogs_analyses_methods = no"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("logging_level=info"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("max_gene_family_size=200"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("distribution_peak_estimate=mode"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("kde_bandwidth_modifier=0.4"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("plot_adjustment_arrows=no"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("num_mixture_model_initializations=10"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("max_mixture_model_iterations=300"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("max_mixture_model_components=5"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("max_mixture_model_ks=5"), append=TRUE, file=expert_parameter, sep="\n")
+    cat(paste0("extra_paralogs_analyses_methods=no"), append=TRUE, file=expert_parameter, sep="\n")
     close(expert_parameter)
 }
 
-#' Create ksrates command Shell file
+#' Create Ksrates Command Files from Data Table
 #'
-#' @param data_table A data frame includes three columns: species name, proteome file, annotation file.
-#' @param ksratesconf The file of ksrates configure infomation.
-#' @param cmd_file The shell file is used to save the commmand line of ksrates.
-#' @param wgd_cmd_file The shell file is used to save the command line of wgd.
-#' @param focal_species  The name of the focal species used in ksrates.
+#' This function generates command files for running Ksrates and related analyses based on a data table and configuration file.
+#'
+#' @param data_table The data table containing information about species.
+#' @param ksratesconf The path to the Ksrates configuration file.
+#' @param cmd_file The path to the main Ksrates command file to be generated.
+#' @param wgd_cmd_file The path to the WGD command file to be generated.
+#' @param focal_species The name of the focal species.
 #'
 #' @export
 #'
-#' @examples  create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, wgd_cmd_sh_file, input$select_focal_species)
+#' @examples
+#' create_ksrates_cmd_from_table(
+#'   my_data_table,
+#'   "ksrates_config.txt",
+#'   "ksrates_cmd.sh",
+#'   "wgd_cmd.sh",
+#'   "FocalSpecies"
+#' )
 create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd_cmd_file, focal_species){
     cmd <- file(cmd_file, open="w")
     wgd_cmd <- file(wgd_cmd_file, open="w")
@@ -519,11 +570,11 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
     close(wgd_cmd)
 }
 
-#' Create ksrates command Shell file
+#' Create Ksrates Command Files from Shiny Input
 #'
 #' @param input The Input object of Shiny.
-#' @param ksratesconf The file of ksrates configure infomation.
-#' @param cmd_file The shell file is used to save the commmand line of ksrates.
+#' @param ksratesconf The path to the Ksrates configuration file.
+#' @param cmd_file The path to the main Ksrates command file to be generated.
 #'
 #' @export
 #'
@@ -567,14 +618,18 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     close(cmd)
 }
 
-#' Remapping the temporary informal name to the Latin name
+#' Map Informal Names to Latin Names
 #'
-#' @param sp_gff_info_xls A file includes the Latin name, informal name, and gff file
+#' This function reads information from an Excel file (XLS) containing columns "latin_name," "informal_name," and "gff." It extracts the "latin_name" and "informal_name" columns, performs some data manipulation, and returns a data frame with these two columns.
 #'
-#' @return A data frame includes the corresponding pair of Latin and informal name
+#' @param sp_gff_info_xls The path to the Excel file containing species information.
+#'
+#' @return A data frame with "latin_name" and "informal_name" columns.
+#'
 #' @export
 #'
-#' @examples names_df <- map_informal_name_to_latin_name(species_info_file[1])
+#' @examples
+#' names_df <- map_informal_name_to_latin_name("species_info.xls")
 map_informal_name_to_latin_name <- function(sp_gff_info_xls){
     df <- read.table(
         sp_gff_info_xls,
@@ -593,15 +648,19 @@ map_informal_name_to_latin_name <- function(sp_gff_info_xls){
     return(df[, 1:2])
 }
 
-#' Replace the infomal name to Latin name
+#' Replace Informal Names with Latin Names
 #'
-#' @param names_df The data frame includes the corresponding pair of Latin and informal name
-#' @param input The informal name
+#' This function takes a data frame `names_df` containing "latin_name" and "informal_name" columns and an `input` string as input. It replaces informal species names in the `input` string with their corresponding Latin names based on the information in `names_df`. If the `input` string contains underscores ("_"), it assumes a comparison between two species and replaces both informal names. Otherwise, it replaces the informal name in the `input` string.
 #'
-#' @return A string includes the Latin name
+#' @param names_df A data frame with "latin_name" and "informal_name" columns.
+#' @param input The input string that may contain informal species names.
+#'
+#' @return A modified input string with informal names replaced by Latin names.
+#'
 #' @export
 #'
-#' @examples replace_informal_name_to_latin_name(names_df, x)
+#' @examples
+#' replaced_name <- replace_informal_name_to_latin_name(names_df, "species1_species2")
 replace_informal_name_to_latin_name <- function(names_df, input){
     if( grepl("_", input) ){
         species_list <- strsplit(input, "_")

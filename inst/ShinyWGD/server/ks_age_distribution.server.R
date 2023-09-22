@@ -989,7 +989,7 @@ observeEvent(input$ks_plot_go, {
                 paralog_ksfile_df <- data.frame(
                     species=unlist(species_list),
                     path=paralog_ksfiles)
-                source(file="tools/find_peaks_resample_95_CI.R", local=TRUE, encoding="UTF-8")
+                # source(file="tools/find_peaks_resample_95_CI.R", local=TRUE, encoding="UTF-8")
                 withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
                     combined_i <- "multiple"
                     maxK <- input[[paste0("ks_maxK_", combined_i)]]
@@ -1140,7 +1140,7 @@ observeEvent(input$ks_plot_go, {
         }
 
         withProgress(message='Analyzing in progress', value=0, {
-            source(file="tools/calculateKsDistribution4wgd_multiple.v2.R", local=TRUE, encoding="UTF-8")
+            # source(file="tools/calculateKsDistribution4wgd_multiple.v2.R", local=TRUE, encoding="UTF-8")
             if( isTruthy(input$ortholog_ks_files_list_A) & !(isTruthy(input$paralog_ks_files_list)) ){
                 widthSpacing <- reactiveValues(
                     value=600
@@ -1271,13 +1271,10 @@ observeEvent(input$ks_plot_go, {
                 incProgress(amount=.2, message="GMM modelling ...")
 
                 # Log-Normal mixturing analyses
-                source("tools/emmix.R", local=T, encoding="UTF-8")
-                source("tools/running_emmix.R", local=T, encoding="UTF-8")
-                source("tools/from_features.R", local=T, encoding="UTF-8")
-                source("tools/ksv.R", local=T, encoding="UTF-8")
-                source("tools/drvkde.R", local=T, encoding="UTF-8")
-                source("tools/dflt.R", local=T, encoding="UTF-8")
-                source("tools/SiZer.R", local=T, encoding="UTF-8")
+                # source("tools/emmix.R", local=T, encoding="UTF-8")
+                # source("tools/running_emmix.R", local=T, encoding="UTF-8")
+                # source("tools/from_features.R", local=T, encoding="UTF-8")
+                # source("tools/ksv.R", local=T, encoding="UTF-8")
                 #source("tools/SiZer.kde.R", local=T, encoding="UTF-8")
                 ks.mclust <- data.frame()
                 ks.sizer <- list()
@@ -1401,7 +1398,7 @@ observeEvent(input$ks_plot_go, {
                     ks_selected_files <- c(ks_selected_files, study2outgroupFile)
 
                     # relative rate test
-                    source("tools/substitution_rate_correction.R", local=T, encoding="UTF-8")
+                    # source("tools/substitution_rate_correction.R", local=T, encoding="UTF-8")
                     study.mode <- relativeRate(
                         ref2outgroupFile,
                         study2outgroupFile,
