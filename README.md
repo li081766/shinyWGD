@@ -3,8 +3,6 @@
 <!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/ShinyWGD?color=blue)](https://cran.r-project.org/web/packages/ShinyWGD)
 [![Downloads](https://cranlogs.r-pkg.org/badges/ShinyWGD?color=blue)](https://cran.rstudio.com/package=ShinyWGD)
-[![R-CMD-check](https://github.com/li081766/ShinyWGD/workflows/R-CMD-check/badge.svg)](https://github.com/li081766/ShinyWGD/actions)
-[![codecov](https://codecov.io/gh/li081766/ShinyWGD/branch/master/graph/badge.svg)](https://codecov.io/gh/li081766/ShinyWGD)
 <!-- badges: end -->
 
 ### Overview
