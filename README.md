@@ -14,13 +14,11 @@
 After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFinder`, `ShinyWGD` can study the whole genome duplication events (WGDs).
 
 
----
 This page gives users a brief introduction to this software. Please go to the <font color='#6650C9'><b>? Help</b></font> Page to see more details.
 
----
 
 
-#### The structure of <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+### The structure of`ShinyWGD`
 
 
 - ##### <font color="#6650C9"><i class="fa-solid fa-info"></i> Introduction</font>
