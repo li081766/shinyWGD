@@ -21,7 +21,7 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 - ##### <font color="#6650C9"><i class="fa-solid fa-info"></i> Introduction</font>
 - ##### <font color="#6650C9"><i aria-label="terminal icon" class="fa fa-terminal fa-fw fa-fade" role="presentation"></i>Scripts</font>
-  - <font color="orange"><i aria-label="microscope icon" class="fa fa-microscope fa-fw fa-fade" role="presentation"></i> Data Preparation</font>
+  - <font color="orange"><i class="fa fa-microscope"></i>Data Preparation</font>
   - <font color="orange"><i aria-label="code icon" class="fa fa-code fa-fw fa-fade" role="presentation"></i> Codes</font>
 - ##### <font color="#6650C9"><i class="fa-solid fa-pencil" role="presentation"></i> Analysis</font>
   - <font color="orange"><img src="inst/ShinyWGD/www/images/ksIcon.svg" alt="Icon" width="20" height="20"> Age Distribution Analysis</font>
