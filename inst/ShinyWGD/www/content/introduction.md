@@ -30,13 +30,13 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 ##### Dependencies
 
-- ###### <font color="#6650C9">External Software</font>
+- ###### <font color="#6650C9">External software</font>
 
-  - `wgd`([https://github.com/arzwa/wgd](https://github.com/arzwa/wgd))
-  - `ksrates` ([https://github.com/VIB-PSB/ksrates](https://github.com/VIB-PSB/ksrates))
-  - `i-ADHoRe` ([https://www.vandepeerlab.org/?q=tools/i-adhore30](https://www.vandepeerlab.org/?q=tools/i-adhore30))
-  - `Whale`([https://github.com/arzwa/Whale.jl/tree/master](https://github.com/arzwa/Whale.jl/tree/master))
-  - `OrthoFinder` ([https://github.com/davidemms/OrthoFinder](https://github.com/davidemms/OrthoFinder))
+  - [`wgd`](https://github.com/arzwa/wgd))
+  - [`ksrates`](https://github.com/VIB-PSB/ksrates)
+  - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
+  - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
+  - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
 
 - ###### <font color="#6650C9">R packages</font>
   - `{shiny}`

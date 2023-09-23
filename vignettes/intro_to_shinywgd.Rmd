@@ -1,11 +1,12 @@
 ---
-title: "Introduction to ShinyWGD"
+#title: "Introduction to ShinyWGD"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Introduction to ShinyWGD}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
+## Introduction to <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
@@ -16,19 +17,34 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(ShinyWGD)
+ShinyWGD::runApp()
 ```
 Getting Started
+
 This vignette provide an introduction to WGD inference using the `ShinyWGD` server or package.
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+`ShinyWGD` can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder), and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) and then study the whole genome duplication events (WGDs) of the interesting species.
 
-# <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+This page provides a brief introduction to this software. 
 
-**ShinyWGD** can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder), and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) and then study the whole genome duplication events (WGDs) of the interesting species.
+Please refer to the <font color='#6650C9'>[ShinyWGD server](https://bioinformatics.psb.ugent.be/webtools/ShinyWGD)</font> to see the detailed usage. 
 
-This page provides a brief introduction to this software. Please go to the <font color='#6650C9'><b>? Help</b></font> Page to see more details.
+### Installation
 
----
+* Install from CRAN:
+
+```r
+install.packages("ShinyWGD")
+```
+
+* Install the latest development version from GitHub (requires [devtools](https://github.com/hadley/devtools) package):
+
+```r
+if (!require("devtools")) {
+  install.packages("devtools")
+}
+devtools::install_github("li081766/ShinyWGD", dependencies = TRUE, build_vignettes = FALSE)
+```
 
 ### The Structure of <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
 
@@ -43,17 +59,14 @@ This page provides a brief introduction to this software. Please go to the <font
   - <font color="orange"><img src="images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis</font>
 - ##### <font color="#6650C9"><i class="fa-solid fa-question"></i> Help</font>
 
----
-
 ##### Dependencies
 
 - ###### <font color="#6650C9">External Software</font>
-
-  - `wgd`([https://github.com/arzwa/wgd](https://github.com/arzwa/wgd))
-  - `ksrates` ([https://github.com/VIB-PSB/ksrates](https://github.com/VIB-PSB/ksrates))
-  - `i-ADHoRe` ([https://www.vandepeerlab.org/?q=tools/i-adhore30](https://www.vandepeerlab.org/?q=tools/i-adhore30))
-  - `Whale`([https://github.com/arzwa/Whale.jl/tree/master](https://github.com/arzwa/Whale.jl/tree/master))
-  - `OrthoFinder` ([https://github.com/davidemms/OrthoFinder](https://github.com/davidemms/OrthoFinder))
+  - [`wgd`](https://github.com/arzwa/wgd)
+  - [`ksrates`](https://github.com/VIB-PSB/ksrates)
+  - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
+  - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
+  - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
 
 - ###### <font color="#6650C9">R packages</font>
   - `{shiny}`
