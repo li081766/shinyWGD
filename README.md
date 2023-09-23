@@ -13,9 +13,7 @@
 
 After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFinder`, `ShinyWGD` can study the whole genome duplication events (WGDs).
 
-
 This page gives users a brief introduction to this software. Please go to the <font color='#6650C9'><b>? Help</b></font> Page to see more details.
-
 
 
 ### The structure of`ShinyWGD`
