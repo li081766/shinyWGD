@@ -24,21 +24,18 @@ observeEvent(input$iadhoredir, {
             div(
                 style="padding-right: 10px;
                        padding-left: 10px;",
-                #h5(icon("list"), HTML("Select <font color='#bb5e00'><b>i-ADHoRe</b></font> output to analyze")),
                 h5(icon("cog"), HTML("<font color='#bb5e00'><b>Synteny Analysis<b></font>")),
                 column(
                     12,
                     uiOutput("iadhoresettingPanel")
                 ),
                 hr(class="setting"),
-                #HTML("<br>"),
                 h5(icon("cog"), HTML("<font color='#bb5e00'><b>Clustering Analysis<b></font>")),
                 column(
                     12,
                     uiOutput("clusteringSettingPanel")
                 ),
                 hr(class="setting"),
-                #HTML("<br>"),
                 column(
                     12,
                     actionButton(
@@ -143,19 +140,6 @@ observeEvent(input$iadhoredir, {
                                 id="iadhore_intra_species_list_collapse",
                                 content=tags$div(
                                     class="well",
-                                    # prettyCheckboxGroup(
-                                    #     inputId="iadhore_intra_species_list",
-                                    #     label="Choose:",
-                                    #     choiceValues=intra_list,
-                                    #     choiceNames=lapply(intra_list, function(choice) {
-                                    #         HTML(paste0("<div style='color: #55CC6D; font-style: italic;'>", gsub("_", " ", choice), "</div>"))
-                                    #     }),
-                                    #     icon=icon("check"),
-                                    #     shape="round",
-                                    #     status="success",
-                                    #     fill=TRUE,
-                                    #     animation="jelly"
-                                    # ),
                                     pickerInput(
                                         inputId="iadhore_intra_species_list",
                                         label=HTML("<b><font color='#38B0E4'>Species:</font></b>"),
@@ -363,6 +347,16 @@ observeEvent(input$iadhoredir, {
                 "iadhore_intra_species_list",
                 selected=character(0)
             )
+            updatePickerInput(
+                session,
+                "cluster_species_A",
+                selected=character(0)
+            )
+           updatePickerInput(
+               session,
+               "cluster_species_B",
+               selected=character(0)
+           )
         }
 
         if( isTruthy(input$cluster_species_A) ){
@@ -544,11 +538,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("pencil-alt"),
                                                                 status="secondary",
                                                                 style="color: #fff;
-                                                                   background-color: #009393;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 10px 5px 10px;
-                                                                   margin: 50px 5px 5px 35px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                       background-color: #009393;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 10px 5px 10px;
+                                                                       margin: 50px 5px 5px 35px;
+                                                                       animation: glowing 5000ms infinite; "
                                                             )
                                                         )
                                                     ),
@@ -595,10 +589,6 @@ observeEvent(input$iadhore_config_go, {
                                                             width=12,
                                                             id=paste0("dotView_", x)
                                                         ),
-                                                        # column(
-                                                        #     width=12,
-                                                        #     id=paste0("dotView_png_", x)
-                                                        # )
                                                     ),
                                                     hr(class="setting"),
                                                     fluidRow(
@@ -636,11 +626,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
                                                                 style="color: #fff;
-                                                                   background-color: #019858;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                       background-color: #019858;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;
+                                                                       animation: glowingD 5000ms infinite;"
                                                             )
                                                         ),
                                                         column(
@@ -675,9 +665,9 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("search"),
                                                                 status="secondary",
                                                                 style="color: #fff;
-                                                                   background-color: #8080C0;
-                                                                   border-color: #fff;
-                                                                   margin: 32px 0px 0px -15px; "
+                                                                       background-color: #8080C0;
+                                                                       border-color: #fff;
+                                                                       margin: 32px 0px 0px -15px; "
                                                             )
                                                         ),
                                                         column(
@@ -709,11 +699,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("pencil-alt"),
                                                                 status="secondary",
                                                                 style="color: #fff;
-                                                                   background-color: #8080C0;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 35px 5px 5px 5px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                       background-color: #8080C0;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 35px 5px 5px 5px;
+                                                                       animation: glowing 5000ms infinite; "
                                                             )
                                                         )
                                                     ),
@@ -753,11 +743,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
                                                                 style="color: #fff;
-                                                               background-color: #019858;
-                                                               border-color: #fff;
-                                                               padding: 5px 14px 5px 14px;
-                                                               margin: 5px 5px 5px 5px;
-                                                               animation: glowingD 5000ms infinite;"
+                                                                       background-color: #019858;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;
+                                                                       animation: glowingD 5000ms infinite;"
                                                             )
                                                         ),
                                                         column(
@@ -961,11 +951,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("play"),
                                                                 status="secondary",
                                                                 style="color: #fff;
-                                                                   background-color: #009393;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 10px 5px 10px;
-                                                                   margin: 50px 5px 5px 35px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                       background-color: #009393;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 10px 5px 10px;
+                                                                       margin: 50px 5px 5px 35px;
+                                                                       animation: glowing 5000ms infinite; "
                                                             )
                                                         )
                                                     ),
@@ -1001,11 +991,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
                                                                 style="color: #fff;
-                                                                   background-color: #019858;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                       background-color: #019858;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;
+                                                                       animation: glowingD 5000ms infinite;"
                                                             )
                                                         ),
                                                         column(
@@ -1082,11 +1072,11 @@ observeEvent(input$iadhore_config_go, {
                                                                 icon=icon("download"),
                                                                 label="",
                                                                 style="color: #fff;
-                                                                   background-color: #019858;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                       background-color: #019858;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;
+                                                                       animation: glowingD 5000ms infinite;"
                                                             )
                                                         ),
                                                         column(
@@ -1127,10 +1117,10 @@ observeEvent(input$iadhore_config_go, {
                 output$iadhore_multiple_species_output <- renderUI({
                     div(
                         style="padding-right: 10px;
-                                   padding-left: 10px;
-                                   padding-top: 10px;
-                                   padding-bottom: 10px;
-                                   background-color: rgba(253, 244, 255, 0.4);",
+                               padding-left: 10px;
+                               padding-top: 10px;
+                               padding-bottom: 10px;
+                               background-color: rgba(253, 244, 255, 0.4);",
                         bsButton(
                             inputId="plot_button_multiple",
                             label=HTML("<b><font color='white'>X. Multiple Species Alignment</font></b>"),
@@ -1261,20 +1251,18 @@ observeEvent(input$iadhore_config_go, {
                                         actionButton(
                                             inputId="synplot_go_last",
                                             "Draw Plot",
-                                            #width="110px",
                                             icon=icon("play"),
                                             status="secondary",
                                             style="color: #fff;
-                                               background-color: #009393;
-                                               border-color: #fff;
-                                               padding: 5px 14px 5px 14px;
-                                               margin: 50px 5px 5px 5px;
-                                               animation: glowing 5300ms infinite; "
+                                                   background-color: #009393;
+                                                   border-color: #fff;
+                                                   padding: 5px 14px 5px 14px;
+                                                   margin: 50px 5px 5px 5px;
+                                                   animation: glowing 5300ms infinite; "
                                         )
                                     ),
                                     hr(class="setting"),
                                     div(
-                                        #style=paste0("width: 900px; height: ", (nrow(total_species) - 1) * 200, "px;"),
                                         h6(HTML("<b>The Multiple Species Parallel Link Plot:</b><br></br>")),
                                         column(
                                             12,
@@ -1309,11 +1297,11 @@ observeEvent(input$iadhore_config_go, {
                                                 icon=icon("download"),
                                                 label=HTML(""),
                                                 style="color: #fff;
-                                                   background-color: #019858;
-                                                   border-color: #fff;
-                                                   padding: 5px 14px 5px 14px;
-                                                   margin: 5px 5px 5px 5px;
-                                                   animation: glowingD 5000ms infinite;"
+                                                       background-color: #019858;
+                                                       border-color: #fff;
+                                                       padding: 5px 14px 5px 14px;
+                                                       margin: 5px 5px 5px 5px;
+                                                       animation: glowingD 5000ms infinite;"
                                             )
                                         ),
                                         column(
@@ -1622,9 +1610,11 @@ observeEvent(input$iadhore_config_go, {
                                 iadhoreDir <- dirname(each_row$comparing_Path)
                                 anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
                                 final_anchorpoints <- suppressMessages(
-                                    vroom(anchorpointout_file,
-                                          col_names=TRUE,
-                                          delim="\t")
+                                    vroom(
+                                        anchorpointout_file,
+                                        col_names=TRUE,
+                                        delim="\t"
+                                    )
                                 )
 
                                 renew_x <- x
@@ -1725,7 +1715,6 @@ observeEvent(input$iadhore_config_go, {
                                 observe({
                                     microSynPlotData <- list(
                                         "plot_id"=renew_x,
-                                        #"multiplicon"=multiplicon[1],
                                         "anchorpoints"=selectedAnchorPoints,
                                         "query_sp"=querySpecies,
                                         "query_chr_info"=chrListX,
@@ -2172,7 +2161,6 @@ observeEvent(input[["synplot_go_last"]], {
             sp_gff_info_df$cdsPath <- new_cds_files
             sp_gff_info_df$gffPath <- new_gff_files
             # source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
-            #print(sp_gff_info_df)
             chr_num_len_df <- obtain_chromosome_length_filter(
                 sp_gff_info_df
             )
@@ -2604,8 +2592,3 @@ observeEvent(input$cluster_go, {
         incProgress(amount=1, message="Done")
     })
 })
-
-
-
-
-
