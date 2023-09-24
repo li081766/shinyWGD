@@ -352,13 +352,44 @@ observeEvent(input$iadhoredir, {
                 "cluster_species_A",
                 selected=character(0)
             )
-           updatePickerInput(
-               session,
-               "cluster_species_B",
-               selected=character(0)
-           )
+            updatePickerInput(
+                session,
+                "cluster_species_B",
+                selected=character(0)
+            )
+            updatePrettyCheckboxGroup(
+                session,
+                "iadhore_multiple_species_list",
+                selected=character(0)
+            )
         }
-
+        if( isTruthy(input$iadhore_intra_species_list) ){
+            updatePickerInput(
+                session,
+                "inter_list_A",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "inter_list_B",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "cluster_species_A",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "cluster_species_B",
+                selected=character(0)
+            )
+            updatePrettyCheckboxGroup(
+                session,
+                "iadhore_multiple_species_list",
+                selected=character(0)
+            )
+        }
         if( isTruthy(input$cluster_species_A) ){
             list_A_species <- input$cluster_species_A
             remaining_species <- setdiff(intra_list, list_A_species)
@@ -386,6 +417,38 @@ observeEvent(input$iadhoredir, {
             updatePickerInput(
                 session,
                 "inter_list_B",
+                selected=character(0)
+            )
+            updatePrettyCheckboxGroup(
+                session,
+                "iadhore_multiple_species_list",
+                selected=character(0)
+            )
+        }
+        if( isTruthy(input$iadhore_multiple_species_list) ){
+            updatePickerInput(
+                session,
+                "iadhore_intra_species_list",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "inter_list_A",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "inter_list_B",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "cluster_species_A",
+                selected=character(0)
+            )
+            updatePickerInput(
+                session,
+                "cluster_species_B",
                 selected=character(0)
             )
         }
@@ -1661,10 +1724,12 @@ observeEvent(input$iadhore_config_go, {
                                 for( multiplicon in input[[paste0("multiplicon_plot_", x)]] ){
                                     selectedAnchorPointsT <- final_anchorpoints[final_anchorpoints$multiplicon==multiplicon, ]
                                     selectedAnchorPoints <- rbind(selectedAnchorPoints, selectedAnchorPointsT)
-                                    cutoffX <- selectedAnchorPointsT %>%
-                                        group_by(listX) %>%
-                                        summarize(min=min(startX),
-                                                  max=max(endX))
+                                    suppressMessages(
+                                        cutoffX <- selectedAnchorPointsT %>%
+                                            group_by(listX) %>%
+                                            summarize(min=min(startX),
+                                                      max=max(endX))
+                                    )
 
                                     cutoffX[["multiplicon"]] <- multiplicon
                                     chrListX <- rbind(chrListX, cutoffX)
@@ -2045,10 +2110,13 @@ observeEvent(input$iadhore_config_go, {
                                     selectedAnchorPointsT <- final_anchorpoints[final_anchorpoints$multiplicon==multiplicon, ]
                                     selectedAnchorPoints <- rbind(selectedAnchorPoints, selectedAnchorPointsT)
                                     # print(selectedAnchorPoints)
-                                    cutoffX <- selectedAnchorPoints %>%
-                                        group_by(listX) %>%
-                                        summarize(min=min(startX),
-                                                  max=max(endX))
+                                    suppressMessages(
+                                        cutoffX <- selectedAnchorPoints %>%
+                                            group_by(listX) %>%
+                                            summarize(min=min(startX),
+                                                      max=max(endX))
+                                    )
+
                                     cutoffX[["multiplicon"]] <- multiplicon
                                     chrListX <- rbind(chrListX, cutoffX)
 
