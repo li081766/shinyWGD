@@ -20,7 +20,6 @@ library(dplyr)
 library(tools)
 library(seqinr)
 library(DT)
-# library(rlang)
 
 ## clean r session and temporary folder first
 rm(list=ls())
@@ -29,7 +28,7 @@ options(shiny.maxRequestSize=5000*1024^2)
 
 ## load custom settings and functions
 # source(file="utils.R", local=T, encoding="UTF-8")
-# ## load ui pages
+### load ui pages
 source(file="ui/introduction.ui.R", local=T, encoding="UTF-8")
 source(file="ui/data_preparation.ui.R", local=T, encoding="UTF-8")
 source(file="ui/codes_checking.ui.R", local=T, encoding="UTF-8")
