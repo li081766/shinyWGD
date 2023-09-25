@@ -400,7 +400,6 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     newick_tree <- readLines(newick_tree_file$datapath)
     latin_names_temp <- c()
     fasta_filenames_temp <- c()
-    #gff_filenames_temp <- c()
     gff_species <- c()
 
     SpeciesInfoConf <- file(species_info_file, open="w")
@@ -425,7 +424,6 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
                 informal_name_temp,
                 data_table[i, 3]
             )
-            # gff_filenames_temp <- c(gff_filenames_temp, paste0(informal_name_temp, ": ", informal_name_temp, ".gff"))
             gff_species <- c(gff_species, informal_name_temp)
             cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
         }else{
