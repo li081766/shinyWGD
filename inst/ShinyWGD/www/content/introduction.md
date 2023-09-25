@@ -11,7 +11,6 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 ---
 
-
 #### The structure of <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
 
 
@@ -32,7 +31,7 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 - ###### <font color="#6650C9">External software</font>
 
-  - [`wgd`](https://github.com/arzwa/wgd))
+  - [`wgd`](https://github.com/arzwa/wgd)
   - [`ksrates`](https://github.com/VIB-PSB/ksrates)
   - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
   - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
