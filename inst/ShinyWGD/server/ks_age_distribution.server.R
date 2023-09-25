@@ -340,76 +340,6 @@ observeEvent(input$paralogous_ks_button, {
     })
 })
 
-# observeEvent(input$select_ref_species, {
-#     if( !is.null(input$dir) ){
-#         observeEvent(input$treeOrderList, {
-#             num_rows <- length(input$treeOrderList) / 3
-#             num_cols <- 3
-#             species_tree_df <- matrix(
-#                 input$treeOrderList,
-#                 nrow=num_rows,
-#                 ncol=num_cols,
-#                 byrow=TRUE
-#             )
-#             species_tree_df <- as.data.frame(species_tree_df)
-#             colnames(species_tree_df) <- c("Species", "id", "pId")
-#             species_tree_df$id <- as.numeric(species_tree_df$id)
-#             species_tree_df$pId <- as.numeric(species_tree_df$pId)
-#
-#             bait_id <- species_tree_df[species_tree_df$Species == input$select_ref_species, "id"]
-#             bait_pId <- species_tree_df[species_tree_df$Species == input$select_ref_species, "pId"]
-#             filtered_df <- species_tree_df[species_tree_df$id > bait_id, ]
-#             if( nrow(filtered_df) > 0 && filtered_df[1, "pId"] == bait_pId ){
-#                 filtered_df <- filtered_df[-1, ]
-#             }
-#             updatePickerInput(
-#                 session,
-#                 "select_outgroup_species",
-#                 choices=filtered_df$Species,
-#                 choicesOpt=list(
-#                     content=lapply(filtered_df$Species, function(choice) {
-#                         paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
-#                     })
-#                 )
-#             )
-#
-#             observeEvent(input$select_outgroup_species, {
-#                 outgroup_id <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "id"]
-#                 outgroup_pId <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "pId"]
-#                 filtered_study_df <- species_tree_df[(species_tree_df$id < outgroup_id) & (species_tree_df$Species != input$select_ref_species), ]
-#                 if( nrow(filtered_study_df) > 0 && filtered_study_df[nrow(filtered_study_df), "pId"] == outgroup_pId ){
-#                     filtered_study_df <- filtered_study_df[-nrow(filtered_study_df), ]
-#                 }
-#                 updatePickerInput(
-#                     session,
-#                     "select_study_species",
-#                     choices=filtered_study_df$Species,
-#                     choicesOpt=list(
-#                         content=lapply(filtered_study_df$Species, function(choice) {
-#                             paste0("<div style='color: #998ec3; font-style: italic;'>", choice, "</div>")
-#                         })
-#                     )
-#                 )
-#             })
-#         })
-#     }
-#     updatePrettyCheckboxGroup(
-#         session,
-#         "paralog_ks_files_list",
-#         selected=character(0)
-#     )
-#     updatePickerInput(
-#         session,
-#         "ortholog_ks_files_list_A",
-#         selected=character(0)
-#     )
-#     updatePickerInput(
-#         session,
-#         "ortholog_ks_files_list_B",
-#         selected=character(0)
-#     )
-# })
-
 observe({
     if( isTruthy(input$select_ref_species) && input$select_ref_species != "" ){
         if( !is.null(input$dir) ){
@@ -742,17 +672,6 @@ observeEvent(input$ks_configure_go, {
                                 uiOutput("y2AxisPanel")
                             )
                         )
-                        # hr(class="setting"),
-                        # column(
-                        #     8,
-                        #     textInput(
-                        #         inputId="vline_multiple",
-                        #         label=HTML("Add Vertical Lines to the <i>K</i><sub>s</sub> plot:"),
-                        #         value="",
-                        #         width="100%",
-                        #         placeholder="Use space to separate. Only support Numeric values"
-                        #     )
-                        # )
                     )
                 )
             }else{
@@ -1072,13 +991,6 @@ observeEvent(input$ks_plot_go, {
                 output$ks_peak_table_output <- renderUI({
                     selected_peaks_info <- peaksInfo[peaksInfo$Species %in% input$paralog_ks_files_list, ]
                     output$ks_peak_table_output <- renderUI({
-                        # div(
-                        #     class="boxLike",
-                        #     style="background-color: #FDFFFF;
-                        #                    padding-left: 40px;
-                        #                    padding-bottom: 10px;
-                        #                    padding-right: 40px;
-                        #                    padding-top: 10px;",
                         fluidRow(
                             column(
                                 8,
@@ -1171,9 +1083,7 @@ observeEvent(input$ks_plot_go, {
 
                 full_data <- calculateKsDistribution4wgd_multiple(
                     files_list,
-                    #plot.mode=input[[paste0("plot_mode_option_", combined_i)]],
                     maxK=input[[paste0("ks_maxK_", combined_i)]],
-                    #binWidth=input[[paste0("ks_binWidth_", combined_i)]],
                 )
                 denData <- full_data$density
 
@@ -1193,10 +1103,6 @@ observeEvent(input$ks_plot_go, {
                         "height"=heightSpacing$value
                     )
                     session$sendCustomMessage("Otholog_Density_Plotting", plot_wgd_data)
-                    #
-                    # observeEvent(input$reset, {
-                    #     session$sendCustomMessage("Bar_Plotting", plot_wgd_data)
-                    # })
                 })
                 Sys.sleep(.2)
                 incProgress(amount=.4, message="Ploting done...")
@@ -1520,37 +1426,3 @@ observeEvent(input$ks_plot_go, {
         })
     }
 })
-
-# observe({
-#     output$outgroupPanel <- renderUI({
-#         if( isTruthy(input$ortholog_ks_files_list_A) ){
-#             dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
-#             species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-#             newick_tree_file <- paste0(dirname(species_info_file), "/tree.newick")
-#             newick_tree <- readLines(newick_tree_file)
-#             session$sendCustomMessage("findOutgroup", newick_tree)
-#             fluidRow(
-#                 column(
-#                     6,
-#                     radioButtons(
-#                         "correct_mode_option",
-#                         label=HTML("<font color='#00AEAE'><b>Original</b></font> versus <font color='#EA7500'><b>Corrected</b></font> <b><i>K</i><sub>s</sub></b> Distribution"),
-#                         choices=c("Original", "Corrected"),
-#                         selected="Original",
-#                         inline=TRUE
-#                     )
-#                 ),
-#                 column(
-#                     6,
-#                     selectizeInput(
-#                         "select_outgroup_species",
-#                         HTML("Choose <b><font color='#21FAA8'>Outgroup </font></b> for <font color='#EA7500'><b>Substitution Rate Correction</b></font>:"),
-#                         choices=input$outgroup,
-#                         width="100%"
-#                     )
-#                 ),
-#                 hr(class="setting")
-#             )
-#         }
-#     })
-# })
