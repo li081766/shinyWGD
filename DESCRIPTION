@@ -17,3 +17,24 @@ Suggests:
 Config/testthat/edition: 3
 VignetteBuilder: knitr
 Vignette: vignettes/intro_to_shinywgd.Rmd
+Imports:
+    shiny,
+    shinyjs,
+    shinyFiles,
+    bslib,
+    shinyBS,
+    bsplus,
+    htmltools,
+    shinyWidgets,
+    shinyalert,
+    stringi,
+    tidyverse,
+    vroom,
+    fs,
+    english,
+    data.table,
+    argparse,
+    tidyr,
+    tools,
+    seqinr,
+    DT
