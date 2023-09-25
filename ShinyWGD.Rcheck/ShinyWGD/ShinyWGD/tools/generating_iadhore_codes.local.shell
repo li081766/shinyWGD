@@ -1,0 +1,206 @@
+#!/bin/bash
+
+make_configure_iadhore_2sp() {
+	species1="$1"
+	species1_list_file="$2"
+	species2="$3"
+	species2_list_file="$4"
+	config_file="$5"
+	output_dir="$6"
+
+	if [[ -e "$config_file" ]]; then
+		rm "$config_file"
+	fi
+
+	{
+		cat "$species1_list_file"
+		cat "$species2_list_file"
+		echo "blast_table=${output_dir}/${species1}_vs_${species2}.blastp.pairs"
+		echo "table_type=pairs"
+		echo "output_path=${output_dir}"
+		echo "cluster_type=collinear"
+		echo "prob_cutoff=0.01"
+		echo "write_stats=true"
+		echo "level_2_only=false"
+		echo "multiple_hypothesis_correction=FDR"
+		echo "gap_size=35"
+		echo "cluster_gap=40"
+		echo "q_value=0.75"
+		echo "anchor_points=3"
+		echo "alignment_method=gg2"
+		echo "max_gaps_in_alignment=40"
+		echo "visualizeGHM=false"
+		echo "visualizeAlignment=false"
+		echo "verbose_output=true"
+		echo ""
+	} >> "$config_file"
+}
+
+make_configure_iadhore() {
+	species="$1"
+	species_list_file="$2"
+	config_file="$3"
+	output_dir="$4"
+
+	if [[ -e "$config_file" ]]; then
+		rm "$config_file"
+	fi
+
+	{
+		cat "$species_list_file"
+		echo "blast_table=${output_dir}/${species}_vs_${species}.blastp.pairs"
+		echo "table_type=pairs"
+		echo "output_path=${output_dir}"
+		echo "cluster_type=collinear"
+		echo "prob_cutoff=0.01"
+		echo "write_stats=true"
+		echo "level_2_only=false"
+		echo "multiple_hypothesis_correction=FDR"
+		echo "gap_size=35"
+		echo "cluster_gap=40"
+		echo "q_value=0.75"
+		echo "anchor_points=3"
+		echo "alignment_method=gg2"
+		echo "max_gaps_in_alignment=40"
+		echo "visualizeGHM=false"
+		echo "visualizeAlignment=false"
+		echo "verbose_output=true"
+		echo ""
+	} >> "$config_file"
+}
+
+generate_shell() {
+	local input_data_file="$1"
+	local shell_dir="$2"
+	local command_file="$3"
+	local shinywgd_path="$4"
+	local diamondShell="$5"
+	local diamondPath="$6"
+	local num_thread="$7"
+
+	cmd_file="${command_file}"
+	if [[ -e "$cmd_file" ]]; then
+		rm "$cmd_file"
+	fi
+	echo "sh ${diamondShell} ../Species.info.xls ./ ${diamondPath} ${num_thread}" >$cmd_file
+
+	# mapfile -t input_data_array < "$input_data_file"
+	IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"
+	config_file_con=$(mktemp)
+	for (( i = 0; i < ${#input_data_array[@]}; i++ )); do
+		line1="${input_data_array[$i]}"
+		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
+		
+		if [[ ! -e "$gff_file" ]]; then
+			echo "Skipping $species: gff_file does not exist"
+			continue
+		fi
+		
+		species=$(echo "$species" | tr ' ' '_')
+		species_gene_list="${shell_dir}/gene_lists/${species}.geneLists"
+		outdir="${shell_dir}/i-adhore.${species}_vs_${species}"
+		if [[ ! -e "$outdir" ]]; then
+			mkdir -p "$outdir"
+		fi
+		iadhore_conf_file="${outdir}/${species}_vs_${species}.i-adhore.ini"
+		make_configure_iadhore "$species" "$species_gene_list" "$iadhore_conf_file" "i-adhore.${species}_vs_${species}"
+		echo "i-adhore i-adhore.${species}_vs_${species}/${species}_vs_${species}.i-adhore.ini 1>i-adhore i-adhore.${species}_vs_${species}/running.log" >> "$config_file_con"
+
+		# Add script to calculate the Ks of anchorpoints
+		cdsFile="${species}.cds.fasta"
+		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.sh anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
+
+		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
+			line2="${input_data_array[$j]}"
+			IFS=$'\t' read -r other_species other_fasta_file other_gff_file <<< "$line2"
+			
+			if [[ ! -e "$other_gff_file" ]]; then
+				echo "Skipping $other_species: gff_file does not exist"
+				continue
+			fi
+
+			species1="${species}"
+			species1_gene_list="${species_gene_list}"
+			species2=$(echo "$other_species" | tr ' ' '_')
+			species2_gene_list="${shell_dir}/gene_lists/${species2}.geneLists"
+			outdir="${shell_dir}/i-adhore.${species1}_vs_${species2}"
+			if [[ ! -e "$outdir" ]]; then
+				mkdir -p "$outdir"
+			fi
+			iadhore_conf_file="${outdir}/${species1}_vs_${species2}.i-adhore.ini"
+			make_configure_iadhore_2sp "$species1" "$species1_gene_list" "$species2" "$species2_gene_list" "$iadhore_conf_file" "i-adhore.${species1}_vs_${species2}"
+			echo "i-adhore i-adhore.${species1}_vs_${species2}/${species1}_vs_${species2}.i-adhore.ini" >> "$config_file_con"
+
+			# Add script to calculate the Ks of anchorpoints
+			cdsFile="${species1}_vs_${species2}.cds.fasta"
+			echo "cd i-adhore.${species1}_vs_${species2}/; sh ../computing_anchorpoint_ks.MultiThreads.sh anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
+		done
+	done
+	cat "$config_file_con" >> "$cmd_file"
+	rm "$config_file_con"
+}
+
+generate_shell_multiple_species (){
+	local input_data_file="$1"
+	local shell_dir="$2"
+	local command_file="$3"
+
+	outdir="${shell_dir}/i-adhore.Multiple_Species"
+	if [[ ! -e "$outdir" ]]; then
+		mkdir -p "$outdir"
+	fi
+	blastp_file="i-adhore.Multiple_Species/Multiple_Species.blastp.pairs"
+	echo "ls */*.blastp.pairs | grep -v Multiple_Species.blastp.pairs | xargs cat >>$blastp_file" >>"$command_file"
+
+	iadhore_conf_file="${outdir}/Multiple_Species.i-adhore.ini"
+	IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"
+	for (( i = 0; i < ${#input_data_array[@]}; i++ )); do
+		line1="${input_data_array[$i]}"
+		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
+
+		if [[ ! -e "$gff_file" ]]; then
+			echo "Skipping $species: gff_file does not exist"
+			continue
+		fi
+
+		species=$(echo "$species" | tr ' ' '_')
+		species_gene_list="${shell_dir}/gene_lists/${species}.geneLists"
+		cat "$species_gene_list" >>"$iadhore_conf_file"
+	done
+
+	{
+		 echo "blast_table=i-adhore.Multiple_Species/Multiple_Species.blastp.pairs"
+		 echo "table_type=pairs"
+		 echo "output_path=i-adhore.Multiple_Species"
+		 echo "cluster_type=collinear"
+		 echo "prob_cutoff=0.01"
+		 echo "write_stats=true"
+		 echo "level_2_only=false"
+		 echo "multiple_hypothesis_correction=FDR"
+		 echo "gap_size=35"
+		 echo "cluster_gap=40"
+		 echo "q_value=0.75"
+		 echo "anchor_points=3"
+		 echo "alignment_method=gg2"
+		 echo "max_gaps_in_alignment=40"
+		 echo "visualizeGHM=false"
+		 echo "visualizeAlignment=false"
+		 echo "verbose_output=true"	
+		 echo ""
+	} >> "$iadhore_conf_file"
+	
+	echo "i-adhore i-adhore.Multiple_Species/Multiple_Species.i-adhore.ini" >> "$command_file"
+}
+
+if [ $# -lt 7 ]; then
+	echo "Usage: $0 <input_file> <output_dir> <command_file> <shinywgd_path> <diamondShell> <diamondPath> <thread_num> <mode>"
+else
+	if [ $# -eq 7 ]; then
+		generate_shell "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+	elif [ $# -eq 8 ]; then
+		generate_shell "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+		generate_shell_multiple_species "$1" "$2" "$3"
+	fi
+fi
+
+

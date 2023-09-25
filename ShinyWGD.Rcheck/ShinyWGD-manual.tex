@@ -1,0 +1,2464 @@
+\nonstopmode{}
+\documentclass[a4paper]{book}
+\usepackage[times,inconsolata,hyper]{Rd}
+\usepackage{makeidx}
+\usepackage[utf8]{inputenc} % @SET ENCODING@
+% \usepackage{graphicx} % @USE GRAPHICX@
+\makeindex{}
+\begin{document}
+\chapter*{}
+\begin{center}
+{\textbf{\huge Package `ShinyWGD'}}
+\par\bigskip{\large \today}
+\end{center}
+\inputencoding{utf8}
+\ifthenelse{\boolean{Rd@use@hyper}}{\hypersetup{pdftitle = {ShinyWGD: ShinyWGD}}}{}
+\begin{description}
+\raggedright{}
+\item[Type]\AsIs{Package}
+\item[Title]\AsIs{ShinyWGD}
+\item[Version]\AsIs{0.1.0}
+\item[Author]\AsIs{Jia Li}
+\item[Maintainer]\AsIs{Jia Li }\email{jiali@psb.vib-ugent.be}\AsIs{}
+\item[Description]\AsIs{ShinyWGD: a toolbox to study whole genome duplication (for the experienced and non-experienced bioinformatician)}
+\item[License]\AsIs{What license is it under?}
+\item[Encoding]\AsIs{UTF-8}
+\item[LazyData]\AsIs{true}
+\item[RoxygenNote]\AsIs{7.2.3}
+\item[Roxygen]\AsIs{list(markdown = TRUE)}
+\item[Suggests]\AsIs{knitr, rmarkdown, testthat (>= 3.0.0)}
+\item[Config/testthat/edition]\AsIs{3}
+\item[VignetteBuilder]\AsIs{knitr}
+\item[Vignette]\AsIs{vignettes/intro_to_shinywgd.Rmd}
+\end{description}
+\Rdcontents{\R{} topics documented:}
+\inputencoding{utf8}
+\HeaderA{analysisEachCluster}{Perform synteny analysis for identified clusters}{analysisEachCluster}
+%
+\begin{Description}\relax
+This function performs synteny analysis for clusters identified by hierarchical clustering.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+analysisEachCluster(
+  segmented_file,
+  segmented_anchorpoints_file,
+  genes_file,
+  cluster_info_file,
+  identified_cluster_file,
+  hcheight = 0.3
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{segmented\_file}] The path to the segmented chromosome file.
+
+\item[\code{segmented\_anchorpoints\_file}] The path to the segmented anchorpoints file.
+
+\item[\code{genes\_file}] genes.txt created by i-ADHoRe.
+
+\item[\code{cluster\_info\_file}] The path to the clustering information file.
+
+\item[\code{identified\_cluster\_file}] The path to the output file for identified clusters.
+
+\item[\code{hcheight}] The cutoff height for cluster identification (default: 0.3).
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing information about identified clusters and their p-values.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+analysisEachCluster(
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{bootStrapPeaks}{Bootstrap Peaks in the Ks Distribution}{bootStrapPeaks}
+%
+\begin{Description}\relax
+This function performs bootstrapping on a given Ks (synonymous substitution rates) distribution
+to estimate peaks within the distribution.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+bootStrapPeaks(
+  ksRaw,
+  binWidth = 0.1,
+  maxK = 5,
+  m = 3,
+  peak.index = 1,
+  peak.maxK = 2,
+  spar = 0.25,
+  rep = 1000,
+  from = 0,
+  to = maxK
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksRaw}] A numeric vector representing the raw Ks distribution to be bootstrapped.
+
+\item[\code{binWidth}] A numeric value indicating the bin width for histogram calculation.
+
+\item[\code{maxK}] A numeric value indicating the maximum Ks value to consider in the distribution.
+
+\item[\code{m}] An integer specifying the parameter for peak detection.
+
+\item[\code{peak.index}] An integer indicating the index of the peak to be estimated.
+
+\item[\code{peak.maxK}] A numeric value indicating the maximum Ks value for peak estimation.
+
+\item[\code{spar}] A numeric value controlling the smoothness of spline fitting.
+
+\item[\code{rep}] An integer specifying the number of bootstrap repetitions.
+
+\item[\code{from}] A numeric value indicating the lower bound for peak estimation.
+
+\item[\code{to}] A numeric value indicating the upper bound for peak estimation.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A numeric vector containing bootstrapped peak estimates.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Load or obtain a Ks distribution (replace with your data)
+ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
+
+# Bootstrap peak estimation
+bootstrap_peaks <- bootStrapPeaks(
+    ksRaw=ks_distribution,
+    peak.index=1,
+    rep=1000,
+    peak.maxK=2.5
+)
+
+# Print the bootstrapped peak estimates
+print(bootstrap_peaks)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{calculateKsDistribution4wgd\_multiple}{Calculate the Ks Distribution for Multiple Speices}{calculateKsDistribution4wgd.Rul.multiple}
+%
+\begin{Description}\relax
+This function takes a list of data files, calculates the Ks distribution, and returns the results.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+calculateKsDistribution4wgd_multiple(
+  files_list,
+  binWidth = 0.1,
+  maxK = 5,
+  plot.mode = "weighted",
+  include.outliers = F,
+  minK = 0,
+  minAlnLen = 0,
+  minIdn = 0,
+  minCov = 0
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{files\_list}] A list of file paths containing Ks data.
+
+\item[\code{binWidth}] The width of Ks bins for the distribution.
+
+\item[\code{maxK}] The maximum Ks value to consider.
+
+\item[\code{plot.mode}] The mode for plotting ("weighted", "average", "min", or "pairwise").
+
+\item[\code{include.outliers}] Whether to include outliers in the calculation.
+
+\item[\code{minK}] The minimum Ks value to include in the distribution.
+
+\item[\code{minAlnLen}] The minimum alignment length to include in the distribution.
+
+\item[\code{minIdn}] The minimum alignment identity to include in the distribution.
+
+\item[\code{minCov}] The minimum alignment coverage to include in the distribution.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing two data frames: "bar" for Ks distribution and "density" for density data.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+result <- calculateKsDistribution4wgd_multiple(
+    files_list = files_list_new,
+    binWidth = 0.1,
+    maxK = 5,
+    plot.mode = "weighted",
+    include.outliers = FALSE,
+    minK = 0,
+    minAlnLen = 0,
+    minIdn = 0,
+    minCov = 0
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{CalHomoConcentration}{Compute the -log10 of Poisson Distribution}{CalHomoConcentration}
+%
+\begin{Description}\relax
+This function calculates the -log10 of the p-value of a Poisson distribution given the parameters.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+CalHomoConcentration(m, n, q, k)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{m}] The total number of trials.
+
+\item[\code{n}] The total number of possible outcomes.
+
+\item[\code{q}] The observed number of successful outcomes.
+
+\item[\code{k}] The expected number of successful outcomes.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The -log10 of the p-value.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+p_value <- CalHomoConcentration(m=100, n=1000, q=10, k=1)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{CalPvalue}{Compute the P-value of a Cluster using the Poisson Distribution}{CalPvalue}
+%
+\begin{Description}\relax
+This function computes the P-value of a cluster using the Poisson distribution.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+CalPvalue(m, n, q, k)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{m}] The total number of all anchored points.
+
+\item[\code{n}] The product of the remapped gene number of the query species and subject species.
+
+\item[\code{q}] The number of anchored points in the cluster.
+
+\item[\code{k}] The product of the remapped gene number of the segmented chromosomes
+of the query species and subject species.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The computed P-value.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+p_value <- CalPvalue(m=100, n=10000, q=5, k=250)
+cat("P-value:", p_value, "\n")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{check\_gff\_from\_file}{Check and Process GFF Input File from a Specific Path}{check.Rul.gff.Rul.from.Rul.file}
+%
+\begin{Description}\relax
+This function checks the type of GFF input file specified by its path and processes it accordingly.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+check_gff_from_file(gff_input_name, gff_input_path)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{gff\_input\_name}] The informal name of the GFF input file.
+
+\item[\code{gff\_input\_path}] The path to the GFF input file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A string containing the processed GFF file's path.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+gff_temp <- check_gff_from_file("MyGFF", "/path/to/my_gff.gff")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{check\_gff\_input}{Check and Prepare GFF/GTF Input File}{check.Rul.gff.Rul.input}
+%
+\begin{Description}\relax
+This function checks the file format of a GFF/GTF input file and prepares it for analysis. It can handle both uncompressed and compressed formats.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+check_gff_input(gff_input_name, gff_input_path)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{gff\_input\_name}] A descriptive name for the GFF/GTF file.
+
+\item[\code{gff\_input\_path}] The file path to the GFF/GTF file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The path to the prepared GFF file for analysis.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+check_gff_input("Sample GFF", input[[paste0("gff_", 1)]])
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{check\_proteome\_from\_file}{Check and Process Proteome Input File From a Special Path}{check.Rul.proteome.Rul.from.Rul.file}
+%
+\begin{Description}\relax
+This function checks the type of proteome input file and processes it accordingly.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+check_proteome_from_file(proteome_name, proteome_input)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{proteome\_name}] The informal name of the proteome input file.
+
+\item[\code{proteome\_input}] The proteome input data.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A string containing the processed proteome file's path.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{check\_proteome\_input}{Check and Process Proteome Input File}{check.Rul.proteome.Rul.input}
+%
+\begin{Description}\relax
+This function checks the type of proteome input file and processes it accordingly.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+check_proteome_input(proteome_name, proteome_input)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{proteome\_name}] The informal name of the proteome input file.
+
+\item[\code{proteome\_input}] The proteome input data.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A string containing the processed proteome file's path.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{cluster\_synteny}{Cluster Synteny Data and Generate Trees}{cluster.Rul.synteny}
+%
+\begin{Description}\relax
+This function clusters synteny data based on calculated p-values and generates trees
+for both column-based and row-based clustering. It then saves the cluster information and
+trees to output files.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+cluster_synteny(
+  segmented_file,
+  segmented_anchorpoints_file,
+  genes_file,
+  out_file
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{segmented\_file}] A character string specifying the file path for segmented data.
+
+\item[\code{segmented\_anchorpoints\_file}] A character string specifying the file path for segmented anchorpoints.
+
+\item[\code{genes\_file}] A character string specifying the file path for genes information created by i-ADHoRe.
+
+\item[\code{out\_file}] A character string specifying the output file path for saving cluster information.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+NULL (output files are generated with the specified information).
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+cluster_synteny(
+    segmented_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.chr.10.txt",
+    segmented_anchorpoints_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.anchorpoints.10.txt",
+    genes_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/genes.txt",
+    out_file="output_cluster_info.RData"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{computing\_depth}{Compute the Depth of Anchored Points}{computing.Rul.depth}
+%
+\begin{Description}\relax
+This function calculates the depth of anchored points based on the provided parameters.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+computing_depth(
+  anchorpoint_ks_file,
+  multiplicon_id,
+  selected_query_chr,
+  selected_subject_chr = NULL
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{anchorpoint\_ks\_file}] The file containing anchorpoint and Ks data.
+
+\item[\code{multiplicon\_id}] The ID of the multiplicon to consider.
+
+\item[\code{selected\_query\_chr}] A list of selected query chromosomes.
+
+\item[\code{selected\_subject\_chr}] A list of selected subject chromosomes (optional).
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing depth data frames, including "query\_depth" and "subject\_depth" if subject chromosomes are specified, or "depth" if not.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+depth_list <- computing_depth(
+    anchorpoint_ks_file = anchorpointout_file,
+    multiplicon_id = selected_multiplicons_Id,
+    selected_query_chr = query_selected_chr_list,
+    selected_subject_chr = subject_selected_chr_list
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{computing\_depth\_paranome}{Compute the Depth of Anchored Points in a Paranome Comparison}{computing.Rul.depth.Rul.paranome}
+%
+\begin{Description}\relax
+This function computes the depth of anchored points in a paranome comparison based on the provided parameters.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+computing_depth_paranome(
+  anchorpoint_ks_file,
+  multiplicon_id,
+  selected_query_chr
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{anchorpoint\_ks\_file}] The file containing anchor point and Ks value data.
+
+\item[\code{multiplicon\_id}] The IDs of the multiplicons to consider.
+
+\item[\code{selected\_query\_chr}] The list of selected query chromosomes.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing the depth dataframe.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+depth_list <- computing_depth_paranome(
+    anchorpoint_ks_file = anchorpointout_file,
+    multiplicon_id = selected_multiplicons_Id,
+    selected_query_chr = query_selected_chr_list
+)
+
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{convert\_wgd2kevins}{Convert}{convert.Rul.wgd2kevins}
+%
+\begin{Description}\relax
+Convert
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+convert_wgd2kevins(file, species_name)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{file}] input file
+
+\item[\code{species\_name}] species name
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+convert_wgd2kevins(file, "rice")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{CountOrthologs}{Count Ortholog Genes in a Species}{CountOrthologs}
+%
+\begin{Description}\relax
+This function counts ortholog genes in a given species based on input data.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+CountOrthologs(atomic.df, species)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{atomic.df}] A data frame containing information about ortholog genes.
+
+\item[\code{species}] The species for which ortholog gene counts should be computed.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame summarizing the counts of ortholog genes for each chromosome.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+ortholog_counts <- CountOrthologs(atomic.df, species="SpeciesA")
+print(ortholog_counts)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{create\_ksrates\_cmd}{Create Ksrates Command Files from Shiny Input}{create.Rul.ksrates.Rul.cmd}
+%
+\begin{Description}\relax
+Create Ksrates Command Files from Shiny Input
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+create_ksrates_cmd(input, ksratesconf, cmd_file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{input}] The Input object of Shiny.
+
+\item[\code{ksratesconf}] The path to the Ksrates configuration file.
+
+\item[\code{cmd\_file}] The path to the main Ksrates command file to be generated.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+create_ksrates_cmd(input, "ksrates_conf.txt", ksrates_cmd_sh_file)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{create\_ksrates\_cmd\_from\_table}{Create Ksrates Command Files from Data Table}{create.Rul.ksrates.Rul.cmd.Rul.from.Rul.table}
+%
+\begin{Description}\relax
+This function generates command files for running Ksrates and related analyses based on a data table and configuration file.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+create_ksrates_cmd_from_table(
+  data_table,
+  ksratesconf,
+  cmd_file,
+  wgd_cmd_file,
+  focal_species
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{data\_table}] The data table containing information about species.
+
+\item[\code{ksratesconf}] The path to the Ksrates configuration file.
+
+\item[\code{cmd\_file}] The path to the main Ksrates command file to be generated.
+
+\item[\code{wgd\_cmd\_file}] The path to the WGD command file to be generated.
+
+\item[\code{focal\_species}] The name of the focal species.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+create_ksrates_cmd_from_table(
+  my_data_table,
+  "ksrates_config.txt",
+  "ksrates_cmd.sh",
+  "wgd_cmd.sh",
+  "FocalSpecies"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{create\_ksrates\_configure\_file\_based\_on\_table}{Create Ksrates Configuration File Based on Data Table}{create.Rul.ksrates.Rul.configure.Rul.file.Rul.based.Rul.on.Rul.table}
+%
+\begin{Description}\relax
+This function generates a Ksrates configuration file based on a data table and other parameters.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+create_ksrates_configure_file_based_on_table(
+  data_table,
+  focal_species,
+  newick_tree_file,
+  ksrates_conf_file,
+  species_info_file
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{data\_table}] The data table containing information about species, proteomes, and GFF files.
+
+\item[\code{focal\_species}] The name of the focal species.
+
+\item[\code{newick\_tree\_file}] The path to the Newick tree file.
+
+\item[\code{ksrates\_conf\_file}] The path to the Ksrates configuration file to be generated.
+
+\item[\code{species\_info\_file}] The path to the species information file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+create_ksrates_configure_file_based_on_table(
+  my_data_table,
+  "FocalSpecies",
+  "my_newick_tree.newick",
+  "ksrates_config.txt",
+  "species_info.txt"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{create\_ksrates\_configure\_file\_v2}{Create Ksrates Configuration File}{create.Rul.ksrates.Rul.configure.Rul.file.Rul.v2}
+%
+\begin{Description}\relax
+This function generates a configuration file for the Ksrates pipeline based on Shiny input.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+create_ksrates_configure_file_v2(input, ksrates_conf_file, species_info_file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{input}] The Input object of Shiny.
+
+\item[\code{ksrates\_conf\_file}] The path to the Ksrates configuration file.
+
+\item[\code{species\_info\_file}] The path to the species information file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+create_ksrates_configure_file_v2(input, "ksrates_config.txt", "species_info.txt")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{create\_ksrates\_expert\_parameter\_file}{Create ksrates Expert Parameter File}{create.Rul.ksrates.Rul.expert.Rul.parameter.Rul.file}
+%
+\begin{Description}\relax
+Create ksrates Expert Parameter File
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+create_ksrates_expert_parameter_file(ksrates_expert_parameter_file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksrates\_expert\_parameter\_file}] The file is used to store the ksrates expert parameter
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
+create_ksrates_expert_parameter_file(ksratesexpert)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{dfltBWrange}{dfltBWrange}{dfltBWrange}
+%
+\begin{Description}\relax
+This function computes the default bandwidth range for kernel density estimation.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+dfltBWrange(x, tau)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] The input data, which can be a numeric vector or matrix.
+
+\item[\code{tau}] A parameter used in bandwidth calculation.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list of bandwidth ranges for each dimension of the input data.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+dfltBWrange(x, tau)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{dfltCounts}{dfltCounts}{dfltCounts}
+%
+\begin{Description}\relax
+This function bins the input data into a regular grid.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+dfltCounts(
+  x,
+  gridsize = rep(64, NCOL(x)),
+  h = rep(0, NCOL(x)),
+  supp = 3.7,
+  range.x,
+  w
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] The input data, which should be a numeric matrix.
+
+\item[\code{gridsize}] A vector specifying the number of bins along each dimension.
+
+\item[\code{h}] A vector specifying the bandwidth (smoothing parameter) along each dimension.
+
+\item[\code{supp}] A parameter for determining the range of the bins.
+
+\item[\code{range.x}] A list specifying the range of values for each dimension.
+
+\item[\code{w}] A vector of weights for the data points.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing the binned counts and the range of values for each dimension.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+dfltCounts(x, gridsize, h, supp, range.x, w)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{downloadButton\_custom}{Creating a Custom Download Button}{downloadButton.Rul.custom}
+%
+\begin{Description}\relax
+Use this function to create a custom download button or link. When clicked, it will initiate a browser download. The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+downloadButton_custom(
+  outputId,
+  label = "Download",
+  class = NULL,
+  status = "primary",
+  ...,
+  icon = shiny::icon("download")
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{outputId}] The name of the output slot that the downloadHandler is assigned to.
+
+\item[\code{label}] The label that should appear on the button.
+
+\item[\code{class}] Additional CSS classes to apply to the tag, if any. Default NULL.
+
+\item[\code{status}] The status of the button; default is "primary."
+
+\item[\code{...}] Other arguments to pass to the container tag function.
+
+\item[\code{icon}] An icon() to appear on the button; default is icon("download").
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+An HTML tag to allow users to download the object.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+downloadButton_custom(
+    outputId="wgd_ksrates_data_download",
+    label="Download Analysis Data",
+    width="215px",
+    icon=icon("download"),
+    status="secondary",
+    style="background-color: #5151A2;
+             padding: 5px 10px 5px 10px;
+             margin: 5px 5px 5px 5px;
+             animation: glowingD 5000ms infinite; "
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{drvkde}{drvkde}{drvkde}
+%
+\begin{Description}\relax
+Compute the mth derivative of a binned d-variate kernel density estimate based on grid counts.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+drvkde(x, drv, bandwidth, gridsize, range.x, binned = FALSE, se = TRUE, w)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] The input data.
+
+\item[\code{drv}] The order of the derivative to compute.
+
+\item[\code{bandwidth}] The bandwidth (smoothing parameter) along each dimension.
+
+\item[\code{gridsize}] The size of the grid.
+
+\item[\code{range.x}] A list specifying the range of values for each dimension.
+
+\item[\code{binned}] A logical indicating whether the input data is already binned.
+
+\item[\code{se}] A logical indicating whether to compute standard errors.
+
+\item[\code{w}] A vector of weights for the data points.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing the estimated density or derivative, and optionally, standard errors.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+est.dens <- drvkde(x, drv0, bandwidthh, gridsizegridsize, range.xrange.x, binnedTRUE, seFALSE)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{extractCluster}{Extract clusters based on specified scaffolds}{extractCluster}
+%
+\begin{Description}\relax
+This function extracts clusters based on the specified scaffolds for both query and subject species.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+extractCluster(segs.df, atomic.df, scaf.bycol, scaf.byrow)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{segs.df}] A data frame containing segment information.
+
+\item[\code{atomic.df}] A data frame containing atomic anchorpoints.
+
+\item[\code{scaf.bycol}] A character vector specifying scaffolds for the query species.
+
+\item[\code{scaf.byrow}] A character vector specifying scaffolds for the subject species.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing two data frames: "segs" for segment information and "atomic" for atomic anchorpoints.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+query_scaffolds <- c("scaffold1", "scaffold2")
+subject_scaffolds <- c("chromosomeA", "chromosomeB")
+cluster <- extractCluster(segs.df, atomic.df, query_scaffolds, subject_scaffolds)
+if (!is.null(cluster)) {
+  cat("Cluster extracted successfully!\n")
+} else {
+  cat("No cluster found for the specified scaffolds.\n")
+}
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{find\_peaks}{Find Peaks in a Numeric Vector}{find.Rul.peaks}
+%
+\begin{Description}\relax
+This function identifies peaks in a numeric vector by analyzing the shape of the curve.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+find_peaks(x, m = 3)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A numeric vector in which peaks will be identified.
+
+\item[\code{m}] An integer indicating the half-width of the neighborhood to consider when identifying peaks. A larger value of \code{m} makes peak detection less sensitive.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A numeric vector containing the indices of the identified peaks in the input vector \code{x}.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Generate some example data
+x <- c(1, 3, 7, 2, 6, 8, 5, 4, 9, 3, 2, 1)
+
+# Find peaks in the data with a half-width of 2
+peaks <- find_peaks(x, m=2)
+
+# Print the indices of the identified peaks
+print(peaks)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{generateKsDistribution}{Generate the Ks Distribution}{generateKsDistribution}
+%
+\begin{Description}\relax
+This function generates a Ks (synonymous substitution rates) distribution from raw Ks values.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+generateKsDistribution(ksraw, speciesName = NULL, maxK = 5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksraw}] A numeric vector containing raw Ks values.
+
+\item[\code{speciesName}] (Optional) A character string specifying the species name associated with the Ks values.
+
+\item[\code{maxK}] A numeric value indicating the maximum Ks value to consider in the distribution.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A numeric vector containing the binned Ks distribution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Load or obtain raw Ks values (replace with your data)
+raw_ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
+
+# Generate the Ks distribution
+ks_distribution <- generateKsDistribution(ksraw=raw_ks_values, maxK=2.5)
+
+# Print the binned Ks distribution
+print(ks_distribution)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{generate\_ksd}{Convert}{generate.Rul.ksd}
+%
+\begin{Description}\relax
+Convert
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+generate_ksd(ks_df, bin_width = 0.01, maxK = 5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ks\_df}] A data frame including Ks and Weights.
+
+\item[\code{bin\_width}] Bin width for generating the distribution, default 0.01.
+
+\item[\code{maxK}] Maximum Ks value for generating the distribution, default 5.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list including:
+*\code{Ks}: the Ks distribution;
+*\code{bin\_width}: bin width;
+*\code{maxK}: maximum Ks.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+generate_ksd(ks_df, bin_width=0.01)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{get\_segments}{Get Segmented Data from Anchorpoints and Ks Values}{get.Rul.segments}
+%
+\begin{Description}\relax
+This function extracts segmented data from anchorpoints and Ks (synonymous substitution rate) values,
+based on specified criteria, and writes the results to output files.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+get_segments(
+  genes_file,
+  anchors_ks_file,
+  multiplicons_file,
+  segmented_file,
+  segmented_anchorpoints_file,
+  num_anchors = 10
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{genes\_file}] A character string specifying the file path for genes information created by i-ADHoRe.
+
+\item[\code{anchors\_ks\_file}] A character string specifying the file path for anchorpoints Ks values data.
+
+\item[\code{multiplicons\_file}] A character string specifying the file path for multiplicons information created by i-ADHoRe.
+
+\item[\code{segmented\_file}] A character string specifying the output file path for segmented data.
+
+\item[\code{segmented\_anchorpoints\_file}] A character string specifying the output file path for segmented anchorpoints.
+
+\item[\code{num\_anchors}] An integer specifying the minimum number of anchorpoints required.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+NULL (output files are generated with the specified information).
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+get_segments(
+    genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
+    anchors_ks_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.merged_pos_ks.txt",
+    multiplicons_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/multiplicons.txt",
+    segmented_file="output_segmented_data.txt",
+    segmented_anchorpoints_file="output_segmented_anchorpoints.txt",
+    num_anchors=5
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{is.ksv}{ksv class}{is.ksv}
+%
+\begin{Description}\relax
+ksv class
+
+ksv class
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+is.ksv(x)
+
+is.ksv(x)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Examples}
+\begin{ExampleCode}
+is.ksv(x)
+is.ksv(x)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{is.not.null}{Check if an Object is Not NULL}{is.not.null}
+%
+\begin{Description}\relax
+This function checks if an object is not NULL.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+is.not.null(x)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] An R object to check.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A logical value indicating whether the object is not NULL.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+is.not.null(5)
+is.not.null(NULL)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{ks\_mclust\_v2}{ks\_mclust\_v2}{ks.Rul.mclust.Rul.v2}
+%
+\begin{Description}\relax
+A wrapper to run emmix modeling using the mclust package.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+ks_mclust_v2(input_data)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{input\_data}] The input data for clustering and modeling.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame containing clustering and modeling results.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+ks_mclust_v2(ks_value)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{map\_informal\_name\_to\_latin\_name}{Map Informal Names to Latin Names}{map.Rul.informal.Rul.name.Rul.to.Rul.latin.Rul.name}
+%
+\begin{Description}\relax
+This function reads information from an Excel file (XLS) containing columns "latin\_name," "informal\_name," and "gff." It extracts the "latin\_name" and "informal\_name" columns, performs some data manipulation, and returns a data frame with these two columns.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+map_informal_name_to_latin_name(sp_gff_info_xls)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{sp\_gff\_info\_xls}] The path to the Excel file containing species information.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame with "latin\_name" and "informal\_name" columns.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+names_df <- map_informal_name_to_latin_name("species_info.xls")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{mix\_logNormal\_Ks}{Log-Normal mixturing analyses of a Ks distributions for the whole paranome}{mix.Rul.logNormal.Rul.Ks}
+%
+\begin{Description}\relax
+Log-Normal mixturing analyses of a Ks distributions for the whole paranome
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+mix_logNormal_Ks(ksv, G = 1:5, k.nstart = 500, maxK = 5, plot = FALSE, ...)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksv}] A \code{ksv} object.
+
+\item[\code{G}] An integer vector specifying the range of the mixtured components.
+A BIC is calculated for each component. The default is G=1:5.
+For a formal analysis, it is recommended to use 1:10.
+
+\item[\code{k.nstart}] How many random sets should be chosen in the k-means
+clustering.
+For a formal analysis, it is recommended to use 500.
+
+\item[\code{maxK}] Maximum Ks values used in the mixture modeling analysis.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame with seven variables.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+mix_logNormal_Ks <- function(ksv)
+
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{modeFinder}{modeFinder}{modeFinder}
+%
+\begin{Description}\relax
+Find the mode (peak) of a univariate distribution.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+modeFinder(x, bw = 0.1, from = 0, to = 5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A numeric vector or a kernel density estimate (KDE).
+
+\item[\code{bw}] Bandwidth for the KDE. Default is 0.1.
+
+\item[\code{from}] Starting point for mode search. Default is 0.
+
+\item[\code{to}] Ending point for mode search. Default is 5.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+The mode (peak) of the distribution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+modeFinder(x)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_chromosome\_length}{obtain\_chromosome\_length}{obtain.Rul.chromosome.Rul.length}
+%
+\begin{Description}\relax
+Process species information file and extract chromosome lengths and mRNA counts from GFF files.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_chromosome_length(species_info_file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{species\_info\_file}] A character string specifying the path to the species information file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing two data frames: len\_df for chromosome lengths and num\_df for mRNA counts.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Load the species information into a data frame (replace 'species_info_df' with your actual data frame)
+species_info_df <- read.table("path/to/your/species_info_file.txt", sep="\t", header=TRUE)
+
+# Call the obtain_chromosome_length_filter function
+result <- obtain_chromosome_length_filter(species_info_df)
+
+# Access the chromosome length and mRNA count data frames from the result
+len_df <- result$len_df
+num_df <- result$num_df
+
+# Print the first few rows of the data frames
+head(len_df)
+head(num_df)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_chromosome\_length\_filter}{obtain\_chromosome\_length\_filter}{obtain.Rul.chromosome.Rul.length.Rul.filter}
+%
+\begin{Description}\relax
+Process a data frame containing species information and extract chromosome lengths and mRNA counts from GFF files.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_chromosome_length_filter(species_info_df)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{species\_info\_df}] A data frame containing species information with columns "sp," "cds," and "gff."
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing two data frames: len\_df for chromosome lengths and num\_df for mRNA counts.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+Create a sample data frame
+species_info_df <- data.frame(
+  sp=c("SpeciesA", "SpeciesB"),
+  cds=c("cds_file_A.gff", "cds_file_B.gff"),
+  gff=c("gff_file_A.gff", "gff_file_B.gff")
+)
+
+# Obtain chromosome lengths and mRNA counts
+result <- obtain_chromosome_length_filter(species_info_df)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_coordiantes\_for\_anchorpoints}{Obtain coordinates for anchorpoints from GFF files}{obtain.Rul.coordiantes.Rul.for.Rul.anchorpoints}
+%
+\begin{Description}\relax
+This function takes a file containing anchorpoints, GFF files for two species, and species names,
+and retrieves the coordinates of anchorpoints and associated genes from the GFF files.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_coordiantes_for_anchorpoints(
+  anchorpoints,
+  species1,
+  gff_file1,
+  out_file,
+  species2 = NULL,
+  gff_file2 = NULL
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{anchorpoints}] A file containing anchorpoints information with columns like gene\_x, gene\_y, and other relevant data.
+
+\item[\code{species1}] The name of the first species.
+
+\item[\code{gff\_file1}] The path to the GFF file for the first species.
+
+\item[\code{out\_file}] The output file where the results will be saved.
+
+\item[\code{species2}] (Optional) The name of the second species. Specify this parameter and gff\_file2 if working with two species.
+
+\item[\code{gff\_file2}] (Optional) The path to the GFF file for the second species.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+None. The function saves the results to the specified out\_file.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage with one species:
+obtain_coordiantes_for_anchorpoints(
+  anchorpoints="anchorpoints.txt",
+  species1="SpeciesA",
+  gff_file1="speciesA.gff",
+  out_file="results.txt"
+)
+
+# Example usage with two species:
+obtain_coordiantes_for_anchorpoints(
+  anchorpoints="anchorpoints.txt",
+  species1="SpeciesA",
+  gff_file1="speciesA.gff",
+  species2="SpeciesB",
+  gff_file2="speciesB.gff",
+  out_file="results.txt"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_coordiantes\_for\_anchorpoints\_ks}{Obtain Coordinates and Ks Values for Anchorpoints}{obtain.Rul.coordiantes.Rul.for.Rul.anchorpoints.Rul.ks}
+%
+\begin{Description}\relax
+This function extracts coordinates and Ks (synonymous substitution rate) values for anchorpoints
+from input data and merges them into a single output file.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_coordiantes_for_anchorpoints_ks(
+  anchorpoints,
+  anchorpoints_ks,
+  genes_file,
+  out_file,
+  out_ks_file,
+  species
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{anchorpoints}] A character string specifying the file path for anchorpoints data.
+
+\item[\code{anchorpoints\_ks}] A character string specifying the file path for anchorpoints Ks values data.
+
+\item[\code{genes\_file}] A character string specifying the file path for genes information.
+
+\item[\code{out\_file}] A character string specifying the output file path for coordinates.
+
+\item[\code{out\_ks\_file}] A character string specifying the output file path for Ks values.
+
+\item[\code{species}] A character string specifying the species name.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+NULL (output files are generated with the specified information).
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+obtain_coordiantes_for_anchorpoints_ks(
+    anchorpoints="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.txt",
+    anchorpoints_ks="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.ks.txt",
+    genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
+    out_file="output_coordinates.txt",
+    out_ks_file="output_ks_values.txt",
+    species="Vitis_vinifera"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_coordiantes\_for\_segments}{Obtain coordinates for segments in a comparison}{obtain.Rul.coordiantes.Rul.for.Rul.segments}
+%
+\begin{Description}\relax
+This function retrieves the coordinates for segments in a comparison based on the provided parameters.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_coordiantes_for_segments(
+  seg_file,
+  sp1,
+  gff_file1,
+  out_file,
+  sp2 = NULL,
+  gff_file2 = NULL
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{seg\_file}] The file containing segment data.
+
+\item[\code{sp1}] The species name for the first genome.
+
+\item[\code{gff\_file1}] The GFF file for the first genome.
+
+\item[\code{out\_file}] The output file to store the merged position data.
+
+\item[\code{sp2}] The species name for the second genome (optional).
+
+\item[\code{gff\_file2}] The GFF file for the second genome (optional).
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+NULL (the results are saved in the output file).
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+obtain_coordiantes_for_segments(
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_coordinates\_for\_segments\_multiple}{Obtain Coordinates for Segments in Multiple Synteny Blocks}{obtain.Rul.coordinates.Rul.for.Rul.segments.Rul.multiple}
+%
+\begin{Description}\relax
+This function extracts coordinates for segments within multiple synteny blocks based on input dataframes.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_coordinates_for_segments_multiple(seg_df, gff_df, input, out_file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{seg\_df}] A dataframe containing information about synteny segments.
+
+\item[\code{gff\_df}] A dataframe containing GFF (General Feature Format) information.
+
+\item[\code{input}] A list containing input data, typically multiple synteny query chromosomes.
+
+\item[\code{out\_file}] A character string specifying the output file path.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A dataframe with coordinates for segments within multiple synteny blocks.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage:
+# Define dataframes for segments and GFF information
+seg_df <- read.table("segments.csv", header=TRUE, sep=",")
+gff_df <- read.table("genomic_data.gff", header=TRUE, sep="\t")
+
+# Define input data
+input_data <- list(
+    multiple_synteny_query_chr_SpeciesA=c("Chr1", "Chr2"),
+    multiple_synteny_query_chr_SpeciesB=c("ChrX", "ChrY")
+)
+
+# Obtain coordinates for segments within multiple synteny blocks
+obtain_coordinates_for_segments_multiple(seg_df, gff_df, input_data, "output_coordinates.txt")
+
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{obtain\_mean\_ks\_for\_each\_multiplicon}{Compute the Mean of Ks values for Each Multiplicon}{obtain.Rul.mean.Rul.ks.Rul.for.Rul.each.Rul.multiplicon}
+%
+\begin{Description}\relax
+This function takes as input a multiplicon file, an anchorpoint file, Ks values, and other relevant information.
+It calculates the mean of Ks values for each multiplicon and associates them with the corresponding data.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+obtain_mean_ks_for_each_multiplicon(
+  multiplicon_file,
+  anchorpoint_file,
+  species1,
+  ks_file,
+  outfile,
+  anchorpointout_file,
+  species2 = NULL
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{multiplicon\_file}] A file containing multiplicon information.
+
+\item[\code{anchorpoint\_file}] A file containing anchorpoints information with columns like geneX, geneY, and other relevant data.
+
+\item[\code{species1}] The name of the first species.
+
+\item[\code{ks\_file}] A file containing Ks values.
+
+\item[\code{outfile}] The output file where the results will be saved.
+
+\item[\code{anchorpointout\_file}] The output file for anchorpoint data with Ks values.
+
+\item[\code{species2}] (Optional) The name of the second species. Specify this parameter and ks\_file if working with two species.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+None. The function saves the results to the specified outfile and anchorpointout\_file.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Example usage with one species:
+obtain_mean_ks_for_each_multiplicon(
+    multiplicon_file="multiplicons.txt",
+    anchorpoint_file="anchorpoints.txt",
+    ks_file="ks_values.txt",
+    species1="SpeciesA",
+    outfile="mean_ks_for_multiplicons.txt",
+    anchorpointout_file="anchorpoint_with_ks.txt"
+)
+
+# Example usage with two species:
+obtain_mean_ks_for_each_multiplicon(
+    multiplicon_file="multiplicons.txt",
+    anchorpoint_file="anchorpoints.txt",
+    ks_file="ks_values.txt",
+    species1="SpeciesA",
+    species2="SpeciesB",
+    outfile="mean_ks_for_multiplicons.txt",
+    anchorpointout_file="anchorpoint_with_ks.txt"
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{parse\_EMMIX}{Read the EMMIX output for a range of components}{parse.Rul.EMMIX}
+%
+\begin{Description}\relax
+Read the EMMIX output for a range of components
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+parse_EMMIX(emmix.out, G = 1:3)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{emmix.out}] The output file from EMMIX software.
+
+\item[\code{G}] An integer vector specifying the range of the mixture components.
+The default is G=1:3.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame with seven variables.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+parse_EMMIX(emmix.out)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{parse\_one\_EMMIX}{Read the EMMIX output for a specify number of components}{parse.Rul.one.Rul.EMMIX}
+%
+\begin{Description}\relax
+Read the EMMIX output for a specify number of components
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+parse_one_EMMIX(emmix.out, ncomponent = 3)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{emmix.out}] The output file from EMMIX software.
+
+\item[\code{ncomponent}] Number of components to read from the file.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame with seven variables.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+parseEMMIX("data/WelMiLog.out")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{PeaksInKsDistributionValues}{Find Peaks in the Ks Distribution}{PeaksInKsDistributionValues}
+%
+\begin{Description}\relax
+This function identifies peaks in a distribution of Ks (synonymous substitution rates) values.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+PeaksInKsDistributionValues(
+  ks,
+  binWidth = 0.1,
+  maxK = 5,
+  m = 3,
+  peak.maxK = 2,
+  spar = 0.25
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ks}] A numeric vector containing Ks values for which peaks will be identified.
+
+\item[\code{binWidth}] A numeric value specifying the bin width for creating the histogram.
+
+\item[\code{maxK}] A numeric value indicating the maximum Ks value to consider.
+
+\item[\code{m}] An integer indicating the half-width of the neighborhood to consider when identifying peaks. A larger value of \code{m} makes peak detection less sensitive.
+
+\item[\code{peak.maxK}] A numeric value specifying the maximum Ks value to consider when identifying peaks.
+
+\item[\code{spar}] A numeric value controlling the smoothness of the spline fit. Higher values make the fit smoother.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A numeric vector containing the identified peaks in the Ks distribution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Generate a vector of Ks values (replace with your data)
+ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
+
+# Find peaks in the Ks distribution
+peaks <- PeaksInKsDistributionValues(ks=ks_values, binWidth=0.1, maxK=2.5, m=3, peak.maxK=2.0, spar=0.25)
+
+# Print the identified peaks
+print(peaks)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{plot.ksv}{Draw Ks distribution using output from \code{wgd}}{plot.ksv}
+%
+\begin{Description}\relax
+Draw Ks distribution using output from \code{wgd}
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+## S3 method for class 'ksv'
+plot(
+  ksv,
+  bin_width = 0.1,
+  maxK = 5,
+  maxY = 1000,
+  plot_mode = "weighted",
+  color = "gray",
+  pdf_file = NULL,
+  ...
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{bin\_width}] bin width of the histgram, default 0.1, minimum 0.01
+
+\item[\code{maxK}] maximum Ks value, default 5
+
+\item[\code{maxY}] maximum value for y-axis, default 1000
+
+\item[\code{plot\_mode}] modes to account for redundant duplicate, including \code{weighted} (default), \code{average}, \code{min}, and \code{pairwise}
+
+\item[\code{color}] color of the histgram, default "darkgray"
+
+\item[\code{pdf\_file}] plot the figure in a pdf file with a specific name or not \code{NULL} (default)
+
+\item[\code{file}] \code{ksd} output file from \code{wgd}, usually with a name \AsIs{\texttt{*.ks.tsv}}
+
+\item[\code{include.outliers}] wheter to include outliers in the \AsIs{\texttt{wgd ksd}} outpuf, default \code{FALSE}
+
+\item[\code{minK}] minimum Ks value, default 0
+
+\item[\code{minAlnLen}] minimum alignment length, default 0
+
+\item[\code{minIdn}] minimum alignment identity, default 0
+
+\item[\code{minCov}] minimum alignment coverage, default 0
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+ksv <- read.wgd_ksd(file)
+plot.ksv(ksv)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{plot\_ksv\_density}{Draw a density plot of ksv}{plot.Rul.ksv.Rul.density}
+%
+\begin{Description}\relax
+Draw a density plot of ksv
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+plot_ksv_density(mids, counts, maxK, spar = 0.2, color = "#424242")
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{mids}] the data of ksv
+
+\item[\code{counts}] counts
+
+\item[\code{maxK}] maximum Ks
+
+\item[\code{spar}] the smooth level
+
+\item[\code{color}] color
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+plot_ksv_density(mids, count, 5)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{plot\_Ks\_mix}{Draw a Ks distribution with fitted Gaussian}{plot.Rul.Ks.Rul.mix}
+%
+\begin{Description}\relax
+Draw a Ks distribution with fitted Gaussian
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+plot_Ks_mix(
+  ksv,
+  ncomponent = 3,
+  EMMIX.file = NULL,
+  bin_width = 0.1,
+  maxK = 5,
+  maxY = 1000,
+  ...
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksv}] A \code{ksv} object
+
+\item[\code{ncomponent}] Number of components, default 3.
+
+\item[\code{EMMIX.file}] The output file of EMMIX software.
+
+\item[\code{bin\_width}] Bin width for the Ks distribution, default 0.1
+
+\item[\code{maxK}] Maximum Ks value, default 5.
+
+\item[\code{maxY}] Maximum number of y-axis, default 1000.
+
+\item[\code{...}] other parameters in plot.ksd or plot.ksv and mix\_logNormal\_Ks
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+plot_Ks_mix(ksv)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{read.dating\_anchors}{Read the output of Ks values for anchor pairs from the dating pipeline}{read.dating.Rul.anchors}
+%
+\begin{Description}\relax
+Read the output of Ks values for anchor pairs from the dating pipeline
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+read.dating_anchors(file, ks_col = 9, header = TRUE)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{file}] Output file of Ks values for anchor pairs from the dating
+pipeline. If it a tabular file with Ks values not from the dating pipeline,
+please denote the column of Ks values using \code{ks\_col}
+
+\item[\code{ks\_col}] Index of column for Ks values, default 9.
+
+\item[\code{header}] Wheather the file has a header or not, default TRUE.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A \code{ksv} object, which is a list including:
+\begin{itemize}
+
+\item{} \code{ks\_df}: the data frame that used for following analysis
+\item{} \code{ks\_dist}: a list including a vector of Ks values in the distribution
+\item{} \code{raw\_df}: raw data
+\item{} \code{filters}: filters that applied to the raw data
+
+\end{itemize}
+
+\end{Value}
+%
+\begin{SeeAlso}\relax
+\code{generate\_ksd}
+\end{SeeAlso}
+%
+\begin{Examples}
+\begin{ExampleCode}
+ksv <- read.dating_anchors(file)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{read.wgd\_ksd}{Read the output file of wgd ksd}{read.wgd.Rul.ksd}
+%
+\begin{Description}\relax
+Read the output file of wgd ksd
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+read.wgd_ksd(
+  file,
+  include_outliers = FALSE,
+  min_ks = 0,
+  min_aln_len = 0,
+  min_idn = 0,
+  min_cov = 0
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{file}] The output file of \AsIs{\texttt{wgd ksd}}
+
+\item[\code{include\_outliers}] Include outliers or not, default FALSE.
+
+\item[\code{min\_ks}] Minimum Ks value, default 0.
+
+\item[\code{min\_aln\_len}] Minimum alignment length, default 0.
+
+\item[\code{min\_idn}] Minimum alignment identity, default 0.
+
+\item[\code{min\_cov}] Minimum alignment coverage, default 0.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A \code{ksv} object, which is a list including:
+\begin{itemize}
+
+\item{} \code{ks\_df}: the data frame that used for following analysis
+\item{} \code{ks\_dist}: a list including a vector of Ks values in the distribution
+\item{} \code{raw\_df}: raw data
+\item{} \code{filters}: filters that applied to the raw data
+
+\end{itemize}
+
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+ksv <- read.wgd_ksd(file)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{read\_data\_file}{Read Data from Uploaded File}{read.Rul.data.Rul.file}
+%
+\begin{Description}\relax
+This function reads data from an uploaded file in a Shiny application and returns it as a data frame.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+read_data_file(uploadfile)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{uploadfile}] The object representing the uploaded file obtained through the Shiny upload function.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A data frame containing the data from the uploaded file.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+data <- read_data_file(input$upload_data_file)
+column1 <- data[["V1"]]
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{read\_KTpipeline}{Read file from KT pipeline}{read.Rul.KTpipeline}
+%
+\begin{Description}\relax
+Read file from KT pipeline
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+read_KTpipeline(file)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{file}] Output from KT pipeline
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Examples}
+\begin{ExampleCode}
+read_KTpipeline(file)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{relativeRate}{relativeRate}{relativeRate}
+%
+\begin{Description}\relax
+Compute relative rates using input data files and statistical computations.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+relativeRate(
+  ksv2out_1_file,
+  ksv2out_2_file,
+  ksv_between_file,
+  KsMax,
+  low = 0.025,
+  up = 0.975,
+  bs = 1000
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ksv2out\_1\_file}] A character string specifying the path to the first input data file.
+
+\item[\code{ksv2out\_2\_file}] A character string specifying the path to the second input data file.
+
+\item[\code{ksv\_between\_file}] A character string specifying the path to the third input data file.
+
+\item[\code{KsMax}] A numeric value representing a maximum threshold for Ks values.
+
+\item[\code{low}] A numeric value specifying the lower quantile for bootstrapping. Default is 0.025.
+
+\item[\code{up}] A numeric value specifying the upper quantile for bootstrapping. Default is 0.975.
+
+\item[\code{bs}] An integer specifying the number of bootstrap iterations. Default is 1000.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing computed relative rates and their confidence intervals.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+relativeRate(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{replace\_informal\_name\_to\_latin\_name}{Replace Informal Names with Latin Names}{replace.Rul.informal.Rul.name.Rul.to.Rul.latin.Rul.name}
+%
+\begin{Description}\relax
+This function takes a data frame \code{names\_df} containing "latin\_name" and "informal\_name" columns and an \code{input} string as input. It replaces informal species names in the \code{input} string with their corresponding Latin names based on the information in \code{names\_df}. If the \code{input} string contains underscores ("\_"), it assumes a comparison between two species and replaces both informal names. Otherwise, it replaces the informal name in the \code{input} string.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+replace_informal_name_to_latin_name(names_df, input)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{names\_df}] A data frame with "latin\_name" and "informal\_name" columns.
+
+\item[\code{input}] The input string that may contain informal species names.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A modified input string with informal names replaced by Latin names.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+replaced_name <- replace_informal_name_to_latin_name(names_df, "species1_species2")
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{resampleKsDistribution}{Resample a Ks Distribution}{resampleKsDistribution}
+%
+\begin{Description}\relax
+This function resamples a given Ks (synonymous substitution rates) distribution.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+resampleKsDistribution(ks, maxK = 5)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{ks}] A numeric vector representing the Ks distribution to be resampled.
+
+\item[\code{maxK}] A numeric value indicating the maximum Ks value to consider in the distribution.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A numeric vector containing a resampled Ks distribution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+# Load or obtain a Ks distribution (replace with your data)
+ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
+
+# Resample the Ks distribution
+resampled_ks <- resampleKsDistribution(ks=ks_distribution, maxK=2.5)
+
+# Print the resampled Ks distribution
+print(resampled_ks)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{runApp}{The main code to run ShinyWGD}{runApp}
+%
+\begin{Description}\relax
+The main code to run ShinyWGD
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+runApp()
+\end{verbatim}
+\end{Usage}
+\inputencoding{utf8}
+\HeaderA{run\_emmix\_kmeas}{A wrapper to run EM analysis of \bsl{}(ln\bsl{}) Ks values with k-means}{run.Rul.emmix.Rul.kmeas}
+%
+\begin{Description}\relax
+A wrapper to run EM analysis of \bsl{}(ln\bsl{}) Ks values with k-means
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+run_emmix_kmeas(v, k.centers = 2, k.nstart = 500)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{v}] A list include a vector of Ks values namely \code{ks\_value},
+and a bolean variable namely \code{log}
+
+\item[\code{k.centers}] Number of k-means centers, default 2.
+
+\item[\code{k.nstart}] Number of random start of k-means clustering, default 10.
+For a formal analysis, it is recommended to use 500.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list, i.e., the original output of mclust::emV
+\end{Value}
+\inputencoding{utf8}
+\HeaderA{SignifFeatureRegion}{SignifFeatureRegion}{SignifFeatureRegion}
+%
+\begin{Description}\relax
+This function computes the significance of features based on gradient and curvature analysis.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+SignifFeatureRegion(
+  n,
+  d,
+  gcounts,
+  gridsize,
+  dest,
+  bandwidth,
+  signifLevel,
+  range.x,
+  grad = TRUE,
+  curv = TRUE,
+  neg.curv.only = TRUE
+)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{n}] The sample size.
+
+\item[\code{d}] The dimensionality of the data.
+
+\item[\code{gcounts}] A numeric vector representing data counts.
+
+\item[\code{gridsize}] A numeric vector specifying the grid size.
+
+\item[\code{dest}] A kernel density estimate.
+
+\item[\code{bandwidth}] The bandwidth parameter.
+
+\item[\code{signifLevel}] The significance level.
+
+\item[\code{range.x}] The range of x values.
+
+\item[\code{grad}] A logical value indicating whether to compute the gradient significance.
+
+\item[\code{curv}] A logical value indicating whether to compute the curvature significance.
+
+\item[\code{neg.curv.only}] A logical value indicating whether to consider negative curvature only.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing the significance results for gradient and curvature.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+SignifFeatureRegion(n, d, gcounts, gridsizegs, est.dens, h, signifLevel, range.x, grad=TRUE, curv=FALSE)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{SiZer}{SiZer (Significant Zero Crossings)}{SiZer}
+%
+\begin{Description}\relax
+The SiZer (Significant Zero Crossings) method is a technique used for assessing the statistical significance of zero crossings in data density estimation.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+SiZer(x, bw, gridsize, signifLevel = 0.05)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{x}] A numeric vector containing the data for which you want to calculate SiZer.
+
+\item[\code{bw}] Bandwidth parameter for kernel density estimation. If not provided, default values are used.
+
+\item[\code{gridsize}] A vector specifying the grid size for SiZer. Default is c(401, 151).
+
+\item[\code{signifLevel}] The significance level for SiZer. Default is 0.05.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A list containing SiZer results, including the SiZer curve, the SiZer map, and the bandwidth.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+df_sizer <- SiZer(
+    ks_value_tmp,
+    gridsize=c(500, 50),
+    bw=c(0.01, 5)
+)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{symconv.ks}{symconv.ks}{symconv.ks}
+%
+\begin{Description}\relax
+Perform symmetric convolution using FFT.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+symconv.ks(rr, ss, skewflag)
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{rr}] The first input vector.
+
+\item[\code{ss}] The second input vector.
+
+\item[\code{skewflag}] A scalar value to apply skew correction.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A vector representing the result of the symmetric convolution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+est <- symconv.ks(kappam, gcounts, skewflag(-1)^drv)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{symconv2D.ks}{symconv2D.ks}{symconv2D.ks}
+%
+\begin{Description}\relax
+Perform symmetric 2D convolution using FFT.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+symconv2D.ks(rr, ss, skewflag = rep(1, 2))
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{rr}] The first input matrix.
+
+\item[\code{ss}] The second input matrix.
+
+\item[\code{skewflag}] A vector of two scalar values for skew correction along each dimension.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A matrix representing the result of the symmetric 2D convolution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+est.var <- ((symconv2D.ks((n*kappam)^2, gcounts)/n) - est^2)/(n-1)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{symconv3D.ks}{symconv3D.ks}{symconv3D.ks}
+%
+\begin{Description}\relax
+Perform symmetric 3D convolution using FFT.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+symconv3D.ks(rr, ss, skewflag = rep(1, 3))
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{rr}] The first input 3D array.
+
+\item[\code{ss}] The second input 3D array.
+
+\item[\code{skewflag}] A vector of three scalar values for skew correction along each dimension.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A 3D array representing the result of the symmetric 3D convolution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+est <- symconv3D.ks(kappam, gcounts, skewflag(-1)^drv)
+\end{ExampleCode}
+\end{Examples}
+\inputencoding{utf8}
+\HeaderA{symconv4D.ks}{symconv4D.ks}{symconv4D.ks}
+%
+\begin{Description}\relax
+Perform symmetric 4D convolution using FFT.
+\end{Description}
+%
+\begin{Usage}
+\begin{verbatim}
+symconv4D.ks(rr, ss, skewflag = rep(1, 4), fftflag = rep(TRUE, 2))
+\end{verbatim}
+\end{Usage}
+%
+\begin{Arguments}
+\begin{ldescription}
+\item[\code{rr}] The first input 4D array.
+
+\item[\code{ss}] The second input 4D array.
+
+\item[\code{skewflag}] A vector of four scalar values for skew correction along each dimension.
+
+\item[\code{fftflag}] A vector of two Boolean values for FFT flag.
+\end{ldescription}
+\end{Arguments}
+%
+\begin{Value}
+A 4D array representing the result of the symmetric 4D convolution.
+\end{Value}
+%
+\begin{Examples}
+\begin{ExampleCode}
+est <- symconv4D.ks(kappam, gcounts, skewflag(-1)^drv)
+\end{ExampleCode}
+\end{Examples}
+\printindex{}
+\end{document}

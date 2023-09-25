@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 24.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="图层_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 590.6 485.6" style="enable-background:new 0 0 590.6 485.6;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#FFFFFF;}
+	.st1{opacity:0.6;fill:#AF961B;enable-background:new    ;}
+	.st2{opacity:0.6;fill:#A5961F;enable-background:new    ;}
+	.st3{opacity:0.6;fill:#C69A12;enable-background:new    ;}
+	.st4{opacity:0.6;fill:#C69A13;enable-background:new    ;}
+	.st5{opacity:0.6;fill:#929327;enable-background:new    ;}
+	.st6{opacity:0.6;fill:#F1891A;enable-background:new    ;}
+	.st7{opacity:0.6;fill:#368339;enable-background:new    ;}
+	.st8{opacity:0.6;fill:#558836;enable-background:new    ;}
+	.st9{opacity:0.6;fill:#95394B;enable-background:new    ;}
+	.st10{opacity:0.8;fill:#A1A11F;enable-background:new    ;}
+	.st11{opacity:0.8;fill:#187C3B;enable-background:new    ;}
+	.st12{opacity:0.6;fill:#9E9D9D;enable-background:new    ;}
+</style>
+<rect x="0" class="st0" width="588.6" height="485.6"/>
+<g>
+	<g>
+		<path class="st1" d="M0,52.9c0,152,494.8,227.8,494.8,379.8h7.9C512.2,237.2,9.8,204.9,9.8,52.9"/>
+		<path class="st2" d="M52.4,52.9c0,152,398.9,227.8,398.9,379.8h39.4c0-152-371.7-227.8-371.7-379.8"/>
+		<path class="st3" d="M165.6,52.9c0,152,242.7,227.8,242.7,379.8h8.6c0-152-237.3-227.8-237.3-379.8"/>
+		<path class="st4" d="M256.6,52.9c0,152,60.2,227.8,60.2,379.8H351c0-152-50.2-227.8-50.2-379.8"/>
+		<path class="st5" d="M353.2,52.9c0,152-110.4,227.8-110.4,379.8h3.9c0-152,122-227.8,122-379.8"/>
+		<path class="st6" d="M439.1,52.9c0,152-271.3,227.8-271.3,379.8h4.1c0-152,289.9-227.8,289.9-379.8"/>
+		<path class="st7" d="M473.8,52.9c0,152-316.5,227.8-316.5,379.8h1.3c0-152,317.9-227.8,317.9-379.8"/>
+		<path class="st8" d="M579.2,52.9c0,152-489.3,227.8-489.3,379.8h2.4c0-152,496.3-227.8,496.3-379.8"/>
+	</g>
+	<g transform="translate(0, 0)">
+		<path id="queryChr_0" class="st9" d="M11.1,16.7h566.4c6.1,0,11.1,24.5,11.1,36.1l0,0c0,11.7-5,36.1-11.1,36.1H11.1
+			C5,88.9,0,64.4,0,52.8l0,0C0,41.1,5,16.7,11.1,16.7z"/>
+		<polygon id="queryGene_p5.00_sc00053_p0001.1" class="st10" points="0,52.8 10.8,0 10.8,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0002.1" class="st11" points="52.4,0 119,52.8 52.4,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0005.1" class="st11" points="156.3,0 162,52.8 156.3,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0006.1" class="st11" points="165.6,0 179.6,52.8 165.6,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0011.1" class="st10" points="256.6,52.8 300.8,0 300.8,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0012.1" class="st11" points="353.2,0 370.8,52.8 353.2,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0013.1" class="st11" points="388.1,0 414.1,52.8 388.1,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0015.1" class="st11" points="439.1,0 461.9,52.8 439.1,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0016.1" class="st10" points="473.8,52.8 476.5,0 476.5,105.6 		"/>
+		<polygon id="queryGene_p5.00_sc00053_p0019.1" class="st11" points="579.2,0 588.6,52.8 579.2,105.6 		"/>
+	</g>
+	<g transform="translate(0, 0)">
+		<path id="subjectChr_0" class="st12" d="M101,396.7h386.6c6.1,0,11.1,24.5,11.1,36.1l0,0c0,11.7-5,36.1-11.1,36.1H101
+			c-6.1,0-11.1-24.5-11.1-36.1l0,0C89.9,421.2,94.9,396.7,101,396.7z"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.386.V1.1" class="st10" points="89.9,432.8 92.3,380 92.3,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.388.V1.1" class="st10" points="157.3,432.8 158.6,380 158.6,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.389.V1.1" class="st10" points="158.8,432.8 164.1,380 164.1,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.390.V1.1" class="st11" points="166.5,380 166.9,432.8 166.5,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.391.V1.1" class="st10" points="167.9,432.8 172,380 172,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.393.V1.1" class="st10" points="176.6,432.8 187.8,380 187.8,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.394.V1.1" class="st10" points="242.8,432.8 246.7,380 246.7,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.395.V1.1" class="st11" points="277.4,380 286.9,432.8 277.4,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.400.V1.1" class="st11" points="316.8,380 351,432.8 316.8,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.402.V1.1" class="st11" points="365,380 380.9,432.8 365,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.408.V1.1" class="st10" points="409.3,432.8 416.9,380 416.9,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.410.V1.1" class="st10" points="426.7,432.8 432.4,380 432.4,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.417.V1.1" class="st10" points="451.4,432.8 490.7,380 490.7,485.6 		"/>
+		<polygon id="subjectGene_evm.model.AsparagusV1_08.418.V1.1" class="st11" points="494.8,380 502.7,432.8 494.8,485.6 		"/>
+	</g>
+</g>
+</svg>
