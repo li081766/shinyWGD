@@ -7,11 +7,13 @@
 #' @param gridsize A vector specifying the grid size for SiZer. Default is c(401, 151).
 #' @param signifLevel The significance level for SiZer. Default is 0.05.
 #'
-#' @return A list containing SiZer results, including the SiZer curve, the SiZer map, and the bandwidth.
+#' @importFrom stats na.omit
 #'
+#' @return A list containing SiZer results, including the SiZer curve, the SiZer map, and the bandwidth.
 #' @export
 #'
 #' @examples
+#' ks_value_tmp <- c(81.3724, 77.5539, 76.6121, 3.5945, 3.3308, -1, 15.4158, 2.7786, 1.8054)
 #' df_sizer <- SiZer(
 #'     ks_value_tmp,
 #'     gridsize=c(500, 50),

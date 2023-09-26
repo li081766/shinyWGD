@@ -11,34 +11,16 @@
 #' @param anchorpointout_file The output file for anchorpoint data with Ks values.
 #' @param species2 (Optional) The name of the second species. Specify this parameter and ks_file if working with two species.
 #'
+#' @importFrom vroom vroom
+#' @importFrom stats median
+#' @importFrom tidyr fill
+#'
 #' @return None. The function saves the results to the specified outfile and anchorpointout_file.
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage with one species:
-#' obtain_mean_ks_for_each_multiplicon(
-#'     multiplicon_file="multiplicons.txt",
-#'     anchorpoint_file="anchorpoints.txt",
-#'     ks_file="ks_values.txt",
-#'     species1="SpeciesA",
-#'     outfile="mean_ks_for_multiplicons.txt",
-#'     anchorpointout_file="anchorpoint_with_ks.txt"
-#' )
-#'
-#' # Example usage with two species:
-#' obtain_mean_ks_for_each_multiplicon(
-#'     multiplicon_file="multiplicons.txt",
-#'     anchorpoint_file="anchorpoints.txt",
-#'     ks_file="ks_values.txt",
-#'     species1="SpeciesA",
-#'     species2="SpeciesB",
-#'     outfile="mean_ks_for_multiplicons.txt",
-#'     anchorpointout_file="anchorpoint_with_ks.txt"
-#' )
 obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_file, species1, ks_file, outfile, anchorpointout_file, species2=NULL){
-    library(vroom)
-    library(dplyr)
+    # library(vroom)
+    # library(dplyr)
     multiplicons <- suppressMessages(
         vroom(multiplicon_file,
               col_names=TRUE,
@@ -50,6 +32,8 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
               col_names=TRUE,
               delim="\t")
     )
+
+    Ks <- genome_x <- list_x <- genome_y <- NULL
 
     if( !is.null(species2) ){
         ks_value_df <- suppressMessages(
@@ -77,7 +61,6 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
         mean_ks_for_each_multiplicon <- aggregate(Ks ~ multiplicon,
                                                   data=merged_ks,
                                                   FUN=function(x) median(x, na.rm=TRUE)
-                                                  #FUN=function(x) mean(x, na.rm=TRUE)
         )
 
         multiplicons_filled <- fill(multiplicons, genome_x, list_x, .direction="down") %>%
@@ -113,7 +96,6 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
                   col_names=TRUE,
                   delim="\t")
         )
-        # %>% select(Family, Ka, Ks, Paralog1, Paralog2)
 
         # merge ks value for each anchor pair
         merged_ks <- left_join(anchorpoints,
@@ -135,7 +117,6 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
         mean_ks_for_each_multiplicon <- aggregate(Ks ~ multiplicon,
                                                   data=merged_ks,
                                                   FUN=function(x) median(x, na.rm=TRUE)
-                                                  #FUN=function(x) mean(x, na.rm=TRUE)
         )
 
         multiplicons_filled <- fill(multiplicons, genome_x, list_x, .direction="down")
@@ -143,7 +124,6 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
         final_multiplicons <- multiplicons_filled
         for (i in 1:nrow(multiplicons_filled)) {
             each_row <- multiplicons_filled[i, ]
-            # each_row$genome_x <- gsub("_", " ", each_row$genome_x)
             tmp1 <- each_row[2:3]
             each_row[2:3] <- each_row[5:6]
             each_row[5:6] <- tmp1

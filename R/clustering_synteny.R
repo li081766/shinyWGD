@@ -10,20 +10,14 @@
 #' @param segmented_anchorpoints_file A character string specifying the output file path for segmented anchorpoints.
 #' @param num_anchors An integer specifying the minimum number of anchorpoints required.
 #'
+#' @importFrom utils read.table
+#' @importFrom utils write.table
+#' @importFrom dplyr select
+#' @importFrom dplyr arrange
+#'
 #' @return NULL (output files are generated with the specified information).
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' get_segments(
-#'     genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
-#'     anchors_ks_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.merged_pos_ks.txt",
-#'     multiplicons_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/multiplicons.txt",
-#'     segmented_file="output_segmented_data.txt",
-#'     segmented_anchorpoints_file="output_segmented_anchorpoints.txt",
-#'     num_anchors=5
-#' )
 get_segments <- function(
         genes_file,
         anchors_ks_file,
@@ -32,16 +26,19 @@ get_segments <- function(
         segmented_anchorpoints_file,
         num_anchors=10){
 
-    library(IRanges)
-    library(dplyr)
+    # requireNamespace("IRanges", quietly=TRUE)
+    # requireNamespace("dplyr", quietly=TRUE)
+    # library(IRanges)
+    # library(dplyr)
 
+    remapped_coordinate <- multiplicon <- geneX <- listX <- coordX <- geneY <- listY <- coordY <- Ks <- id <- level <- number_of_anchorpoints <-  NULL
     scaf_df <- read.table(
         genes_file,
         header=TRUE,
         sep="\t"
     ) %>%
-        group_by(genome, list) %>%
-        summarise(num_gene_remapped=max(remapped_coordinate), .groups="drop")
+        dplyr::group_by(genome, list) %>%
+        dplyr::summarise(num_gene_remapped=max(remapped_coordinate), .groups="drop")
 
     anchors_ks_df <- read.table(
         anchors_ks_file,
@@ -63,7 +60,7 @@ get_segments <- function(
         select(id, level, number_of_anchorpoints)
 
     anchors_df <- merge(anchors_ks_df, multiplicons_df, by.x="multiplicon", by.y="id") %>%
-        filter(number_of_anchorpoints >= num_anchors)
+        dplyr::filter(number_of_anchorpoints >= num_anchors)
 
     df_A <- anchors_df[, c(1:5)]
     df_B <- anchors_df[, c(1, 6:9)]
@@ -73,8 +70,9 @@ get_segments <- function(
     colnames(df_B) <- c("multiplicon_id", "gene", "genome", "chr", "pos")
 
     anchors <- rbind(df_A, df_B)
-    anchors.arranged <- arrange(anchors)
+    anchors.arranged <- dplyr::arrange(anchors)
 
+    multiplicon_id <- NULL
     ap <- group_by(anchors.arranged, multiplicon_id, genome, chr)
 
     segs <- summarise(ap, pos_min=min(pos), pos_max=max(pos), .groups="drop")
@@ -82,9 +80,10 @@ get_segments <- function(
     segments <- data.frame()
     for( chr in unique(segs$chr) ){
         seg.chr <- segs[segs$chr==chr, ]
-        ir <- IRanges(seg.chr$pos_min, seg.chr$pos_max)
-        seg.chr$group <- subjectHits(findOverlaps(ir, reduce(ir)))
+        ir <- IRanges::IRanges(seg.chr$pos_min, seg.chr$pos_max)
+        seg.chr$group <- S4Vectors::subjectHits(IRanges::findOverlaps(ir, IRanges::reduce(ir)))
         class(seg.chr)<-"data.frame"
+        pos_min <- group <- pos_max <- is_real <- NULL
         df <- summarise(group_by(arrange(seg.chr, pos_min), genome, chr, group),
                         pos_min=min(pos_min), pos_max=max(pos_max), .groups="drop")
         class(df) <- "data.frame"
@@ -203,18 +202,17 @@ get_segments <- function(
 #' @param genes_file A character string specifying the file path for genes information created by i-ADHoRe.
 #' @param out_file A character string specifying the output file path for saving cluster information.
 #'
+#' @importFrom utils read.table
+#' @importFrom stats cutree
+#' @importFrom dplyr select
+#' @importFrom stats cor
+#' @importFrom stats hclust
+#' @importFrom stats as.dist
+#' @importFrom ape as.phylo
+#' @importFrom ape write.tree
+#'
 #' @return NULL (output files are generated with the specified information).
-#'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' cluster_synteny(
-#'     segmented_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.chr.10.txt",
-#'     segmented_anchorpoints_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.anchorpoints.10.txt",
-#'     genes_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/genes.txt",
-#'     out_file="output_cluster_info.RData"
-#' )
 cluster_synteny <- function(
         segmented_file,
         segmented_anchorpoints_file,
@@ -231,6 +229,8 @@ cluster_synteny <- function(
         header=TRUE,
         sep="\t"
     )
+
+    id <- genome <- list <- remapped_coordinate <- NULL
 
     genes_df <- read.table(
         genes_file,
@@ -291,9 +291,10 @@ cluster_synteny <- function(
     newick_bycol_file <- gsub(".RData", ".bycol.newick", out_file)
     newick_byrow_file <- gsub(".RData", ".byrow.newick", out_file)
 
-    suppressMessages(
-        library(ape)
-    )
+    # suppressMessages(
+    #     requireNamespace("ape", quietly=TRUE)
+    #     #library(ape)
+    # )
     newick_tree_bycol <- as.phylo(cluster_info[['bycol']])
     write.tree(newick_tree_bycol, file=newick_bycol_file)
 
@@ -312,15 +313,14 @@ cluster_synteny <- function(
 #' @param q The observed number of successful outcomes.
 #' @param k The expected number of successful outcomes.
 #'
+#' @importFrom stats ppois
 #' @return The -log10 of the p-value.
-#'
 #' @export
 #'
 #' @examples
 #' # Example usage:
 #' p_value <- CalHomoConcentration(m=100, n=1000, q=10, k=1)
 CalHomoConcentration <- function(m, n, q, k) {
-    importFrom(stats, ppois)
     p <- m / n
     mean <- k * p
     return(-log10(ppois(q, mean, lower.tail=F)))
@@ -339,18 +339,14 @@ CalHomoConcentration <- function(m, n, q, k) {
 #' @param identified_cluster_file The path to the output file for identified clusters.
 #' @param hcheight The cutoff height for cluster identification (default: 0.3).
 #'
+#' @importFrom utils read.table
+#' @importFrom dplyr %>%
+#' @importFrom dplyr select
+#' @importFrom stats p.adjust
+#'
 #' @return A list containing information about identified clusters and their p-values.
 #'
 #' @export
-#'
-#' @examples analysisEachCluster(
-#     segmented_file="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/clusteringDir/segmented.chr.10.txt",
-#     segmented_anchorpoints_file="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/clusteringDir/segmented.anchorpoints.10.txt",
-#     genes_file="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
-#     cluster_info_file="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/clusteringDir/Clustering_info.10.RData",
-#     identified_cluster_file="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/clusteringDir/Identified_Clusters.10.RData",
-#     hclength=0.3
-# )
 analysisEachCluster <- function(
         segmented_file,
         segmented_anchorpoints_file,
@@ -358,11 +354,14 @@ analysisEachCluster <- function(
         cluster_info_file,
         identified_cluster_file,
         hcheight=0.3){
-
-    library(grid)
-    library(dplyr)
-    library(gridBase)
-    library(gridExtra)
+    # requireNamespace("grid", quietly=TRUE)
+    # requireNamespace("dplyr", quietly=TRUE)
+    # requireNamespace("gridBase", quietly=TRUE)
+    # requireNamespace("gridExtra", quietly=TRUE)
+    # library(grid)
+    # library(dplyr)
+    # library(gridBase)
+    # library(gridExtra)
 
     segs.df <- read.table(
         segmented_file,
@@ -378,6 +377,7 @@ analysisEachCluster <- function(
     SpeciesX <- unique(atomic.df$speciesX)
     SpeciesY <- unique(atomic.df$speciesY)
 
+    id <- genome <- list <- remapped_coordinate <- NULL
     genes.df <- read.table(
         genes_file,
         header=TRUE,
@@ -385,6 +385,7 @@ analysisEachCluster <- function(
     ) %>%
         select(id, genome, list, remapped_coordinate)
 
+    cluster_info <- NULL
     load(cluster_info_file)
     hc <- cluster_info
     hc.bycol <- hc$bycol
@@ -402,7 +403,7 @@ analysisEachCluster <- function(
         scaf.bycol <- names(cl.bycol[which(cl.bycol == i)])
         for( j in 1:cl.byrow.num ){
             scaf.byrow <- names(cl.byrow[which(cl.byrow == j)])
-            clust <- ExtractCluster(
+            clust <- extractCluster(
                 segs.df,
                 atomic.df,
                 scaf.bycol,
@@ -453,8 +454,9 @@ analysisEachCluster <- function(
 #' @param k The product of the remapped gene number of the segmented chromosomes
 #'          of the query species and subject species.
 #'
-#' @return The computed P-value.
+#' @importFrom stats ppois
 #'
+#' @return The computed P-value.
 #' @export
 #'
 #' @examples
@@ -462,7 +464,6 @@ analysisEachCluster <- function(
 #' p_value <- CalPvalue(m=100, n=10000, q=5, k=250)
 #' cat("P-value:", p_value, "\n")
 CalPvalue <- function(m, n, q, k) {
-    importFrom(stats, ppois)
     p <- m / n
     mean <- p * k
     return(ppois(q, mean, lower.tail=F))
@@ -481,17 +482,6 @@ CalPvalue <- function(m, n, q, k) {
 #' @return A list containing two data frames: "segs" for segment information and "atomic" for atomic anchorpoints.
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' query_scaffolds <- c("scaffold1", "scaffold2")
-#' subject_scaffolds <- c("chromosomeA", "chromosomeB")
-#' cluster <- extractCluster(segs.df, atomic.df, query_scaffolds, subject_scaffolds)
-#' if (!is.null(cluster)) {
-#'   cat("Cluster extracted successfully!\n")
-#' } else {
-#'   cat("No cluster found for the specified scaffolds.\n")
-#' }
 extractCluster <- function(
         segs.df,
         atomic.df,

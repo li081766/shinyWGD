@@ -10,20 +10,14 @@
 #' @param out_ks_file A character string specifying the output file path for Ks values.
 #' @param species A character string specifying the species name.
 #'
+#' @importFrom dplyr select
+#' @importFrom dplyr rowwise
+#' @importFrom dplyr distinct
+#' @importFrom vroom vroom
+#'
 #' @return NULL (output files are generated with the specified information).
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' obtain_coordiantes_for_anchorpoints_ks(
-#'     anchorpoints="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.txt",
-#'     anchorpoints_ks="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.ks.txt",
-#'     genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
-#'     out_file="output_coordinates.txt",
-#'     out_ks_file="output_ks_values.txt",
-#'     species="Vitis_vinifera"
-#' )
 obtain_coordiantes_for_anchorpoints_ks <- function(
         anchorpoints,
         anchorpoints_ks,
@@ -31,8 +25,11 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
         out_file,
         out_ks_file,
         species){
-    library(vroom)
-    library(dplyr)
+    # library(vroom)
+    # library(dplyr)
+
+    id <- genome <- list <- orientation <- remapped_coordinate <- NULL
+    multiplicon <- NULL
 
     position_df <- suppressMessages(
         vroom(
@@ -54,6 +51,9 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
         )
     )
 
+    gene_x <- genome.x <- list.x <- strand.x <- coord.x <- NULL
+    gene_y <- genome.y <- list.y <- strand.y <- coord.y <- NULL
+
     merged_x <- left_join(anchors_df, position_df, by=c("gene_x"="gene"))
     final_df <- left_join(merged_x, position_df, by=c("gene_y"="gene")) %>%
         select(multiplicon,
@@ -72,6 +72,9 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
         row.names=FALSE,
         quote=FALSE
     )
+
+    speciesX <- speciesY <- NULL
+
     if( length(genome_list) > 1 ){
         final_df <- final_df %>%
             filter(speciesX != speciesY)
@@ -96,6 +99,8 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
         final_df <- final_df_out
     }
 
+    geneX <- geneY <- gene_pair <- NULL
+
     anchors_ks_df <- suppressMessages(
         vroom(
             anchorpoints_ks,
@@ -107,6 +112,8 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
         mutate(gene_pair=paste(sort(c(geneX, geneY)), collapse="_")) %>%
         distinct(gene_pair, .keep_all=TRUE) %>%
         select(-gene_pair)
+
+    Omega <- Ka <- Ks <- NULL
 
     merged_x <- left_join(anchors_ks_df, position_df, by=c("geneX"="gene"))
     anchors_ks_df <- left_join(merged_x, position_df, by=c("geneY"="gene")) %>%
@@ -142,6 +149,9 @@ obtain_coordiantes_for_anchorpoints_ks <- function(
 
     final_anchors_ks_df <- final_anchors_ks_df %>%
         select(geneX, geneY, Omega, Ka, Ks)
+
+    listX <- strandX <- coordX <- NULL
+    listY <- strandY <- coordY <- NULL
 
     final_table_ks_df <- merge(
         final_df,

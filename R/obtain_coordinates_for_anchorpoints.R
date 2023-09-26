@@ -10,28 +10,16 @@
 #' @param species2 (Optional) The name of the second species. Specify this parameter and gff_file2 if working with two species.
 #' @param gff_file2 (Optional) The path to the GFF file for the second species.
 #'
+#' @importFrom vroom vroom
+#' @importFrom dplyr filter
+#' @importFrom dplyr select
+#' @importFrom dplyr mutate
+#' @importFrom dplyr left_join
+#'
+#'
 #' @return None. The function saves the results to the specified out_file.
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage with one species:
-#' obtain_coordiantes_for_anchorpoints(
-#'   anchorpoints="anchorpoints.txt",
-#'   species1="SpeciesA",
-#'   gff_file1="speciesA.gff",
-#'   out_file="results.txt"
-#' )
-#'
-#' # Example usage with two species:
-#' obtain_coordiantes_for_anchorpoints(
-#'   anchorpoints="anchorpoints.txt",
-#'   species1="SpeciesA",
-#'   gff_file1="speciesA.gff",
-#'   species2="SpeciesB",
-#'   gff_file2="speciesB.gff",
-#'   out_file="results.txt"
-#' )
 obtain_coordiantes_for_anchorpoints <- function(anchorpoints, species1, gff_file1, out_file, species2=NULL, gff_file2=NULL){
     gff_df <- suppressMessages(
         vroom(
@@ -41,9 +29,10 @@ obtain_coordiantes_for_anchorpoints <- function(anchorpoints, species1, gff_file
             col_names=FALSE
         )
     )
-    library(vroom)
-    library(dplyr)
+    # library(vroom)
+    # library(dplyr)
 
+    X1 <- X4 <- X5 <- X7 <- X9 <- NULL
     position_df <- gff_df %>%
         filter(gff_df$X3=="mRNA") %>%
         select(X1, X9, X4, X5, X7) %>%
@@ -89,6 +78,7 @@ obtain_coordiantes_for_anchorpoints <- function(anchorpoints, species1, gff_file
                             "listY", "startY", "endY", "strandY", "speciesY")
     final_df <- merged_y
 
+    speciesX <- speciesY <- NULL
     if( !is.null(gff_file2) ){
         final_df <- final_df %>% filter(speciesX != speciesY)
         final_table <- data.frame(matrix(ncol=ncol(final_df), nrow=nrow(final_df)))

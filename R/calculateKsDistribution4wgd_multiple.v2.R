@@ -12,28 +12,19 @@
 #' @param minIdn The minimum alignment identity to include in the distribution.
 #' @param minCov The minimum alignment coverage to include in the distribution.
 #'
+#' @importFrom stats aggregate
+#' @importFrom stats complete.cases
+#' @importFrom dplyr bind_rows
+#'
 #' @return A list containing two data frames: "bar" for Ks distribution and "density" for density data.
 #'
 #' @export
 #'
-#' @examples
-#' # Example usage:
-#' result <- calculateKsDistribution4wgd_multiple(
-#'     files_list = files_list_new,
-#'     binWidth = 0.1,
-#'     maxK = 5,
-#'     plot.mode = "weighted",
-#'     include.outliers = FALSE,
-#'     minK = 0,
-#'     minAlnLen = 0,
-#'     minIdn = 0,
-#'     minCov = 0
-#' )
 calculateKsDistribution4wgd_multiple <- function(
         files_list, binWidth=0.1, maxK=5,
         plot.mode="weighted",
         include.outliers=F, minK=0, minAlnLen=0, minIdn=0, minCov=0){
-    library(dplyr)
+    # library(dplyr)
 
     full.data <- data.frame()
     full.data.density <- data.frame()

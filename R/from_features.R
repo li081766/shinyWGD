@@ -22,11 +22,12 @@
 #' @param curv A logical value indicating whether to compute the curvature significance.
 #' @param neg.curv.only A logical value indicating whether to consider negative curvature only.
 #'
+#' @importFrom stats pchisq
+#'
 #' @return A list containing the significance results for gradient and curvature.
 #'
 #' @export
 #'
-#' @examples SignifFeatureRegion(n, d, gcounts, gridsizegs, est.dens, h, signifLevel, range.x, grad=TRUE, curv=FALSE)
 SignifFeatureRegion <- function(n, d, gcounts, gridsize, dest, bandwidth, signifLevel, range.x, grad=TRUE, curv=TRUE, neg.curv.only=TRUE)
 {
   h <- bandwidth
@@ -435,9 +436,6 @@ SignifFeatureRegion <- function(n, d, gcounts, gridsize, dest, bandwidth, signif
 #' @return A list of bandwidth ranges for each dimension of the input data.
 #'
 #' @export
-#'
-#' @examples
-#' dfltBWrange(x, tau)
 dfltBWrange <- function(x,tau) {
   d <- ncol(x)
   if (d==1) x <- as.matrix(x)
@@ -447,10 +445,10 @@ dfltBWrange <- function(x,tau) {
   r <- 0
   cmb.fac.low <- (4/((d+2*r+2)*nrow(x)))^(1/(d+2*r+4))
 
+  sd <- IQR <- NULL
   ## Compute the scale in each direction
-
   st.devs <- apply(x,2,sd)
-  IQR.vals <- apply(x, 2, IQR)/(qnorm(3/4) - qnorm(1/4))
+  IQR.vals <- apply(x, 2, IQR)/(stats::qnorm(3/4) - stats::qnorm(1/4))
   sig.hats <- apply(cbind(st.devs,IQR.vals),1,min)
   ##range.vals <- apply(x,2,max) - apply(x,2,min)
 
@@ -485,9 +483,6 @@ dfltBWrange <- function(x,tau) {
 #' @return A list containing the binned counts and the range of values for each dimension.
 #'
 #' @export
-#'
-#' @examples
-#' dfltCounts(x, gridsize, h, supp, range.x, w)
 dfltCounts <- function(x,gridsize=rep(64,NCOL(x)),h=rep(0,NCOL(x)), supp=3.7, range.x, w)
 {
   x <- as.matrix(x)
@@ -548,9 +543,6 @@ dfltCounts <- function(x,gridsize=rep(64,NCOL(x)),h=rep(0,NCOL(x)), supp=3.7, ra
 #' @return A list containing the estimated density or derivative, and optionally, standard errors.
 #'
 #' @export
-#'
-#' @examples
-#' est.dens <- drvkde(x, drv0, bandwidthh, gridsizegridsize, range.xrange.x, binnedTRUE, seFALSE)
 drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
 {
   d <- length(drv)
@@ -596,8 +588,8 @@ drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
 
   if (binned==FALSE)
   {
-    if (d==1) gcounts <- binning(x=x, bgridsize=gridsize, h=h, xmin=a, xmax=b, w=w)$counts
-    else if (d>1) gcounts <- binning(x=x, bgridsize=gridsize, H=diag(h^2), xmin=a, xmax=b, w=w)$counts
+    if (d==1) gcounts <- ks::binning(x=x, bgridsize=gridsize, h=h, xmin=a, xmax=b, w=w)$counts
+    else if (d>1) gcounts <- ks::binning(x=x, bgridsize=gridsize, H=diag(h^2), xmin=a, xmax=b, w=w)$counts
   }
   else
     gcounts <- x
@@ -612,7 +604,7 @@ drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
     lvecid <- (0:Lid)
     facid  <- (b[id]-a[id])/(h[id]*(M[id]-1))
     argid <- lvecid*facid
-    kapmid[[id]] <- dnorm(argid)/(h[id]^(drv[id]+1))
+    kapmid[[id]] <- stats::dnorm(argid)/(h[id]^(drv[id]+1))
     hmold0 <- 1
     hmold1 <- argid
     if (drv[id]==0) hmnew <- 1
@@ -690,11 +682,11 @@ drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
 #' @param ss The second input vector.
 #' @param skewflag A scalar value to apply skew correction.
 #'
+#' @importFrom stats fft
+#'
 #' @return A vector representing the result of the symmetric convolution.
 #'
 #' @export
-#'
-#' @examples est <- symconv.ks(kappam, gcounts, skewflag(-1)^drv)
 symconv.ks <- function (rr,ss,skewflag)
 {
   L <- length(rr) - 1
@@ -720,11 +712,11 @@ symconv.ks <- function (rr,ss,skewflag)
 #' @param ss The second input matrix.
 #' @param skewflag A vector of two scalar values for skew correction along each dimension.
 #'
+#' @importFrom stats fft
+#'
 #' @return A matrix representing the result of the symmetric 2D convolution.
 #'
 #' @export
-#'
-#' @examples est.var <- ((symconv2D.ks((n*kappam)^2, gcounts)/n) - est^2)/(n-1)
 symconv2D.ks <- function(rr, ss, skewflag=rep(1,2))
 {
   L <- dim(rr)-1
@@ -762,11 +754,11 @@ symconv2D.ks <- function(rr, ss, skewflag=rep(1,2))
 #' @param ss The second input 3D array.
 #' @param skewflag A vector of three scalar values for skew correction along each dimension.
 #'
+#' @importFrom stats fft
+#'
 #' @return A 3D array representing the result of the symmetric 3D convolution.
 #'
 #' @export
-#'
-#' @examples est <- symconv3D.ks(kappam, gcounts, skewflag(-1)^drv)
 symconv3D.ks <- function(rr, ss, skewflag=rep(1,3))
 {
   L <- dim(rr) - 1
@@ -812,11 +804,11 @@ symconv3D.ks <- function(rr, ss, skewflag=rep(1,3))
 #' @param skewflag A vector of four scalar values for skew correction along each dimension.
 #' @param fftflag A vector of two Boolean values for FFT flag.
 #'
+#' @importFrom stats fft
+#'
 #' @return A 4D array representing the result of the symmetric 4D convolution.
 #'
 #' @export
-#'
-#' @examples est <- symconv4D.ks(kappam, gcounts, skewflag(-1)^drv)
 symconv4D.ks <- function(rr, ss, skewflag=rep(1,4) , fftflag=rep(TRUE,2))
 {
   L <- dim(rr) - 1

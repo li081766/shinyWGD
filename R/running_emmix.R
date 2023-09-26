@@ -7,12 +7,10 @@
 #' @return A data frame containing clustering and modeling results.
 #'
 #' @export
-#'
-#' @examples ks_mclust_v2(ks_value)
 ks_mclust_v2 <- function(input_data) {
-    suppressMessages(
-        library(mclust)
-    )
+    # suppressMessages(
+    #     library(mclust)
+    # )
     ks.mclust <- data.frame()
 
     for (i in 1:10) {

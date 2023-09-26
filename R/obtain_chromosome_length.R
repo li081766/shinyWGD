@@ -4,24 +4,14 @@
 #'
 #' @param species_info_file A character string specifying the path to the species information file.
 #'
+#' @importFrom vroom vroom
+#' @importFrom dplyr group_by
+#' @importFrom dplyr summarise
+#' @importFrom dplyr filter
+#'
 #' @return A list containing two data frames: len_df for chromosome lengths and num_df for mRNA counts.
 #'
 #' @export
-#'
-#' @examples
-#' # Load the species information into a data frame (replace 'species_info_df' with your actual data frame)
-#' species_info_df <- read.table("path/to/your/species_info_file.txt", sep="\t", header=TRUE)
-#'
-#' # Call the obtain_chromosome_length_filter function
-#' result <- obtain_chromosome_length_filter(species_info_df)
-#'
-#' # Access the chromosome length and mRNA count data frames from the result
-#' len_df <- result$len_df
-#' num_df <- result$num_df
-#'
-#' # Print the first few rows of the data frames
-#' head(len_df)
-#' head(num_df)
 obtain_chromosome_length <- function(species_info_file){
     actual_path <- dirname(species_info_file)
 
@@ -59,6 +49,8 @@ obtain_chromosome_length <- function(species_info_file){
                                     "start", "end", "score",
                                     "strand", "phase", "attributes")))
 
+        seqchr <- end <- type <- NULL
+
         gff_grouped <- group_by(gff_df, seqchr)
         max_pos <- summarise(gff_grouped, len=max(end))
         max_pos$sp <- each_row$sp
@@ -66,7 +58,7 @@ obtain_chromosome_length <- function(species_info_file){
         mRNA_counts <- gff_grouped %>%
             filter(type=="mRNA") %>%
             group_by(seqchr) %>%
-            summarize(count=n())
+            summarise(count=dplyr::n())
         mRNA_counts$sp <- each_row$sp
         num_df <- rbind(num_df, mRNA_counts)
     }
@@ -80,20 +72,14 @@ obtain_chromosome_length <- function(species_info_file){
 #'
 #' @param species_info_df A data frame containing species information with columns "sp," "cds," and "gff."
 #'
+#' @importFrom vroom vroom
+#' @importFrom dplyr group_by
+#' @importFrom dplyr summarise
+#' @importFrom dplyr filter
+#'
 #' @return A list containing two data frames: len_df for chromosome lengths and num_df for mRNA counts.
 #'
 #' @export
-#'
-#' @examples
-#' Create a sample data frame
-#' species_info_df <- data.frame(
-#'   sp=c("SpeciesA", "SpeciesB"),
-#'   cds=c("cds_file_A.gff", "cds_file_B.gff"),
-#'   gff=c("gff_file_A.gff", "gff_file_B.gff")
-#' )
-#'
-#' # Obtain chromosome lengths and mRNA counts
-#' result <- obtain_chromosome_length_filter(species_info_df)
 obtain_chromosome_length_filter <- function(species_info_df){
 
     df <- species_info_df
@@ -106,6 +92,7 @@ obtain_chromosome_length_filter <- function(species_info_df){
                          chr=character(),
                          num=integer())
 
+    seqchr <- end <- type <- NULL
     for( i in 1:nrow(df) ){
         each_row <- df[i, ]
         gff_df <- suppressMessages(
@@ -126,7 +113,7 @@ obtain_chromosome_length_filter <- function(species_info_df){
         mRNA_counts <- gff_grouped %>%
             filter(type=="mRNA") %>%
             group_by(seqchr) %>%
-            summarize(count=n())
+            summarise(count=dplyr::n())
         mRNA_counts$sp <- each_row$sp
         num_df <- rbind(num_df, mRNA_counts)
     }

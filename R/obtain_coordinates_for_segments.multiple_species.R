@@ -8,33 +8,24 @@
 #' @param input A list containing input data, typically multiple synteny query chromosomes.
 #' @param out_file A character string specifying the output file path.
 #'
+#' @importFrom vroom vroom
+#' @importFrom dplyr filter
+#' @importFrom dplyr mutate
+#' @importFrom dplyr select
+#'
 #' @return A dataframe with coordinates for segments within multiple synteny blocks.
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' # Define dataframes for segments and GFF information
-#' seg_df <- read.table("segments.csv", header=TRUE, sep=",")
-#' gff_df <- read.table("genomic_data.gff", header=TRUE, sep="\t")
-#'
-#' # Define input data
-#' input_data <- list(
-#'     multiple_synteny_query_chr_SpeciesA=c("Chr1", "Chr2"),
-#'     multiple_synteny_query_chr_SpeciesB=c("ChrX", "ChrY")
-#' )
-#'
-#' # Obtain coordinates for segments within multiple synteny blocks
-#' obtain_coordinates_for_segments_multiple(seg_df, gff_df, input_data, "output_coordinates.txt")
-#'
 obtain_coordinates_for_segments_multiple <- function(
         seg_df,
         gff_df,
         input,
         out_file
     ){
-    library(vroom)
-    library(dplyr)
+    # library(vroom)
+    # library(dplyr)
+
+    X1 <- X4 <- X5 <- X7 <- X9 <- NULL
 
     position_df <- data.frame()
     for( x in 1:nrow(gff_df) ){
@@ -57,6 +48,10 @@ obtain_coordinates_for_segments_multiple <- function(
         gff_df_tmp$sp <- each_row$species
         position_df <- rbind(position_df, gff_df_tmp)
     }
+
+    gene <- start <- end <- multiplicon <- genome <- list <- first <- last <- NULL
+    genome.1 <- list.1 <- first.1 <- last.1 <- start.1 <- end.1 <- order.1 <- NULL
+    genomeX <- genomeY <- NULL
 
     segs <- seg_df
     start_subset <- select(position_df, gene, start)

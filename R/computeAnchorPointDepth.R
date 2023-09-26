@@ -10,20 +10,12 @@
 #' @return A list containing depth data frames, including "query_depth" and "subject_depth" if subject chromosomes are specified, or "depth" if not.
 #'
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' depth_list <- computing_depth(
-#'     anchorpoint_ks_file = anchorpointout_file,
-#'     multiplicon_id = selected_multiplicons_Id,
-#'     selected_query_chr = query_selected_chr_list,
-#'     selected_subject_chr = subject_selected_chr_list
-#' )
 computing_depth <- function(anchorpoint_ks_file,
                             multiplicon_id,
                             selected_query_chr,
                             selected_subject_chr=NULL){
     if( !is.null(selected_subject_chr) ){
+        multiplicon <- listX <- listY <- coordX <- coordY <- NULL
         anchorpoint_df <- read.table(
             anchorpoint_ks_file,
             sep="\t",
@@ -31,25 +23,26 @@ computing_depth <- function(anchorpoint_ks_file,
             fill=T,
             na.strings=""
         ) %>%
-            filter(multiplicon %in% multiplicon_id) %>%
-            filter(listX %in% selected_query_chr) %>%
-            filter(listY %in% selected_subject_chr)
+            dplyr::filter(multiplicon %in% multiplicon_id) %>%
+            dplyr::filter(listX %in% selected_query_chr) %>%
+            dplyr::filter(listY %in% selected_subject_chr)
 
         suppressMessages(
             query_depth <- anchorpoint_df %>%
-                group_by(listX, coordX) %>%
-                summarise(count=n())
+                dplyr::group_by(listX, coordX) %>%
+                dplyr::summarise(count=dplyr::n())
         )
 
         suppressMessages(
             subject_depth <- anchorpoint_df %>%
-                group_by(listY, coordY) %>%
-                summarise(count=n())
+                dplyr::group_by(listY, coordY) %>%
+                dplyr::summarise(count=dplyr::n())
         )
 
         return(list(query_depth=query_depth,
                     subject_depth=subject_depth))
     }else{
+        listX <- coordX <- NULL
         anchorpoint_df <- read.table(
             anchorpoint_ks_file,
             sep="\t",
@@ -57,12 +50,12 @@ computing_depth <- function(anchorpoint_ks_file,
             fill=T,
             na.strings=""
         ) %>%
-            filter(listX %in% selected_query_chr)
+            dplyr::filter(listX %in% selected_query_chr)
 
         suppressMessages(
             query_depth <- anchorpoint_df %>%
-                group_by(listX, coordX) %>%
-                summarise(count=n())
+                dplyr::group_by(listX, coordX) %>%
+                dplyr::summarise(count=dplyr::n())
         )
 
         return(list(depth=query_depth))
@@ -79,15 +72,6 @@ computing_depth <- function(anchorpoint_ks_file,
 #'
 #' @return A list containing the depth dataframe.
 #' @export
-#'
-#' @examples
-#' # Example usage:
-#' depth_list <- computing_depth_paranome(
-#'     anchorpoint_ks_file = anchorpointout_file,
-#'     multiplicon_id = selected_multiplicons_Id,
-#'     selected_query_chr = query_selected_chr_list
-#' )
-#'
 computing_depth_paranome <- function(
         anchorpoint_ks_file,
         multiplicon_id,
@@ -110,14 +94,15 @@ computing_depth_paranome <- function(
 
     colnames(tmp_df) <- data_names_swapped
 
+    multiplicon <- listX <- coordX <- NULL
     anchorpoint_df <- rbind(anchorpoint_df, tmp_df) %>%
-        filter(multiplicon %in% multiplicon_id) %>%
-        filter(listX %in% selected_query_chr)
+        dplyr::filter(multiplicon %in% multiplicon_id) %>%
+        dplyr::filter(listX %in% selected_query_chr)
 
     suppressMessages(
         query_depth <- anchorpoint_df %>%
-            group_by(listX, coordX) %>%
-            summarise(count=n())
+            dplyr::group_by(listX, coordX) %>%
+            dplyr::summarise(count=dplyr::n())
     )
     return(list(depth=query_depth))
 }

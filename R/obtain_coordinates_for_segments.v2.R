@@ -9,19 +9,17 @@
 #' @param sp2 The species name for the second genome (optional).
 #' @param gff_file2 The GFF file for the second genome (optional).
 #'
+#' @importFrom vroom vroom
+#' @importFrom dplyr filter
+#' @importFrom dplyr mutate
+#' @importFrom dplyr select
+#'
 #' @return NULL (the results are saved in the output file).
 #'
 #' @export
-#'
-#' @examples obtain_coordiantes_for_segments(
-#     seg_file="Analysis_2023-04-19/Syn/i-adhore.Oryza_sativa_vs_Asparagus_officinalis/segments.txt",
-#     gff_file1="Analysis_2023-04-19/sp_2.gff",
-#     gff_file2="Analysis_2023-04-19/sp_3.gff",
-#     out_file="Analysis_2023-04-19/Syn/i-adhore.Oryza_sativa_vs_Asparagus_officinalis/segments.merged_position.txt"
-# )
 obtain_coordiantes_for_segments <- function(seg_file, sp1, gff_file1, out_file, sp2=NULL, gff_file2=NULL){
-    library(vroom)
-    library(dplyr)
+    # library(vroom)
+    # library(dplyr)
 
     gff_df <- suppressMessages(
         vroom(gff_file1,
@@ -29,12 +27,11 @@ obtain_coordiantes_for_segments <- function(seg_file, sp1, gff_file1, out_file, 
               comment="#",
               col_names=FALSE)
     )
+    X1 <- X4 <- X5 <- X7 <- X9 <- NULL
     position_df <- gff_df %>%
         filter(gff_df$X3=="mRNA") %>%
         select(X1, X9, X4, X5, X7) %>%
-        mutate(X9=gsub("ID=([^;]+).*", "\\1", X9)) #%>%
-		#rename(X1="list", X9="gene", X4="start", X5="end", X7="strand")
-        #rename("list"=X1, "gene"=X9, "start"=X4, "end"=X5, "strand"=X7)
+        mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))
 
     colnames(position_df) <- c("list", "gene", "start", "end", "strand")
 
@@ -48,9 +45,8 @@ obtain_coordiantes_for_segments <- function(seg_file, sp1, gff_file1, out_file, 
         position_df2 <- gff_df2 %>%
             filter(gff_df2$X3=="mRNA") %>%
             select(X1, X9, X4, X5, X7) %>%
-            mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))# %>%
-			#rename(X1="list", X9="gene", X4="start", X5="end", X7="strand")
-            #rename("list"=X1, "gene"=X9, "start"=X4, "end"=X5, "strand"=X7)
+            mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))
+
         colnames(position_df2) <- c("list", "gene", "start", "end", "strand")
         position_df <- rbind(position_df, position_df2)
     }
@@ -59,6 +55,10 @@ obtain_coordiantes_for_segments <- function(seg_file, sp1, gff_file1, out_file, 
               delim="\t",
               col_names=TRUE)
     )
+
+    gene <- start <- end <- multiplicon <- genome <- list <- first <- last <- NULL
+    genome.1 <- list.1 <- first.1 <- last.1 <- start.1 <- end.1 <- order.1 <- NULL
+    genomeX <- genomeY <- NULL
 
     start_subset <- select(position_df, gene, start)
     merged_data <- left_join(segs, start_subset, by = c("first"="gene"))

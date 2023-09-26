@@ -2,9 +2,12 @@
 #'
 #' @export
 #'
-#' @examples is.ksv(x)
+#' @examples
+#' x <- c(0.1, 0.3, 0.8, 1,1, 0.8, 0.9)
+#' is.ksv(x)
 is.ksv <- function(x) {
-    if (class(x) == "ksv") {
+    # if (class(x) == "ksv") {
+    if (inherits(x, "ksv")) {
         TRUE
     } else {
         FALSE
@@ -23,14 +26,16 @@ is.ksv <- function(x) {
 #' @return The mode (peak) of the distribution.
 #' @export
 #'
-#' @examples modeFinder(x)
+#' @examples
+#' x <- c(1.1, 1.1, 1.2, 1.4, 1.8, 0.9, 0.8, 0.7)
+#' modeFinder(x)
 modeFinder <- function(x, bw = 0.1, from = 0, to = 5) {
     if (is.ksv(x)) {
         k <- x$ks.value
     } else {
         k <- x
     }
-    d <- density(k, bw = bw, from = from, to = to)
+    d <- stats::density(k, bw = bw, from = from, to = to)
     peak <- d$x[which.max(d$y)]
     return(peak)
 }
@@ -47,10 +52,10 @@ modeFinder <- function(x, bw = 0.1, from = 0, to = 5) {
 #' @param up A numeric value specifying the upper quantile for bootstrapping. Default is 0.975.
 #' @param bs An integer specifying the number of bootstrap iterations. Default is 1000.
 #'
+#' @importFrom stats quantile
+#'
 #' @return A list containing computed relative rates and their confidence intervals.
 #' @export
-#'
-#' @examples relativeRate(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax)
 relativeRate <- function(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax, low = 0.025, up = 0.975, bs = 1000) {
     ksv2out_1 <- read.table(ksv2out_1_file, sep="\t", header=T)
     ksv2out_1 <- ksv2out_1[ksv2out_1$Ks <= KsMax, ]
