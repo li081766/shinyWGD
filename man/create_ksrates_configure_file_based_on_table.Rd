@@ -26,12 +26,3 @@ create_ksrates_configure_file_based_on_table(
 \description{
 This function generates a Ksrates configuration file based on a data table and other parameters.
 }
-\examples{
-create_ksrates_configure_file_based_on_table(
-  my_data_table,
-  "FocalSpecies",
-  "my_newick_tree.newick",
-  "ksrates_config.txt",
-  "species_info.txt"
-)
-}

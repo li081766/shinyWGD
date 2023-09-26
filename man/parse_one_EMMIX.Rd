@@ -17,6 +17,3 @@ A data frame with seven variables.
 \description{
 Read the EMMIX output for a specify number of components
 }
-\examples{
-parseEMMIX("data/WelMiLog.out")
-}

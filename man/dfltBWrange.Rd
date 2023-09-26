@@ -17,6 +17,3 @@ A list of bandwidth ranges for each dimension of the input data.
 \description{
 This function computes the default bandwidth range for kernel density estimation.
 }
-\examples{
-dfltBWrange(x, tau)
-}

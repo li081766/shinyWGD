@@ -17,6 +17,3 @@ A string containing the processed GFF file's path.
 \description{
 This function checks the type of GFF input file specified by its path and processes it accordingly.
 }
-\examples{
-gff_temp <- check_gff_from_file("MyGFF", "/path/to/my_gff.gff")
-}

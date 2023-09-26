@@ -4,7 +4,7 @@
 \alias{mix_logNormal_Ks}
 \title{Log-Normal mixturing analyses of a Ks distributions for the whole paranome}
 \usage{
-mix_logNormal_Ks(ksv, G = 1:5, k.nstart = 500, maxK = 5, plot = FALSE, ...)
+mix_logNormal_Ks(ksv, G = 1:5, k.nstart = 500, maxK = 5)
 }
 \arguments{
 \item{ksv}{A \code{ksv} object.}
@@ -26,6 +26,7 @@ A data frame with seven variables.
 Log-Normal mixturing analyses of a Ks distributions for the whole paranome
 }
 \examples{
+ksv <- c(0.1, 0.3, 0.12, 0.34, 0.45, 0.32, 0.33)
 mix_logNormal_Ks <- function(ksv)
 
 }

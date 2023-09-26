@@ -19,6 +19,3 @@ A 3D array representing the result of the symmetric 3D convolution.
 \description{
 Perform symmetric 3D convolution using FFT.
 }
-\examples{
-est <- symconv3D.ks(kappam, gcounts, skewflag(-1)^drv)
-}

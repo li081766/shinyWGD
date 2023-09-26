@@ -32,6 +32,3 @@ A list containing the binned counts and the range of values for each dimension.
 \description{
 This function bins the input data into a regular grid.
 }
-\examples{
-dfltCounts(x, gridsize, h, supp, range.x, w)
-}

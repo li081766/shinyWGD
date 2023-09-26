@@ -15,18 +15,3 @@ A list containing two data frames: len_df for chromosome lengths and num_df for 
 \description{
 Process species information file and extract chromosome lengths and mRNA counts from GFF files.
 }
-\examples{
-# Load the species information into a data frame (replace 'species_info_df' with your actual data frame)
-species_info_df <- read.table("path/to/your/species_info_file.txt", sep="\t", header=TRUE)
-
-# Call the obtain_chromosome_length_filter function
-result <- obtain_chromosome_length_filter(species_info_df)
-
-# Access the chromosome length and mRNA count data frames from the result
-len_df <- result$len_df
-num_df <- result$num_df
-
-# Print the first few rows of the data frames
-head(len_df)
-head(num_df)
-}

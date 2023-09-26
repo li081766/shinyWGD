@@ -15,6 +15,3 @@ A data frame containing clustering and modeling results.
 \description{
 A wrapper to run emmix modeling using the mclust package.
 }
-\examples{
-ks_mclust_v2(ks_value)
-}

@@ -16,6 +16,3 @@ create_ksrates_cmd(input, ksratesconf, cmd_file)
 \description{
 Create Ksrates Command Files from Shiny Input
 }
-\examples{
-create_ksrates_cmd(input, "ksrates_conf.txt", ksrates_cmd_sh_file)
-}

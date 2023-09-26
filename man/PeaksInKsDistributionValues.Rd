@@ -37,7 +37,14 @@ This function identifies peaks in a distribution of Ks (synonymous substitution 
 ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
 
 # Find peaks in the Ks distribution
-peaks <- PeaksInKsDistributionValues(ks=ks_values, binWidth=0.1, maxK=2.5, m=3, peak.maxK=2.0, spar=0.25)
+peaks <- PeaksInKsDistributionValues(
+  ks=ks_values,
+  binWidth=0.1,
+  maxK=2.5,
+  m=3,
+  peak.maxK=2.0,
+  spar=0.25
+)
 
 # Print the identified peaks
 print(peaks)

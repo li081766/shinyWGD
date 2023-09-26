@@ -33,14 +33,3 @@ NULL (output files are generated with the specified information).
 This function extracts segmented data from anchorpoints and Ks (synonymous substitution rate) values,
 based on specified criteria, and writes the results to output files.
 }
-\examples{
-# Example usage:
-get_segments(
-    genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
-    anchors_ks_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.merged_pos_ks.txt",
-    multiplicons_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/multiplicons.txt",
-    segmented_file="output_segmented_data.txt",
-    segmented_anchorpoints_file="output_segmented_anchorpoints.txt",
-    num_anchors=5
-)
-}

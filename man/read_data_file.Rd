@@ -15,7 +15,3 @@ A data frame containing the data from the uploaded file.
 \description{
 This function reads data from an uploaded file in a Shiny application and returns it as a data frame.
 }
-\examples{
-data <- read_data_file(input$upload_data_file)
-column1 <- data[["V1"]]
-}

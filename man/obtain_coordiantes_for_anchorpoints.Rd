@@ -33,22 +33,3 @@ None. The function saves the results to the specified out_file.
 This function takes a file containing anchorpoints, GFF files for two species, and species names,
 and retrieves the coordinates of anchorpoints and associated genes from the GFF files.
 }
-\examples{
-# Example usage with one species:
-obtain_coordiantes_for_anchorpoints(
-  anchorpoints="anchorpoints.txt",
-  species1="SpeciesA",
-  gff_file1="speciesA.gff",
-  out_file="results.txt"
-)
-
-# Example usage with two species:
-obtain_coordiantes_for_anchorpoints(
-  anchorpoints="anchorpoints.txt",
-  species1="SpeciesA",
-  gff_file1="speciesA.gff",
-  species2="SpeciesB",
-  gff_file2="speciesB.gff",
-  out_file="results.txt"
-)
-}

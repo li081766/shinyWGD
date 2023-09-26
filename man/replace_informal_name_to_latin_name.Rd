@@ -17,6 +17,3 @@ A modified input string with informal names replaced by Latin names.
 \description{
 This function takes a data frame \code{names_df} containing "latin_name" and "informal_name" columns and an \code{input} string as input. It replaces informal species names in the \code{input} string with their corresponding Latin names based on the information in \code{names_df}. If the \code{input} string contains underscores ("_"), it assumes a comparison between two species and replaces both informal names. Otherwise, it replaces the informal name in the \code{input} string.
 }
-\examples{
-replaced_name <- replace_informal_name_to_latin_name(names_df, "species1_species2")
-}

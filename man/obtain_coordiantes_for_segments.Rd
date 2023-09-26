@@ -32,6 +32,3 @@ NULL (the results are saved in the output file).
 \description{
 This function retrieves the coordinates for segments in a comparison based on the provided parameters.
 }
-\examples{
-obtain_coordiantes_for_segments(
-}

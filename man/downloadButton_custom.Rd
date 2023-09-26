@@ -32,16 +32,3 @@ An HTML tag to allow users to download the object.
 \description{
 Use this function to create a custom download button or link. When clicked, it will initiate a browser download. The filename and contents are specified by the corresponding downloadHandler() defined in the server function.
 }
-\examples{
-downloadButton_custom(
-    outputId="wgd_ksrates_data_download",
-    label="Download Analysis Data",
-    width="215px",
-    icon=icon("download"),
-    status="secondary",
-    style="background-color: #5151A2;
-             padding: 5px 10px 5px 10px;
-             margin: 5px 5px 5px 5px;
-             animation: glowingD 5000ms infinite; "
-)
-}

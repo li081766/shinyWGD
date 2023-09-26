@@ -18,6 +18,3 @@ A data frame with seven variables.
 \description{
 Read the EMMIX output for a range of components
 }
-\examples{
-parse_EMMIX(emmix.out)
-}

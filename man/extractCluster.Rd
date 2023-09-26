@@ -21,14 +21,3 @@ A list containing two data frames: "segs" for segment information and "atomic" f
 \description{
 This function extracts clusters based on the specified scaffolds for both query and subject species.
 }
-\examples{
-# Example usage:
-query_scaffolds <- c("scaffold1", "scaffold2")
-subject_scaffolds <- c("chromosomeA", "chromosomeB")
-cluster <- extractCluster(segs.df, atomic.df, query_scaffolds, subject_scaffolds)
-if (!is.null(cluster)) {
-  cat("Cluster extracted successfully!\n")
-} else {
-  cat("No cluster found for the specified scaffolds.\n")
-}
-}

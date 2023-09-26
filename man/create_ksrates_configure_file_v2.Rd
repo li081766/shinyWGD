@@ -16,6 +16,3 @@ create_ksrates_configure_file_v2(input, ksrates_conf_file, species_info_file)
 \description{
 This function generates a configuration file for the Ksrates pipeline based on Shiny input.
 }
-\examples{
-create_ksrates_configure_file_v2(input, "ksrates_config.txt", "species_info.txt")
-}

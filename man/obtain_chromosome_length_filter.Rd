@@ -15,14 +15,3 @@ A list containing two data frames: len_df for chromosome lengths and num_df for 
 \description{
 Process a data frame containing species information and extract chromosome lengths and mRNA counts from GFF files.
 }
-\examples{
-Create a sample data frame
-species_info_df <- data.frame(
-  sp=c("SpeciesA", "SpeciesB"),
-  cds=c("cds_file_A.gff", "cds_file_B.gff"),
-  gff=c("gff_file_A.gff", "gff_file_B.gff")
-)
-
-# Obtain chromosome lengths and mRNA counts
-result <- obtain_chromosome_length_filter(species_info_df)
-}

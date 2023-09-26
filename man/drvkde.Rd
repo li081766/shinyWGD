@@ -29,6 +29,3 @@ A list containing the estimated density or derivative, and optionally, standard 
 \description{
 Compute the mth derivative of a binned d-variate kernel density estimate based on grid counts.
 }
-\examples{
-est.dens <- drvkde(x, drv0, bandwidthh, gridsizegridsize, range.xrange.x, binnedTRUE, seFALSE)
-}

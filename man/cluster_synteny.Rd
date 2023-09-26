@@ -28,12 +28,3 @@ This function clusters synteny data based on calculated p-values and generates t
 for both column-based and row-based clustering. It then saves the cluster information and
 trees to output files.
 }
-\examples{
-# Example usage:
-cluster_synteny(
-    segmented_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.chr.10.txt",
-    segmented_anchorpoints_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/clusteringDir/segmented.anchorpoints.10.txt",
-    genes_file="Analysis_2023-09-06/i-ADHoRe_wd/i-adhore.AMK_vs_Zostera_marina/genes.txt",
-    out_file="output_cluster_info.RData"
-)
-}

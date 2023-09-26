@@ -35,6 +35,3 @@ A list containing computed relative rates and their confidence intervals.
 \description{
 Compute relative rates using input data files and statistical computations.
 }
-\examples{
-relativeRate(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax)
-}

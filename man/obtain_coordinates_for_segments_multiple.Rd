@@ -22,19 +22,3 @@ A dataframe with coordinates for segments within multiple synteny blocks.
 \description{
 This function extracts coordinates for segments within multiple synteny blocks based on input dataframes.
 }
-\examples{
-# Example usage:
-# Define dataframes for segments and GFF information
-seg_df <- read.table("segments.csv", header=TRUE, sep=",")
-gff_df <- read.table("genomic_data.gff", header=TRUE, sep="\t")
-
-# Define input data
-input_data <- list(
-    multiple_synteny_query_chr_SpeciesA=c("Chr1", "Chr2"),
-    multiple_synteny_query_chr_SpeciesB=c("ChrX", "ChrY")
-)
-
-# Obtain coordinates for segments within multiple synteny blocks
-obtain_coordinates_for_segments_multiple(seg_df, gff_df, input_data, "output_coordinates.txt")
-
-}

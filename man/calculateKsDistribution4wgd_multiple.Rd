@@ -41,17 +41,3 @@ A list containing two data frames: "bar" for Ks distribution and "density" for d
 \description{
 This function takes a list of data files, calculates the Ks distribution, and returns the results.
 }
-\examples{
-# Example usage:
-result <- calculateKsDistribution4wgd_multiple(
-    files_list = files_list_new,
-    binWidth = 0.1,
-    maxK = 5,
-    plot.mode = "weighted",
-    include.outliers = FALSE,
-    minK = 0,
-    minAlnLen = 0,
-    minIdn = 0,
-    minCov = 0
-)
-}

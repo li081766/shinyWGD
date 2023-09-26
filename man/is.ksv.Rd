@@ -2,18 +2,22 @@
 % Please edit documentation in R/ksv.R, R/substitution_rate_correction.R
 \name{is.ksv}
 \alias{is.ksv}
-\title{ksv class}
+\title{Check if an object is of class "ksv"}
 \usage{
 is.ksv(x)
 
 is.ksv(x)
 }
+\arguments{
+\item{x}{The object to be checked.}
+}
+\value{
+Returns TRUE if the object is of class "ksv"; otherwise, returns FALSE.
+}
 \description{
-ksv class
-
-ksv class
+This function checks if the provided object is of class "ksv."
 }
 \examples{
-is.ksv(x)
+x <- c(0.1, 0.3, 0.8, 1,1, 0.8, 0.9)
 is.ksv(x)
 }

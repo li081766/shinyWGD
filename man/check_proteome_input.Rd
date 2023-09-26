@@ -17,6 +17,3 @@ A string containing the processed proteome file's path.
 \description{
 This function checks the type of proteome input file and processes it accordingly.
 }
-\examples{
-proteome_temp <- check_proteome_input("MyProteome", my_proteome_data)
-}

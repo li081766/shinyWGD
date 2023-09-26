@@ -33,14 +33,3 @@ NULL (output files are generated with the specified information).
 This function extracts coordinates and Ks (synonymous substitution rate) values for anchorpoints
 from input data and merges them into a single output file.
 }
-\examples{
-# Example usage:
-obtain_coordiantes_for_anchorpoints_ks(
-    anchorpoints="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.txt",
-    anchorpoints_ks="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/anchorpoints.ks.txt",
-    genes_file="Analysis_2023-07-04/i-ADHoRe_wd/i-adhore.Vitis_vinifera_vs_Oryza_sativa/genes.txt",
-    out_file="output_coordinates.txt",
-    out_ks_file="output_ks_values.txt",
-    species="Vitis_vinifera"
-)
-}

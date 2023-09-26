@@ -36,25 +36,3 @@ None. The function saves the results to the specified outfile and anchorpointout
 This function takes as input a multiplicon file, an anchorpoint file, Ks values, and other relevant information.
 It calculates the mean of Ks values for each multiplicon and associates them with the corresponding data.
 }
-\examples{
-# Example usage with one species:
-obtain_mean_ks_for_each_multiplicon(
-    multiplicon_file="multiplicons.txt",
-    anchorpoint_file="anchorpoints.txt",
-    ks_file="ks_values.txt",
-    species1="SpeciesA",
-    outfile="mean_ks_for_multiplicons.txt",
-    anchorpointout_file="anchorpoint_with_ks.txt"
-)
-
-# Example usage with two species:
-obtain_mean_ks_for_each_multiplicon(
-    multiplicon_file="multiplicons.txt",
-    anchorpoint_file="anchorpoints.txt",
-    ks_file="ks_values.txt",
-    species1="SpeciesA",
-    species2="SpeciesB",
-    outfile="mean_ks_for_multiplicons.txt",
-    anchorpointout_file="anchorpoint_with_ks.txt"
-)
-}

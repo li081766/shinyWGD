@@ -38,6 +38,3 @@ A \code{ksv} object, which is a list including:
 \description{
 Read the output file of wgd ksd
 }
-\examples{
-ksv <- read.wgd_ksd(file)
-}

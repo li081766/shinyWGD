@@ -2,26 +2,25 @@
 % Please edit documentation in R/ksv.R
 \name{generate_ksd}
 \alias{generate_ksd}
-\title{Convert}
+\title{Generate Kernel Density Estimates (KDE) for Ks Distribution}
 \usage{
 generate_ksd(ks_df, bin_width = 0.01, maxK = 5)
 }
 \arguments{
-\item{ks_df}{A data frame including Ks and Weights.}
+\item{ks_df}{A data frame containing Ks values.}
 
-\item{bin_width}{Bin width for generating the distribution, default 0.01.}
+\item{bin_width}{The width of each bin for KDE calculation.}
 
-\item{maxK}{Maximum Ks value for generating the distribution, default 5.}
+\item{maxK}{The maximum Ks value for the distribution.}
 }
 \value{
-A list including:
-*\code{Ks}: the Ks distribution;
-*\code{bin_width}: bin width;
-*\code{maxK}: maximum Ks.
+A list containing the following components:
+\itemize{
+\item \code{Ks}: A numeric vector representing the KDE values.
+\item \code{bin_width}: The width of each bin used for KDE calculation.
+\item \code{maxK}: The maximum Ks value for the distribution.
+}
 }
 \description{
-Convert
-}
-\examples{
-generate_ksd(ks_df, bin_width=0.01)
+This function generates Kernel Density Estimates (KDE) for the Ks (synonymous substitution rates) distribution.
 }

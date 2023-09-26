@@ -19,6 +19,3 @@ A matrix representing the result of the symmetric 2D convolution.
 \description{
 Perform symmetric 2D convolution using FFT.
 }
-\examples{
-est.var <- ((symconv2D.ks((n*kappam)^2, gcounts)/n) - est^2)/(n-1)
-}

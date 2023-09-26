@@ -26,12 +26,3 @@ create_ksrates_cmd_from_table(
 \description{
 This function generates command files for running Ksrates and related analyses based on a data table and configuration file.
 }
-\examples{
-create_ksrates_cmd_from_table(
-  my_data_table,
-  "ksrates_config.txt",
-  "ksrates_cmd.sh",
-  "wgd_cmd.sh",
-  "FocalSpecies"
-)
-}

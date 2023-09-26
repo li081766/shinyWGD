@@ -17,6 +17,3 @@ The path to the prepared GFF file for analysis.
 \description{
 This function checks the file format of a GFF/GTF input file and prepares it for analysis. It can handle both uncompressed and compressed formats.
 }
-\examples{
-check_gff_input("Sample GFF", input[[paste0("gff_", 1)]])
-}

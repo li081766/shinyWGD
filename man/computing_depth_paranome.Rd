@@ -23,12 +23,3 @@ A list containing the depth dataframe.
 \description{
 This function computes the depth of anchored points in a paranome comparison based on the provided parameters.
 }
-\examples{
-# Example usage:
-depth_list <- computing_depth_paranome(
-    anchorpoint_ks_file = anchorpointout_file,
-    multiplicon_id = selected_multiplicons_Id,
-    selected_query_chr = query_selected_chr_list
-)
-
-}

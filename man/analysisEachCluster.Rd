@@ -32,6 +32,3 @@ A list containing information about identified clusters and their p-values.
 \description{
 This function performs synteny analysis for clusters identified by hierarchical clustering.
 }
-\examples{
-analysisEachCluster(
-}

@@ -12,7 +12,3 @@ create_ksrates_expert_parameter_file(ksrates_expert_parameter_file)
 \description{
 Create ksrates Expert Parameter File
 }
-\examples{
-ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
-create_ksrates_expert_parameter_file(ksratesexpert)
-}

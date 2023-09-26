@@ -47,6 +47,3 @@ A list containing the significance results for gradient and curvature.
 \description{
 This function computes the significance of features based on gradient and curvature analysis.
 }
-\examples{
-SignifFeatureRegion(n, d, gcounts, gridsizegs, est.dens, h, signifLevel, range.x, grad=TRUE, curv=FALSE)
-}

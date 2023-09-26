@@ -21,6 +21,3 @@ A 4D array representing the result of the symmetric 4D convolution.
 \description{
 Perform symmetric 4D convolution using FFT.
 }
-\examples{
-est <- symconv4D.ks(kappam, gcounts, skewflag(-1)^drv)
-}

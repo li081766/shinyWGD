@@ -19,6 +19,3 @@ A vector representing the result of the symmetric convolution.
 \description{
 Perform symmetric convolution using FFT.
 }
-\examples{
-est <- symconv.ks(kappam, gcounts, skewflag(-1)^drv)
-}

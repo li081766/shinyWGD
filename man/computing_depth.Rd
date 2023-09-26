@@ -26,12 +26,3 @@ A list containing depth data frames, including "query_depth" and "subject_depth"
 \description{
 This function calculates the depth of anchored points based on the provided parameters.
 }
-\examples{
-# Example usage:
-depth_list <- computing_depth(
-    anchorpoint_ks_file = anchorpointout_file,
-    multiplicon_id = selected_multiplicons_Id,
-    selected_query_chr = query_selected_chr_list,
-    selected_subject_chr = subject_selected_chr_list
-)
-}

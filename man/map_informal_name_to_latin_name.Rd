@@ -15,6 +15,3 @@ A data frame with "latin_name" and "informal_name" columns.
 \description{
 This function reads information from an Excel file (XLS) containing columns "latin_name," "informal_name," and "gff." It extracts the "latin_name" and "informal_name" columns, performs some data manipulation, and returns a data frame with these two columns.
 }
-\examples{
-names_df <- map_informal_name_to_latin_name("species_info.xls")
-}
