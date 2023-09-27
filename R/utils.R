@@ -183,7 +183,7 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
 #' @export
 check_proteome_input <- function(proteome_name, proteome_input){
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
-    if( str_detect(proteome_input$name, regex(".(fa|fasta|fna|fas|gz$")) ){
+    if( str_detect(proteome_input$name, regex(".(fa|fasta|fna|fas|gz$)")) ){
         sequences <- read.fasta(proteome_input$datapath)
         lengths <- getLength(sequences)
         filtered_sequences <- sequences[lengths %% 3 == 0]
@@ -222,7 +222,7 @@ check_proteome_input <- function(proteome_name, proteome_input){
 check_proteome_from_file <- function(proteome_name, proteome_input){
     tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
-    if( str_detect(proteome_input, regex(".(fa|fasta|fna|fas|gz$")) ){
+    if( str_detect(proteome_input, regex(".(fa|fasta|fna|fas|gz$)")) ){
         sequences <- read.fasta(proteome_input)
         lengths <- getLength(sequences)
         filtered_sequences <- sequences[lengths %% 3 == 0]
