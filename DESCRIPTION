@@ -2,17 +2,17 @@ Package: ShinyWGD
 Type: Package
 Title: ShinyWGD
 Version: 0.1.0
-Author: Jia Li
-Maintainer: Jia Li <jiali@psb.vib-ugent.be>
 Authors@R: 
     person("Jia", "Li", email = "jiali@psb.vib-ugent.be", role = c("cre", "aut"))
+Maintainer: Jia Li <jiali@psb.vib-ugent.be>
 Description: ShinyWGD: a toolbox to study whole genome duplication (for the experienced and non-experienced bioinformatician).
-License: GPL-3 + file LICENSE
+License: GPL (>=3)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
+SystemRequirements: pandoc (>= 1.12.3), pandoc-citeproc
 Imports:
     shiny,
     shinyalert,
@@ -22,18 +22,11 @@ Imports:
     tidyr,
     dplyr,
     ape,
-    BiocManager,
     ks,
     mclust,
     htmltools,
-    Biostrings,
-    IRanges,
-    S4Vectors
+    seqinr
 Suggests:
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0),
-    Biostrings,
-    IRanges,
-    S4Vectors
-biocViews: 
+    testthat (>= 3.0.0)
