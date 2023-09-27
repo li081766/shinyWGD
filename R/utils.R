@@ -174,34 +174,24 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
 #' @importFrom shinyalert shinyalert
-#' @importFrom Biostrings readDNAStringSet
+#' @importFrom seqinr read.fasta
+#' @importFrom seqinr getLength
+#' @importFrom seqinr write.fasta
 #'
 #' @return A string containing the processed proteome file's path.
 #'
 #' @export
 check_proteome_input <- function(proteome_name, proteome_input){
-    tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
-    if( str_detect(proteome_input$name, regex(".gz$")) ){
-        system(paste0("gunzip -c ", proteome_input$datapath, " > ", tmp_file))
-        fasta <- readDNAStringSet(tmp_file)
-        sequences <- as.character(fasta)
-        filtered_sequences <- sequences[nchar(sequences) %% 3==0]
-        headers <- paste0(">", names(filtered_sequences))
-        fasta_modified <- paste(headers, filtered_sequences, sep="\n")
-        writeLines(fasta_modified, con=proteome_file)
-        if( file.exists(tmp_file) ){
-            system(paste("rm", tmp_file))
-        }
-    }
-    else if( str_detect(proteome_input$name, regex(".(fa|fasta|fna|fas)$")) ){
-        #library(Biostrings)
-        fasta <- readDNAStringSet(proteome_input$datapath)
-        sequences <- as.character(fasta)
-        filtered_sequences <- sequences[nchar(sequences) %% 3==0]
-        headers <- paste0(">", names(filtered_sequences))
-        fasta_modified <- paste(headers, filtered_sequences, sep="\n")
-        writeLines(fasta_modified, con=proteome_file)
+    if( str_detect(proteome_input$name, regex(".(fa|fasta|fna|fas|gz$")) ){
+        sequences <- read.fasta(proteome_input$datapath)
+        lengths <- getLength(sequences)
+        filtered_sequences <- sequences[lengths %% 3 == 0]
+        write.fasta(
+            sequences=filtered_sequences,
+            names=names(filtered_sequences),
+            file.out=proteome_file
+        )
     }
     else{
         shinyalert(
@@ -222,7 +212,9 @@ check_proteome_input <- function(proteome_name, proteome_input){
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
 #' @importFrom shinyalert shinyalert
-#' @importFrom Biostrings readDNAStringSet
+#' @importFrom seqinr read.fasta
+#' @importFrom seqinr getLength
+#' @importFrom seqinr write.fasta
 #'
 #' @return A string containing the processed proteome file's path.
 #'
@@ -230,28 +222,15 @@ check_proteome_input <- function(proteome_name, proteome_input){
 check_proteome_from_file <- function(proteome_name, proteome_input){
     tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
     proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
-    if( str_detect(proteome_input, regex(".gz$")) ){
-        #print(proteome_input)
-        system(paste0("gunzip -c ", proteome_input, " > ", tmp_file))
-        # suppressMessages(library(Biostrings))
-        fasta <- readDNAStringSet(tmp_file)
-        sequences <- as.character(fasta)
-        filtered_sequences <- sequences[nchar(sequences) %% 3==0]
-        headers <- paste0(">", names(filtered_sequences))
-        fasta_modified <- paste(headers, filtered_sequences, sep="\n")
-        writeLines(fasta_modified, con=proteome_file)
-        if( file.exists(tmp_file) ){
-            system(paste("rm", tmp_file))
-        }
-    }
-    else if( str_detect(proteome_input, regex(".(fa|fasta|fna|fas)$")) ){
-        # suppressMessages(library(Biostrings))
-        fasta <- readDNAStringSet(proteome_input)
-        sequences <- as.character(fasta)
-        filtered_sequences <- sequences[nchar(sequences) %% 3==0]
-        headers <- paste0(">", names(filtered_sequences))
-        fasta_modified <- paste(headers, filtered_sequences, sep="\n")
-        writeLines(fasta_modified, con=proteome_file)
+    if( str_detect(proteome_input, regex(".(fa|fasta|fna|fas|gz$")) ){
+        sequences <- read.fasta(proteome_input)
+        lengths <- getLength(sequences)
+        filtered_sequences <- sequences[lengths %% 3 == 0]
+        write.fasta(
+            sequences=filtered_sequences,
+            names=names(filtered_sequences),
+            file.out=proteome_file
+        )
     }
     else{
         shinyalert(

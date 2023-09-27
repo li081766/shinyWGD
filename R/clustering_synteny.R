@@ -14,6 +14,9 @@
 #' @importFrom utils write.table
 #' @importFrom dplyr select
 #' @importFrom dplyr arrange
+#' @importFrom dplyr mutate
+#' @importFrom dplyr row_number
+#' @importFrom dplyr lag
 #'
 #' @return NULL (output files are generated with the specified information).
 #'
@@ -80,8 +83,10 @@ get_segments <- function(
     segments <- data.frame()
     for( chr in unique(segs$chr) ){
         seg.chr <- segs[segs$chr==chr, ]
-        ir <- IRanges::IRanges(seg.chr$pos_min, seg.chr$pos_max)
-        seg.chr$group <- S4Vectors::subjectHits(IRanges::findOverlaps(ir, IRanges::reduce(ir)))
+        seg.chr <- seg.chr %>%
+            mutate(group=row_number()) %>%
+            arrange(pos_min) %>%
+            mutate(group=cumsum(lag(pos_max, default=0) < pos_min))
         class(seg.chr)<-"data.frame"
         pos_min <- group <- pos_max <- is_real <- NULL
         df <- summarise(group_by(arrange(seg.chr, pos_min), genome, chr, group),
