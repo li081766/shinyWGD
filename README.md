@@ -67,7 +67,6 @@ Please refer to the [ShinyWGD server](https://bioinformatics.psb.ugent.be/webtoo
   - `{bslib}`
   - `{bsplus}`
   - `{htmltools}`
-  - `{stringi}`
   - `{tidyverse}`
   - `{vroom}`
   - `{english}`
@@ -77,3 +76,13 @@ Please refer to the [ShinyWGD server](https://bioinformatics.psb.ugent.be/webtoo
   - `{tools}`
   - `{seqinr}`
   - `{DT}`
+  - `{stringr}`
+  - `{fs}`
+  - `{tidyr}`
+  - `{ape}`
+  - `{BiocManager}`
+  - `{ks}`
+  - `{mclust}`
+  - `{Biostrings}`
+  - `{IRanges}`
+  - `{S4Vectors}`
