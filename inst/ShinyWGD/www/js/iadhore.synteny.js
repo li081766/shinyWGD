@@ -467,6 +467,8 @@ script.onload = function () {
         // tippy(".queryChrs rect", { trigger: "mouseenter", followCursor: "initial", delay: [tooltipDelay, null] });
         // tippy(".subjectChrs rect", { trigger: "mouseenter", followCursor: "initial", delay: [tooltipDelay, null] });
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVG("Synteny_download_" + plotId,
             "SyntenicBlock_" + plotId,
             querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
@@ -1418,6 +1420,8 @@ script.onload = function () {
         tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
 
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVG("Dot_download_" + plotId,
             "dotView_" + plotId,
             querySpecies + "_vs_" + subjectSpecies + ".dot_plot.svg");
@@ -1988,6 +1992,7 @@ script.onload = function () {
         tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".multipliconsT line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
 
+        querySpecies = querySpecies.replace(" ", "_");
         downloadSVG("Dot_download_" + plotId,
             "dotView_" + plotId,
             querySpecies + ".self.dot_plot.svg");
@@ -2593,6 +2598,8 @@ script.onload = function () {
         tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
 
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVG("Dot_download_" + plotId,
             "dotView_" + plotId,
             querySpecies + "_vs_" + subjectSpecies + ".dot_plot.svg");
@@ -3388,6 +3395,9 @@ script.onload = function () {
         });
 
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVGs("microSyn_download_" + plotId,
             "microSyntenicBlock_" + plotId,
             querySpecies + "_vs_" + subjectSpecies + ".microSyn");
@@ -3883,6 +3893,8 @@ script.onload = function () {
             BuildHeightTree("#dendrogramTreeView", treeJson, svgTree, 300, 400);
         } */
 
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVG("cluster_download",
             plotId,
             querySpecies + "_vs_" + subjectSpecies + ".cluster.svg");
@@ -4190,6 +4202,8 @@ script.onload = function () {
         tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
 
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
         downloadSVG("PAR_download",
             plotId,
             querySpecies + "_vs_" + subjectSpecies + "." + parId.replace(" ", "_") + ".cluster.svg");
