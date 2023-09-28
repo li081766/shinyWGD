@@ -135,20 +135,20 @@
     - **`focal species`** is the parameter in `ksrates`, which will be set in the [`configure file`](https://ksrates.readthedocs.io/en/latest/configuration.html) of `ksrates`.
 
   After successfully uploading the tab-separated file, the number of species in the file will be calculated. 
-  + If only one species needed to be studyed, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+  + If only one species needed to be studied, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
    will generate the command line for `wgd` <br>by clicking the <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create WGD Codes</font> or <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create i-ADHoRe Codes</font> button in the right **`Setting`** panel. 
     + Users can check the codes by clicking the <font color="#ad5a5a"><i aria-label="share icon" class="fa fa-share" role="presentation"></i> Check WGD Codes</font> or <font color="#ad5a5a"><i aria-label="share icon" class="fa fa-share" role="presentation"></i> Check i-ADHoRe Codes</font> button.
     + Then, users can click the <font style="background-color: #508ab2; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i> Download Analysis Data</font> button to download the prepared files and script for `wgd` program. 
     <br>
   + If multiple species needed to be study, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
    will generate the command line for `ksrates`. 
-    + Two more parametes should be added.
+    + Two more parameters should be added.
       + [`focal species`](https://ksrates.readthedocs.io/en/latest/configuration.html) set the focal species for `ksrates`.
       + `newick tree` upload a tree file in `newick` format. The tree should contain all the species.
     + Then, users can click the <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create Ksrates Codes</font> button to generate the `configure file` and command line for `ksrates`.
     + After that, users can click the <font color="#ad5a5a"><i aria-label="share icon" class="fa fa-share" role="presentation"></i> Check Ksrates Codes</font> button to review the `configure file` and command line for `ksrates`.
     + Then, users can click the rest buttons to generate the codes for `i-ADHoRe` and `OrthoFinder`.
-    + Finally, users can click the <font style="background-color: #508ab2; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i> Download Analysis Data</font> button to download the prepared files and script for `ksrates` program. 
+    + Finally, users can click the <font style="background-color: #508ab2; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i> Download Analysis Data</font> button to download the prepared files and script for `ksrates`, `i-ADHoRe`, and `OrthoFinder` program. 
 
     <br><img src="../images/data_preparation.gif" alt="" class="docImage" width="90%"></br>
     <br></br> 
@@ -160,17 +160,17 @@
 
   <br>This option provide users a more straightforward way to upload data.</br>
 
-  + After selecting the number of studyed species, the corresponding uploading panels will be created. 
+  + After selecting the number of studied species, the corresponding uploading panels will be created. 
   + Three items (`latin name`, `cds fasta`, and annotation `gff`) of each species should be set or uploaded by users. 
   + Once more than one species needed to be analyzed, the `focal species` and `newick tree` should be defined by users.
-  + Then users can click the <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create WGD Codes</font> or  <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create Ksrates Codes</font> button to create the codes for `wgd` or `ksrates` according to the species number.
+  + Then users can click the <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create WGD Codes</font> or <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i aria-label="code icon" class="fa fa-code fa-fw" role="presentation"></i> Create Ksrates Codes</font> button to create the codes for `wgd` or `ksrates` according to the species number.
   + After reviewing and downloading the necessary files, users can execute `wgd`, `ksrates`, `i-ADHoRe` or `OrthoFinder` in their local environment. 
   <br>
 
   <a name="excuting"></a>
 
-  ##### <font color="#23B395">Excuting `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
-  After decompressing the downlaoded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). <br>Users can execute it in their local environment.  
+  ##### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
+  After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). <br>Users can execute them in their local environment.  
     + downloading files for `wgd`
     <br><img src="../images/wgd_download.png" alt="" class="docImage" width="90%"></br>
     + downloading files for `ksrates` and `i-ADHoRe`
@@ -180,8 +180,7 @@
     - How to install `i-ADHoRe` to your local environment, please read the [`i-ADHoRe` document](https://www.vandepeerlab.org/?q=tools/i-adhore30).
     - How to install `OrthoFinder` to your local environment, please read the [`OrthoFinder` document](https://github.com/davidemms/OrthoFinder).
     <blockquote><div style="padding: 10px; background-color: #f0f0f0;">
-  <font color="green"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> When creating the Code and files for <font color="green">i-ADHoRe</font>, the alignment file will be produced. The alignment will use the <font color="green">diamond</font> program. So please install <font color="green">diamond</font> program first.
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;The aligning will take longer time. So please download the Analysis Data after the Notification Window in the right-bottom corner of the window disappears.</div></blockquote>
+  <font color="green"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> When creating the Code and files for <font color="green">i-ADHoRe</font>, the alignment file will be produced. The alignment will use the <font color="green">diamond</font> program. So please install <font color="green">diamond</font> program first.</blockquote>
 
   <br>
 
@@ -205,7 +204,7 @@
 
   <a name="ks-inference"></a>
 
-  #### <font color="orange"><i class="fas fa-chart-line" role="presentation"></i> <i>K</i><sub>s</sub> Age Distribution Analysis</font>
+  #### <font color="orange"><img src="../images/ksIcon.svg" alt="Icon" width="20" height="20"><i>K</i><sub>s</sub> Age Distribution Analysis</font>
 
   After successfully running the corresponding shell files locally, the necessary outputs will be saved in the **`Analysis_Date`** folder. Then users can choose this folder in the `Uploading` panel in <font color="orange"><i class="fas fa-chart-line" role="presentation"></i> <i>K</i><sub>s</sub> Age Distribution Analysis</font> page.
 
@@ -239,12 +238,12 @@
 
   The example output is below.
 
-  <img src="../images/Paralogous_Multiple_Species_Ks.svg" width="90%">
+  <img src="../images/Paralogous_Multiple_Species_Ks-01.png" width="90%">
 
   <br></br>
   <a name="ortholog-ks"></a>
   ##### <font color="#23B395">Ortholog <i>K</i><sub>s</sub> age distribution</font>
-  Users need to select one species from the <font color="#38B0E4">Group A</font> of the <font style="background-color: #17a2b8; color: #FF9191; padding: 5px; border-radius: 2px;"><i class="fas fa-list" role="presentation"></i> Ortholog <i>K</i><sub>s</sub> &#x25BC;</font> as the focal species. Then users can choose multiple species from the <font color="#B97D4B">Group B</font> to compute the density of <i>K</i><sub>s</sub> age distribution between the forcal species and the species in the <font color="#B97D4B">Group B</font>. 
+  Users need to select one species from the <font color="#38B0E4">Group A</font> of the <font style="background-color: #17a2b8; color: #FF9191; padding: 5px; border-radius: 2px;"><i class="fas fa-list" role="presentation"></i> Ortholog <i>K</i><sub>s</sub> &#x25BC;</font> as the focal species. Then users can choose multiple species from the <font color="#B97D4B">Group B</font> to compute the density of <i>K</i><sub>s</sub> age distribution between the focal species and the species in the <font color="#B97D4B">Group B</font>. 
 
   To obtain the potential peak of the plot, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> will fit the peak by using the Epanechnikov kernel funciton. Then 95% confidence interval (CI) is estimated by 1000 iterations.
 
@@ -256,30 +255,30 @@
 
   <a name="rate-correction"></a>
   ##### <font color="#23B395">Substitution rate correction</font>
-  When comparing the one-to-one ortholog <i>K</i><sub>s</sub>  distributions between studied species and the reference species, the different <i>K</i><sub>s</sub> peaks for the same speciation event may exist, suggesting different synonymous substitution rates among the studied species, resulting in an over- or under-estimate for the divergence between the studied species and the reference species. 
+  When comparing the one-to-one ortholog <i>K</i><sub>s</sub> distributions between studied species and the reference species, the different <i>K</i><sub>s</sub> peaks for the same speciation event may exist, suggesting different synonymous substitution rates among the studied species, resulting in an over- or under-estimate for the divergence between the studied species and the reference species. 
 
   To quantify the difference in substitution rates, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> employs the relative rate tests. First, the Newick tree, which contains the phylogenetic relationship, will be used to ensure enough species. Then, users need to define a <b> reference species</b> and an <b>outgroup species</b> to determine a tree structure among the species which will be used in the relative rate test. Then, the <i>K</i><sub>s</sub> distance between two species is estimated by the mode of their ortholog KS distribution. Then, using the <i>K</i><sub>s</sub> distance between the reference species and the studied species, the <i>K</i><sub>s</sub> distance between the outgroup species and the reference species, the <i>K</i><sub>s</sub> distance between the outgroup species and the studied species, the distances to the studied species and the reference species after their divergence are computed. Finally, ortholog <i>K</i><sub>s</sub> between the studied species and the reference species is corrected by the double of the <i>K</i><sub>s</sub> distance to the reference species, assuming that studied species has the same substitution rate as the reference species. 
 
-  The exmaple output is below.
+  The example output is below.
 
   <img src="../images/Rate_correction_with_paralogous_species.svg" width="90%">
 
-  In the above figure, Kernel-density estimates (KDEs) of <i>K</i><sub>s</sub> distribution for one-to-one orthologues between <i>V. vinifera</i> and other four species, namely <i>A. officinalis</i>, <i>E. guineesis</i>, <i>A. comosus</i>, and <i>Z. marina</i>. The bar and line plots are the paralog<i>K</i><sub>s</sub> distributions of <i>E. guineensis</i>. As the modes (peaks) of the KDE all represent the distances between <i>V. vinifera</i> and the compared species, the differences observed among the <i>K</i><sub>s</sub> values of the modes indicate substitution rate variations among the studied species. The segments with arrows above the KDE denote, from bottom to top, the <i>K</i><sub>s</sub> distances computed for <i>A. comosus</i> (dark red), <i>E. guineensis</i> (yellow), and <i>A. officinalis</i> (blue) using <i>Z. marina</i> (purple) as the reference and <i>V. vinifera</i> as the outgroup. The dotted lines align with the observed modes in the KDE of the ortholog <i>K</i><sub>s</sub> distributions. The black dots on the segments represent the divergence between <i>Z. marina</i> with the other three species; hence, the lengths of segments pointed to the right show the <i>K</i><sub>s</sub> accumulated in <i>A. comosus</i>, <i>E. guineensis</i> and <i>A. officinalis</i>, whereas the grey segments pointed to the left show the <i>K</i><sub>s</sub>  distance between <i>V. vinifera</i> and the divergence of the other species. The grey rectangles show the 95% confidence intervals of the <i>K</i><sub>s</sub>  inferred from 200 bootstraps.
+  In the above figure, Kernel-density estimates (KDEs) of <i>K</i><sub>s</sub> distribution for one-to-one orthologues between <i>V. vinifera</i> and other four species, namely <i>A. officinalis</i>, <i>E. guineesis</i>, <i>A. comosus</i>, and <i>Z. marina</i>. The bar and line plots are the paralog<i>K</i><sub>s</sub> distributions of <i>E. guineensis</i>. As the modes (peaks) of the KDE all represent the distances between <i>V. vinifera</i> and the compared species, the differences observed among the <i>K</i><sub>s</sub> values of the modes indicate substitution rate variations among the studied species. The segments with arrows above the KDE denote, from bottom to top, the <i>K</i><sub>s</sub> distances computed for <i>A. comosus</i> (dark red), <i>E. guineensis</i> (yellow), and <i>A. officinalis</i> (blue) using <i>Z. marina</i> (purple) as the reference and <i>V. vinifera</i> as the outgroup. The dotted lines align with the observed modes in the KDE of the ortholog <i>K</i><sub>s</sub> distributions. The black dots on the segments represent the divergence between <i>Z. marina</i> with the other three species; hence, the lengths of segments pointed to the right show the <i>K</i><sub>s</sub> accumulated in <i>A. comosus</i>, <i>E. guineensis</i> and <i>A. officinalis</i>, whereas the grey segments pointed to the left show the <i>K</i><sub>s</sub>  distance between <i>V. vinifera</i> and the divergence of the other species. The grey rectangles show the 95% confidence intervals of the <i>K</i><sub>s</sub> inferred from 200 bootstraps.
 
   ---
 
   <a name="synteny-analysis"></a>
-  #### <font color="orange"><i aria-label="water icon" class="fa-solid fa-water" role="presentation"></i> Synteny Analysis</font>
+  #### <font color="orange"><img src="../images/syntenyIcon.svg" alt="Icon" width="20" height="20">Synteny Analysis</font>
 
   After uploading the folder of `i-ADHoRe` in this page, users can study the *intra-*, *inter-*, and *multiple-* species synteny.
 
-  After selecting the studied species, users can click the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;"><i class="fa-solid fa-gear"></i> Configure <b><i>K</i><sub>s</sub></b> Analysis</font> to create the output panel in the right side of the page. 
+  After selecting the studied species, users can click the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;"><i class="fa-solid fa-gear"></i> Configure Analysis</font> to create the output panel in the right side of the page. 
 
   <br><img src="../images/synteny.gif" alt="" class="docImage" width="90%"></br>
 
-  Users can set the threshold for the number of achor pairs in each multiplcon to filter out the small multiplcons which contain less anchor pairs. 
+  Users can set the threshold for the number of anchor pairs in each multiplicon to filter out the small multiplicons which contain less anchor pairs. 
 
-  Users can also search a certain gene to check the location of the gene in the multiplcon in the <font color="green">Multiplicon-level Synteny</font> panel.
+  Users can also search a certain gene to check the location of the gene in the multiplicon in the <font color="green">Multiplicon-level Synteny</font> panel.
 
   In the multiple species alignment panel, users can define the order of species in the plot. Users can change the color of species by clicking the text of the species name. When the mouse hovers a link, the related links with this link among species can be highlighted using different colors.
 
@@ -300,7 +299,7 @@
 
   The example output is below.
 
-  <img src="../images/Two_species.cluster.svg" width="100%">
+  <img src="../images/Two_species.cluster.svg" width="80%">
 
   In the example, we used 0.5 as the cutoff for r and 10 to filter out the segment with fewer anchor points. In total, we identified 61 PARs. 
 
@@ -375,7 +374,7 @@
 
   Users can upload a file which contains the WGD events of each studied species to place these WGDs into the tree.
 
-  + **<i>K</i><sub>s</sub> Peaks file** separated by Tab
+  + **WGD Events file** separated by Tab
 
     <table>
       <tr>
@@ -409,7 +408,7 @@
 
   <img src="../images/ksTree_timeTree.jointPlot.svg" width="95%">
 
-  In the above figure, the left subfigure is the <i>K</i><sub>s</sub> unit tree. The right subfigure is the time tree. Users can also add the <i>K</i><sub>s</sub> peaks or WGD events into the tree when clicking the branch.
+  In the above figure, the left subplot is the <i>K</i><sub>s</sub> unit tree. The right subplot is the time tree. Users can also add the <i>K</i><sub>s</sub> peaks or WGD events into the tree when clicking the branch.
 
   ---
 
@@ -428,7 +427,7 @@
 
   <img src="../images/speciesTree.whale.svg" width="800px">
 
-  In the above tree figure, four hypothetical WGD events are ested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
+  In the above tree figure, four hypothetical WGD events are tested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
 
   Users can review the added **hypothetical WGD event** in the **<font color='#AD1F1F'>Hypothetical WGDs</font> to test** panel in the left side.
 
@@ -447,9 +446,9 @@
   We can judge whether the **hypothetical WGD event** is true or not based on the Bayes factor (*K*) to compare the likelihood of q = 0(H<sub>0</sub>) to the likelihood of q > 0(H<sub>1</sub>) using the Savage–Dickey density ratio.
 
   <blockquote><div style="padding: 10px; background-color: #f0f0f0;">
-  <font color="red"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> Please Note: the log10 Bayes factor is calcualted. Thus, a Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode.</div></blockquote>
+  <font color="red"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> Please Note: the log10 Bayes factor is calculated. Thus, a Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode.</div></blockquote>
 
-  Besides, users should also check the **ESS** values. Generally, ESS values exceeding at least 100 is better for a good model, although short chains may be good for exploring and testing different models. If the ESS values below 100, pleae increase the **Chain Rounds** in the left setting panel.
+  Besides, users should also check the **ESS** values. Generally, ESS values exceeding at least 100 is better for a good model, although short chains may be good for exploring and testing different models. If the ESS values below 100, please increase the **Chain Rounds** in the left setting panel.
 
   Then, users can click the <font style="background-color: #548C00; color: white; padding: 5px; border-radius: 2px;"><i class="fa-solid fa-sync"></i></font> button to update the species tree to display the output of Whale.
 
