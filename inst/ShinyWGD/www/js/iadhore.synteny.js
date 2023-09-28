@@ -747,9 +747,13 @@ script.onload = function () {
                 .text(function (e) {
                     if (e.seqchr.includes("_")) {
                         var parts = e.seqchr.split("_");
-                        return parts[parts.length - 1].replace(/^chr/i, "");
+                        var label = parts[parts.length - 1].replace(/^chr/i, "");
+                        label = label.replace(/^0+/, "");
+                        return label;
                     } else {
-                        return (e.seqchr.replace(commonPart, ""))
+                        var label = e.seqchr.replace(commonPart, "");
+                        label = label.replace(/^0+/, "");
+                        return label;
                     }
                 })
                 .attr("font-size", "12px")
