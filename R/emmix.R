@@ -22,11 +22,13 @@ run_emmix_kmeas <- function(v, k.centers=2, k.nstart=500) {
   # prepare data as a data frame for mclust::em
   k_data <- data.frame(v=v$ks_value, cluster=k_fit$cluster)
 
-  cluster <- var <- NULL
+  cluster <- NULL
   # prepare parameters as a list for mclust::em
   df <- k_data %>%
     dplyr::group_by(cluster) %>%
-    dplyr::summarise_at(dplyr::vars(v), list(sigmasq=var))
+    dplyr::summarise(sigmasq=var(v))
+
+    #dplyr::summarise_at(dplyr::vars(v), list(sigmasq=var))
 
   var.list <- list(modelName="V",
                    d=1, # dimension
