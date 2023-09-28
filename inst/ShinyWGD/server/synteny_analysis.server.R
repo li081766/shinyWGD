@@ -1198,6 +1198,7 @@ observeEvent(input$iadhore_config_go, {
                             bs_attach_collapse("plot_panel_multiple_collapse"),
                         bs_collapse(
                             id="plot_panel_multiple_collapse",
+                            show=TRUE,
                             content=tags$div(
                                 class="well",
                                 fluidRow(
