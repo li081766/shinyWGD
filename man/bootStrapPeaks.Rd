@@ -53,7 +53,7 @@ ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
 bootstrap_peaks <- bootStrapPeaks(
     ksRaw=ks_distribution,
     peak.index=1,
-    rep=1000,
+    rep=10,
     peak.maxK=2.5
 )
 
