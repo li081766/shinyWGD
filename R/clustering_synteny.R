@@ -217,6 +217,7 @@ get_segments <- function(
 #' @importFrom ape write.tree
 #'
 #' @return NULL (output files are generated with the specified information).
+#'
 #' @export
 cluster_synteny <- function(
         segmented_file,
@@ -319,7 +320,9 @@ cluster_synteny <- function(
 #' @param k The expected number of successful outcomes.
 #'
 #' @importFrom stats ppois
+#'
 #' @return The -log10 of the p-value.
+#'
 #' @export
 #'
 #' @examples
@@ -462,6 +465,7 @@ analysisEachCluster <- function(
 #' @importFrom stats ppois
 #'
 #' @return The computed P-value.
+#'
 #' @export
 #'
 #' @examples
