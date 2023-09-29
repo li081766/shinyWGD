@@ -7,6 +7,7 @@
 #'   For a formal analysis, it is recommended to use 500.
 #'
 #' @importFrom stats kmeans
+#' @importFrom stats var
 #'
 #' @return A list, i.e., the original output of mclust::emV
 #' @export
