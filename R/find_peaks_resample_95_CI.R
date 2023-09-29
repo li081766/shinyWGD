@@ -178,7 +178,7 @@ resampleKsDistribution <- function(ks, maxK=5) {
 #' bootstrap_peaks <- bootStrapPeaks(
 #'     ksRaw=ks_distribution,
 #'     peak.index=1,
-#'     rep=1000,
+#'     rep=10,
 #'     peak.maxK=2.5
 #' )
 #'
