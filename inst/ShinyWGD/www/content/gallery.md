@@ -66,16 +66,16 @@
 
   <a name="paralog-ks-one-species"></a>
   ###### *Single species*
-  <img src="../images/Paralogous_Multiple_Species_Ks.svg">
+  <img src="../images/Paralogous_One_Species_Ks-01.jpg">
 
   <a name="paralog-ks-multiple-species"></a>
   ###### *Multiple species*
-  <img src="../images/Paralogous_Multiple_Species_Ks.svg">
+  <img src="../images/Paralogous_Multiple_Species_Ks-01.jpg">
 
   ---
   <a name="ortholog-ks"></a>
   ##### Ortholog <i>K</i><sub>s</sub> age distribution
-  <img src="../images/orthologous_ks.svg">
+  <img src="../images/Wgd_plot_ortholog.svg">
 
   ---
   <a name="rate-correction"></a>
@@ -97,11 +97,11 @@
   ##### Intra-comparing alignment
   <a name="intra-comparing-dot"></a>
   ###### *Dot plot*
-  <img src="../images/Elaeis_guineensis.self.dot_plot.svg">
+  <img src="../images/Elaeis_guineensis.self.dot_plot-01.jpg">
 
   <a name="intra-comparing-parallel"></a>
   ###### *Parallel-line plot*
-  <img src="../images/Elaeis_guineensis.Parallel_plot.svg">
+  <img src="../images/Elaeis_guineensis.Parallel.svg">
 
   <a name="intra-comparing-micro"></a>
   ###### *Micro-synteny plot*
@@ -113,11 +113,11 @@
 
   <a name="inter-comparing-dot"></a>
   ###### *Dot plot*
-  <img src="../images/Elaeis_guineensis_vs_Asparagus_officinalis.dot_plot.svg">
+  <img src="../images/Elaeis_guineensis_vs_Asparagus_officinalis.dot_plot-01.jpg">
 
   <a name="inter-comparing-parallel"></a>
   ###### *Parallel-line plot*
-  <img src="../images/Elaeis_guineensis_vs_Asparagus_officinalis.Parallel.svg">
+  <img src="../images/Elaeis_guineensis_vs_Asparagus_officinalis.Parallel-01.jpg">
 
   <a name="inter-comparing-micro"></a>
   ###### *Micro-synteny plot*
@@ -134,7 +134,7 @@
 
   <a name="clustering-plot"></a>
   ###### *Clustering plot*
-  <img src="../images/Two_species.cluster.svg">
+  <img src="../images/Two_species.cluster-01.jpg">
 
   <a name="PAR-zoom-in"></a>
   ###### *PAR zoom-in plot*

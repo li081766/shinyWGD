@@ -171,10 +171,10 @@
 
   ##### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
   After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). <br>Users can execute them in their local environment.  
-    <!--+ downloading files for `wgd`
+    <!-- + downloading files for `wgd`
     <br><img src="../images/wgd_download.png" alt="" class="docImage" width="90%"></br>
     + downloading files for `ksrates` and `i-ADHoRe`
-    <br><img src="../images/ksrates_iadhore_download.png" alt="" class="docImage" width="90%"></br>--->
+    <br><img src="../images/ksrates_iadhore_download.png" alt="" class="docImage" width="90%"></br> --->
     - How to install `wgd` to your local environment, please read the [`wgd` document](https://github.com/arzwa/wgd).
     - How to install `ksrate` to your local environment, please read the [`ksrates` document](https://ksrates.readthedocs.io/en/latest/installation.html).
     - How to install `i-ADHoRe` to your local environment, please read the [`i-ADHoRe` document](https://www.vandepeerlab.org/?q=tools/i-adhore30).
