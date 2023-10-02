@@ -38,10 +38,10 @@
     - [Ortholog <i>K</i><sub>s</sub> age distribution](#ortholog-ks)
     - [Substitution rate correctiong](#rate-correction)
   - [<font color="orange"><i aria-label="water icon" class="fa-solid fa-water" role="presentation"></i> Synteny Analysis</font>](#synteny-analysis)
+    - [Intra- or Inter-species alignment](#intra-inter-comparing)
+    - [Multiplicon-level synteny](#multiplicon-level-synteny)
+    - [Multiple species alignment](#multiple-species-alignment)
     - [Clustering analysis](#clustering-analysis)
-    <!-- - [Intra-comparing alignment](#intra-comparing) -->
-    <!-- - [Inter-comparing alignment](#inter-comparing) -->
-    <!-- - [Multiple-species alignment](#multiple-species-alignment) -->
   - [<font color="orange"><img src="../images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> Tree Building</font>](#tree-building)
     - [<i>K</i><sub>s</sub> unit tree](#ks-tree)
     - [TimeTree](#time-tree)
@@ -150,7 +150,7 @@
     + Then, users can click the rest buttons to generate the codes for `i-ADHoRe` and `OrthoFinder`.
     + Finally, users can click the <font style="background-color: #508ab2; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i> Download Analysis Data</font> button to download the prepared files and script for `ksrates`, `i-ADHoRe`, and `OrthoFinder` program. 
 
-    <br><img src="../images/data_preparation.gif" alt="" class="docImage" width="90%"></br>
+    <!--<br><img src="../images/data_preparation.gif" alt="" class="docImage" width="90%"></br>--->
     <br></br> 
 
 
@@ -171,16 +171,16 @@
 
   ##### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
   After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). <br>Users can execute them in their local environment.  
-    + downloading files for `wgd`
+    <!--+ downloading files for `wgd`
     <br><img src="../images/wgd_download.png" alt="" class="docImage" width="90%"></br>
     + downloading files for `ksrates` and `i-ADHoRe`
-    <br><img src="../images/ksrates_iadhore_download.png" alt="" class="docImage" width="90%"></br>
+    <br><img src="../images/ksrates_iadhore_download.png" alt="" class="docImage" width="90%"></br>--->
     - How to install `wgd` to your local environment, please read the [`wgd` document](https://github.com/arzwa/wgd).
     - How to install `ksrate` to your local environment, please read the [`ksrates` document](https://ksrates.readthedocs.io/en/latest/installation.html).
     - How to install `i-ADHoRe` to your local environment, please read the [`i-ADHoRe` document](https://www.vandepeerlab.org/?q=tools/i-adhore30).
     - How to install `OrthoFinder` to your local environment, please read the [`OrthoFinder` document](https://github.com/davidemms/OrthoFinder).
     <blockquote><div style="padding: 10px; background-color: #f0f0f0;">
-  <font color="green"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> When creating the Code and files for <font color="green">i-ADHoRe</font>, the alignment file will be produced. The alignment will use the <font color="green">diamond</font> program. So please install <font color="green">diamond</font> program first.</blockquote>
+  <font color="green"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> When creating the Code and files for <font color="green">i-ADHoRe</font>, the alignment file will be produced. The alignment process will use the <font color="green">diamond</font> program. So please install <font color="green">diamond</font> program first.</blockquote>
 
   <br>
 
@@ -208,10 +208,10 @@
 
   After successfully running the corresponding shell files locally, the necessary outputs will be saved in the **`Analysis_Date`** folder. Then users can choose this folder in the `Uploading` panel in <font color="orange"><i class="fas fa-chart-line" role="presentation"></i> <i>K</i><sub>s</sub> Age Distribution Analysis</font> page.
 
-  <br><img src="../images/Ks_age_distribution.gif" alt="" class="docImage" width="90%"></br>
+  <!--<br><img src="../images/Ks_age_distribution.gif" alt="" class="docImage" width="90%"></br>--->
 
   <blockquote><div style="padding: 10px; background-color: #f0f0f0;">
-  <font color="red"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> Users should choose the folder which is originated from the folder created by <b>ShinyWGD</b> program to avoid the failure of displaying the correct file names.</div></blockquote>
+  <font color="red"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> Users should choose the folder which is originated from the folder created by <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> program to avoid the failure of displaying the correct file names.</div></blockquote>
 
   <br></br>
   <a name="paralog-ks"></a>
@@ -238,7 +238,7 @@
 
   The example output is below.
 
-  <img src="../images/Paralogous_Multiple_Species_Ks-01.png" width="90%">
+  <img src="../images/Paralogous_Multiple_Species_Ks-01.jpg" width="90%">
 
   <br></br>
   <a name="ortholog-ks"></a>
@@ -249,7 +249,7 @@
 
   The example output is below.
 
-  <img src="../images/orthologous_ks.svg" width="90%">
+  <img src="../images/Wgd_plot_ortholog.svg" width="90%">
 
   In the above figure, the dash line is the peak of a combination of focal species and another species. The colored rectangle is the 95% CI. Users can retrieve the detail information about the density, the peaks, and the 95% CIs by hovering the mouse above the lines or rectangles.  
 
@@ -270,38 +270,53 @@
   <a name="synteny-analysis"></a>
   #### <font color="orange"><img src="../images/syntenyIcon.svg" alt="Icon" width="20" height="20">Synteny Analysis</font>
 
-  After uploading the folder of `i-ADHoRe` in this page, users can study the *intra-*, *inter-*, and *multiple-* species synteny.
+  <a name="intra-inter-comparing"></a>
+  ##### <font color="#23B395">Intra- or Inter-species alignment</font>
+
+  After uploading the folder of `i-ADHoRe` in this page, users can study the *intra-*, *inter-*, and *multiple-* species synteny, as well as the *clustering analysis*.
 
   After selecting the studied species, users can click the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;"><i class="fa-solid fa-gear"></i> Configure Analysis</font> to create the output panel in the right side of the page. 
 
-  <br><img src="../images/synteny.gif" alt="" class="docImage" width="90%"></br>
+  <!--<br><img src="../images/synteny.gif" alt="" class="docImage" width="90%"></br>--->
 
   Users can set the threshold for the number of anchor pairs in each multiplicon to filter out the small multiplicons which contain less anchor pairs. 
 
-  Users can also search a certain gene to check the location of the gene in the multiplicon in the <font color="green">Multiplicon-level Synteny</font> panel.
+  The dot plot and parallel link plot will be generated.
+
+  <img src="../images/Elaeis_guineensis.self.dot_plot-01.jpg" width="60%">
+  <img src="../images/Elaeis_guineensis.Parallel.svg" width="80%">
+
+  <a name="multiplicon-level-synteny"></a>
+  ##### <font color="#23B395">Multiplicon-level synteny</font>
+
+  Users can also search a certain gene to check the location of the gene in the multiplicon in the <font color="green">Multiplicon-level Synteny</font> panel and then plot the searched multiplicon.
+
+  <img src="../images/microSyn_one_species.svg" width="80%">
+
+  <a name="multiple-species-alignment"></a>
+  ##### <font color="#23B395">Multiple species alignment</font>
 
   In the multiple species alignment panel, users can define the order of species in the plot. Users can change the color of species by clicking the text of the species name. When the mouse hovers a link, the related links with this link among species can be highlighted using different colors.
 
   The example output is below.
 
-  <img src="../images/Multiple_Species_Alignment.Parallel.svg" width="100%">
+  <img src="../images/Multiple_Species_Alignment.Parallel-01.jpg" width="80%">
 
   <a name="clustering-analysis"></a>
-  
-  ##### <font color="#bb5e00">Clustering Analysis</font>
+  ##### <font color="#bb5e00">Clustering analysis</font>
 
   <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> employs the Hierarchical clustering method for constructing putative ancestral regions (PARs). The segments are identified from the outputs of `i-ADHoRe`, and the **homolog concentration scores** are calculated using `-log(p)`, where `p` is the probability of the observed number of homolog pairs as modeled by a Poisson distribution.
 
   <blockquote><div style="padding: 10px; background-color: #f0f0f0;">
   <font color="green"><i aria-label="fa-info icon" class="fa fa-info fa-fw" role="presentation"></i></font> To read more about <b><i>homolog concentration scores</i></b>, please refer to <i>Putnam NH, et al. (2008) The amphioxus genome and the evolution of the chordate karyotype. Nature 453:1064–1071</i>.</div></blockquote> 
   
-  For each segment, the array of scores against all segments in the other genome forms a unique profile. The segments are then clustered based on the similarity of these profiles (determined by **Pearson correlation coefficient r**) using the average linkage method. The default cutoff of r is 0.3. Users can change this cutoff through the sliding block. The faint yellow rectangle will highlight the significantly enriched regions (P < 1E-10). Then, users can zoom in each PAR through the <font color="green"><b>Putative Ancestral Regions</b></font> block.
+  For each segment, the array of scores against all segments in the other genome forms a unique profile. The segments are then clustered based on the similarity of these profiles (determined by **Pearson correlation coefficient r**) using the average linkage method. The default cutoff of r is 0.3. Users can change this cutoff through the sliding block. The faint yellow rectangle will highlight the significantly enriched regions (`P < 1E-10`). Then, users can zoom in each PAR through the <font color="green"><b>Putative Ancestral Regions</b></font> block.
 
   The example output is below.
 
-  <img src="../images/Two_species.cluster.svg" width="80%">
+  <img src="../images/Two_species.cluster-01.jpg" width="80%">
 
-  In the example, we used 0.5 as the cutoff for r and 10 to filter out the segment with fewer anchor points. In total, we identified 61 PARs. 
+  In the example, we used 0.5 as the cutoff for **r** and 10 to filter out the segment with fewer anchor points. In total, we identified 61 PARs. 
 
   A single PAR zooms in is below.
 
@@ -314,7 +329,7 @@
 
   In this page, users can generate the <i>K</i><sub>s</sub> unit tree, time tree, and a joint tree with <i>K</i><sub>s</sub> unit tree and time tree.
 
-  <br><img src="../images/Tree_building.gif" alt="" class="docImage" width="90%"></br>
+  <!--<br><img src="../images/Tree_building.gif" alt="" class="docImage" width="90%"></br>--->
 
   <a name="ks-tree"></a>
   ##### <i>K</i><sub>s</sub> unit tree
@@ -415,9 +430,11 @@
   <a name="reconciliation-analysis"></a>
   #### <font color="orange"><img src="../images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis</font>
 
-  In this page, users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all ALE files. If users use operate `OrthoFinder` in <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the ALE files by using the gene families built by other software.
+  In this page, users can use `Whale` to operate the gene tree - species tree reconciliation analysis.
 
-  <br><img src="../images/Whale_analysis.gif" alt="" class="docImage" width="90%"></br>
+  Users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all ALE files. If users use `OrthoFinder` in <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the ALE files by using the gene families built by other software.
+
+  <!--<br><img src="../images/Whale_analysis.gif" alt="" class="docImage" width="90%"></br>-->
 
   Once the tree file uploaded, users can check the topology of the tree in the right panel. Then users can add the **hypothetical WGD event** to a certain branch by clicking the branch.
 
@@ -425,7 +442,7 @@
   <font color="red"><i aria-label="warning icon" class="fa fa-warning fa-fw" role="presentation"></i></font> Users should use <font color="green"><b>wgd</b></font> as the prefix for the name of <b>hypothetical WGD event</b> to satisfy the requirements of <i>Whale.jl</i>.</div></blockquote>
 
 
-  <img src="../images/speciesTree.whale.svg" width="800px">
+  <img src="../images/speciesTree.whale.svg" width="500px">
 
   In the above tree figure, four hypothetical WGD events are tested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
 
@@ -458,7 +475,7 @@
 
   In the above plot, the WGD with the solid green bar is supported with retention rates significantly different from zero, while the hollow WGD bars are the ones with retention rates not different from zero.
 
-  Then usres can downloads the plot by click the <font style="background-color: #5B5B00; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i></font> button.
+  Then users can download the plot by clicking the <font style="background-color: #5B5B00; color: white; padding: 5px; border-radius: 2px;"><i arial-label="download icon" class="fa fa-download" role="presentation"></i></font> button.
 
 
 </div>
