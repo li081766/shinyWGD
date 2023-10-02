@@ -1,12 +1,28 @@
 Package: ShinyWGD
 Type: Package
-Title: ShinyWGD
-Version: 0.1.0
+Title: Shiny Application for Whole Genome Duplication Analysis
+Version: 1.0.0
 Authors@R: 
     person("Jia", "Li", email = "jiali@psb.vib-ugent.be", role = c("cre", "aut"))
 Maintainer: Jia Li <jiali@psb.vib-ugent.be>
-Description: ShinyWGD: a toolbox to study whole genome duplication (for the experienced and non-experienced bioinformatician).
-License: GPL (>=3)
+Description: ShinyWGD is a comprehensive Shiny-R package that simplifies 
+    and streamlines the analysis of Whole Genome Duplication (WGD) events. 
+    This package provides a user-friendly Shiny web application for 
+    non-experienced researchers to prepare input data and execute command lines 
+    for several well-known WGD analysis tools, including wgd, ksrates, 
+    i-ADHoRe, OrthoFinder, and Whale. This package also provides the source code 
+    for experienced researchers to adjust and install the package to their own server. 
+    Key Features
+    1) Input Data Preparation 
+    ShinyWGD allows users to conveniently upload and format their data, making it compatible with various WGD analysis tools.
+    2) Command Line Generation
+    The package automatically generates the necessary command lines for selected WGD analysis tools, reducing manual errors and saving time.
+    3) Visualization
+    ShinyWGD offers interactive visualizations to explore and interpret WGD results, facilitating in-depth WGD analysis.
+    4) Comparative Genomics
+    Users can study and compare WGD events across different species, aiding in evolutionary and comparative genomics studies.
+    5) User-Friendly Interface The Shiny web application provides an intuitive and accessible interface, making WGD analysis accessible to researchers and bioinformaticians of all levels.
+License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
@@ -29,4 +45,5 @@ Imports:
 Suggests:
     knitr,
     rmarkdown,
+    fontawesome,
     testthat (>= 3.0.0)
