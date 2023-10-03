@@ -1,24 +1,58 @@
 #!/bin/bash
 
-# Check if the correct number of arguments is provided
-if [ $# -ne 7 ]; then
-	echo "Usage: $0 <singleCopyOrthologuesID> <orthologuesGroups> <singleCopyOrthologues> <cdsFastaDir> <aliged.phylip> <tree.newick> <number_threads>"
-	exit 1
+helpFunction()
+{
+   echo ""
+   echo "Usage: $0 -i <singleCopyOrthologuesID> -o <orthologuesGroups> -s <singleCopyOrthologues> -c <cdsFastaDir> -p <aligned.phylip> -t <tree.newick> -n <number_threads>"
+   echo "\t-i <singleCopyOrthologuesID>"
+   echo "\t-o <orthologuesGroups>"
+   echo "\t-s <singleCopyOrthologues>"
+   echo "\t-c <cdsFastaDir>"
+   echo "\t-p <phylipFile>"
+   echo "\t-t <newickTree>"
+   echo "\t-n <threads>"
+   exit 1
+}
+
+while getopts "i:o:s:c:p:t:n:" opt
+do
+   case "$opt" in
+      i ) singleCopyOrthologuesID="$OPTARG" ;;
+      o ) orthologuesGroups="$OPTARG" ;;
+      s ) singleCopyOrthologues="$OPTARG" ;;
+      c ) cdsFastaDir="$OPTARG" ;;
+      p ) phylip="$OPTARG" ;;
+      t ) tree="$OPTARG" ;;
+      n ) threads="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+if [ -z "$singleCopyOrthologuesID" ] || [ -z "$orthologuesGroups" ] || [ -z "$singleCopyOrthologues" ] || [ -z "$cdsFastaDir" ] || [ -z "$phylip" ] || [ -z "$tree" ] || [ -z "$threads" ]
+then
+   echo "Some or all of the parameters are empty";
+   helpFunction
 fi
+
+# # Check if the correct number of arguments is provided
+# if [ $# -ne 7 ]; then
+# 	echo "Usage: $0 <singleCopyOrthologuesID> <orthologuesGroups> <singleCopyOrthologues> <cdsFastaDir> <aligned.phylip> <tree.newick> <number_threads>"
+# 	exit 1
+# fi
 
 
 # Check if the files exist
-if [ ! -f "$1" ] || [ ! -f "$2" ]; then
-	echo "Error: the output of Orthofinder is not found. Please check the run log of Orthofinder."
+if [ ! -f "$singleCopyOrthologuesID" ] || [ ! -f "$orthologuesGroups" ]; then
+	echo "Error: the output of OrthoFinder is not found. Please check the run log of OrthoFinder."
 	exit 1
 fi
 
 
 
 # Number of threads
-num_threads=$7
+num_threads=$threads
 
-start_time=$(date +%s) 
+start_time=$(date +%s)
 
 # Function to select singleCopyOrthologues from orthologuesGroups
 select_items() {
@@ -80,27 +114,27 @@ extract_sequences() {
 		species="${species_names[i]}"
 		species_name="${species%%_*}"
 		species_file="${sequence_dir}/${species_name}*.fa"
-		
+
 		if ls $species_file >/dev/null 2>&1; then
 			species_files["$species_name"]=$(ls $species_file)
 		else
 			echo "Species file not found: ${species_name}.fa"
 		fi
 	done
-	
+
 	if [ -d "singleCopyGeneDir" ]; then
 	    rm -r "singleCopyGeneDir"
 	fi
 	mkdir "singleCopyGeneDir"
-	
+
 	max_jobs=${num_threads}
 	current_jobs=0
-	
+
 	# Read the temp file line by line, process orthogroups in parallel
 	tail -n +2 "$temp_file" | while IFS=$'\t' read -r -a row; do
 	    process_orthogroup "${row[@]}" &
 	    ((current_jobs++))
-	
+
 	    if (( current_jobs >= max_jobs )); then
 	        wait
 	        current_jobs=0
@@ -154,13 +188,13 @@ merge_aligned_files_into_phylip() {
 compute_ks() {
 	local phylip="$1"
 	local tree="$2"
-	sed 's/, /,/g' "$tree" | sed 's/ /_/g' >tree.newick 
+	sed 's/, /,/g' "$tree" | sed 's/ /_/g' >tree.newick
 
     # Create PAML control file
     control_file="singleCopyGene.paml.ctrl"
     cat > "$control_file" <<EOF
       seqfile = ${phylip}
-	  treefile = tree.newick 
+	  treefile = tree.newick
       outfile = singleCopyGene.paml.out
       noisy = 9
       verbose = 1
@@ -188,7 +222,7 @@ EOF
     # Run PAML to compute ks value
 	module load paml
     codeml "$control_file" >/dev/null
-	
+
 	# Extract ds Tree from PAML output
 	grep -A 1 "dS tree:" singleCopyGene.paml.out  | tail -n 1 >singleCopyGene.ds_tree.newick
 }
@@ -219,10 +253,10 @@ addPid() {
 	pids=(${pids[@]} $pid)
 }
 
-select_items "$1" "$2" > "$3"
-#extract_sequences "$3" "$4" 
-selected_file="$3"
-sequence_dir="$4"
+select_items "$singleCopyOrthologuesID" "$orthologuesGroups" > "$singleCopyOrthologues"
+selected_file="$singleCopyOrthologues"
+sequence_dir="$cdsFastaDir"
+
 temp_file=$(mktemp)
 tr -d '\r' < "$selected_file" > "$temp_file"
 
@@ -233,7 +267,7 @@ declare -A species_files
 
 for ((i = 1; i < num_species; i++)); do
 	species="${species_names[i]}"
-	species_name="${species%%_*}"	
+	species_name="${species%%_*}"
 	species_file="${sequence_dir}/${species_name}*.fa"
 
 	if ls $species_file >/dev/null 2>&1; then
@@ -269,8 +303,8 @@ done < "$tmp_rows_file"
 
 waitPids
 
-merge_aligned_files_into_phylip "$3" "singleCopyGeneDir" "$5"
-compute_ks "$5" "$6"
+merge_aligned_files_into_phylip "$singleCopyOrthologues" "singleCopyGeneDir" "$phylip"
+compute_ks "$phylip" "$tree"
 
 # Get the end time of the script
 end_time=$(date +%s)
