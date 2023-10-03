@@ -1011,6 +1011,26 @@ output$wgd_ksrates_data_download <- downloadHandler(
         # }
         # else{
         withProgress(message='Downloading in progress', value=0, {
+            # update the Species.info.xls
+            species_info <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls"))
+            species_data <- read.table(
+                species_info,
+                header=FALSE,
+                sep="\t",
+                stringsAsFactors=FALSE
+            )
+
+            species_data$V2 <- gsub("^.*/", "../", species_data$V2)
+            species_data$V3 <- gsub("^.*/", "../", species_data$V3)
+
+            file.edit(
+                species_info,
+                species_data,
+                quote=FALSE,
+                col.names=FALSE,
+                row.names=FALSE
+            )
+
             incProgress(amount=.1, message="Compressing files...")
             shinyalert(
                 "Note",
