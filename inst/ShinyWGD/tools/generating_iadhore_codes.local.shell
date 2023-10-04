@@ -1,4 +1,8 @@
 #!/bin/bash
+# Note: this program needs diamond to align the protein, i-ADHoRE to do the sysnteny analysis
+# For our cluster, we use module to manage the software. So we load the software by using the command line below
+# module load diamond i-adhore
+
 
 make_configure_iadhore_2sp() {
 	species1="$1"
@@ -75,14 +79,13 @@ generate_shell() {
 	local command_file="$3"
 	local shinywgd_path="$4"
 	local diamondShell="$5"
-	local diamondPath="$6"
-	local num_thread="$7"
+	local num_thread="$6"
 
 	cmd_file="${command_file}"
 	if [[ -e "$cmd_file" ]]; then
 		rm "$cmd_file"
 	fi
-	echo "sh ${diamondShell} ../Species.info.xls ./ ${diamondPath} ${num_thread}" >$cmd_file
+	echo "module load diamond i-adhore; sh ${diamondShell} ../Species.info.xls ./ ${num_thread}" >$cmd_file
 
 	# mapfile -t input_data_array < "$input_data_file"
 	IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"
@@ -90,12 +93,12 @@ generate_shell() {
 	for (( i = 0; i < ${#input_data_array[@]}; i++ )); do
 		line1="${input_data_array[$i]}"
 		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
-		
+
 		if [[ ! -e "$gff_file" ]]; then
 			echo "Skipping $species: gff_file does not exist"
 			continue
 		fi
-		
+
 		species=$(echo "$species" | tr ' ' '_')
 		species_gene_list="${shell_dir}/gene_lists/${species}.geneLists"
 		outdir="${shell_dir}/i-adhore.${species}_vs_${species}"
@@ -113,7 +116,7 @@ generate_shell() {
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
 			IFS=$'\t' read -r other_species other_fasta_file other_gff_file <<< "$line2"
-			
+
 			if [[ ! -e "$other_gff_file" ]]; then
 				echo "Skipping $other_species: gff_file does not exist"
 				continue
@@ -185,20 +188,20 @@ generate_shell_multiple_species (){
 		 echo "max_gaps_in_alignment=40"
 		 echo "visualizeGHM=false"
 		 echo "visualizeAlignment=false"
-		 echo "verbose_output=true"	
+		 echo "verbose_output=true"
 		 echo ""
 	} >> "$iadhore_conf_file"
-	
+
 	echo "i-adhore i-adhore.Multiple_Species/Multiple_Species.i-adhore.ini" >> "$command_file"
 }
 
-if [ $# -lt 7 ]; then
-	echo "Usage: $0 <input_file> <output_dir> <command_file> <shinywgd_path> <diamondShell> <diamondPath> <thread_num> <mode>"
+if [ $# -lt 6 ]; then
+	echo "Usage: $0 <input_file> <output_dir> <command_file> <shinywgd_path> <diamondShell> <thread_num> <mode>"
 else
-	if [ $# -eq 7 ]; then
-		generate_shell "$1" "$2" "$3" "$4" "$5" "$6" "$7"
-	elif [ $# -eq 8 ]; then
-		generate_shell "$1" "$2" "$3" "$4" "$5" "$6" "$7"
+	if [ $# -eq 6 ]; then
+		generate_shell "$1" "$2" "$3" "$4" "$5" "$6"
+	elif [ $# -eq 7 ]; then
+		generate_shell "$1" "$2" "$3" "$4" "$5" "$6"
 		generate_shell_multiple_species "$1" "$2" "$3"
 	fi
 fi

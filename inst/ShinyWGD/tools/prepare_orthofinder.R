@@ -8,11 +8,11 @@ parser$add_argument("-c", "--command_file", help="Path to the command file for i
 
 args <- parser$parse_args()
 
-input_data <- fread(args$input_file, 
-                    header=FALSE, 
-                    col.names=c("species", "fasta_file", "gff_file"), 
-                    fill=T, 
-                    sep="\t", 
+input_data <- fread(args$input_file,
+                    header=FALSE,
+                    col.names=c("species", "fasta_file", "gff_file"),
+                    fill=T,
+                    sep="\t",
                     na.strings=c("", "NA"))
 for( i in seq_len(nrow(input_data)) ){
     species <- input_data$species[i]
@@ -40,7 +40,7 @@ cmd_con <- file(cmd_file, open="w")
 
 #outDir <- paste0(args$output_dir, "/orthofinderOutputDir")
 writeLines(
-    paste("orthofinder", 
+    paste("orthofinder",
           "-f pepDir",
           "-S diamond -t 4 -a 4 -I 3 -M msa -ot",
           "-o orthofinderOutputDir"
@@ -50,11 +50,16 @@ writeLines(
 writeLines("folder=$(find ./orthofinderOutputDir -maxdepth 1 -type d -name \"Results_*\" -printf '%f\\n')", cmd_con)
 writeLines(
     paste0(
-        "sh ", 
-        "./computing_Ks_tree_of_SingleCopyOrthologues.sh ",
-        "orthofinderOutputDir/$folder/Orthogroups/Orthogroups_SingleCopyOrthologues.txt ",
-        "orthofinderOutputDir/$folder/Orthogroups/Orthogroups.tsv ",
-        "SingleCopyOrthologues.tsv ../ singleCopyAlign.phylip ../tree.newick 4"
+        "sh ",
+        "./computing_Ks_tree_of_SingleCopyOrthologues.shell \\\n",
+        "\t-i orthofinderOutputDir/$folder/Orthogroups/Orthogroups_SingleCopyOrthologues.txt \\\n",
+        "\t-o orthofinderOutputDir/$folder/Orthogroups/Orthogroups.tsv \\\n",
+        "\t-d orthofinderOutputDir/$folder/Orthogroups/Orthogroup_Sequences/ \\\n",
+        "\t-s SingleCopyOrthologues.tsv \\\n",
+        "\t-c ../ \\\n",
+        "\t-p ../singleCopyAlign.phylip \\\n",
+        "\t-t ../tree.newick \\\n",
+        "\t-n 4"
     ),
     cmd_con
 )

@@ -1,16 +1,25 @@
 #!/bin/bash
 
+# Note: this program needs EMBOSS 6.60 to translate the cds into the protein, 
+# and diamond to compute the Ks tree. So please ensure these software have been
+# installed before running this program. You can quickly check it by using `transeq -h`
+# and `diamond help` in your command line.
+
+# For our cluster, we use module to manage the software. 
+# So we load the software by using the command line below.
+module load diamond EMBOSS/x86_64/6.6.0
+
+
 # Function to run Diamond for two species
 run_diamond_2sp() {
 	species1=$1
 	fasta_file1=$2
 	species2=$3
 	fasta_file2=$4
-	diamond_path=$5
-	cds_file=$6
-	pep_file=$7
-	out_file=$8
-	num_thread=$9
+	cds_file=$5
+	pep_file=$6
+	out_file=$7
+	num_thread=$8
 	
 	seqs1=$(cat $fasta_file1)
 	seqs1=$(echo "$seqs1" | sed -E "s/>(.*)/\>${species1}_\1/")
@@ -24,12 +33,12 @@ run_diamond_2sp() {
 	
 	cat $temp_file1 $temp_file2 > $cds_file
 
-	module load EMBOSS/x86_64/6.6.0
+	#module load EMBOSS/x86_64/6.6.0
 	transeq -sequence $cds_file -outseq $pep_file -trim
 	sed -i 's/_/|/2' $pep_file 
 	sed -i 's/_1$//' $pep_file
 	
-	$diamond_path blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
+	diamond blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
 	
 	rm $temp_file1 $temp_file2
 }
@@ -38,23 +47,20 @@ run_diamond_2sp() {
 run_diamond() {
 	species=$1
 	fasta_file=$2
-	diamond_path=$3
-	cds_file=$4
-	pep_file=$5
-	out_file=$6
-	num_thread=$7
-	
+	cds_file=$3
+	pep_file=$4
+	out_file=$5
+	num_thread=$6
 	
 	seqs=$(cat $fasta_file)
 	seqs=$(echo "$seqs" | sed -E "s/>(.*)/\>${species}_\1/")
 	echo "$seqs" | awk '{print $1}' > $cds_file
 	
-	module load EMBOSS/x86_64/6.6.0
 	transeq -sequence $cds_file -outseq $pep_file -trim
 	sed -i 's/_/|/2' $pep_file
 	sed -i 's/_1$//' $pep_file
 	
-	$diamond_path blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
+	diamond blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
 }
 
 # Function to filter the Blast output
@@ -116,8 +122,7 @@ run_filter_blast() {
 run_diamond_and_filter() {
 	local input_data_file="$1"
 	local work_dir="$2"
-	local diamond_path="$3"
-	local num_core="$4"
+	local num_core="$3"
 
 	mapfile -t input_data_array < "$input_data_file"
 
@@ -143,7 +148,7 @@ run_diamond_and_filter() {
 			if [[ ! -e "$outdir" ]]; then
 				mkdir -p "$outdir"
 			fi
-			run_diamond "$species" "$fasta_file" "$diamond_path" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
+			run_diamond "$species" "$fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
 			run_filter_blast "$blastOutFile" "$out_filter_file"
 		fi
 
@@ -169,17 +174,15 @@ run_diamond_and_filter() {
 				if [[ ! -e "$outdir" ]]; then
 					mkdir -p $outdir
 				fi
-				run_diamond_2sp "$species" "$fasta_file" "$other_species" "$other_fasta_file" "$diamond_path" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
+				run_diamond_2sp "$species" "$fasta_file" "$other_species" "$other_fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
 				run_filter_blast "$blastOutFile" "$filteredFile"
 			fi
 		done
 	done
 }
 
-if [ $# -lt 4 ]; then
-	echo "Usage: $0 <input_file> <output_dir> <diamond_path> <thread_num>"
+if [ $# -lt 3 ]; then
+	echo "Usage: $0 <input_file> <output_dir> <thread_num>"
 else
-	run_diamond_and_filter $1 $2 $3 $4
+	run_diamond_and_filter $1 $2 $3
 fi
-
-

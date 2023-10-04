@@ -80,7 +80,7 @@ ui <- tagList(
             class="navbar-brand large-title",
             href="#",
             onclick="javascript:window.location.href='#shinywgd_1'",
-            "ShinyWGD"
+            "shinyWGD"
         ),
         # position="fixed-top",
         Introduction_ui,

@@ -81,7 +81,7 @@ Data_preparation_ui <- tabPanel(
             )
         ),
         column(
-            id="WgdKsratesSettingPanel",
+            id="WgdksratesSettingPanel",
             width=6,
             div(class="boxLike",
                 style="background-color: #FFFFF4;",
@@ -91,7 +91,7 @@ Data_preparation_ui <- tabPanel(
                 fluidRow(
                     column(
                         12,
-                        uiOutput("WgdKsratesSettingDisplay")
+                        uiOutput("WgdksratesSettingDisplay")
                     )
                 )
             ),

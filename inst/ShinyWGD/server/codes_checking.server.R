@@ -1,11 +1,11 @@
 observeEvent(input$ksrates_go, {
-    output$KsratesConfigureFileTxt <- renderText({
+    output$ksratesConfigureFileTxt <- renderText({
         ksratesconf <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd/ksrates_conf.txt")
         if( file.exists(ksratesconf) ){
             rawText <- readChar(ksratesconf, file.info(ksratesconf)$size)
         }
     })
-    output$KsratesCommandTxt <- renderText({
+    output$ksratesCommandTxt <- renderText({
         ksratescommad <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd/run_ksrates.sh")
         if( file.exists(ksratescommad) ){
             CommandText <- readChar(ksratescommad, file.info(ksratescommad)$size)
@@ -18,29 +18,29 @@ observeEvent(input$ksrates_go, {
                 width=12,
                 div(class="boxLike",
                     style="background-color: #faf9f6;",
-                    h4(icon("cog"), "Ksrates parameter"),
+                    h4(icon("cog"), "ksrates parameter"),
                     hr(class="setting"),
                     fluidRow(
                         column(
                             12,
-                            h5(HTML(paste0("The configure file for ", "<span style=\"color:green\"><b><i>Ksrates</i></b></span>", ":"))),
+                            h5(HTML(paste0("The configure file for ", "<span style=\"color:green\"><b><i>ksrates</i></b></span>", ":"))),
                             verbatimTextOutput(
-                                "KsratesConfigureFileTxt",
+                                "ksratesConfigureFileTxt",
                                 placeholder=TRUE)
                         )
                     ),
                     fluidRow(
                         column(
                             12,
-                            h5(HTML(paste0("The command line for <font color='green'><b><i>Ksrates</i></b></font>:"))),
+                            h5(HTML(paste0("The command line for <font color='green'><b><i>ksrates</i></b></font>:"))),
                             verbatimTextOutput(
-                                "KsratesCommandTxt",
+                                "ksratesCommandTxt",
                                 placeholder=TRUE)
                         ),
                         column(
                             12,
                             actionLink(
-                                "back_datapreparation_2", 
+                                "back_datapreparation_2",
                                 h5(HTML(paste0("<font color='#5151A2'>",
                                             icon("share"),
                                             " Back to <i><b>Data Preparation</b></i> Page")
@@ -84,7 +84,7 @@ observeEvent(input$wgd_go, {
                         column(
                             12,
                             actionLink(
-                                "back_datapreparation_1", 
+                                "back_datapreparation_1",
                                 h5(HTML(paste0("<font color='#5151A2'>",
                                                icon("share"),
                                                " Back to <i><b>Data Preparation</b></i> Page")
@@ -128,7 +128,7 @@ observeEvent(input$iadhore_go, {
                         column(
                             12,
                             actionLink(
-                                "back_datapreparation_3", 
+                                "back_datapreparation_3",
                                 h5(HTML(paste0("<font color='#5151A2'>",
                                                icon("share"),
                                                " Back to <i><b>Data Preparation</b></i> Page")
@@ -143,8 +143,8 @@ observeEvent(input$iadhore_go, {
 })
 
 observeEvent(input$orthofinder_go, {
-    output$OrthofinderCommandTxt <- renderText({
-        orthofinderCommandFile <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/Orthofinder_wd/run_orthofinder.sh")
+    output$OrthoFinderCommandTxt <- renderText({
+        orthofinderCommandFile <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/OrthoFinder_wd/run_orthofinder.sh")
         if( file.exists(orthofinderCommandFile) ){
             command_info <- readChar(
                 orthofinderCommandFile,
@@ -159,24 +159,24 @@ observeEvent(input$orthofinder_go, {
                 id="TEST",
                 value="TEST",
                 column(
-                    id="OrthofinderSetting",
+                    id="OrthoFinderSetting",
                     width=12,
                     div(class="boxLike",
                         style="background-color: #faf9f6;",
-                        h4(icon("cog"), "Orthofinder parameter"),
+                        h4(icon("cog"), "OrthoFinder parameter"),
                         hr(class="setting"),
-                        h5(HTML(paste0("The command line for <font color='#5A5AAD'><i><b>Orthofinder</b></i></font>:"))),
+                        h5(HTML(paste0("The command line for <font color='#5A5AAD'><i><b>OrthoFinder</b></i></font>:"))),
                         fluidRow(
                             column(
                                 12,
                                 verbatimTextOutput(
-                                    "OrthofinderCommandTxt",
+                                    "OrthoFinderCommandTxt",
                                     placeholder=TRUE)
-                            ),  
+                            ),
                             column(
                                 12,
                                 actionLink(
-                                    "back_datapreparation_5", 
+                                    "back_datapreparation_5",
                                     h5(HTML(paste0("<font color='#5151A2'>",
                                                    icon("share"),
                                                    " Back to <i><b>Data Preparation</b></i> Page")
@@ -221,7 +221,7 @@ observeEvent(input$whale_go, {
                         column(
                             12,
                             actionLink(
-                                "back_datapreparation_4", 
+                                "back_datapreparation_4",
                                 h5(HTML(paste0("<font color='#5151A2'>",
                                                icon("share"),
                                                " Back to <i><b>Data Preparation</b></i> Page")

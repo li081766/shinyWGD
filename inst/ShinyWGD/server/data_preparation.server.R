@@ -61,7 +61,7 @@ output$UploadDisplay <- renderUI({
     ui_parts
 })
 
-output$WgdKsratesSettingDisplay <- renderUI({
+output$WgdksratesSettingDisplay <- renderUI({
     num <- toupper(as.english(input$number_of_study_species))
     if( input$number_of_study_species < 2 ){
         mode <- "Whole-Paranome"
@@ -125,29 +125,24 @@ output$WgdKsratesSettingDisplay <- renderUI({
         fluidRow(
             div(
                 style="padding-left: 20px;
-                       padding-right: 20px;
-                       padding-top: 10px; ",
+                       padding-right: 20px;",
                 fluidRow(
                     column(
-                        6,
+                        12,
                         h6(
                             HTML(
                                 "Species number is set to <b><font color='#9F5000'>",
                                 num,
                                 "</b></font>, larger than <b><font color='red'>ONE</font></b>.",
-                                " Following <b><font color='green'>Ksrates</font></b> pipeline..."
+                                " Following <b><font color='green'>ksrates</font></b> pipeline...<br></br>"
                             )
                         )
                     ),
                     column(
                         6,
-                        uiOutput("multipleSpeciesPanel")
-                    ),
-                    column(
-                        6,
                         pickerInput(
                             inputId="select_focal_species",
-                            label=HTML("<b>Focal Species</b> for Ksrates:"),
+                            label=HTML("<b>Focal Species</b> for <b><font color='green'>ksrates</font></b>:"),
                             options=list(
                                 title='Please select focal species below'
                             ),
@@ -159,11 +154,15 @@ output$WgdKsratesSettingDisplay <- renderUI({
                         6,
                         fileInput(
                             "newick_tree",
-                            HTML("Upload <b>a Newick Tree</b> File for Ksrates:"),
+                            HTML("Upload <b>a Newick Tree</b> File for <b><font color='green'>ksrates</font></b>:"),
                             multiple=FALSE,
                             width="100%"
                         )
-                    )
+                    ),
+                    column(
+                        12,
+                        uiOutput("multipleSpeciesPanel")
+                    ),
                 ),
                 hr(class="setting"),
                 fluidRow(
@@ -171,7 +170,7 @@ output$WgdKsratesSettingDisplay <- renderUI({
                         6,
                         actionButton(
                             inputId="ksrates_go",
-                            HTML("Create <b><i>Ksrates</b></i> Codes"),
+                            HTML("Create <b><i>ksrates</b></i> Codes"),
                             #"Create Codes",
                             width="230px",
                             icon=icon("code"),
@@ -195,7 +194,7 @@ output$WgdKsratesSettingDisplay <- renderUI({
                                         "<font color='#5151A2'>",
                                         icon("share"),
                                         #" Go to Codes"
-                                        " Go to <i><b>Ksrates</b></i> Codes</font>"
+                                        " Go to <i><b>ksrates</b></i> Codes</font>"
                                     )
                                 )
                             )
@@ -243,7 +242,7 @@ output$WgdKsratesSettingDisplay <- renderUI({
                                 style="padding-bottom: 15px;",
                                 actionButton(
                                     inputId="orthofinder_go",
-                                    HTML("Create <i><b>Orthofinder</b></i> Codes"),
+                                    HTML("Create <i><b>OrthoFinder</b></i> Codes"),
                                     width="265px",
                                     icon=icon("code"),
                                     status="secondary",
@@ -266,7 +265,7 @@ output$WgdKsratesSettingDisplay <- renderUI({
                                         paste0(
                                             "<font color='#5151A2'>",
                                             icon("share"),
-                                            " Go to <i><b>Orthofinder</b></i> Codes</font>"
+                                            " Go to <i><b>OrthoFinder</b></i> Codes</font>"
                                         )
                                     )
                                 )
@@ -304,28 +303,37 @@ output$WgdKsratesSettingDisplay <- renderUI({
 output$multipleSpeciesPanel <- renderUI({
     if( input$number_of_study_species > 2 ){
         div(
-            style="margin-top: 40px; display: inline-flex;",
-            materialSwitch(
-                "multiple_iadhore",
-                HTML("<b><i><font color='green'>i-ADHoRe</b></i></font> Mode"),
-                value=FALSE,
-                status="success",
+            style="display: inline-flex;",
+            column(
+                8,
+                HTML(
+                    "If switching on the right mode, <font color='green'><b>i-ADHoRe</b></font> will study all the species within one run. The code will be appended to the main script of <font color='green'><b>run_diamond_iadhore.sh</b></font>. See more details in <font color='green'><b>i-ADHoRe</b></font> manual"
+                ),
             ),
-            span(
-                `data-toggle`="tooltip",
-                `data-placement`="auto",
-                `data-trigger`="click hover",
-                title="If switching on this mode, i-ADHoRe will study all the species within one run. The code will be appended to the main script of run_diamond_iadhore.sh. See more details in i-ADHoRe manul",
-                #title=HTML("<div>If switching on this mode, <b><font color='green'>i-ADHoRe</font></b> uses the multiple-species mode to study all the species within one run.<br>The code will be appended to the main script <b><font color='steelblue' face='Courier New' bgcolor='grey'>run_diamond_iadhore.sh</font></b></div>"),
-                icon("info-circle", style="font-size: 120%; margin-left: -100px;")
-            ),
-            tags$script(HTML('
-               $( document ).on("shiny:sessioninitialized", function(event) {
-                    $(\'span[data-toggle="tooltip"]\').tooltip({
-                        html: true
-                    });
-               });'
-            ))
+            column(
+                4,
+                style="margin-top: 20px;",
+                switchInput(
+                    inputId="multiple_iadhore",
+                    onStatus="success",
+                    offStatus="danger"
+                )
+            )
+            # span(
+            #     `data-toggle`="tooltip",
+            #     `data-placement`="auto",
+            #     `data-trigger`="click hover",
+            #     title="If switching on this mode, i-ADHoRe will study all the species within one run. The code will be appended to the main script of run_diamond_iadhore.sh. See more details in i-ADHoRe manul",
+            #     #title=HTML("<div>If switching on this mode, <b><font color='green'>i-ADHoRe</font></b> uses the multiple-species mode to study all the species within one run.<br>The code will be appended to the main script <b><font color='steelblue' face='Courier New' bgcolor='grey'>run_diamond_iadhore.sh</font></b></div>"),
+            #     icon("info-circle", style="font-size: 120%; margin-left: -100px;")
+            # ),
+            # tags$script(HTML('
+            #    $( document ).on("shiny:sessioninitialized", function(event) {
+            #         $(\'span[data-toggle="tooltip"]\').tooltip({
+            #             html: true
+            #         });
+            #    });'
+            # ))
         )
     }
 })
@@ -440,7 +448,8 @@ observeEvent(get_species_from_input(), {
         choices=get_species_from_input(),
         choicesOpt=list(
             content=lapply(get_species_from_input(), function(choice) {
-                HTML(paste0("<div style='color: #FA9D88; font-style: italic;'>", choice, "</div>"))
+                choice <- gsub("_", " ", choice)
+                HTML(paste0("<div style='color: #5667E5; font-style: italic;'>", choice, "</div>"))
             })
         )
     )
@@ -458,7 +467,8 @@ observeEvent(get_species_from_file(), {
         choices=get_species_from_file(),
         choicesOpt=list(
             content=lapply(get_species_from_file(), function(choice) {
-                HTML(paste0("<div style='color: #FA9D88; font-style: italic;'>", choice, "</div>"))
+                choice <- gsub("_", " ", choice)
+                HTML(paste0("<div style='color: #5667E5; font-style: italic;'>", choice, "</div>"))
             })
         )
     )
@@ -675,7 +685,7 @@ observeEvent(input$ksrates_go, {
         if( is.null(input[[paste0("proteome_", 2)]]) ){
             shinyalert(
                 "Oops!",
-                "Please upload the data from at least two species to trigger the Ksrates pipeline, then switch this on",
+                "Please upload the data from at least two species to trigger the ksrates pipeline, then switch this on",
                 type="error"
             )
         }
@@ -695,7 +705,7 @@ observeEvent(input$ksrates_go, {
         }
         else{
             withProgress(message='Creating in progress', value=0, {
-                incProgress(amount=.1, message="Preparing Ksrates configure file...")
+                incProgress(amount=.1, message="Preparing ksrates configure file...")
                 Sys.sleep(.1)
                 ksratesDir <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd")
                 if( !file.exists(ksratesDir) ){
@@ -705,13 +715,13 @@ observeEvent(input$ksrates_go, {
                 speciesinfoconf <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls")
                 create_ksrates_configure_file_v2(input, ksratesconf, speciesinfoconf)
 
-                incProgress(amount=.1, message="Preparing Ksrates expert parameters...")
+                incProgress(amount=.1, message="Preparing ksrates expert parameters...")
                 Sys.sleep(.1)
                 # create Ksrate expert parameters file
                 ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                 create_ksrates_expert_parameter_file(ksratesexpert)
 
-                incProgress(amount=.8, message="Creating Ksrates Runing Script ...")
+                incProgress(amount=.8, message="Creating ksrates Runing Script ...")
                 Sys.sleep(.1)
                 ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
                 ksrates_cmd <- create_ksrates_cmd(input, "ksrates_conf.txt", ksrates_cmd_sh_file)
@@ -741,7 +751,7 @@ observeEvent(input$ksrates_go, {
             }
             else{
                 withProgress(message='Creating in progress', value=0, {
-                    incProgress(amount=.1, message="Preparing Ksrates Configure File ...")
+                    incProgress(amount=.1, message="Preparing ksrates Configure File ...")
                     Sys.sleep(.1)
                     ksratesDir <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd")
                     if( !file.exists(ksratesDir) ){
@@ -757,12 +767,12 @@ observeEvent(input$ksrates_go, {
                         speciesinfoconf
                     )
 
-                    incProgress(amount=.1, message="Preparing Ksrates Expert Parameters ...")
+                    incProgress(amount=.1, message="Preparing ksrates Expert Parameters ...")
                     Sys.sleep(.1)
                     ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                     create_ksrates_expert_parameter_file(ksratesexpert)
 
-                    incProgress(amount=.8, message="Create Ksrates Running Script ...")
+                    incProgress(amount=.8, message="Create ksrates Running Script ...")
                     Sys.sleep(.1)
                     ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
                     wgd_cmd_sh_file <- paste0(ksratesDir, "/run_wgd_rest_species.sh")
@@ -811,7 +821,7 @@ observeEvent(input$iadhore_go, {
             system(
                 paste(
                     "cp",
-                    paste0(getwd()[1], "/tools/computing_anchorpoint_ks.MultiThreads.sh"),
+                    paste0(getwd()[1], "/tools/computing_anchorpoint_ks.MultiThreads.shell"),
                     syn_dir
                 )
             )
@@ -833,7 +843,6 @@ observeEvent(input$iadhore_go, {
                         cmd_file,
                         getwd()[1],
                         "running_diamond.shell",
-                        "diamond_path",
                         4,
                         "mode"
                     )
@@ -847,7 +856,6 @@ observeEvent(input$iadhore_go, {
                         cmd_file,
                         getwd()[1],
                         "running_diamond.shell",
-                        "diamond_path",
                         4
                     )
                 )
@@ -864,18 +872,18 @@ observeEvent(input$orthofinder_go, {
     species_info <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls"))
     if( file.exists(species_info) ){
         withProgress(message='Creating in progress', value=0, {
-            incProgress(amount=.1, message="Preparing Orthofinder input file...")
+            incProgress(amount=.1, message="Preparing OrthoFinder input file...")
             Sys.sleep(.1)
-            orthofinder_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/Orthofinder_wd"))
+            orthofinder_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/OrthoFinder_wd"))
             if( !file.exists(orthofinder_dir) ){
                 dir.create(orthofinder_dir)
             }
             cmd_file <- paste0(orthofinder_dir, "/run_orthofinder.sh")
-            incProgress(amount=.3, message="Create inputs file for Orthofinder ...")
+            incProgress(amount=.3, message="Create inputs file for OrthoFinder ...")
             system(
                 paste(
                     "cp",
-                    paste0(getwd()[1], "/tools/computing_Ks_tree_of_SingleCopyOrthologues.sh"),
+                    paste0(getwd()[1], "/tools/computing_Ks_tree_of_SingleCopyOrthologues.shell"),
                     orthofinder_dir
                 )
             )
@@ -932,7 +940,7 @@ observeEvent(input$go_codes_ksrates, {
     if( !file.exists(wgdcommmandFile) & !file.exists(ksratescommadFile) ){
         shinyalert(
             "Oops",
-            "Please click the Create-Ksrates-Codes button first, then switch this on",
+            "Please click the Create-ksrates-Codes button first, then switch this on",
             type="error"
         )
     }
@@ -972,11 +980,11 @@ observeEvent(input$go_codes_iadhore, {
 })
 
 observeEvent(input$go_codes_orthofinder, {
-    orthofinderCommandFile <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/Orthofinder_wd/run_orthofinder.sh")
+    orthofinderCommandFile <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/OrthoFinder_wd/run_orthofinder.sh")
     if( !file.exists(orthofinderCommandFile) ){
         shinyalert(
             "Oops",
-            "Please click the Create-Orthofinder-Codes button first, then switch this on",
+            "Please click the Create-OrthoFinder-Codes button first, then switch this on",
             type="error"
         )
     }
@@ -1004,7 +1012,7 @@ output$wgd_ksrates_data_download <- downloadHandler(
         # if( !file.exists(wgdcommmandFile) & !file.exists(ksratescommadFile) ){
         #     shinyalert(
         #         "Oops",
-        #         "Please click the TEST Create-WGD-Codes or Create-Ksrates-Codes button first, then switch this on",
+        #         "Please click the TEST Create-WGD-Codes or Create-ksrates-Codes button first, then switch this on",
         #         type="error"
         #     )
         #     return(NULL)
@@ -1020,12 +1028,14 @@ output$wgd_ksrates_data_download <- downloadHandler(
                 stringsAsFactors=FALSE
             )
 
+            species_data$V1 <- gsub("_", " ", species_data$V1)
             species_data$V2 <- gsub("^.*/", "../", species_data$V2)
             species_data$V3 <- gsub("^.*/", "../", species_data$V3)
 
-            file.edit(
-                species_info,
+            write.table(
                 species_data,
+                file=species_info,
+                sep="\t",
                 quote=FALSE,
                 col.names=FALSE,
                 row.names=FALSE

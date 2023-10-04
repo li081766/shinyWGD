@@ -1460,7 +1460,7 @@ observeEvent(input$iadhore_config_go, {
                             else{
                                 shinyalert(
                                     "Opps!",
-                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of ShinyWGD first ..."),
+                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
                                     type="error",
                                 )
                             }
@@ -1863,7 +1863,7 @@ observeEvent(input$iadhore_config_go, {
                             else{
                                 shinyalert(
                                     "Opps!",
-                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of ShinyWGD first ..."),
+                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
                                     type="error",
                                 )
                             }
@@ -2465,7 +2465,7 @@ observeEvent(input$cluster_go, {
         else{
             shinyalert(
                 "Opps!",
-                paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of ShinyWGD first ..."),
+                paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
                 type="error",
             )
         }
