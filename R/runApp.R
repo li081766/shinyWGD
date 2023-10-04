@@ -1,11 +1,11 @@
-#' The main code to run ShinyWGD
+#' The main code to run shinyWGD
 #'
 #'
 #' @export
-runShinyWGD <- function() {
-    appDir <- system.file("ShinyWGD", package="ShinyWGD")
+runshinyWGD <- function() {
+    appDir <- system.file("shinyWGD", package="shinyWGD")
     if (appDir == "") {
-        stop("Could not find ShinyWGD Try re-installing `ShinyWGD`.", call.=FALSE)
+        stop("Could not find shinyWGD Try re-installing `shinyWGD`.", call.=FALSE)
     }
 
     shiny::runApp(appDir)
