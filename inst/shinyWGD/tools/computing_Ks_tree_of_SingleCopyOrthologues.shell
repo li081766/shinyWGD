@@ -1,0 +1,284 @@
+#!/bin/bash
+
+# Note: this program needs mafft to align the protein, 
+# trimal to blacktranslate the protein into the cds, 
+# and paml to compute the Ks tree. So please ensure these 
+# software have been installed before running this program. 
+# You can quickly check it by using `mafft --help`, `trimal -h`,
+# `codeml`.
+
+# For our cluster, we use module to manage the software. 
+# So we load the software by using the command line below
+module load mafft trimal paml
+
+helpFunction()
+{
+   echo ""
+   echo "Usage: $0 -i <singleCopyOrthologuesID> -o <orthologuesGroups> -s <singleCopyOrthologues> -d <Orthogroup_Sequences> -c <cdsFastaDir> -p <aligned.phylip> -t <tree.newick> -n <number_threads>"
+   echo -e "\t-i <orthofinderOutputDir/Orthogroups/Orthogroups_SingleCopyOrthologues.txt>"
+   echo -e "\t-o <orthofinderOutputDir/Orthogroups/Orthogroups.tsv>"
+   echo -e "\t-d <orthofinderOutputDir/Orthogroups/Orthogroup_Sequences/>"
+   echo -e "\t-s <singleCopyOrthologues>"
+   echo -e "\t-c <cdsFastaDir>"
+   echo -e "\t-p <phylipFile>"
+   echo -e "\t-t <newickTree>"
+   echo -e "\t-n <threads>"
+   exit 1
+}
+
+while getopts "i:o:d:s:c:p:t:n:" opt
+do
+   case "$opt" in
+      i ) singleCopyOrthologuesID="$OPTARG" ;;
+      o ) orthologuesGroups="$OPTARG" ;;
+	  d ) orthogroupSequences="$OPTARG" ;;
+      s ) singleCopyOrthologues="$OPTARG" ;;
+      c ) cdsFastaDir="$OPTARG" ;;
+      p ) phylip="$OPTARG" ;;
+      t ) tree="$OPTARG" ;;
+      n ) threads="$OPTARG" ;;
+      ? ) helpFunction ;; # Print helpFunction in case parameter is non-existent
+   esac
+done
+
+if [ -z "$singleCopyOrthologuesID" ] || [ -z "$orthologuesGroups" ] || [ -z "$orthogroupSequences" ] || [ -z "$singleCopyOrthologues" ] || [ -z "$cdsFastaDir" ] || [ -z "$phylip" ] || [ -z "$tree" ] || [ -z "$threads" ]
+then
+   echo "Some or all of the parameters are empty";
+   helpFunction
+fi
+
+# Check if the files exist
+if [ ! -f "$singleCopyOrthologuesID" ] || [ ! -f "$orthologuesGroups" ]; then
+	echo "Error: the output of OrthoFinder is not found. Please check the run log of OrthoFinder."
+	exit 1
+fi
+
+
+# Number of threads
+num_threads=$threads
+
+start_time=$(date +%s)
+
+# Function to select singleCopyOrthologues from orthologuesGroups
+select_items() {
+	local first_file="$1"
+	local second_file="$2"
+	local output_file="$3"
+
+	awk 'FNR == 1 {print}' "$second_file"
+	awk 'FNR == NR { items[$0] = 1; next } $1 in items' "$first_file" "$second_file"
+}
+
+process_orthogroup() {
+	local row=("$@")
+	local orthogroup="${row[0]}"
+	local sequence
+
+	declare -A gene_id_mappings
+
+	for ((i = 1; i < num_species; i++)); do
+		species="${species_names[i]}"
+		species_name="${species%%_*}"
+		species_file="${species_files[$species_name]}"
+		gene_id="${row[i]}"
+		sequence=$(grep -A 1 -wF "$gene_id" "$species_file" | tail -n 1 | sed 's/TAA$//; s/TGA$//; s/TAG$//')
+
+        # Check if the length is divisible by 3
+		if (( ${#sequence} % 3 != 0 )); then
+			continue
+		fi
+
+		gene_id_mappings["${species}_${gene_id}"]="$gene_id"
+
+		echo -e ">${species}_${gene_id}" >> "singleCopyGeneDir/$orthogroup.cds.fas"
+		echo "$sequence" >> "singleCopyGeneDir/$orthogroup.cds.fas"
+	done
+
+	if (( ${#sequence} % 3 != 0 )); then
+		return
+	fi
+
+	for ((i = 1; i < num_species; i++)); do
+		species="${species_names[i]}"
+		species_name="${species%%_*}"
+		pep_file="$orthogroupSequences/$orthogroup.fa"
+		
+		cp "$pep_file" "singleCopyGeneDir/$orthogroup.pep.fas"
+		for key in "${!gene_id_mappings[@]}"; do
+			value="${gene_id_mappings[$key]}"
+
+			sed -i "s/$value/$key/g" "singleCopyGeneDir/$orthogroup.pep.fas"
+		done
+	done
+
+	mafft "singleCopyGeneDir/$orthogroup.pep.fas" --quiet >"singleCopyGeneDir/$orthogroup.pep.mafft.fas"
+	trimal -in "singleCopyGeneDir/$orthogroup.pep.mafft.fas" -backtrans "singleCopyGeneDir/$orthogroup.cds.fas" -automated1 -ignorestopcodon -out "singleCopyGeneDir/$orthogroup.cds.best.fas"	
+}
+
+
+merge_aligned_files_into_phylip() {
+    local selected_file="$1"
+    local aligned_dir="$2"
+    local output_file="$3"
+
+    local aligned_files=("$aligned_dir"/*.cds.best.fas)
+
+    temp_file=$(mktemp)
+    tr -d '\r' < "$selected_file" > "$temp_file"
+    IFS=$'\t' read -r -a species_names <<< "$(head -n 1 "$temp_file" | cut -f 2-)"
+
+    # Declare the associative array to store concatenated sequences
+	#local concatenated_seqs=()
+	declare -A concatenated_seqs
+
+    # Iterate over the aligned sequence files
+    for aligned_file in "${aligned_files[@]}"; do
+        local orthogroup=$(basename "$aligned_file" | cut -d'.' -f1)
+
+        # Read the aligned sequences from the file
+        while IFS= read -r line; do
+            if [[ $line == '>'* ]]; then
+                IFS='_' read -r -a name_parts <<< "${line:1}"
+                local species="${name_parts[0]}_${name_parts[1]}"
+            else
+				concatenated_seqs["$species"]+="${line//[[:space:]]/}"
+            fi
+        done < "$aligned_file"
+    done
+
+    # Write the concatenated sequences to the output phylip file
+    echo "${#species_names[@]} ${#concatenated_seqs[${species_names[0]}]}" > "$output_file"
+    for species in "${species_names[@]}"; do
+        printf "%-20s    %s\n" "$species" "${concatenated_seqs[$species]}" >> "$output_file"
+    done
+
+    rm "$temp_file"
+}
+
+
+# Function to compute ks value using PAML
+compute_ks() {
+	local phylip="$1"
+	local tree="$2"
+	sed 's/, /,/g' "$tree" | sed 's/ /_/g' >tree.newick
+
+    # Create PAML control file
+    control_file="singleCopyGene.paml.ctrl"
+    cat > "$control_file" <<EOF
+      seqfile = ${phylip}
+	  treefile = tree.newick
+      outfile = singleCopyGene.paml.out
+      noisy = 9
+      verbose = 1
+      runmode = 0
+      seqtype = 1
+      CodonFreq = 2
+      clock = 0
+      model = 1
+      NSsites = 0
+       icode = 0
+      Mgene = 0
+      fix_kappa = 0
+      kappa = 2
+      fix_omega = 0
+      omega = 2
+      fix_alpha = 1
+      alpha = .0
+      Malpha = 0
+      ncatG = 4
+      getSE = 0
+      RateAncestor = 0
+      method = 0
+EOF
+
+    # Run PAML to compute ks value
+    codeml "$control_file" >/dev/null
+
+	# Extract ds Tree from PAML output
+	grep -A 1 "dS tree:" singleCopyGene.paml.out  | tail -n 1 >singleCopyGene.ds_tree.newick
+}
+
+
+declare -a pids
+waitPids() {
+	while [ ${#pids[@]} -ne 0 ]; do
+		#echo "Waiting for pids: ${pids[@]}"
+		local range=$(eval echo {0..$((${#pids[@]}-1))})
+		local i
+		for i in $range; do
+			if ! kill -0 ${pids[$i]} 2> /dev/null; then
+				echo "Done -- ${pids[$i]}"
+				unset pids[$i]
+			fi
+		done
+		pids=("${pids[@]}") # Expunge nulls created by unset.
+		sleep 1
+	done
+	#echo "Done!"
+}
+
+addPid() {
+	local desc=$1
+	local pid=$2
+	echo "$desc -- $pid"
+	pids=(${pids[@]} $pid)
+}
+
+select_items "$singleCopyOrthologuesID" "$orthologuesGroups" > "$singleCopyOrthologues"
+selected_file="$singleCopyOrthologues"
+sequence_dir="$cdsFastaDir"
+
+temp_file=$(mktemp)
+tr -d '\r' < "$selected_file" > "$temp_file"
+
+IFS=$'\t' read -r -a species_names < "$temp_file"
+num_species="${#species_names[@]}"
+
+declare -A species_files
+
+for ((i = 1; i < num_species; i++)); do
+	species="${species_names[i]}"
+	species_name="${species%%_*}"
+	species_file="${sequence_dir}/${species_name}*.fa"
+
+	if ls $species_file >/dev/null 2>&1; then
+		species_files["$species_name"]=$(ls $species_file)
+	else
+		echo "Species file not found: ${species_name}.fa"
+	fi
+done
+
+if [ -d "singleCopyGeneDir" ]; then
+	rm -r "singleCopyGeneDir"
+fi
+mkdir "singleCopyGeneDir"
+
+tmp_rows_file=$(mktemp)
+tail -n +2 "$temp_file" > "$tmp_rows_file"
+
+max_jobs="${num_threads}"
+current_jobs=0
+
+while IFS=$'\t' read -r -a row; do
+
+	if [ "$current_jobs" -ge "$max_jobs" ]; then
+		waitPids
+		current_jobs=0
+	fi
+
+	process_orthogroup "${row[@]}" &
+	addPid "Sleep for ${row[0]}" $!
+	((current_jobs++))
+
+done < "$tmp_rows_file"
+
+waitPids
+
+merge_aligned_files_into_phylip "$singleCopyOrthologues" "singleCopyGeneDir" "$phylip"
+compute_ks "$phylip" "$tree"
+
+# Get the end time of the script
+end_time=$(date +%s)
+runtime=$((end_time - start_time))
+
+echo "Script execution time: $runtime seconds"
