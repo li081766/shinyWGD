@@ -1,9 +1,9 @@
 ---
-title: "An Introduction to <span style='color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>ShinyWGD</span>"
+title: "An Introduction to <span style='color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;'>shinyWGD</span>"
 author: "Jia Li"
 date: "`r Sys.Date()`"
 show_toc: yes
-githubEditURL: https://github.com/li081766/ShinyWGD/blob/main/vignettes/intro_to_shinywgd.Rmd
+githubEditURL: https://github.com/li081766/shinyWGD/blob/main/vignettes/intro_to_shinywgd.Rmd
 output: 
    html_document:
     toc: true
@@ -12,7 +12,7 @@ output:
     toc_depth: 3
     number_sections: true
 vignette: >
-  %\VignetteIndexEntry{An Introduction to ShinyWGD}
+  %\VignetteIndexEntry{An Introduction to shinyWGD}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -25,7 +25,7 @@ blockquote {
 }
 </style>
 
-Source: https://github.com/li081766/ShinyWGD/blob/main/vignettes/intro_to_shinywgd.Rmd
+Source: https://github.com/li081766/shinyWGD/blob/main/vignettes/intro_to_shinywgd.Rmd  <img src="../inst/shinyWGD/www/images/sticker.png" align="right" width="120" style="margin-top: -100px;">
 
 ```{r, include=FALSE}
 knitr::opts_chunk$set(
@@ -41,9 +41,9 @@ library(fontawesome)
 # Getting Started
 
 This vignette provides an introduction to WGD inference using 
-the <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> server or package.
+the <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> server or package.
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder), and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) 
+<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder), and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) 
 and then study the whole genome duplication events (WGDs) of the interesting species.
 
 This page provides a brief introduction to this software. 
@@ -56,7 +56,7 @@ This page provides a brief introduction to this software.
 ## Install from CRAN
 
 ```r
-install.packages("ShinyWGD")
+install.packages("shinyWGD")
 ```
 
 ## Install the latest development version from GitHub
@@ -65,7 +65,7 @@ install.packages("ShinyWGD")
 if (!require("devtools")) {
   install.packages("devtools")
 }
-devtools::install_github("li081766/ShinyWGD", dependencies=TRUE, build_vignettes=FALSE)
+devtools::install_github("li081766/shinyWGD", dependencies=TRUE, build_vignettes=FALSE)
 ```
 
 <br></br>
@@ -74,8 +74,8 @@ devtools::install_github("li081766/ShinyWGD", dependencies=TRUE, build_vignettes
 # Usage
 
 ```r
-library(ShinyWGD)
-ShinyWGD::runApp()
+library(shinyWGD)
+shinyWGD::runshinyWGD()
 ```
 
 ## Data Preparation
@@ -87,7 +87,7 @@ Please select the proper number of species you want to study in <font color="9f5
   <blockquote>
   `r fa(name="exclamation-triangle", fill="green")` If only one species is set, the core program will be set to <b>`wgd`</b>, otherwise, <b>`ksrates`</b> will be chosen.</blockquote>
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> provides two options to upload the data in the `Data Preparation` Page.
+<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> provides two options to upload the data in the `Data Preparation` Page.
 
 #### <i>Option One</i>
 
@@ -129,14 +129,14 @@ The detailed format of this file is below: </br>
 
 After successfully uploading the tab-separated file, the number of species in the file will be calculated. 
   
-  - If only one species needed to be studied, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+  - If only one species needed to be studied, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
    will generate the command line for `wgd` by clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create WGD Codes</font> or <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create i-ADHoRe Codes</font> button in the right **`Setting`** panel. 
     
     - Users can check the codes by clicking the <font color="#ad5a5a">`r fa(name="share")` Check WGD Codes</font> or <font color="#ad5a5a">`r fa(name="share")` Check i-ADHoRe Codes</font> button.
     
     - Then, users can click the <font style="background-color: #508ab2; color: white; padding: 2px; border-radius: 2px;">`r fa(name="download")` Download Analysis Data</font> button to download the prepared files and script for `wgd` program. 
 
-  - If multiple species needed to be study, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+  - If multiple species needed to be study, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
    will generate the command line for `ksrates`. 
     
     - Two more parameters should be added.
@@ -165,7 +165,7 @@ This option provide users a more straightforward way to upload data.
   
   - After reviewing and downloading the necessary files, users can execute `wgd`, `ksrates`, `i-ADHoRe` or `OrthoFinder` in their local environment. 
 
-### Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`
+### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
 
 After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). 
   
@@ -182,7 +182,7 @@ Users can execute them in their local environment.
 
 ### <font color="#23B395">Extracting the tree from [TimeTree.org](http://www.timetree.org/)</font>
 
-  If users don’t ensure the evolutionary relationships among the studied species, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>
+  If users don’t ensure the evolutionary relationships among the studied species, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
    provides an alternative way to generate the newick tree through interacting with [TimeTree.org](http://www.timetree.org/) database.
 
   <blockquote>
@@ -193,16 +193,16 @@ Please click the <font style="background-color: #548C00; color: white; padding: 
   
 After successfully obtaining the tree, users can review the tree in the box below <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="tree")` Extract Tree</font> button.
 
-<br><img src="../inst/ShinyWGD/www/images/timetree.png" alt="" class="docImage" width="70%"></br>
+<br><img src="../inst/shinyWGD/www/images/timetree.png" alt="" class="docImage" width="70%"></br>
 
 Users need to save this tree to a local file and then upload the file to `newick tree` panel in the <b>`Setting`</b> block.
 
-## <img src="../inst/ShinyWGD/www/images/ksIcon.svg" alt="Icon" width="20" height="20">  <i>K</i><sub>s</sub> Age Distribution Analysis
+## <img src="../inst/shinyWGD/www/images/ksIcon.svg" alt="Icon" width="20" height="20">  <i>K</i><sub>s</sub> Age Distribution Analysis
 
-After successfully running the corresponding shell files locally, the necessary outputs will be saved in the **`Analysis_Date`** folder. Then users can choose this folder in the `Uploading` panel in <img src="../inst/ShinyWGD/www/images/ksIcon.svg" alt="Icon" width="10" height="10"> page.
+After successfully running the corresponding shell files locally, the necessary outputs will be saved in the **`Analysis_Date`** folder. Then users can choose this folder in the `Uploading` panel in <img src="../inst/shinyWGD/www/images/ksIcon.svg" alt="Icon" width="10" height="10"> page.
 
   <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` Users should choose the folder which is originated from the folder created by <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> program to avoid the failure of displaying the correct file names.</blockquote>
+  `r fa(name="exclamation-triangle", fill="red")` Users should choose the folder which is originated from the folder created by <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> program to avoid the failure of displaying the correct file names.</blockquote>
 
 ### <font color="#23B395">Paralog <i>K</i><sub>s</sub> age distribution</font>
 
@@ -210,11 +210,11 @@ Once selecting one / multiple species from the drop-down menu of <font style="ba
 
 After clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="play")` Start <b><i>K</i><sub>s</sub></b> Analysis</font>, the <i>K</i><sub>s</sub> age distribution of the selected species will be generated. 
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> employs two methods to model the potential peaks of the distribution. 
+<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> employs two methods to model the potential peaks of the distribution. 
 
-First, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> fits normal mixture models to the <b><i>K</i><sub>s</sub></b> data using maximum likelihood with EMMIX. <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> will test one to ten components with 500 random starts. Fitted models are selected by the Bayesian Information Criterion (BIC) within EMMIX. Finally, the fitted models are drawn above the bar plot of each species.
+First, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> fits normal mixture models to the <b><i>K</i><sub>s</sub></b> data using maximum likelihood with EMMIX. <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> will test one to ten components with 500 random starts. Fitted models are selected by the Bayesian Information Criterion (BIC) within EMMIX. Finally, the fitted models are drawn above the bar plot of each species.
 
-Second, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> uses SiZer to identify significant peaks based on the significant zero crossings of derivatives from kernel density estimation. Then, a subplot to show the output of SiZer will be added under the bar plot.
+Second, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> uses SiZer to identify significant peaks based on the significant zero crossings of derivatives from kernel density estimation. Then, a subplot to show the output of SiZer will be added under the bar plot.
 
   <blockquote>
 Please refer to the papers below to see details about EMMIX and SiZer.
@@ -226,17 +226,17 @@ Please refer to the papers below to see details about EMMIX and SiZer.
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/Paralogous_Multiple_Species_Ks-01.jpg" width="90%">
+<img src="../inst/shinyWGD/www/images/Paralogous_Multiple_Species_Ks-01.jpg" width="90%">
 
 ### <font color="#23B395">Ortholog <i>K</i><sub>s</sub> age distribution</font>
 
 Users need to select one species from the <font color="#38B0E4">Group A</font> of the <font style="background-color: #17a2b8; color: #FF9191; padding: 2px; border-radius: 2px;">`r fa(name="list")` Ortholog <i>K</i><sub>s</sub> &#x25BC;</font> as the focal species. Then users can choose multiple species from the <font color="#B97D4B">Group B</font> to compute the density of <i>K</i><sub>s</sub> age distribution between the focal species and the species in the <font color="#B97D4B">Group B</font>. 
 
-To obtain the potential peak of the plot, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> will fit the peak by using the Epanechnikov kernel funciton. Then 95% confidence interval (CI) is estimated by 1000 iterations.
+To obtain the potential peak of the plot, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> will fit the peak by using the Epanechnikov kernel funciton. Then 95% confidence interval (CI) is estimated by 1000 iterations.
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/Wgd_plot_ortholog.svg" width="60%">
+<img src="../inst/shinyWGD/www/images/Wgd_plot_ortholog.svg" width="60%">
 
 In the above figure, the dash line is the peak of a combination of focal species and another species. The colored rectangle is the 95% CI. Users can retrieve the detail information about the density, the peaks, and the 95% CIs by hovering the mouse above the lines or rectangles.  
 
@@ -244,15 +244,15 @@ In the above figure, the dash line is the peak of a combination of focal species
 
 When comparing the one-to-one ortholog <i>K</i><sub>s</sub> distributions between studied species and the reference species, the different <i>K</i><sub>s</sub> peaks for the same speciation event may exist, suggesting different synonymous substitution rates among the studied species, resulting in an over- or under-estimate for the divergence between the studied species and the reference species. 
 
-To quantify the difference in substitution rates, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> employs the relative rate tests. First, the Newick tree, which contains the phylogenetic relationship, will be used to ensure enough species. Then, users need to define a <b> reference species</b> and an <b>outgroup species</b> to determine a tree structure among the species which will be used in the relative rate test. Then, the <i>K</i><sub>s</sub> distance between two species is estimated by the mode of their ortholog KS distribution. Using the <i>K</i><sub>s</sub> distance between the reference species and the studied species, the <i>K</i><sub>s</sub> distance between the outgroup species and the reference species, the <i>K</i><sub>s</sub> distance between the outgroup species and the studied species, the distances to the studied species and the reference species after their divergence are computed. Finally, ortholog <i>K</i><sub>s</sub> between the studied species and the reference species is corrected by the double of the <i>K</i><sub>s</sub> distance to the reference species, assuming that studied species has the same substitution rate as the reference species. 
+To quantify the difference in substitution rates, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> employs the relative rate tests. First, the Newick tree, which contains the phylogenetic relationship, will be used to ensure enough species. Then, users need to define a <b> reference species</b> and an <b>outgroup species</b> to determine a tree structure among the species which will be used in the relative rate test. Then, the <i>K</i><sub>s</sub> distance between two species is estimated by the mode of their ortholog KS distribution. Using the <i>K</i><sub>s</sub> distance between the reference species and the studied species, the <i>K</i><sub>s</sub> distance between the outgroup species and the reference species, the <i>K</i><sub>s</sub> distance between the outgroup species and the studied species, the distances to the studied species and the reference species after their divergence are computed. Finally, ortholog <i>K</i><sub>s</sub> between the studied species and the reference species is corrected by the double of the <i>K</i><sub>s</sub> distance to the reference species, assuming that studied species has the same substitution rate as the reference species. 
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/Rate_correction_with_paralogous_species.svg" width="60%">
+<img src="../inst/shinyWGD/www/images/Rate_correction_with_paralogous_species.svg" width="60%">
 
 In the above figure, Kernel-density estimates (KDEs) of <i>K</i><sub>s</sub> distribution for one-to-one orthologues between <i>V. vinifera</i> and other four species, namely <i>A. officinalis</i>, <i>E. guineesis</i>, <i>A. comosus</i>, and <i>Z. marina</i>. The bar and line plots are the paralog<i>K</i><sub>s</sub> distributions of <i>E. guineensis</i>. As the modes (peaks) of the KDE all represent the distances between <i>V. vinifera</i> and the compared species, the differences observed among the <i>K</i><sub>s</sub> values of the modes indicate substitution rate variations among the studied species. The segments with arrows above the KDE denote, from bottom to top, the <i>K</i><sub>s</sub> distances computed for <i>A. comosus</i> (dark red), <i>E. guineensis</i> (yellow), and <i>A. officinalis</i> (blue) using <i>Z. marina</i> (purple) as the reference and <i>V. vinifera</i> as the outgroup. The dotted lines align with the observed modes in the KDE of the ortholog <i>K</i><sub>s</sub> distributions. The black dots on the segments represent the divergence between <i>Z. marina</i> with the other three species; hence, the lengths of segments pointed to the right show the <i>K</i><sub>s</sub> accumulated in <i>A. comosus</i>, <i>E. guineensis</i> and <i>A. officinalis</i>, whereas the grey segments pointed to the left show the <i>K</i><sub>s</sub> distance between <i>V. vinifera</i> and the divergence of the other species. The grey rectangles show the 95% confidence intervals of the <i>K</i><sub>s</sub>  inferred from 200 bootstraps.
 
-## <img src="../inst/ShinyWGD/www/images/syntenyIcon.svg" alt="Icon" width="20" height="29">  Synteny Analysis
+## <img src="../inst/shinyWGD/www/images/syntenyIcon.svg" alt="Icon" width="20" height="29">  Synteny Analysis
 
 After uploading the folder of `i-ADHoRe` in this page, users can study the *intra-*, *inter-*, and *multiple-* species synteny, as well as the *clustering analysis*.
 
@@ -264,45 +264,45 @@ Users can set the threshold for the number of anchor pairs in each multiplicon t
 
 The dot plot and parallel link plot will be generated.
 
-<img src="../inst/ShinyWGD/www/images/Elaeis_guineensis.self.dot_plot-01.jpg" width="60%">
-<img src="../inst/ShinyWGD/www/images/Elaeis_guineensis.Parallel.svg" width="80%">
+<img src="../inst/shinyWGD/www/images/Elaeis_guineensis.self.dot_plot-01.jpg" width="60%">
+<img src="../inst/shinyWGD/www/images/Elaeis_guineensis.Parallel.svg" width="80%">
 
 ### <font color="#23B395">Multiplicon-level synteny</font>
 
 Users can also search a certain gene to check the location of the gene in the multiplicon in the <font color="green">Multiplicon-level Synteny</font> panel and then plot the searched multiplicon.
 
-<img src="../inst/ShinyWGD/www/images/microSyn_one_species.svg" width="80%">
+<img src="../inst/shinyWGD/www/images/microSyn_one_species.svg" width="80%">
 
 ### <font color="#23B395">Multiple species alignment</font>
 
 In the multiple species alignment panel, users can define the order of species in the plot. Users can change the color of species by clicking the text of the species name. When the mouse hovers a link, the related links with this link among species can be highlighted using different colors. 
 
-<img src="../inst/ShinyWGD/www/images/Multiple_Species_Alignment.Parallel-01.jpg" width="80%">
+<img src="../inst/shinyWGD/www/images/Multiple_Species_Alignment.Parallel-01.jpg" width="80%">
   
 ### <font color="#23B395">Clustering analysis</font>
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> employs the Hierarchical clustering method for constructing putative ancestral regions (PARs). The segments are identified from the outputs of `i-ADHoRe`, and the **homolog concentration scores** are calculated using `-log(p)`, where `p` is the probability of the observed number of homolog pairs as modeled by a Poisson distribution.
+<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> employs the Hierarchical clustering method for constructing putative ancestral regions (PARs). The segments are identified from the outputs of `i-ADHoRe`, and the **homolog concentration scores** are calculated using `-log(p)`, where `p` is the probability of the observed number of homolog pairs as modeled by a Poisson distribution.
 
   <blockquote>
   <font color="green">`r fa(name="exclamation-triangle")`</font> To read more about <b><i>homolog concentration scores</i></b>, please refer to Putnam NH, et al. (2008) <i>The amphioxus genome and the evolution of the chordate karyotype</i>. <b>Nature</b> 453:1064–1071.</blockquote> 
   
 For each segment, the array of scores against all segments in the other genome forms a unique profile. The segments are then clustered based on the similarity of these profiles (determined by **Pearson correlation coefficient r**) using the average linkage method. The default cutoff of r is 0.3. Users can change this cutoff through the sliding block. The faint yellow rectangle will highlight the significantly enriched regions (`P < 1E-10`). Then, users can zoom in each PAR through the <font color="green"><b>Putative Ancestral Regions</b></font> block.
 
-<img src="../inst/ShinyWGD/www/images/Two_species.cluster-01.jpg" width="80%">
+<img src="../inst/shinyWGD/www/images/Two_species.cluster-01.jpg" width="80%">
 
 In the example, we used 0.5 as the cutoff for **r** and 10 to filter out the segment with fewer anchor points. In total, we identified 61 PARs. 
 
 A single PAR zooms in is below.
 
-<img src="../inst/ShinyWGD/www/images/PAR.cluster.svg" width="50%">
+<img src="../inst/shinyWGD/www/images/PAR.cluster.svg" width="50%">
 
-## <img src="../inst/ShinyWGD/www/images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> Tree Building
+## <img src="../inst/shinyWGD/www/images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> Tree Building
 
   In this page, users can generate the <i>K</i><sub>s</sub> unit tree, time tree, and a joint tree with <i>K</i><sub>s</sub> unit tree and time tree.
 
 ### <font color="#23B395"><i>K</i><sub>s</sub> unit tree</font>
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span> uses the single-copy gene families built by *OrthoFinder* to calculate the <i>K</i><sub>s</sub> unit tree. Users can check the tree in the *Orthofinder_wd* folder, named *singleCopyGene.ds_tree.newick*. Once uploading the tree file in the <font color="green"><i>K</i><sub>s</sub> Tree</font> File panel, the <i>K</i><sub>s</sub> unit tree will displayed in the right side of the page. Users can click the text of the species name to change the color or add a symbol to the species. Users can click the branch to add a <i>K</i><sub>s</sub> peak into the branch.
+<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> uses the single-copy gene families built by *OrthoFinder* to calculate the <i>K</i><sub>s</sub> unit tree. Users can check the tree in the *Orthofinder_wd* folder, named *singleCopyGene.ds_tree.newick*. Once uploading the tree file in the <font color="green"><i>K</i><sub>s</sub> Tree</font> File panel, the <i>K</i><sub>s</sub> unit tree will displayed in the right side of the page. Users can click the text of the species name to change the color or add a symbol to the species. Users can click the branch to add a <i>K</i><sub>s</sub> peak into the branch.
 
 Users can upload a file which contains the <i>K</i><sub>s</sub> peaks of each studied species to place these peaks into the <i>K</i><sub>s</sub> unit tree.
 
@@ -348,7 +348,7 @@ Users can upload a file which contains the <i>K</i><sub>s</sub> peaks of each st
 
   The example output is below.
 
-  <img src="../inst/ShinyWGD/www/images/ksTree.Plot.svg" width="95%">
+  <img src="../inst/shinyWGD/www/images/ksTree.Plot.svg" width="95%">
 
 ### <font color="#23B395">Time tree</font>
 
@@ -380,7 +380,7 @@ Users can upload a file which contains the WGD events of each studied species to
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/timeTree.Plot.svg" width="95%">
+<img src="../inst/shinyWGD/www/images/timeTree.Plot.svg" width="95%">
 
 ### <font color="#23B395"><i>K</i><sub>s</sub> unit tree and TimeTree joint tree</font>
 
@@ -388,23 +388,23 @@ If users upload both <i>K</i><sub>s</sub> unit tree and the time tree, a joint <
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/ksTree_timeTree.jointPlot.svg" width="95%">
+<img src="../inst/shinyWGD/www/images/ksTree_timeTree.jointPlot.svg" width="95%">
 
 In the above figure, the left subplot is the <i>K</i><sub>s</sub> unit tree. The right subplot is the time tree. Users can also add the <i>K</i><sub>s</sub> peaks or WGD events into the tree when clicking the branch.
 
 
-## <img src="../inst/ShinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis
+## <img src="../inst/shinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis
 
 In this page, users can use `Whale` to operate the gene tree - species tree reconciliation analysis.
 
-Users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all ALE files. If users use `OrthoFinder` in <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">ShinyWGD</span>, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the ALE files by using the gene families built by other software.
+Users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all ALE files. If users use `OrthoFinder` in <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the ALE files by using the gene families built by other software.
 
 Once the tree file uploaded, users can check the topology of the tree in the right panel. Then users can add the **hypothetical WGD event** to a certain branch by clicking the branch.
 
   <blockquote>
   `r fa(name="exclamation-triangle", fill="red")` Users should use <font color="green"><b>wgd</b></font> as the prefix for the name of <b>hypothetical WGD event</b> to satisfy the requirements of <i>Whale.jl</i>.</blockquote>
 
- <img src="../inst/ShinyWGD/www/images/speciesTree.whale.svg" width="500px">
+ <img src="../inst/shinyWGD/www/images/speciesTree.whale.svg" width="500px">
 
 In the above tree figure, four hypothetical WGD events are tested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
 
@@ -418,7 +418,7 @@ After `Whale` is done, users can check the output in the right side.
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/Whale_output.jpg" width="600px">
+<img src="../inst/shinyWGD/www/images/Whale_output.jpg" width="600px">
 
 <br></br>
 We can judge whether the **hypothetical WGD event** is true or not based on the Bayes factor (*K*) to compare the likelihood of q = 0(H<sub>0</sub>) to the likelihood of q > 0(H<sub>1</sub>) using the Savage–Dickey density ratio.
@@ -432,7 +432,7 @@ Then, users can click the <font style="background-color: #548C00; color: white; 
 
 The example output is below.
 
-<img src="../inst/ShinyWGD/www/images/speciesTree.updated.whale.svg" width="800px">
+<img src="../inst/shinyWGD/www/images/speciesTree.updated.whale.svg" width="800px">
 
 In the above plot, the WGD with the solid green bar is supported with retention rates significantly different from zero, while the hollow WGD bars are the ones with retention rates not different from zero.
 
@@ -448,10 +448,10 @@ Then users can download the plot by clicking the <font style="background-color: 
   - <font color="orange">`r fa(name="microscope")` Data Preparation</font>
   - <font color="orange">`r fa(name="code")` Codes</font>
 - <font color="#6650C9">`r fa(name="pencil-alt")` Analysis</font>
-  - <font color="orange"><img src="../inst/ShinyWGD/www/images/ksIcon.svg" alt="Icon" width="15" height="15"> Age Distribution Analysis</font>
-  - <font color="orange"><img src="../inst/ShinyWGD/www/images/syntenyIcon.svg" alt="Icon" width="15" height="15"> Synteny Analysis</font>
-  - <font color="orange"><img src="../inst/ShinyWGD/www/images/ksTreeIcon.svg" alt="Icon" width="15" height="15"> Tree Building</font>
-  - <font color="orange"><img src="../inst/ShinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="15" height="15"> Gene Tree – Species Tree Reconciliation Analysis</font>
+  - <font color="orange"><img src="../inst/shinyWGD/www/images/ksIcon.svg" alt="Icon" width="15" height="15"> Age Distribution Analysis</font>
+  - <font color="orange"><img src="../inst/shinyWGD/www/images/syntenyIcon.svg" alt="Icon" width="15" height="15"> Synteny Analysis</font>
+  - <font color="orange"><img src="../inst/shinyWGD/www/images/ksTreeIcon.svg" alt="Icon" width="15" height="15"> Tree Building</font>
+  - <font color="orange"><img src="../inst/shinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="15" height="15"> Gene Tree – Species Tree Reconciliation Analysis</font>
 - <font color="#6650C9">`r fa(name="question")` Help</font>
 
 <br></br>

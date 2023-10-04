@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(ShinyWGD)
+library(shinyWGD)
 
-test_check("ShinyWGD")
+test_check("shinyWGD")

@@ -267,7 +267,9 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
         latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
         informal_name_temp <- paste0(latin_name_list[1], i)
 
+        latin_name_temp2 <- gsub(" ", "_", latin_name_temp)
         newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
+        newick_tree <- gsub(latin_name_temp2, informal_name_temp, newick_tree)
 
         proteome_temp <- check_proteome_input(
             informal_name_temp,
@@ -371,6 +373,9 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
         if( focal_species == latin_name ){
             focal_species_informal=informal_name_temp
         }
+
+        latin_name2 <- gsub(" ", "_", latin_name)
+        newick_tree <- gsub(latin_name2, informal_name_temp, newick_tree)
         newick_tree <- gsub(latin_name, informal_name_temp, newick_tree)
         proteome_temp <- check_proteome_from_file(
             informal_name_temp,
@@ -465,7 +470,7 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
     cat("module load wgd blast mcl paml fasttree mafft i-adhore diamond; export OMP_NUM_THREADS=1", file=wgd_cmd, append=TRUE, sep="\n")
     cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
-    cat(paste0("ksrates paralogs-ks ", ksratesconf), file=cmd, append=TRUE, sep="\n")
+    cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     for( i in 1:nrow(data_table) ){
         latin_name <- data_table[i, 1]
         latin_name_temp <- trimws(latin_name)
@@ -498,7 +503,8 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
                 cat(paste("ksrates orthologs-ks",
                            ksratesconf,
                            informal_name_i,
-                           informal_name_j
+                           informal_name_j,
+                          "--n-threads 1"
                         ),
                     file=cmd, append=TRUE, sep="\n"
                 )
@@ -525,7 +531,7 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
 create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     cmd <- file(cmd_file, open="w")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
-    cat(paste0("ksrates paralogs-ks ", ksratesconf), file=cmd, append=TRUE, sep="\n")
+    cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     informal_name_list <- paste0("seq_", 1:input$number_of_study_species)
     for( i in 1:length(informal_name_list) ){
         latin_name <- paste0("latin_name_", i)
@@ -545,7 +551,8 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
                         " ",
                         informal_name_i,
                         " ",
-                        informal_name_j
+                        informal_name_j,
+                        " --n-threads 1"
                     ),
                     file=cmd, append=TRUE, sep="\n"
                 )
