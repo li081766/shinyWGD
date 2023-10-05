@@ -40,6 +40,10 @@ cmd_con <- file(cmd_file, open="w")
 
 #outDir <- paste0(args$output_dir, "/orthofinderOutputDir")
 writeLines(
+    "module load OrthoFinder",
+    cmd_con
+)
+writeLines(
     paste("orthofinder",
           "-f pepDir",
           "-S diamond -t 4 -a 4 -I 3 -M msa -ot",

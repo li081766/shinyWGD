@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Note: this program needs EMBOSS 6.60 to translate the cds into the protein, 
+# Note: this program needs EMBOSS 6.60 to translate the cds into the protein,
 # and diamond to compute the Ks tree. So please ensure these software have been
 # installed before running this program. You can quickly check it by using `transeq -h`
 # and `diamond help` in your command line.
 
-# For our cluster, we use module to manage the software. 
+# For our cluster, we use module to manage the software.
 # So we load the software by using the command line below.
-module load diamond EMBOSS/x86_64/6.6.0
+module load EMBOSS/x86_64/6.6.0
 
 
 # Function to run Diamond for two species
@@ -20,26 +20,26 @@ run_diamond_2sp() {
 	pep_file=$6
 	out_file=$7
 	num_thread=$8
-	
+
 	seqs1=$(cat $fasta_file1)
 	seqs1=$(echo "$seqs1" | sed -E "s/>(.*)/\>${species1}_\1/")
 	temp_file1=$(mktemp)
 	echo "$seqs1" | awk '{print $1}' > $temp_file1
-	
+
 	seqs2=$(cat $fasta_file2)
 	seqs2=$(echo "$seqs2" | sed -E "s/>(.*)/\>${species2}_\1/")
 	temp_file2=$(mktemp)
 	echo "$seqs2" | awk '{print $1}' > $temp_file2
-	
+
 	cat $temp_file1 $temp_file2 > $cds_file
 
 	#module load EMBOSS/x86_64/6.6.0
 	transeq -sequence $cds_file -outseq $pep_file -trim
-	sed -i 's/_/|/2' $pep_file 
+	sed -i 's/_/|/2' $pep_file
 	sed -i 's/_1$//' $pep_file
-	
+
 	diamond blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
-	
+
 	rm $temp_file1 $temp_file2
 }
 
@@ -51,15 +51,15 @@ run_diamond() {
 	pep_file=$4
 	out_file=$5
 	num_thread=$6
-	
+
 	seqs=$(cat $fasta_file)
 	seqs=$(echo "$seqs" | sed -E "s/>(.*)/\>${species}_\1/")
 	echo "$seqs" | awk '{print $1}' > $cds_file
-	
+
 	transeq -sequence $cds_file -outseq $pep_file -trim
 	sed -i 's/_/|/2' $pep_file
 	sed -i 's/_1$//' $pep_file
-	
+
 	diamond blastp -d $pep_file -q $pep_file --outfmt 6 -p $num_thread --out $out_file -e 1E-05 -k 500 --quiet
 }
 
@@ -129,7 +129,7 @@ run_diamond_and_filter() {
 	for (( i = 0; i < ${#input_data_array[@]}; i++ )); do
 		line1="${input_data_array[$i]}"
 		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
-		
+
 		if [[ ! -e "$gff_file" ]]; then
 			echo "Skipping $species: gff_file does not exist"
 			continue
@@ -153,11 +153,11 @@ run_diamond_and_filter() {
 		fi
 
 		iadhore_sp_list+=("$species")
-		
+
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
 			IFS=$'\t' read -r other_species other_fasta_file other_gff_file <<< "$line2"
-			
+
 			if [[ ! -e "$other_gff_file" ]]; then
 				echo "Skipping $other_species: gff_file does not exist"
 				continue

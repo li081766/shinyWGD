@@ -111,7 +111,7 @@ generate_shell() {
 
 		# Add script to calculate the Ks of anchorpoints
 		cdsFile="${species}.cds.fasta"
-		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.sh anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
+		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
 
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
