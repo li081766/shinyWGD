@@ -338,6 +338,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     fasta_filenames_temp <- c()
     # gff_filenames_temp <- c()
 
+    collinearity <- "yes"
     workdirname <- dirname(dirname(ksrates_conf_file))
     newick_tree <- readLines(input$newick_tree$datapath)
     newick_tree <- gsub("_", " ", newick_tree)
@@ -370,10 +371,11 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
         gff <- paste0("gff_", i)
         if( input$select_focal_species == latin_name_temp ){
             if( is.null(input[[gff]]) ){
+                collinearity <- "no"
                 shinyalert(
-                    "Oops!",
-                    "You trigger Ksrates pipeline. Please upload the Annotation file for at lease the focal species",
-                    type="error"
+                    "Note!",
+                    "No Annotation file for the focal species is detected. Do not run the collinearity analysis for the focal species",
+                    type="info"
                 )
             }else{
                 focal_species_gff_filenames_temp <- paste0(informal_name_temp, ".gff")
@@ -406,7 +408,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("paranome=yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("collinearity=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("collinearity=", collinearity), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("gff_feature=mrna"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("gff_attribute=id"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("max_number_outgroups=4"), file=ksratesconf, append=TRUE, sep="\n")
@@ -453,6 +455,8 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     fasta_filenames_temp <- c()
     gff_species <- c()
 
+    collinearity <- "yes"
+
     SpeciesInfoConf <- file(species_info_file, open="w")
     for( i in 1:nrow(data_table) ){
         latin_name <- data_table[i, 1]
@@ -488,10 +492,11 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
         }
     }
     if( !focal_species_informal %in% gff_species ){
+        collinearity <- "no"
         shinyalert(
-            "Oops",
-            paste0("Please set the annotation gff file for the focal species: ", focal_species),
-            type="error",
+            "Note!",
+            "No Annotation file for the focal species is detected. Do not run the collinearity analysis for the focal species",
+            type="info"
         )
     }else{
         focal_species_gff_filenames_temp <- paste0("../", focal_species_informal, ".gff")
@@ -508,7 +513,7 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("paranome=yes"), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("collinearity=yes"), file=ksratesconf, append=TRUE, sep="\n")
+    cat(paste0("collinearity=", collinearity), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("gff_feature=mrna"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("gff_attribute=id"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("max_number_outgroups=4"), file=ksratesconf, append=TRUE, sep="\n")
