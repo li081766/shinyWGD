@@ -191,11 +191,45 @@ is_fasta_cds <- function(file_path) {
 
     if( all(unlist(strsplit(sequence_lines, "")) %in% nucleotide_chars) ){
         return(TRUE)
-    } else {
+    }else{
         return(FALSE)
     }
 }
 
+
+#' Check if the header of sequences contains a pipe character ("|").
+#'
+#' This function reads the first line of a fasta file and checks if the header contains the
+#' pipe character "|".
+#'
+#' @param file_path The path to the file to be checked.
+#'
+#' @return Returns TRUE if the header contains a pipe character, otherwise FALSE.
+#'
+#' @export
+is_header_contains_pipe <- function(file_path) {
+    lines <- readLines(file_path, n=1, warn=FALSE)
+    if( grepl("\\|", lines) ){
+        return(TRUE)
+    }else{
+        return(FALSE)
+    }
+}
+
+#' Extract the first part of a string by splitting it at tab characters ("\t").
+#'
+#' This function takes a string and splits it at tab characters ("\t"). It then
+#' returns the first part of the resulting character vector.
+#'
+#' @param name The input string to be split.
+#'
+#' @return Returns the first part of the input string.
+#'
+#' @export
+extract_first_part <- function(name) {
+    parts <- unlist(strsplit(name, "\t"))
+    return(parts[1])
+}
 
 #' Check and Process Proteome Input File
 #'
@@ -226,12 +260,25 @@ check_proteome_input <- function(proteome_name, proteome_input){
         return(NULL)
     }
 
+    if( is_header_contains_pipe(proteome_input$datapath) ){
+        proteome_name <- gsub("[0-9]", "", proteome_name)
+        proteome_name <- gsub("_", " ", proteome_name)
+        shinyalert(
+            paste0("Oops!",
+                   " Please upload the correct proteome file for ",
+                   proteome_name,
+                   ". Do not keep \"|\" in the identifier of each sequences.",
+                   "Then switch this on"),
+            type="error"
+        )
+        return(NULL)
+    }
     sequences <- read.fasta(proteome_input$datapath)
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
     write.fasta(
         sequences=filtered_sequences,
-        names=names(filtered_sequences),
+        names=sapply(names(filtered_sequences), extract_first_part),
         file.out=proteome_file
     )
 
@@ -269,12 +316,26 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
         return(NULL)
     }
 
+    if( is_header_contains_pipe(proteome_input) ){
+        proteome_name <- gsub("[0-9]", "", proteome_name)
+        proteome_name <- gsub("_", " ", proteome_name)
+        shinyalert(
+            paste0("Oops!",
+                   " Please upload the correct proteome file for ",
+                   proteome_name,
+                   ". Do not keep \"|\" in the identifier of each sequences.",
+                   "Then switch this on"),
+            type="error"
+        )
+        return(NULL)
+    }
+
     sequences <- read.fasta(proteome_input)
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
     write.fasta(
         sequences=filtered_sequences,
-        names=names(filtered_sequences),
+        names=sapply(names(filtered_sequences), extract_first_part),
         file.out=proteome_file
     )
 
