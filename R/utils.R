@@ -216,9 +216,9 @@ is_header_contains_pipe <- function(file_path) {
     }
 }
 
-#' Extract the first part of a string by splitting it at tab characters ("\t").
+#' Extract the first part of a string by splitting it at tab characters.
 #'
-#' This function takes a string and splits it at tab characters ("\t"). It then
+#' This function takes a string and splits it at tab characters. It then
 #' returns the first part of the resulting character vector.
 #'
 #' @param name The input string to be split.

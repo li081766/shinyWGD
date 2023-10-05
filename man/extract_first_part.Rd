@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{extract_first_part}
 \alias{extract_first_part}
-\title{Extract the first part of a string by splitting it at tab characters ("\t").}
+\title{Extract the first part of a string by splitting it at tab characters.}
 \usage{
 extract_first_part(name)
 }
@@ -13,6 +13,6 @@ extract_first_part(name)
 Returns the first part of the input string.
 }
 \description{
-This function takes a string and splits it at tab characters ("\t"). It then
+This function takes a string and splits it at tab characters. It then
 returns the first part of the resulting character vector.
 }
