@@ -196,26 +196,6 @@ is_fasta_cds <- function(file_path) {
     }
 }
 
-
-#' Check if the header of sequences contains a pipe character ("|").
-#'
-#' This function reads the first line of a fasta file and checks if the header contains the
-#' pipe character "|".
-#'
-#' @param file_path The path to the file to be checked.
-#'
-#' @return Returns TRUE if the header contains a pipe character, otherwise FALSE.
-#'
-#' @export
-is_header_contains_pipe <- function(file_path) {
-    lines <- readLines(file_path, n=1, warn=FALSE)
-    if( grepl("\\|", lines) ){
-        return(TRUE)
-    }else{
-        return(FALSE)
-    }
-}
-
 #' Extract the first part of a string by splitting it at tab characters.
 #'
 #' This function takes a string and splits it at tab characters. It then
@@ -260,7 +240,9 @@ check_proteome_input <- function(proteome_name, proteome_input){
         return(NULL)
     }
 
-    if( is_header_contains_pipe(proteome_input$datapath) ){
+    sequences <- read.fasta(proteome_input$datapath)
+
+    if( grepl("\\|", names(sequences)) ){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
@@ -273,7 +255,7 @@ check_proteome_input <- function(proteome_name, proteome_input){
         )
         return(NULL)
     }
-    sequences <- read.fasta(proteome_input$datapath)
+
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
     write.fasta(
@@ -316,9 +298,10 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
         return(NULL)
     }
 
-    if( is_header_contains_pipe(proteome_input) ){
-        proteome_name <- gsub("[0-9]", "", proteome_name)
-        proteome_name <- gsub("_", " ", proteome_name)
+    sequences <- read.fasta(proteome_input)
+
+    if( any(grepl("\\|", names(sequences))) ){
+        proteome_name <- gsub("[0-9_]", " ", proteome_name)
         shinyalert(
             paste0("Oops!",
                    " Please upload the correct proteome file for ",
@@ -330,7 +313,6 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
         return(NULL)
     }
 
-    sequences <- read.fasta(proteome_input)
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
     write.fasta(
