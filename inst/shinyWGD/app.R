@@ -26,8 +26,12 @@ rm(list=ls())
 ## change upload file size limit to 5GB
 options(shiny.maxRequestSize=5000*1024^2)
 
-## load custom settings and functions
-# source(file="utils.R", local=T, encoding="UTF-8")
+## source the necessary R script before deploying shinyWGD to the PSB server
+# R_files <- list.files(path="R", pattern="\\.R$", full.names=TRUE)
+# for( file in R_files ){
+#     source(file)
+# }
+
 ### load ui pages
 source(file="ui/introduction.ui.R", local=T, encoding="UTF-8")
 source(file="ui/data_preparation.ui.R", local=T, encoding="UTF-8")
