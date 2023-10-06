@@ -153,7 +153,7 @@ generate_shell_multiple_species (){
 		mkdir -p "$outdir"
 	fi
 	blastp_file="i-adhore.Multiple_Species/Multiple_Species.blastp.pairs"
-	echo "ls */*.blastp.pairs | grep -v Multiple_Species.blastp.pairs | xargs cat >>$blastp_file" >>"$command_file"
+	echo "ls */*.blastp.pairs | grep -v Multiple_Species.blastp.pairs | xargs cat >$blastp_file" >>"$command_file"
 
 	iadhore_conf_file="${outdir}/Multiple_Species.i-adhore.ini"
 	IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"

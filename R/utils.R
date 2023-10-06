@@ -403,7 +403,9 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     cat(paste0("newick_tree=", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("latin_names=", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("fasta_filenames=", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    if( collinearity == "yes" ){
+        cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    }
     cat(paste0("peak_database_path=ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
@@ -491,6 +493,7 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
             cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
         }
     }
+
     if( !focal_species_informal %in% gff_species ){
         collinearity <- "no"
         shinyalert(
@@ -508,7 +511,9 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     cat(paste0("newick_tree=", newick_tree), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("latin_names=", paste(latin_names_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("fasta_filenames=", paste(fasta_filenames_temp, collapse=", ")), file=ksratesconf, append=TRUE, sep="\n")
-    cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    if( collinearity == "yes" ){
+        cat(paste0("gff_filename=", focal_species_gff_filenames_temp), file=ksratesconf, append=TRUE, sep="\n")
+    }
     cat(paste0("peak_database_path=ortholog_peak_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("ks_list_database_path=ortholog_ks_list_db.tsv"), file=ksratesconf, append=TRUE, sep="\n")
     cat(paste0("[ANALYSIS SETTING]"), file=ksratesconf, append=TRUE, sep="\n")
