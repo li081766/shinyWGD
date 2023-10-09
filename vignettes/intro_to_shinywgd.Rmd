@@ -19,7 +19,7 @@ vignette: >
 
 <style>
 blockquote {
-  font-size: 12px;
+  font-size: 14px;
   background-color: #f0f0f0;
   padding: 10px;
 }
@@ -128,7 +128,7 @@ The detailed format of this file is below: </br>
     - **`focal species`** is the parameter in `ksrates`, which will be set in the [`configure file`](https://ksrates.readthedocs.io/en/latest/configuration.html) of `ksrates`.
 
 After successfully uploading the tab-separated file, the number of species in the file will be calculated. 
-  
+
   - If only one species needed to be studied, <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
    will generate the command line for `wgd` by clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create WGD Codes</font> or <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create i-ADHoRe Codes</font> button in the right **`Setting`** panel. 
     
@@ -164,10 +164,15 @@ This option provide users a more straightforward way to upload data.
   - Then users can click the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create WGD Codes</font> or <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="code")` Create Ksrates Codes</font> button to create the codes for `wgd` or `ksrates` according to the species number.
   
   - After reviewing and downloading the necessary files, users can execute `wgd`, `ksrates`, `i-ADHoRe` or `OrthoFinder` in their local environment. 
+  
+    
+ <blockquote>
+  `r fa(name="exclamation-triangle", fill="red")` <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> will exclude genes with internal stop codons and genes whose lengths are not divisible by three. You can find details on the gene filtering process in the *Sequence_processing.log* file located in the **`Analysis_Date`** folder.
+</blockquote>
 
 ### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
 
-After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). 
+After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_paralog_ks_rest_species.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). 
   
 Users can execute them in their local environment.  
     
