@@ -211,6 +211,41 @@ extract_first_part <- function(name) {
     return(parts[1])
 }
 
+#' Remove Genes Contain Stop Codons within the Sequence
+#'
+#' This function removes the gene contains stop codons (TAA, TAG, TGA, taa, tag, tga)
+#' within its sequence.
+#'
+#' @param sequence A nucleotide sequence as a character string.
+#'
+#' @return A character string or NULL.
+#'
+#' @export
+#'
+#' @examples
+#' sequence <- "ATGTAACTAGTGAAGTAGCTAACATAG"
+#' modified_sequence <- remove_inner_stop_codon_sequence(sequence)
+#' modified_sequence
+#' # [1] NULL
+#'
+remove_inner_stop_codon_sequence <- function(sequence) {
+    is_stop_codon <- function(codon) {
+        stop_codons <- c("TAA", "TAG", "TGA", "taa", "tag", "tga")
+        return(codon %in% stop_codons)
+    }
+
+    codons <- strsplit(sequence, "")
+    codons <- split(codons, rep(1:(length(codons) / 3), each=3))
+    codons <- sapply(codons, paste, collapse="")
+    codons <- codons[-length(codons)]
+
+    if( any(is_stop_codon(codons)) ){
+        return(NULL)
+    }else{
+        return(sequence)
+    }
+}
+
 #' Check and Process Proteome Input File
 #'
 #' This function checks the type of proteome input file and processes it accordingly.
@@ -258,11 +293,37 @@ check_proteome_input <- function(proteome_name, proteome_input){
 
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
+
+    filtered_sequences_2 <- sapply(filtered_sequences, remove_inner_stop_codon_sequence, simplify=FALSE)
+    filtered_sequences_2 <- filtered_sequences_2[sapply(filtered_sequences_2, function(x) !is.null(x))]
+
     write.fasta(
-        sequences=filtered_sequences,
-        names=sapply(names(filtered_sequences), extract_first_part),
-        file.out=proteome_file
+        sequences=filtered_sequences_2,
+        names=sapply(names(filtered_sequences_2), extract_first_part),
+        file.out=proteome_file,
+        nbchar=100000000
     )
+
+    # Get the Log Info
+    log_file <- paste0(dirname(proteome_file), "/Sequence_processing.log")
+    if( file.exists(log_file) ){
+        logInfo <- file(log_file, open="a")
+    }else{
+        logInfo <- file(log_file, open="w")
+        cat(paste("Species", "Tot_gene", "genes_not_triple_codon", "genes_within_stop_codons", "refined_gene", collapse="\t"), file=logInfo, sep="\n")
+    }
+    original_num <- length(sequences)
+    filter_num1 <- length(filtered_sequences)
+    filter_num2 <- length(filtered_sequences_2)
+
+    if( original_num == filter_num1 && filter_num1 == filter_num2 ){
+        cat(paste(proteome_name, original_num, 0, 0, original_num, collapse="\t"), file=logInfo, append=TRUE, sep="\n")
+    }else{
+        tmp1_num <- original_num - filter_num1
+        tmp2_num <- filter_num1 - filter_num2
+        cat(paste(proteome_name, original_num, tmp1_num, tmp2_num, filter_num2, collapse="\t"), file=logInfo, append=TRUE, sep="\n")
+    }
+    close(logInfo)
 
     return(proteome_file)
 }
@@ -315,11 +376,35 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
 
     lengths <- getLength(sequences)
     filtered_sequences <- sequences[lengths %% 3 == 0]
+    filtered_sequences_2 <- sapply(filtered_sequences, remove_inner_stop_codon_sequence, simplify=FALSE)
+    filtered_sequences_2 <- filtered_sequences_2[sapply(filtered_sequences_2, function(x) !is.null(x))]
     write.fasta(
-        sequences=filtered_sequences,
-        names=sapply(names(filtered_sequences), extract_first_part),
-        file.out=proteome_file
+        sequences=filtered_sequences_2,
+        names=sapply(names(filtered_sequences_2), extract_first_part),
+        file.out=proteome_file,
+        nbchar=100000000
     )
+
+    # Get the Log Info
+    log_file <- paste0(dirname(proteome_file), "/Sequence_processing.log")
+    if( file.exists(log_file) ){
+        logInfo <- file(log_file, open="a")
+    }else{
+        logInfo <- file(log_file, open="w")
+        cat(paste("Species", "Tot_gene", "genes_not_triple_codon", "genes_within_stop_codons", "refined_gene", collapse="\t"), file=logInfo, sep="\n")
+    }
+    original_num <- length(sequences)
+    filter_num1 <- length(filtered_sequences)
+    filter_num2 <- length(filtered_sequences_2)
+
+    if( original_num == filter_num1 && filter_num1 == filter_num2 ){
+        cat(paste(proteome_name, original_num, 0, 0, original_num, collapse="\t"), file=logInfo, append=TRUE, sep="\n")
+    }else{
+        tmp1_num <- original_num - filter_num1
+        tmp2_num <- filter_num1 - filter_num2
+        cat(paste(proteome_name, original_num, tmp1_num, tmp2_num, filter_num2, collapse="\t"), file=logInfo, append=TRUE, sep="\n")
+    }
+    close(logInfo)
 
     return(proteome_file)
 }
