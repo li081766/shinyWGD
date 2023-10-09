@@ -648,14 +648,13 @@ create_ksrates_expert_parameter_file <- function(ksrates_expert_parameter_file){
 #' @param data_table The data table containing information about species.
 #' @param ksratesconf The path to the Ksrates configuration file.
 #' @param cmd_file The path to the main Ksrates command file to be generated.
-#' @param wgd_cmd_file The path to the WGD command file to be generated.
 #' @param focal_species The name of the focal species.
 #'
 #' @export
-create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd_cmd_file, focal_species){
+create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, focal_species){
     cmd <- file(cmd_file, open="w")
-    wgd_cmd <- file(wgd_cmd_file, open="w")
-    cat("module load wgd blast mcl paml fasttree mafft i-adhore diamond; export OMP_NUM_THREADS=1", file=wgd_cmd, append=TRUE, sep="\n")
+    # wgd_cmd <- file(wgd_cmd_file, open="w")
+    # cat("module load wgd blast mcl paml fasttree mafft i-adhore diamond; export OMP_NUM_THREADS=1", file=wgd_cmd, append=TRUE, sep="\n")
     cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
@@ -665,24 +664,24 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
         latin_name_temp <- trimws(latin_name)
         latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
         informal_name_i <- paste0(latin_name_list[1], i)
-        if( latin_name_temp != focal_species ){
-            cat(paste0("# Dealing with ", latin_name_temp), file=wgd_cmd, append=TRUE, seq="\n")
-            cat(paste0("mkdir paralog_distributions/wgd_", informal_name_i), file=wgd_cmd, append=TRUE, seq="\n")
-            cat(paste0("wgd dmd -I 3 ../", informal_name_i, ".fa -o paralog_distributions/wgd_", informal_name_i, "/01.wgd_dmd"), file=wgd_cmd, append=TRUE, sep="\n")
-            cat(paste0("wgd ksd paralog_distributions/wgd_", informal_name_i, "/01.wgd_dmd/", informal_name_i, ".fa.mcl ../", informal_name_i, ".fa -o paralog_distributions/wgd_", informal_name_i, "/02.wgd_ksd"), file=wgd_cmd, append=TRUE, sep="\n")
-            if( !is.na(data_table[i, 3]) ){
-                cat(
-                    paste0(
-                        "wgd syn -f mRNA -a ID -ks paralog_distributions/wgd_",
-                        informal_name_i, "/02.wgd_ksd/", informal_name_i, ".fa.ks.tsv ../",
-                        informal_name_i, ".gff paralog_distributions/wgd_",
-                        informal_name_i, "/01.wgd_dmd", informal_name_i, ".fa.mcl -o paralog_distributions/wgd_",
-                        informal_name_i, "/03.wgd_syn"),
-                    file=wgd_cmd, append=TRUE, sep="\n"
-                )
-                cat("", file=wgd_cmd, append=TRUE, sep="\n")
-            }
-        }
+        # if( latin_name_temp != focal_species ){
+        #     cat(paste0("# Dealing with ", latin_name_temp), file=wgd_cmd, append=TRUE, seq="\n")
+        #     cat(paste0("mkdir paralog_distributions/wgd_", informal_name_i), file=wgd_cmd, append=TRUE, seq="\n")
+        #     cat(paste0("wgd dmd -I 3 ../", informal_name_i, ".fa -o paralog_distributions/wgd_", informal_name_i, "/01.wgd_dmd"), file=wgd_cmd, append=TRUE, sep="\n")
+        #     cat(paste0("wgd ksd paralog_distributions/wgd_", informal_name_i, "/01.wgd_dmd/", informal_name_i, ".fa.mcl ../", informal_name_i, ".fa -o paralog_distributions/wgd_", informal_name_i, "/02.wgd_ksd"), file=wgd_cmd, append=TRUE, sep="\n")
+        #     if( !is.na(data_table[i, 3]) ){
+        #         cat(
+        #             paste0(
+        #                 "wgd syn -f mRNA -a ID -ks paralog_distributions/wgd_",
+        #                 informal_name_i, "/02.wgd_ksd/", informal_name_i, ".fa.ks.tsv ../",
+        #                 informal_name_i, ".gff paralog_distributions/wgd_",
+        #                 informal_name_i, "/01.wgd_dmd", informal_name_i, ".fa.mcl -o paralog_distributions/wgd_",
+        #                 informal_name_i, "/03.wgd_syn"),
+        #             file=wgd_cmd, append=TRUE, sep="\n"
+        #         )
+        #         cat("", file=wgd_cmd, append=TRUE, sep="\n")
+        #     }
+        # }
         for( j in 1:nrow(data_table) ){
             latin_name <- data_table[j, 1]
             latin_name_temp <- trimws(latin_name)
@@ -707,7 +706,7 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, wgd
     cat(paste0("ksrates plot-tree ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-analyses ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     close(cmd)
-    close(wgd_cmd)
+    # close(wgd_cmd)
 }
 
 #' Create Ksrates Command Files from Shiny Input

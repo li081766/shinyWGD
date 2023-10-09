@@ -776,14 +776,6 @@ observeEvent(input$ksrates_go, {
                         speciesinfoconf
                     )
 
-                    system(
-                        paste(
-                            "cp",
-                            paste0(getwd()[1], "/tools/run_paralog_ks_rest_species.sh"),
-                            ksratesDir
-                        )
-                    )
-
                     incProgress(amount=.1, message="Preparing ksrates Expert Parameters ...")
                     Sys.sleep(.1)
                     ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
@@ -792,8 +784,16 @@ observeEvent(input$ksrates_go, {
                     incProgress(amount=.8, message="Create ksrates Running Script ...")
                     Sys.sleep(.1)
                     ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
-                    wgd_cmd_sh_file <- paste0(ksratesDir, "/run_wgd_rest_species.sh")
-                    ksrates_cmd <- create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, wgd_cmd_sh_file, input$select_focal_species)
+                    # wgd_cmd_sh_file <- paste0(ksratesDir, "/run_wgd_rest_species.sh")
+                    ksrates_cmd <- create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, input$select_focal_species)
+
+                    system(
+                        paste(
+                            "cp",
+                            paste0(getwd()[1], "/tools/run_paralog_ks_rest_species.sh"),
+                            ksratesDir
+                        )
+                    )
 
                     incProgress(amount=1)
                     Sys.sleep(.1)

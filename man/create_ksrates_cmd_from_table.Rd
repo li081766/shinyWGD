@@ -4,13 +4,7 @@
 \alias{create_ksrates_cmd_from_table}
 \title{Create Ksrates Command Files from Data Table}
 \usage{
-create_ksrates_cmd_from_table(
-  data_table,
-  ksratesconf,
-  cmd_file,
-  wgd_cmd_file,
-  focal_species
-)
+create_ksrates_cmd_from_table(data_table, ksratesconf, cmd_file, focal_species)
 }
 \arguments{
 \item{data_table}{The data table containing information about species.}
@@ -18,8 +12,6 @@ create_ksrates_cmd_from_table(
 \item{ksratesconf}{The path to the Ksrates configuration file.}
 
 \item{cmd_file}{The path to the main Ksrates command file to be generated.}
-
-\item{wgd_cmd_file}{The path to the WGD command file to be generated.}
 
 \item{focal_species}{The name of the focal species.}
 }
