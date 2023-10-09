@@ -107,11 +107,12 @@ generate_shell() {
 		fi
 		iadhore_conf_file="${outdir}/${species}_vs_${species}.i-adhore.ini"
 		make_configure_iadhore "$species" "$species_gene_list" "$iadhore_conf_file" "i-adhore.${species}_vs_${species}"
-		echo "i-adhore i-adhore.${species}_vs_${species}/${species}_vs_${species}.i-adhore.ini 1>i-adhore i-adhore.${species}_vs_${species}/running.log" >> "$config_file_con"
+		echo "i-adhore i-adhore.${species}_vs_${species}/${species}_vs_${species}.i-adhore.ini 1>i-adhore.${species}_vs_${species}/i-adhore.running.log" >> "$config_file_con"
 
 		# Add script to calculate the Ks of anchorpoints
 		cdsFile="${species}.cds.fasta"
-		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
+		pepFile="${species}.pep.fasta"
+		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile $pepFile 4; cd .." >> "$config_file_con"
 
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
@@ -132,11 +133,12 @@ generate_shell() {
 			fi
 			iadhore_conf_file="${outdir}/${species1}_vs_${species2}.i-adhore.ini"
 			make_configure_iadhore_2sp "$species1" "$species1_gene_list" "$species2" "$species2_gene_list" "$iadhore_conf_file" "i-adhore.${species1}_vs_${species2}"
-			echo "i-adhore i-adhore.${species1}_vs_${species2}/${species1}_vs_${species2}.i-adhore.ini" >> "$config_file_con"
+			echo "i-adhore i-adhore.${species1}_vs_${species2}/${species1}_vs_${species2}.i-adhore.ini 1>i-adhore.${species1}_vs_${species2}/i-adhore.running.log" >> "$config_file_con"
 
 			# Add script to calculate the Ks of anchorpoints
 			cdsFile="${species1}_vs_${species2}.cds.fasta"
-			echo "cd i-adhore.${species1}_vs_${species2}/; sh ../computing_anchorpoint_ks.MultiThreads.sh anchorpoints.txt $cdsFile 4; cd .." >> "$config_file_con"
+			pepFile="${species1}_vs_${species2}.pep.fasta"
+			echo "cd i-adhore.${species1}_vs_${species2}/; sh ../computing_anchorpoint_ks.MultiThreads.sh anchorpoints.txt $cdsFile $pepFile 4; cd .." >> "$config_file_con"
 		done
 	done
 	cat "$config_file_con" >> "$cmd_file"

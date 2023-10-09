@@ -1,11 +1,11 @@
 #!/bin/bash
-# Note: this program needs prank to align the cds, and paml to compute the Ks tree
+# Note: this program needs mafft to align the pep, use trimal to backtranlate the pep to cds, and paml to compute the Ks tree
 # For our cluster, we use module to manage the software. So we load the software by using the command line below
-module load prank paml
+module load mafft trimal paml
 
 # Check if both anchorpoints file and fasta file are provided as command-line arguments
-if [ $# -lt 3 ]; then
-    echo "Usage: $0 <anchorpoints_file> <fasta_file> <thread_num>"
+if [ $# -lt 4 ]; then
+	echo "Usage: $0 <anchorpoints_file> <cds.fasta> <pep.fasta> <thread_num>"
     exit 1
 fi
 
@@ -15,8 +15,11 @@ anchorpoints_file="$1"
 # Fasta file
 fasta_file="$2"
 
+# Pep file
+pep_file="$3"
+
 # Number of threads
-num_threads="$3"
+num_threads="$4"
 
 
 start_time=$(date +%s)  # Get the start time of the script
@@ -48,10 +51,16 @@ perform_alignment() {
     echo ">${gene_y}" >> "$tmp_fasta"
     grep -A 1 "$gene_y" "$fasta_file" | tail -n 1 >> "$tmp_fasta"
 
-    # Perform alignment using prank (assuming codon alignment)
-    aligned_file="${gene_x}_${gene_y}_nuc.aligned"
-	prank -codon -F -once -d="$tmp_fasta" -o="$aligned_file"
+	tmp_pep_fasta="${gene_x}_${gene_y}.pep"
+	echo ">${gene_x}" > "$tmp_pep_fasta"
+	less "$pep_file" | awk '/^>/ {if (seq) print seq; print; seq=""; next} {seq = seq $0} END {print seq}' | grep -A 1 "$gene_x" | tail -n 1 | sed 's/TAA$//i; s/TGA$//i; s/TAG$//i' >> "$tmp_pep_fasta"
+	echo ">${gene_y}" >> "$tmp_pep_fasta"
+	less "$pep_file" | awk '/^>/ {if (seq) print seq; print; seq=""; next} {seq = seq $0} END {print seq}' | grep -A 1 "$gene_y" | tail -n 1 | sed 's/TAA$//i; s/TGA$//i; s/TAG$//i' >> "$tmp_pep_fasta"
 
+    # Perform alignment using mafft and trimal to do the alignment
+    aligned_file="${gene_x}_${gene_y}_nuc.aligned.best.fas"
+	mafft --quiet "$tmp_pep_fasta" > "$tmp_pep_fasta.mafft.fa"
+	trimal -in "$tmp_pep_fasta.mafft.fa" -backtrans "$tmp_fasta" -automated1 -out "$aligned_file" -ignorestopcodon
 }
 
 # Function to convert FASTA to PHYLIP format
@@ -59,40 +68,42 @@ convert_to_phylip() {
     fasta_file="${gene_x}_${gene_y}_nuc.aligned.best.fas"
     phylip_file="${gene_x}_${gene_y}_nuc.aligned.best.phylip"
 
+	# Use trimal to convert fasta format into phylip format
+	trimal -in "$fasta_file" -out "$phylip_file" -phylip_paml 
 
     # Read the FASTA file and extract the sequence names and sequences
-    sequence_names=()
-    sequences=()
-    current_sequence=""
-
-    while read -r line; do
-        if [[ "$line" =~ ^>(.*)$ ]]; then
-            if [[ -n "$current_sequence" ]]; then
-                sequences+=("$current_sequence")
-                current_sequence=""
-            fi
-            sequence_names+=("${BASH_REMATCH[1]}")
-        else
-            current_sequence+="$line"
-        fi
-    done < "$fasta_file"
-
-    # Add the last sequence
-    if [[ -n "$current_sequence" ]]; then
-        sequences+=("$current_sequence")
-    fi
-
-    # Get the number of sequences and sequence length
-    num_sequences=${#sequence_names[@]}
-    sequence_length=${#sequences[0]}
-
-    # Write the PHYLIP header line
-    echo "$num_sequences $sequence_length" > "$phylip_file"
-
-    # Write the sequence names and sequences in PHYLIP format
-    for ((i = 0; i < num_sequences; i++)); do
-        printf "%-50s%s\n" "${sequence_names[i]}" "${sequences[i]}" >> "$phylip_file"
-    done
+#    sequence_names=()
+#    sequences=()
+#    current_sequence=""
+#
+#    while read -r line; do
+#        if [[ "$line" =~ ^>(.*)$ ]]; then
+#            if [[ -n "$current_sequence" ]]; then
+#                sequences+=("$current_sequence")
+#                current_sequence=""
+#            fi
+#            sequence_names+=("${BASH_REMATCH[1]}")
+#        else
+#            current_sequence+="$line"
+#        fi
+#    done < "$fasta_file"
+#
+#    # Add the last sequence
+#    if [[ -n "$current_sequence" ]]; then
+#        sequences+=("$current_sequence")
+#    fi
+#
+#    # Get the number of sequences and sequence length
+#    num_sequences=${#sequence_names[@]}
+#    sequence_length=${#sequences[0]}
+#
+#    # Write the PHYLIP header line
+#    echo "$num_sequences $sequence_length" > "$phylip_file"
+#
+#    # Write the sequence names and sequences in PHYLIP format
+#    for ((i = 0; i < num_sequences; i++)); do
+#        printf "%-50s%s\n" "${sequence_names[i]}" "${sequences[i]}" >> "$phylip_file"
+#    done
 }
 
 # Function to compute ks value using PAML
@@ -144,7 +155,7 @@ while IFS=$'\t' read -r id multiplicon basecluster gene_x gene_y coord_x coord_y
     {
 		# Check if gene_x and gene_y are valid anchorpoints
    		if [[ "$is_real_anchorpoint" == "-1" ]]; then
-   			# Perform alignment using Prank
+   			# Perform alignment using mafft and trimal
        		aliged_file=$(perform_alignment "$gene_x" "$gene_y" "$fasta_file")
 
 			# Convert fasta into phylip
@@ -167,8 +178,14 @@ while IFS=$'\t' read -r id multiplicon basecluster gene_x gene_y coord_x coord_y
 			if [ -f "${gene_x}_${gene_y}.nuc.fa" ]; then
 				rm "${gene_x}_${gene_y}.nuc.fa"
 			fi
+			if [ -f "${gene_x}_${gene_y}.pep" ]; then
+				rm "${gene_x}_${gene_y}.pep"
+			fi
 			if [ -f "${gene_x}_${gene_y}_nuc.aligned.best.fas" ]; then
 				rm "${gene_x}_${gene_y}_nuc.aligned.best.fas"
+			fi
+			if [ -f "${gene_x}_${gene_y}.pep.mafft.fa" ]; then
+				rm "${gene_x}_${gene_y}.pep.mafft.fa"
 			fi
 			if [ -f "${gene_x}_${gene_y}_nuc.aligned.best.phylip" ]; then
 				rm "${gene_x}_${gene_y}_nuc.aligned.best.phylip"

@@ -58,10 +58,10 @@ writeLines(
         "./computing_Ks_tree_of_SingleCopyOrthologues.shell \\\n",
         "\t-i orthofinderOutputDir/$folder/Orthogroups/Orthogroups_SingleCopyOrthologues.txt \\\n",
         "\t-o orthofinderOutputDir/$folder/Orthogroups/Orthogroups.tsv \\\n",
-        "\t-d orthofinderOutputDir/$folder/Orthogroups/Orthogroup_Sequences/ \\\n",
+        "\t-d orthofinderOutputDir/$folder/Orthogroup_Sequences/ \\\n",
         "\t-s SingleCopyOrthologues.tsv \\\n",
-        "\t-c ../ \\\n",
-        "\t-p ../singleCopyAlign.phylip \\\n",
+        "\t-c ../Species.info.xls \\\n",
+        "\t-p singleCopyAlign.phylip \\\n",
         "\t-t ../tree.newick \\\n",
         "\t-n 4"
     ),

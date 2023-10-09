@@ -1,25 +1,25 @@
 #!/bin/bash
 
-# Note: this program needs mafft to align the protein, 
-# trimal to blacktranslate the protein into the cds, 
-# and paml to compute the Ks tree. So please ensure these 
-# software have been installed before running this program. 
+# Note: this program needs mafft to align the protein,
+# trimal to blacktranslate the protein into the cds,
+# and paml to compute the Ks tree. So please ensure these
+# software have been installed before running this program.
 # You can quickly check it by using `mafft --help`, `trimal -h`,
 # `codeml`.
 
-# For our cluster, we use module to manage the software. 
+# For our cluster, we use module to manage the software.
 # So we load the software by using the command line below
 module load mafft trimal paml
 
 helpFunction()
 {
    echo ""
-   echo "Usage: $0 -i <singleCopyOrthologuesID> -o <orthologuesGroups> -s <singleCopyOrthologues> -d <Orthogroup_Sequences> -c <cdsFastaDir> -p <aligned.phylip> -t <tree.newick> -n <number_threads>"
+   echo "Usage: $0 -i <singleCopyOrthologuesID> -o <orthologuesGroups> -s <singleCopyOrthologues> -d <Orthogroup_Sequences> -c <cdsFastaInfo> -p <aligned.phylip> -t <tree.newick> -n <number_threads>"
    echo -e "\t-i <orthofinderOutputDir/Orthogroups/Orthogroups_SingleCopyOrthologues.txt>"
    echo -e "\t-o <orthofinderOutputDir/Orthogroups/Orthogroups.tsv>"
-   echo -e "\t-d <orthofinderOutputDir/Orthogroups/Orthogroup_Sequences/>"
+   echo -e "\t-d <orthofinderOutputDir/Orthogroup_Sequences/>"
    echo -e "\t-s <singleCopyOrthologues>"
-   echo -e "\t-c <cdsFastaDir>"
+   echo -e "\t-c <cdsFastaInfo>"
    echo -e "\t-p <phylipFile>"
    echo -e "\t-t <newickTree>"
    echo -e "\t-n <threads>"
@@ -33,7 +33,7 @@ do
       o ) orthologuesGroups="$OPTARG" ;;
 	  d ) orthogroupSequences="$OPTARG" ;;
       s ) singleCopyOrthologues="$OPTARG" ;;
-      c ) cdsFastaDir="$OPTARG" ;;
+      c ) cdsFastaInfo="$OPTARG" ;;
       p ) phylip="$OPTARG" ;;
       t ) tree="$OPTARG" ;;
       n ) threads="$OPTARG" ;;
@@ -41,7 +41,7 @@ do
    esac
 done
 
-if [ -z "$singleCopyOrthologuesID" ] || [ -z "$orthologuesGroups" ] || [ -z "$orthogroupSequences" ] || [ -z "$singleCopyOrthologues" ] || [ -z "$cdsFastaDir" ] || [ -z "$phylip" ] || [ -z "$tree" ] || [ -z "$threads" ]
+if [ -z "$singleCopyOrthologuesID" ] || [ -z "$orthologuesGroups" ] || [ -z "$orthogroupSequences" ] || [ -z "$singleCopyOrthologues" ] || [ -z "$cdsFastaInfo" ] || [ -z "$phylip" ] || [ -z "$tree" ] || [ -z "$threads" ]
 then
    echo "Some or all of the parameters are empty";
    helpFunction
@@ -78,31 +78,30 @@ process_orthogroup() {
 
 	for ((i = 1; i < num_species; i++)); do
 		species="${species_names[i]}"
-		species_name="${species%%_*}"
-		species_file="${species_files[$species_name]}"
+		species_file="${species_files[$species]}"
 		gene_id="${row[i]}"
 		sequence=$(grep -A 1 -wF "$gene_id" "$species_file" | tail -n 1 | sed 's/TAA$//; s/TGA$//; s/TAG$//')
 
-        # Check if the length is divisible by 3
-		if (( ${#sequence} % 3 != 0 )); then
-			continue
-		fi
+#         # Check if the length is divisible by 3
+# 		if (( ${#sequence} % 3 != 0 )); then
+# 			continue
+# 		fi
 
 		gene_id_mappings["${species}_${gene_id}"]="$gene_id"
 
 		echo -e ">${species}_${gene_id}" >> "singleCopyGeneDir/$orthogroup.cds.fas"
 		echo "$sequence" >> "singleCopyGeneDir/$orthogroup.cds.fas"
 	done
-
-	if (( ${#sequence} % 3 != 0 )); then
-		return
-	fi
+#
+# 	if (( ${#sequence} % 3 != 0 )); then
+# 		return
+# 	fi
 
 	for ((i = 1; i < num_species; i++)); do
 		species="${species_names[i]}"
 		species_name="${species%%_*}"
 		pep_file="$orthogroupSequences/$orthogroup.fa"
-		
+
 		cp "$pep_file" "singleCopyGeneDir/$orthogroup.pep.fas"
 		for key in "${!gene_id_mappings[@]}"; do
 			value="${gene_id_mappings[$key]}"
@@ -111,10 +110,9 @@ process_orthogroup() {
 		done
 	done
 
-	mafft "singleCopyGeneDir/$orthogroup.pep.fas" --quiet >"singleCopyGeneDir/$orthogroup.pep.mafft.fas"
-	trimal -in "singleCopyGeneDir/$orthogroup.pep.mafft.fas" -backtrans "singleCopyGeneDir/$orthogroup.cds.fas" -automated1 -ignorestopcodon -out "singleCopyGeneDir/$orthogroup.cds.best.fas"	
+	mafft --quiet singleCopyGeneDir/$orthogroup.pep.fas >singleCopyGeneDir/$orthogroup.pep.mafft.fas
+	trimal -in "singleCopyGeneDir/$orthogroup.pep.mafft.fas" -backtrans "singleCopyGeneDir/$orthogroup.cds.fas" -automated1 -ignorestopcodon -out "singleCopyGeneDir/$orthogroup.cds.best.fas"
 }
-
 
 merge_aligned_files_into_phylip() {
     local selected_file="$1"
@@ -128,7 +126,6 @@ merge_aligned_files_into_phylip() {
     IFS=$'\t' read -r -a species_names <<< "$(head -n 1 "$temp_file" | cut -f 2-)"
 
     # Declare the associative array to store concatenated sequences
-	#local concatenated_seqs=()
 	declare -A concatenated_seqs
 
     # Iterate over the aligned sequence files
@@ -191,10 +188,8 @@ compute_ks() {
       method = 0
 EOF
 
-    # Run PAML to compute ks value
     codeml "$control_file" >/dev/null
 
-	# Extract ds Tree from PAML output
 	grep -A 1 "dS tree:" singleCopyGene.paml.out  | tail -n 1 >singleCopyGene.ds_tree.newick
 }
 
@@ -211,7 +206,7 @@ waitPids() {
 				unset pids[$i]
 			fi
 		done
-		pids=("${pids[@]}") # Expunge nulls created by unset.
+		pids=("${pids[@]}")
 		sleep 1
 	done
 	#echo "Done!"
@@ -226,7 +221,7 @@ addPid() {
 
 select_items "$singleCopyOrthologuesID" "$orthologuesGroups" > "$singleCopyOrthologues"
 selected_file="$singleCopyOrthologues"
-sequence_dir="$cdsFastaDir"
+sequence_dir="$cdsFastaInfo"
 
 temp_file=$(mktemp)
 tr -d '\r' < "$selected_file" > "$temp_file"
@@ -234,15 +229,24 @@ tr -d '\r' < "$selected_file" > "$temp_file"
 IFS=$'\t' read -r -a species_names < "$temp_file"
 num_species="${#species_names[@]}"
 
-declare -A species_files
+declare -A file_path
+while IFS=$'\t' read -r key value _; do
+	if [[ -n "$key" && -n "$value" ]]; then
+		key="${key// /_}"
+		file_path["$key"]=$value
+	else
+		echo "Invalid line in input file: $line"
+	fi
+done < "$cdsFastaInfo"
 
+declare -A species_files
 for ((i = 1; i < num_species; i++)); do
 	species="${species_names[i]}"
-	species_name="${species%%_*}"
-	species_file="${sequence_dir}/${species_name}*.fa"
+
+	species_file="${file_path[$species]}"
 
 	if ls $species_file >/dev/null 2>&1; then
-		species_files["$species_name"]=$(ls $species_file)
+		species_files["$species"]=$(ls $species_file)
 	else
 		echo "Species file not found: ${species_name}.fa"
 	fi
