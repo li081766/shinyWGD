@@ -1,4 +1,4 @@
-# shinyWGD <img src="inst/shinyWGD/www/images/sticker.png" align="right" width="120" />
+# shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
