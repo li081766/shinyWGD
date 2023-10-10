@@ -109,15 +109,15 @@ ui <- tagList(
     tags$a(href="https://www.vandepeerlab.org/", id="mylink1",
            tags$img(
                src="images/logo_lab.png",
-               width="169.46",
-               height="31.95"
+               width="222.50",
+               height="41.95"
                )
     ),
     tags$head(
         tags$style(HTML("
             #mylink1 {
             position: absolute;
-            top: 40px;
+            top: 30px;
             right: 110px;
             z-index: 9999;
             }"
@@ -126,15 +126,15 @@ ui <- tagList(
     tags$a(href="https://www.ugent.be/", id="mylink2",
            tags$img(
                src="images/logo_ugent.png",
-               width="88.32",
-               height="71.64"
+               width="100.65",
+               height="81.64"
            )
     ),
     tags$head(
         tags$style(HTML("
             #mylink2 {
             position: absolute;
-            top: 5px;
+            top: 10px;
             right: 10px;
             z-index: 9999;
             }"
