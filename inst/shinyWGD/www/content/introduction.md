@@ -1,9 +1,8 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
 
-### <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
+### **`shinyWGD`**
 
-<span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
- can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder) and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) and then study the whole genome duplication events (WGDs) of the interesting species.
+**`shinyWGD`** can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), [`OrthoFinder`](https://github.com/davidemms/OrthoFinder) and [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) and then study the whole genome duplication events (WGDs) of the interesting species.
 
 
 This page gives users a brief introduction to this software. Please go to the <font color='#6650C9'><b>? Help</b></font> Page to see more details. 
@@ -11,7 +10,7 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 ---
 
-#### The structure of <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span>
+#### The structure of **`shinyWGD`**
 
 
 - ##### <font color="#6650C9"><i class="fa-solid fa-home"></i> Home</font>

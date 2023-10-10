@@ -60,16 +60,16 @@ ui <- tagList(
             href="custom.css"
         )
     ),
-    tags$head(
-        tags$style(HTML('
-            .navbar-brand.large-title {
-              font-size: 28px;
-              background: linear-gradient(90deg, red, yellow, green, cyan, yellow, red);
-              -webkit-background-clip: text;
-              -webkit-text-fill-color: transparent;
-            }')
-        )
-    ),
+    # tags$head(
+    #     tags$style(HTML('
+    #         .navbar-brand.large-title {
+    #           font-size: 28px;
+    #           background: linear-gradient(90deg, red, yellow, green, cyan, yellow, red);
+    #           -webkit-background-clip: text;
+    #           -webkit-text-fill-color: transparent;
+    #         }')
+    #     )
+    # ),
     # tags$style(type="text/css", "body {padding-top: 80px;}"),
     navbarPage(
         id="shinywgd",
@@ -80,12 +80,11 @@ ui <- tagList(
             fg="#336666",
             "input-border-color"="#feb24c"
         ),
-        title=tags$a(
-            class="navbar-brand large-title",
-            href="#",
-            onclick="javascript:window.location.href='#shinywgd_1'",
-            "shinyWGD"
+        title=tags$img(
+            src="images/sticker_server.png",
+            width="80",
         ),
+        windowTitle="shinyWGD",
         # position="fixed-top",
         Introduction_ui,
         navbarMenu(
@@ -118,7 +117,7 @@ ui <- tagList(
         tags$style(HTML("
             #mylink1 {
             position: absolute;
-            top: 20px;
+            top: 40px;
             right: 110px;
             z-index: 9999;
             }"
@@ -135,7 +134,7 @@ ui <- tagList(
         tags$style(HTML("
             #mylink2 {
             position: absolute;
-            top: 0px;
+            top: 5px;
             right: 10px;
             z-index: 9999;
             }"

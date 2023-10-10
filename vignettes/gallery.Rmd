@@ -17,7 +17,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Source: https://github.com/li081766/shinyWGD/blob/main/vignettes/gallery.Rmd  <img src="../inst/shinyWGD/www/images/sticker.png" align="right" width="120" style="margin-top: -100px;">
+Source: https://github.com/li081766/shinyWGD/blob/main/vignettes/gallery.Rmd  <img src="../inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" style="margin-top: -100px;">
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
