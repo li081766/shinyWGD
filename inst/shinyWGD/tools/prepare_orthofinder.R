@@ -40,6 +40,20 @@ cmd_con <- file(cmd_file, open="w")
 
 #outDir <- paste0(args$output_dir, "/orthofinderOutputDir")
 writeLines(
+    c(
+        "#!/bin/bash",
+        "",
+        "#SBATCH -p all",
+        "#SBATCH -c 4",
+        "#SBATCH --mem 8G",
+        paste0("#SBATCH -o ", basename(cmd_file), ".o%j"),
+        paste0("#SBATCH -o ", basename(cmd_file), ".e%j"),
+        ""
+    ),
+    cmd_con
+)
+
+writeLines(
     "module load OrthoFinder",
     cmd_con
 )
@@ -51,7 +65,7 @@ writeLines(
     ),
     cmd_con
 )
-writeLines("folder=$(find ./orthofinderOutputDir -maxdepth 1 -type d -name \"Results_*\" -printf '%f\\n')", cmd_con)
+writeLines("folder=$(find ./orthofinderOutputDir -maxdepth 1 -type d -name \"Results_*\" -printf '%f')", cmd_con)
 writeLines(
     paste0(
         "sh ",

@@ -430,56 +430,67 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     system(paste("cp", input$newick_tree$datapath, paste0(workdirname, "/tree.newick")))
 
     SpeciesInfoConf <- file(species_info_file, open="w")
-    for( i in 1:input$number_of_study_species ){
-        latin_name <- paste0("latin_name_", i)
-        latin_name <- gsub("_", " ", latin_name)
-        proteome <- paste0("proteome_", i)
-        latin_name_temp <- trimws(input[[latin_name]])
-        latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
-        informal_name_temp <- paste0(latin_name_list[1], i)
+    withProgress(message='Processing fasta files in progress', value=0, {
+        for( i in 1:input$number_of_study_species ){
+            incProgress(
+                amount=0.8/input$number_of_study_species,
+                message=paste0("Dealing with ", latin_name, " ...")
+            )
+            Sys.sleep(.1)
 
-        # latin_name_temp2 <- gsub("_", " ", latin_name_temp)
-        # newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
-        newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
+            latin_name <- paste0("latin_name_", i)
+            latin_name <- gsub("_", " ", latin_name)
+            proteome <- paste0("proteome_", i)
+            latin_name_temp <- trimws(input[[latin_name]])
+            latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
+            informal_name_temp <- paste0(latin_name_list[1], i)
 
-        proteome_temp <- check_proteome_input(
-            informal_name_temp,
-            input[[proteome]]
-        )
-        if( is.null(proteome_temp) ){
-            close(SpeciesInfoConf)
-            return(NULL)
-        }
-        latin_names_temp <- c(latin_names_temp, paste0(informal_name_temp, ": ", latin_name_temp))
-        fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ", informal_name_temp, ".fa"))
+            # latin_name_temp2 <- gsub("_", " ", latin_name_temp)
+            # newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
+            newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
 
-        gff <- paste0("gff_", i)
-        if( input$select_focal_species == latin_name_temp ){
-            if( is.null(input[[gff]]) ){
-                collinearity <- "no"
-                shinyalert(
-                    "Note!",
-                    "No Annotation file for the focal species is detected. Do not run the collinearity analysis for the focal species",
-                    type="info"
+            proteome_temp <- check_proteome_input(
+                informal_name_temp,
+                input[[proteome]]
+            )
+            if( is.null(proteome_temp) ){
+                close(SpeciesInfoConf)
+                return(NULL)
+            }
+            latin_names_temp <- c(latin_names_temp, paste0(informal_name_temp, ": ", latin_name_temp))
+            fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ", informal_name_temp, ".fa"))
+
+            gff <- paste0("gff_", i)
+            if( input$select_focal_species == latin_name_temp ){
+                if( is.null(input[[gff]]) ){
+                    collinearity <- "no"
+                    shinyalert(
+                        "Note!",
+                        "No Annotation file for the focal species is detected. Do not run the collinearity analysis for the focal species",
+                        type="info"
+                    )
+                }else{
+                    focal_species_gff_filenames_temp <- paste0(informal_name_temp, ".gff")
+                }
+            }
+            if( input$select_focal_species == latin_name_temp ){
+                focal_species_informal <- informal_name_temp
+            }
+            if( is.not.null(input[[gff]]) ){
+                gff_temp <- check_gff_input(
+                    informal_name_temp,
+                    input[[gff]]
                 )
-            }else{
-                focal_species_gff_filenames_temp <- paste0(informal_name_temp, ".gff")
+                cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
+            }
+            else{
+                cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
             }
         }
-        if( input$select_focal_species == latin_name_temp ){
-            focal_species_informal <- informal_name_temp
-        }
-        if( is.not.null(input[[gff]]) ){
-            gff_temp <- check_gff_input(
-                informal_name_temp,
-                input[[gff]]
-            )
-            cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
-        }
-        else{
-            cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
-        }
-    }
+        incProgress(amount=1)
+        Sys.sleep(.1)
+    })
+
     close(SpeciesInfoConf)
 
     ksratesconf <- file(ksrates_conf_file, open="w")
@@ -545,39 +556,49 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     collinearity <- "yes"
 
     SpeciesInfoConf <- file(species_info_file, open="w")
-    for( i in 1:nrow(data_table) ){
-        latin_name <- data_table[i, 1]
-        latin_name <- gsub("_", " ", latin_name)
-        proteome <- data_table[i, 2]
-        latin_name_temp <- trimws(latin_name)
-        latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
-        informal_name_temp <- paste0(latin_name_list[1], i)
-        if( focal_species == latin_name ){
-            focal_species_informal=informal_name_temp
-        }
-
-        newick_tree <- gsub(latin_name, informal_name_temp, newick_tree)
-        proteome_temp <- check_proteome_from_file(
-            informal_name_temp,
-            proteome
-        )
-        if( is.null(proteome_temp) ){
-            close(SpeciesInfoConf)
-            return(NULL)
-        }
-        latin_names_temp <- c(latin_names_temp, paste0(informal_name_temp, ": ", latin_name_temp))
-        fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ../", informal_name_temp, ".fa"))
-        if( !is.na(data_table[i, 3]) ){
-            gff_temp <- check_gff_from_file(
-                informal_name_temp,
-                data_table[i, 3]
+    withProgress(message='Processing fasta files in progress', value=0, {
+        for( i in 1:nrow(data_table) ){
+            incProgress(
+                amount=0.8/nrow(data_table),
+                message=paste0("Dealing with ", data_table[i, 1], " ...")
             )
-            gff_species <- c(gff_species, informal_name_temp)
-            cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
-        }else{
-            cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
+            Sys.sleep(.1)
+
+            latin_name <- data_table[i, 1]
+            latin_name <- gsub("_", " ", latin_name)
+            proteome <- data_table[i, 2]
+            latin_name_temp <- trimws(latin_name)
+            latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
+            informal_name_temp <- paste0(latin_name_list[1], i)
+            if( focal_species == latin_name ){
+                focal_species_informal=informal_name_temp
+            }
+
+            newick_tree <- gsub(latin_name, informal_name_temp, newick_tree)
+            proteome_temp <- check_proteome_from_file(
+                informal_name_temp,
+                proteome
+            )
+            if( is.null(proteome_temp) ){
+                close(SpeciesInfoConf)
+                return(NULL)
+            }
+            latin_names_temp <- c(latin_names_temp, paste0(informal_name_temp, ": ", latin_name_temp))
+            fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ../", informal_name_temp, ".fa"))
+            if( !is.na(data_table[i, 3]) ){
+                gff_temp <- check_gff_from_file(
+                    informal_name_temp,
+                    data_table[i, 3]
+                )
+                gff_species <- c(gff_species, informal_name_temp)
+                cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
+            }else{
+                cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
+            }
         }
-    }
+        incProgress(amount=1)
+        Sys.sleep(.1)
+    })
 
     if( !focal_species_informal %in% gff_species ){
         collinearity <- "no"
@@ -655,6 +676,16 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
     cmd <- file(cmd_file, open="w")
     # wgd_cmd <- file(wgd_cmd_file, open="w")
     # cat("module load wgd blast mcl paml fasttree mafft i-adhore diamond; export OMP_NUM_THREADS=1", file=wgd_cmd, append=TRUE, sep="\n")
+    # Add Sbatch commond line
+    cat("#!/bin/bash", file=cmd, append=TRUE, sep="\n")
+    cat("", file=cmd, append=TRUE, sep="\n")
+    cat("#SBATCH -p all", file=cmd, append=TRUE, sep="\n")
+    cat("#SBATCH -c 1", file=cmd, append=TRUE, sep="\n")
+    cat("#SBATCH --mem 4G", file=cmd, append=TRUE, sep="\n")
+    cat(paste0("#SBATCH -o ", basename(cmd_file), ".o%j"), file=cmd, append=TRUE, sep="\n")
+    cat(paste0("#SBATCH -o ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n")
+    cat("", file=cmd, append=TRUE, sep="\n")
+
     cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
@@ -718,6 +749,14 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
 #' @export
 create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     cmd <- file(cmd_file, open="w")
+    # Add Sbatch commond line
+    cat("#!/bin/bash", file=cmd, append=TRUE, sep="\n\n")
+    cat("#SBATCH -p all", file=cmd, append=TRUE, sep="\n")
+    cat("#SBATCH -c 1", file=cmd, append=TRUE, sep="\n")
+    cat("#SBATCH --mem 4G", file=cmd, append=TRUE, sep="\n")
+    cat(paste0("#SBATCH -o ", basename(cmd_file), ".o%j"), file=cmd, append=TRUE, sep="\n")
+    cat(paste0("#SBATCH -o ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n\n")
+
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     informal_name_list <- paste0("seq_", 1:input$number_of_study_species)
