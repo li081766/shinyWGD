@@ -33,7 +33,7 @@ library(fontawesome)
 # Getting Started
 
 This vignette provides the examples of output using 
-the <span style="color:red; background:linear-gradient(to right, red, yellow, green, cyan, yellow, red); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">shinyWGD</span> server or package.
+the **`shinyWGD`** server or package.
 
 <br></br>
 
