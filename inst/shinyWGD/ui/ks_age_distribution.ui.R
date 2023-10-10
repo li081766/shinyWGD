@@ -51,15 +51,10 @@ Ks_Age_Distribution_ui <- tabPanel(
                     )
                 )
             ),
-            div(class="boxLike",
-                style="background-color: #FBFEEC;
-                       padding-bottom: 10px;
-                       padding-top: 10px;",
-                fluidRow(
-                    column(
-                        12,
-                        uiOutput("ksanalysisPanel")
-                    )
+            fluidRow(
+                column(
+                    12,
+                    uiOutput("ksanalysisPanel")
                 )
             )
         ),

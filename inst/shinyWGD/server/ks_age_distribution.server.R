@@ -43,191 +43,196 @@ output$ksanalysisPanel <- renderUI({
             replace_informal_name_to_latin_name(names_df, x)
         })
 
-        fluidRow(
-            div(
-                style="padding-bottom: 5px;
-                   padding-top: 5px;
-                   padding-left: 10px;",
-                h5(icon("cog"), HTML("Select <font color='#bb5e00'><b><i>K</i><sub>s</sub></b></font> to analyze")),
-                hr(class="setting"),
-                column(
-                    width=12,
-                    div(
-                        style="padding-bottom: 10px;",
-                        bsButton(
-                            inputId="paralogous_ks_button",
-                            label=HTML("<font color='#EBD1FC'><b>&nbsp;Paralog <i>K</i><sub>s</sub>&nbsp;&#x25BC;</b></font>"),
-                            icon=icon("list"),
-                            style="info"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to choose species",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ) %>%
-                            bs_attach_collapse("paralog_ks_files_collapse"),
-                        bs_collapse(
-                            id="paralog_ks_files_collapse",
-                            content=tags$div(
-                                class="well",
-                                prettyCheckboxGroup(
-                                    inputId="paralog_ks_files_list",
-                                    label="Choose:",
-                                    choiceNames=lapply(unlist(species_list), function(choice) {
-                                        HTML(paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>"))
-                                    }),
-                                    choiceValues=c(unlist(species_list)),
-                                    icon=icon("check"),
-                                    shape="round",
-                                    status="success",
-                                    fill=TRUE,
-                                    animation="jelly"
-                                )
-                            )
-                        )
-                    )
-                ),
-                column(
-                    width=12,
-                    div(
-                        style="padding-bottom: 10px;",
-                        bsButton(
-                            inputId="orthologous_ks_button",
-                            label=HTML("<font color='#FF9191'><b>&nbsp;Ortholog <i>K</i><sub>s</sub>&nbsp;&#x25BC;</b></font>"),
-                            icon=icon("list"),
-                            style="info"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to choose species",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ) %>%
-                            bs_attach_collapse("ortholog_ks_files_collapse"),
-                        bs_collapse(
-                            id="ortholog_ks_files_collapse",
-                            content=tags$div(
-                                class="well",
-                                pickerInput(
-                                    inputId="ortholog_ks_files_list_A",
-                                    label=HTML("<b><font color='#38B0E4'>Group A</font></b>"),
-                                    options=list(
-                                        title='Please select species below'
-                                    ),
-                                    choices=unlist(species_list),
-                                    choicesOpt=list(
-                                        content=lapply(unlist(species_list), function(choice) {
-                                            paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    ),
-                                    multiple=FALSE
-                                ),
-                                pickerInput(
-                                    inputId="ortholog_ks_files_list_B",
-                                    label=HTML("<b><font color='#B97D4B'>Group B</font></b>"),
-                                    options=list(
-                                        title='Please select species below',
-                                        `selected-text-format`="count > 1",
-                                        `actions-box`=TRUE
-                                    ),
-                                    choices=unlist(species_list),
-                                    choicesOpt=list(
-                                        content=lapply(unlist(species_list), function(choice) {
-                                            paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    ),
-                                    multiple=TRUE
-                                )
-                            )
-                        )
-                    )
-                ),
-                column(
-                    width=12,
-                    div(
-                        style="padding-bottom: 10px;",
-                        bsButton(
-                            inputId="rate_correct_button",
-                            label=HTML("<font color='white'><b>&nbsp;Substitution Rate Correction&nbsp;&#x25BC;</b></font>"),
-                            icon=icon("list"),
-                            style="success"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to set",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ) %>%
-                            bs_attach_collapse("rate_correction_collapse"),
-                        bs_collapse(
-                            id="rate_correction_collapse",
-                            content=tags$div(
-                                class="well",
-                                pickerInput(
-                                    inputId="select_ref_species",
-                                    label=HTML("Choose <b><font color='#54B4D3'>Focal</font></b> species:"),
-                                    options=list(
-                                        title='Please select species below'
-                                    ),
-                                    choices=unlist(species_list),
-                                    choicesOpt=list(
-                                        content=lapply(unlist(species_list), function(choice) {
-                                            paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    )
-                                ),
-                                pickerInput(
-                                    inputId="select_outgroup_species",
-                                    label=HTML("Choose <b><font color='#fc8d59'>Outgroup</font></b> species:"),
-                                    options=list(
-                                        title='Please select species below'
-                                    ),
-                                    choices=species_tree_df$Species,
-                                    choicesOpt=list(
-                                        content=lapply(species_tree_df$Species, function(choice) {
-                                            paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    )
-                                ),
-                                pickerInput(
-                                    inputId="select_study_species",
-                                    label=HTML("Choose <b><font color='#C699FF'>Other</font></b> species to analyze:"),
-                                    options=list(
-                                        title='Please select one or multiple species below',
-                                        `selected-text-format`="count > 1",
-                                        `actions-box`=TRUE
-                                    ),
-                                    choices=unlist(species_list),
-                                    choicesOpt=list(
-                                        content=lapply(unlist(species_list), function(choice) {
-                                            paste0("<div style='color: #C699FF; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    ),
-                                    multiple=TRUE
-                                ),
-                                hr(class="setting"),
-                                pickerInput(
-                                    inputId="select_focal_species",
-                                    label=HTML("Choose <b><font color='#54B4D3'>Focal</font></b> species to draw paralog <b><i>K</i><sub>s</sub></b> distribution (optional):"),
-                                    options=list(
-                                        title='Please select species below'
-                                    ),
-                                    choices=unlist(species_list),
-                                    choicesOpt=list(
-                                        content=lapply(unlist(species_list), function(choice) {
-                                            paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
-                                        })
-                                    )
-                                ),
-                            )
-                        )
-                    )
-                ),
-                column(
-                    12,
+        div(class="boxLike",
+            style="background-color: #FBFEEC;
+                   padding-bottom: 10px;
+                   padding-top: 10px;",
+            fluidRow(
+                div(
+                    style="padding-bottom: 5px;
+                       padding-top: 5px;
+                       padding-left: 10px;",
+                    h5(icon("cog"), HTML("Select <font color='#bb5e00'><b><i>K</i><sub>s</sub></b></font> to analyze")),
                     hr(class="setting"),
-                    uiOutput("ksanalysissettingPanel")
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="paralogous_ks_button",
+                                label=HTML("<font color='#EBD1FC'><b>&nbsp;Paralog <i>K</i><sub>s</sub>&nbsp;&#x25BC;</b></font>"),
+                                icon=icon("list"),
+                                style="info"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to choose species",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse("paralog_ks_files_collapse"),
+                            bs_collapse(
+                                id="paralog_ks_files_collapse",
+                                content=tags$div(
+                                    class="well",
+                                    prettyCheckboxGroup(
+                                        inputId="paralog_ks_files_list",
+                                        label="Choose:",
+                                        choiceNames=lapply(unlist(species_list), function(choice) {
+                                            HTML(paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>"))
+                                        }),
+                                        choiceValues=c(unlist(species_list)),
+                                        icon=icon("check"),
+                                        shape="round",
+                                        status="success",
+                                        fill=TRUE,
+                                        animation="jelly"
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="orthologous_ks_button",
+                                label=HTML("<font color='#FF9191'><b>&nbsp;Ortholog <i>K</i><sub>s</sub>&nbsp;&#x25BC;</b></font>"),
+                                icon=icon("list"),
+                                style="info"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to choose species",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse("ortholog_ks_files_collapse"),
+                            bs_collapse(
+                                id="ortholog_ks_files_collapse",
+                                content=tags$div(
+                                    class="well",
+                                    pickerInput(
+                                        inputId="ortholog_ks_files_list_A",
+                                        label=HTML("<b><font color='#38B0E4'>Group A</font></b>"),
+                                        options=list(
+                                            title='Please select species below'
+                                        ),
+                                        choices=unlist(species_list),
+                                        choicesOpt=list(
+                                            content=lapply(unlist(species_list), function(choice) {
+                                                paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        ),
+                                        multiple=FALSE
+                                    ),
+                                    pickerInput(
+                                        inputId="ortholog_ks_files_list_B",
+                                        label=HTML("<b><font color='#B97D4B'>Group B</font></b>"),
+                                        options=list(
+                                            title='Please select species below',
+                                            `selected-text-format`="count > 1",
+                                            `actions-box`=TRUE
+                                        ),
+                                        choices=unlist(species_list),
+                                        choicesOpt=list(
+                                            content=lapply(unlist(species_list), function(choice) {
+                                                paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        ),
+                                        multiple=TRUE
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="rate_correct_button",
+                                label=HTML("<font color='white'><b>&nbsp;Substitution Rate Correction&nbsp;&#x25BC;</b></font>"),
+                                icon=icon("list"),
+                                style="success"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to set",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse("rate_correction_collapse"),
+                            bs_collapse(
+                                id="rate_correction_collapse",
+                                content=tags$div(
+                                    class="well",
+                                    pickerInput(
+                                        inputId="select_ref_species",
+                                        label=HTML("Choose <b><font color='#54B4D3'>Focal</font></b> species:"),
+                                        options=list(
+                                            title='Please select species below'
+                                        ),
+                                        choices=unlist(species_list),
+                                        choicesOpt=list(
+                                            content=lapply(unlist(species_list), function(choice) {
+                                                paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        )
+                                    ),
+                                    pickerInput(
+                                        inputId="select_outgroup_species",
+                                        label=HTML("Choose <b><font color='#fc8d59'>Outgroup</font></b> species:"),
+                                        options=list(
+                                            title='Please select species below'
+                                        ),
+                                        choices=species_tree_df$Species,
+                                        choicesOpt=list(
+                                            content=lapply(species_tree_df$Species, function(choice) {
+                                                paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        )
+                                    ),
+                                    pickerInput(
+                                        inputId="select_study_species",
+                                        label=HTML("Choose <b><font color='#C699FF'>Other</font></b> species to analyze:"),
+                                        options=list(
+                                            title='Please select one or multiple species below',
+                                            `selected-text-format`="count > 1",
+                                            `actions-box`=TRUE
+                                        ),
+                                        choices=unlist(species_list),
+                                        choicesOpt=list(
+                                            content=lapply(unlist(species_list), function(choice) {
+                                                paste0("<div style='color: #C699FF; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        ),
+                                        multiple=TRUE
+                                    ),
+                                    hr(class="setting"),
+                                    pickerInput(
+                                        inputId="select_focal_species",
+                                        label=HTML("Choose <b><font color='#54B4D3'>Focal</font></b> species to draw paralog <b><i>K</i><sub>s</sub></b> distribution (optional):"),
+                                        options=list(
+                                            title='Please select species below'
+                                        ),
+                                        choices=unlist(species_list),
+                                        choicesOpt=list(
+                                            content=lapply(unlist(species_list), function(choice) {
+                                                paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        )
+                                    ),
+                                )
+                            )
+                        )
+                    ),
+                    column(
+                        12,
+                        hr(class="setting"),
+                        uiOutput("ksanalysissettingPanel")
+                    )
                 )
             )
         )

@@ -95,13 +95,10 @@ Data_preparation_ui <- tabPanel(
                     )
                 )
             ),
-            div(class="boxLike",
-                style="background-color: #F5FFE8;",
-                fluidRow(
-                    column(
-                        12,
-                        uiOutput("ObtainTreeFromTimeTreeSettingDisplay")
-                    )
+            fluidRow(
+                column(
+                    12,
+                    uiOutput("ObtainTreeFromTimeTreeSettingDisplay")
                 )
             )
         ),

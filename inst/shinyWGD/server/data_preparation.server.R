@@ -341,77 +341,80 @@ output$multipleSpeciesPanel <- renderUI({
 output$ObtainTreeFromTimeTreeSettingDisplay <- renderUI({
     num <- toupper(as.english(input$number_of_study_species))
     if( input$number_of_study_species > 2 ){
-        fluidRow(
-            div(
-                style="background-color: #F5FFE8; padding-left: 20px;",
-                fluidRow(
-                    column(
-                        12,
-                        h4(
-                            icon("tree", style="color: #64A600;"),
-                            HTML("<font color='#64A600'>Extracting Tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a></font>")
-                        )
-                    )
-                ),
-                hr(class="setting"),
-                fluidRow(
-                    div(
-                        style="padding-left: 20px;",
+        div(class="boxLike",
+            style="background-color: #F5FFE8;",
+            fluidRow(
+                div(
+                    style="background-color: #F5FFE8; padding-left: 20px;",
+                    fluidRow(
                         column(
                             12,
-                            h6(
-                                HTML(
-                                    "If you don’t ensure the evolutionary relationships among the studied species,
-                <br>click the button below to obtain a tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a>."
-                                )
+                            h4(
+                                icon("tree", style="color: #64A600;"),
+                                HTML("<font color='#64A600'>Extracting Tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a></font>")
                             )
-                        ),
-                        # div(class="float-left, padding-right: 20px; padding-left: 20px;",
-                            tags$head(
-                                tags$style(HTML(
-                                    "@keyframes glowing {
-                                     0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                     50% { background-color: #73BF00; box-shadow: 0 0 20px #43b0d1; }
-                                     100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                     }
-                                @keyframes glowingD {
-                                     0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                     50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
-                                     100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                     }"
-                                ))
-                            ),
-                            actionButton(
-                                inputId="extract_tree_go",
-                                "Extract Tree",
-                                width="200px",
-                                icon=icon("tree"),
-                                status="secondary",
-                                style="color: #fff;
-                                      background-color: #019858;
-                                      border-color: #fff;
-                                      padding: 5px 14px 5px 14px;
-                                      margin: 5px 5px 5px 5px;
-                                      animation: glowing 5300ms infinite;"
-                            # )
-                        ),
-                        fluidRow(
+                        )
+                    ),
+                    hr(class="setting"),
+                    fluidRow(
+                        div(
+                            style="padding-left: 20px;",
                             column(
                                 12,
-                                HTML(paste0("The Newick Tree Extracted from TimeTree.org:")),
-                                div(
-                                    style="width: 500px;",
-                                    verbatimTextOutput(
-                                        "TimetreeNewick",
-                                        placeholder=TRUE
+                                h6(
+                                    HTML(
+                                        "If you don’t ensure the evolutionary relationships among the studied species,
+                    <br>click the button below to obtain a tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a>."
                                     )
                                 )
+                            ),
+                            # div(class="float-left, padding-right: 20px; padding-left: 20px;",
+                                tags$head(
+                                    tags$style(HTML(
+                                        "@keyframes glowing {
+                                         0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
+                                         50% { background-color: #73BF00; box-shadow: 0 0 20px #43b0d1; }
+                                         100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
+                                         }
+                                    @keyframes glowingD {
+                                         0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
+                                         50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
+                                         100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
+                                         }"
+                                    ))
+                                ),
+                                actionButton(
+                                    inputId="extract_tree_go",
+                                    "Extract Tree",
+                                    width="200px",
+                                    icon=icon("tree"),
+                                    status="secondary",
+                                    style="color: #fff;
+                                          background-color: #019858;
+                                          border-color: #fff;
+                                          padding: 5px 14px 5px 14px;
+                                          margin: 5px 5px 5px 5px;
+                                          animation: glowing 5300ms infinite;"
+                                # )
+                            ),
+                            fluidRow(
+                                column(
+                                    12,
+                                    HTML(paste0("The Newick Tree Extracted from TimeTree.org:")),
+                                    div(
+                                        style="width: 500px;",
+                                        verbatimTextOutput(
+                                            "TimetreeNewick",
+                                            placeholder=TRUE
+                                        )
+                                    )
+                                )
+                            ),
+                            h6(
+                                HTML("<font color='red'><b>Note</b></font> TimeTree database does not include all the species.
+                         <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the species are not included in the TimeTree database,
+                         <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you should ensure the relationship in other ways.")
                             )
-                        ),
-                        h6(
-                            HTML("<font color='red'><b>Note</b></font> TimeTree database does not include all the species.
-                     <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the species are not included in the TimeTree database,
-                     <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;you should ensure the relationship in other ways.")
                         )
                     )
                 )

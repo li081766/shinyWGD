@@ -20,36 +20,41 @@ observeEvent(input$iadhoredir, {
         }
     }
     output$iadhoreanalysisPanel <- renderUI({
-        fluidRow(
-            div(
-                style="padding-right: 10px;
-                       padding-left: 10px;",
-                h5(icon("cog"), HTML("<font color='#bb5e00'><b>Synteny Analysis<b></font>")),
-                column(
-                    12,
-                    uiOutput("iadhoresettingPanel")
-                ),
-                hr(class="setting"),
-                h5(icon("cog"), HTML("<font color='#bb5e00'><b>Clustering Analysis<b></font>")),
-                column(
-                    12,
-                    uiOutput("clusteringSettingPanel")
-                ),
-                hr(class="setting"),
-                column(
-                    12,
-                    actionButton(
-                        inputId="iadhore_config_go",
-                        "Configure Analysis",
-                        width="200px",
-                        icon=icon("cog"),
-                        status="secondary",
-                        style="color: #fff;
-                               background-color: #27ae60;
-                               border-color: #fff;
-                               padding: 5px 14px 5px 14px;
-                               margin: 5px 5px 5px 5px;
-                               animation: glowing 5300ms infinite;"
+        div(class="boxLike",
+            style="background-color: #FBFEEC;
+                       padding-bottom: 10px;
+                       padding-top: 10px",
+            fluidRow(
+                div(
+                    style="padding-right: 10px;
+                           padding-left: 10px;",
+                    h5(icon("cog"), HTML("<font color='#bb5e00'><b>Synteny Analysis<b></font>")),
+                    column(
+                        12,
+                        uiOutput("iadhoresettingPanel")
+                    ),
+                    hr(class="setting"),
+                    h5(icon("cog"), HTML("<font color='#bb5e00'><b>Clustering Analysis<b></font>")),
+                    column(
+                        12,
+                        uiOutput("clusteringSettingPanel")
+                    ),
+                    hr(class="setting"),
+                    column(
+                        12,
+                        actionButton(
+                            inputId="iadhore_config_go",
+                            "Configure Analysis",
+                            width="200px",
+                            icon=icon("cog"),
+                            status="secondary",
+                            style="color: #fff;
+                                   background-color: #27ae60;
+                                   border-color: #fff;
+                                   padding: 5px 14px 5px 14px;
+                                   margin: 5px 5px 5px 5px;
+                                   animation: glowing 5300ms infinite;"
+                        )
                     )
                 )
             )
