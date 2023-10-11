@@ -44,7 +44,6 @@ source(file="ui/gallery.ui.R", local=T, encoding="UTF-8")
 source(file="ui/help.ui.R", local=T, encoding="UTF-8")
 
 ui <- tagList(
-    includeScript("www/js/utils.js"),
     includeScript("www/js/d3.min.js"),
     includeScript("www/js/iadhore.synteny.js"),
     includeScript("www/js/clustering.js"),
@@ -61,17 +60,6 @@ ui <- tagList(
             href="custom.css"
         )
     ),
-    # tags$head(
-    #     tags$style(HTML('
-    #         .navbar-brand.large-title {
-    #           font-size: 28px;
-    #           background: linear-gradient(90deg, red, yellow, green, cyan, yellow, red);
-    #           -webkit-background-clip: text;
-    #           -webkit-text-fill-color: transparent;
-    #         }')
-    #     )
-    # ),
-    # tags$style(type="text/css", "body {padding-top: 80px;}"),
     navbarPage(
         id="shinywgd",
         theme=bs_theme(
