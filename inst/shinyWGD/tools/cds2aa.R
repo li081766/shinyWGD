@@ -8,26 +8,17 @@ parser$add_argument("-o", "--output_file", help="Path to the output file", requi
 args <- parser$parse_args()
 
 cds_sequences <- read.fasta(args$input_file)
-proteins <- lapply(cds_sequences, translate)
-
-#' Remove the last "*" from the protein sequence
-#'
-#' @param seq protein sequence
-#'
-#' @return modified sequence
-#' @export
-#'
-#' @noRd
-remove_last_asterisk <- function(seq){
-    if( seq[length(seq)] == "*" ){
-        seq <- seq[seq != "*"]
+proteins <- sapply(cds_sequences, function(seq) {
+    translated_seq <- translate(seq)
+    if (tail(translated_seq, 1) == "*") {
+        translated_seq <- head(translated_seq, -1)
     }
-    return(seq)
-}
+    return(translated_seq)
+})
 
-proteins <- lapply(proteins, remove_last_asterisk)
 write.fasta(
     sequences=proteins,
     names=names(proteins),
     file.out=args$output_file
 )
+
