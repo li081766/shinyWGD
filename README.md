@@ -56,6 +56,9 @@ Please refer to the [shinyWGD server](https://bioinformatics.psb.ugent.be/webtoo
   - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
   - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
   - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
+  - [`MAFFT`](https://mafft.cbrc.jp/alignment/software/)
+  - [`trimAl`](http://trimal.cgenomics.org/)
+  - [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)
 
 - ##### R packages
   - `{shiny}`
