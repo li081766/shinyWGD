@@ -238,36 +238,16 @@ observeEvent(input$whale_go, {
 # Link to Data Preparation page
 observeEvent(input$back_datapreparation_1, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
-    # Sys.sleep(1)
-    # session$sendCustomMessage(
-    #     type="toggleDropdown",
-    #     message=list(msg="hide dropdown"))
 })
 observeEvent(input$back_datapreparation_2, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
-    # Sys.sleep(1)
-    # session$sendCustomMessage(
-    #     type="toggleDropdown",
-    #     message=list(msg="hide dropdown"))
 })
 observeEvent(input$back_datapreparation_3, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
-    # Sys.sleep(1)
-    # session$sendCustomMessage(
-    #     type="toggleDropdown",
-    #     message=list(msg="hide dropdown"))
 })
 observeEvent(input$back_datapreparation_4, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
-    # Sys.sleep(1)
-    # session$sendCustomMessage(
-    #     type="toggleDropdown",
-    #     message=list(msg="hide dropdown"))
 })
 observeEvent(input$back_datapreparation_5, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
-    # Sys.sleep(1)
-    # session$sendCustomMessage(
-    #     type="toggleDropdown",
-    #     message=list(msg="hide dropdown"))
 })
