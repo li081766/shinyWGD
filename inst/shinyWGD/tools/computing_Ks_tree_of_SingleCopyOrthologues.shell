@@ -80,7 +80,7 @@ process_orthogroup() {
 		species="${species_names[i]}"
 		species_file="${species_files[$species]}"
 		gene_id="${row[i]}"
-		sequence=$(grep -A 1 -wF "$gene_id" "$species_file" | tail -n 1 | sed 's/TAA$//; s/TGA$//; s/TAG$//')
+		sequence=$(grep -A 1 -wF "$gene_id" "$species_file" | tail -n 1 | sed 's/TAA$//i; s/TGA$//i; s/TAG$//i')
 
 #         # Check if the length is divisible by 3
 # 		if (( ${#sequence} % 3 != 0 )); then
