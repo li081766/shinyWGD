@@ -432,21 +432,20 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     SpeciesInfoConf <- file(species_info_file, open="w")
     withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:input$number_of_study_species ){
+            latin_name <- paste0("latin_name_", i)
+            latin_name <- gsub("_", " ", latin_name)
+
             incProgress(
                 amount=0.8/input$number_of_study_species,
                 message=paste0("Dealing with ", latin_name, " ...")
             )
             Sys.sleep(.1)
 
-            latin_name <- paste0("latin_name_", i)
-            latin_name <- gsub("_", " ", latin_name)
             proteome <- paste0("proteome_", i)
             latin_name_temp <- trimws(input[[latin_name]])
             latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
             informal_name_temp <- paste0(latin_name_list[1], i)
 
-            # latin_name_temp2 <- gsub("_", " ", latin_name_temp)
-            # newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
             newick_tree <- gsub(latin_name_temp, informal_name_temp, newick_tree)
 
             proteome_temp <- check_proteome_input(
@@ -558,14 +557,15 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     SpeciesInfoConf <- file(species_info_file, open="w")
     withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:nrow(data_table) ){
+            latin_name <- data_table[i, 1]
+            latin_name <- gsub("_", " ", latin_name)
+
             incProgress(
                 amount=0.8/nrow(data_table),
                 message=paste0("Dealing with ", data_table[i, 1], " ...")
             )
             Sys.sleep(.1)
 
-            latin_name <- data_table[i, 1]
-            latin_name <- gsub("_", " ", latin_name)
             proteome <- data_table[i, 2]
             latin_name_temp <- trimws(latin_name)
             latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
