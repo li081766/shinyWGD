@@ -9,8 +9,6 @@ Data_preparation_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Data Uploading"),
                 hr(class="setting"),
-                #h4(HTML("Data for <b><i>K</i></b><sub>s</sub> distribution analysis")),
-                #fluidRow(
                 column(
                     12,
                     numericInput(
@@ -45,9 +43,7 @@ Data_preparation_ui <- tabPanel(
                           }
                         ")
                 ),
-                # (
                 hr(class="setting"),
-                #fluidRow(
                 column(
                     5,
                     fileInput(
@@ -63,21 +59,16 @@ Data_preparation_ui <- tabPanel(
                             ".gz"
                         )
                     )
-                    #)
                 ),
                 hr(class="setting"),
-                #fluidRow(
                 column(
                     12,
                     h4(HTML("<font color='#e17f00'><b><i>OR</i></b></font>"))
-                    #)
                 ),
-                #fluidRow(
                 column(
                     12,
                     uiOutput("UploadDisplay")
                 )
-                #),
             )
         ),
         column(

@@ -171,7 +171,6 @@ output$WgdksratesSettingDisplay <- renderUI({
                         actionButton(
                             inputId="ksrates_go",
                             HTML("Create <b><i>ksrates</b></i> Codes"),
-                            #"Create Codes",
                             width="230px",
                             icon=icon("code"),
                             status="secondary",
@@ -181,6 +180,9 @@ output$WgdksratesSettingDisplay <- renderUI({
                                    padding: 5px 14px 5px 14px;
                                    margin: 5px 5px 5px 5px;
                                    animation: glowing 5300ms infinite; "
+                        ),
+                        div(
+                            id="ksrates_progress_container_js"
                         )
                     ),
                     column(
@@ -217,6 +219,9 @@ output$WgdksratesSettingDisplay <- renderUI({
                                        padding: 5px 14px 5px 14px;
                                        margin: 5px 5px 5px 5px;
                                        animation: glowing 5300ms infinite; "
+                            ),
+                            div(
+                                id="iadhore_progress_container_js"
                             )
                         )
                     ),
@@ -252,6 +257,9 @@ output$WgdksratesSettingDisplay <- renderUI({
                                        padding: 5px 14px 5px 14px;
                                        margin: 5px 5px 5px 5px;
                                        animation: glowing 5300ms infinite; "
+                                ),
+                                div(
+                                    id="orthofinder_progress_container_js"
                                 )
                             )
                         ),
@@ -319,21 +327,6 @@ output$multipleSpeciesPanel <- renderUI({
                     offStatus="danger"
                 )
             )
-            # span(
-            #     `data-toggle`="tooltip",
-            #     `data-placement`="auto",
-            #     `data-trigger`="click hover",
-            #     title="If switching on this mode, i-ADHoRe will study all the species within one run. The code will be appended to the main script of run_diamond_iadhore.sh. See more details in i-ADHoRe manul",
-            #     #title=HTML("<div>If switching on this mode, <b><font color='green'>i-ADHoRe</font></b> uses the multiple-species mode to study all the species within one run.<br>The code will be appended to the main script <b><font color='steelblue' face='Courier New' bgcolor='grey'>run_diamond_iadhore.sh</font></b></div>"),
-            #     icon("info-circle", style="font-size: 120%; margin-left: -100px;")
-            # ),
-            # tags$script(HTML('
-            #    $( document ).on("shiny:sessioninitialized", function(event) {
-            #         $(\'span[data-toggle="tooltip"]\').tooltip({
-            #             html: true
-            #         });
-            #    });'
-            # ))
         )
     }
 })
@@ -683,8 +676,21 @@ observeEvent(input$wgd_go, {
     }
 })
 
+updateProgress <- function(container, width, type) {
+    session$sendCustomMessage(
+        "UpdateProgressBar",
+        list(container=container, width=width, type=type)
+    )
+}
+
 observeEvent(input$ksrates_go, {
     if( is.null(input$upload_data_file) ){
+        progress_data <- list("actionbutton"="ksrates_go",
+                              "container"="ksrates_progress_container_js")
+        session$sendCustomMessage(
+            "Progress_Bar_Complete",
+            progress_data
+        )
         if( is.null(input[[paste0("proteome_", 2)]]) ){
             shinyalert(
                 "Oops!",
@@ -708,8 +714,14 @@ observeEvent(input$ksrates_go, {
         }
         else{
             withProgress(message='Creating in progress', value=0, {
-                incProgress(amount=.1, message="Preparing ksrates configure file...")
-                Sys.sleep(.1)
+                incProgress(amount=.15, message="Preparing ksrates configure file...")
+                updateProgress(
+                    container="ksrates_progress_container_js",
+                    width=15,
+                    type="ksrates"
+                )
+                Sys.sleep(1)
+
                 ksratesDir <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd")
                 if( !file.exists(ksratesDir) ){
                     dir.create(ksratesDir)
@@ -718,14 +730,20 @@ observeEvent(input$ksrates_go, {
                 speciesinfoconf <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls")
                 create_ksrates_configure_file_v2(input, ksratesconf, speciesinfoconf)
 
-                incProgress(amount=.1, message="Preparing ksrates expert parameters...")
-                Sys.sleep(.1)
+                incProgress(amount=.6, message="Preparing ksrates expert parameters...")
+                updateProgress(
+                    container="ksrates_progress_container_js",
+                    width=60,
+                    type="ksrates"
+                )
+                Sys.sleep(1)
                 # create Ksrate expert parameters file
                 ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                 create_ksrates_expert_parameter_file(ksratesexpert)
 
+                updateProgress("ksrates_progress_container_js", 80, "ksrates")
                 incProgress(amount=.8, message="Creating ksrates Runing Script ...")
-                Sys.sleep(.1)
+                Sys.sleep(1)
                 ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
                 ksrates_cmd <- create_ksrates_cmd(input, "ksrates_conf.txt", ksrates_cmd_sh_file)
 
@@ -737,17 +755,25 @@ observeEvent(input$ksrates_go, {
                     )
                 )
 
+                updateProgress("ksrates_progress_container_js", 100, "ksrates")
                 incProgress(amount=1)
-                Sys.sleep(.1)
+                Sys.sleep(1)
             })
         }
     }
     else{
+        progress_data <- list("actionbutton"="ksrates_go",
+                              "container"="ksrates_progress_container_js")
+        session$sendCustomMessage(
+            "Progress_Bar_Complete",
+            progress_data
+        )
+
         data_table <- read_data_file(input$upload_data_file)
         ncols <- ncol(data_table)
         nrows <- nrow(data_table)
         if( nrows > 1 ){
-            if( is.null(input$select_focal_species) ){
+            if( is.null(input$select_focal_species) || input$select_focal_species == ""){
                 shinyalert(
                     "Oops!",
                     "Please define focal species first, then switch this on",
@@ -763,8 +789,9 @@ observeEvent(input$ksrates_go, {
             }
             else{
                 withProgress(message='Creating in progress', value=0, {
-                    incProgress(amount=.1, message="Preparing ksrates Configure File ...")
-                    Sys.sleep(.1)
+                    incProgress(amount=.15, message="Preparing ksrates Configure File ...")
+                    updateProgress("ksrates_progress_container_js", 15, "ksrates")
+                    Sys.sleep(1)
                     ksratesDir <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd")
                     if( !file.exists(ksratesDir) ){
                         dir.create(ksratesDir)
@@ -779,15 +806,17 @@ observeEvent(input$ksrates_go, {
                         speciesinfoconf
                     )
 
-                    incProgress(amount=.1, message="Preparing ksrates Expert Parameters ...")
-                    Sys.sleep(.1)
+                    incProgress(amount=.6, message="Preparing ksrates Expert Parameters ...")
+                    updateProgress("ksrates_progress_container_js", 60, "ksrates")
+                    Sys.sleep(1)
+
                     ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                     create_ksrates_expert_parameter_file(ksratesexpert)
 
                     incProgress(amount=.8, message="Create ksrates Running Script ...")
-                    Sys.sleep(.1)
+                    updateProgress("ksrates_progress_container_js", 80, "ksrates")
+                    Sys.sleep(1)
                     ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
-                    # wgd_cmd_sh_file <- paste0(ksratesDir, "/run_wgd_rest_species.sh")
                     ksrates_cmd <- create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, input$select_focal_species)
 
                     system(
@@ -799,6 +828,7 @@ observeEvent(input$ksrates_go, {
                     )
 
                     incProgress(amount=1)
+                    updateProgress("ksrates_progress_container_js", 100, "ksrates")
                     Sys.sleep(.1)
                 })
             }
@@ -823,9 +853,17 @@ observeEvent(input$iadhore_go, {
         )
     }
     else{
+        progress_data <- list("actionbutton"="iadhore_go",
+                              "container"="iadhore_progress_container_js")
+        session$sendCustomMessage(
+            "Progress_Bar_Complete",
+            progress_data
+        )
         withProgress(message='Creating in progress', value=0, {
-            incProgress(amount=.1, message="Preparing i-ADHoRe configure file...")
-            Sys.sleep(.1)
+            incProgress(amount=.2, message="Preparing i-ADHoRe configure file...")
+            updateProgress("iadhore_progress_container_js", 20, "i-ADHoRe")
+            Sys.sleep(1)
+
             syn_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/i-ADHoRe_wd"))
             if( !file.exists(syn_dir) ){
                 dir.create(syn_dir)
@@ -845,7 +883,11 @@ observeEvent(input$iadhore_go, {
                     syn_dir
                 )
             )
-            incProgress(amount=.3, message="Dealing with gff files...")
+
+            incProgress(amount=.1, message="Dealing with gff files...")
+            updateProgress("iadhore_progress_container_js", 30, "i-ADHoRe")
+            Sys.sleep(1)
+
             system(
                 paste(
                     "sh tools/preparing_iadhore_inputs.shell",
@@ -853,7 +895,10 @@ observeEvent(input$iadhore_go, {
                     syn_dir
                 )
             )
-            incProgress(amount=.5, message="Generating the codes for diamond and i-ADHoRe")
+            incProgress(amount=.4, message="Generating the codes for diamond and i-ADHoRe")
+            updateProgress("iadhore_progress_container_js", 70, "i-ADHoRe")
+            Sys.sleep(1)
+
             if( input$multiple_iadhore ){
                 system(
                     paste(
@@ -880,26 +925,34 @@ observeEvent(input$iadhore_go, {
                     )
                 )
             }
-            incProgress(amount=.8, message="Done")
-            Sys.sleep(.1)
-            incProgress(amount=1)
-            Sys.sleep(.1)
+            incProgress(amount=1, message="Done")
+            updateProgress("iadhore_progress_container_js", 100, "i-ADHoRe")
+            Sys.sleep(1)
         })
     }
 })
 
 observeEvent(input$orthofinder_go, {
+    progress_data <- list("actionbutton"="orthofinder_go",
+                          "container"="orthofinder_progress_container_js")
+    session$sendCustomMessage(
+        "Progress_Bar_Complete",
+        progress_data
+    )
+
     species_info <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls"))
     if( file.exists(species_info) ){
         withProgress(message='Creating in progress', value=0, {
             incProgress(amount=.1, message="Preparing OrthoFinder input file...")
-            Sys.sleep(.1)
+            updateProgress("orthofinder_progress_container_js", 10, "OrthoFinder")
+            Sys.sleep(1)
+
             orthofinder_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/OrthoFinder_wd"))
             if( !file.exists(orthofinder_dir) ){
                 dir.create(orthofinder_dir)
             }
             cmd_file <- paste0(orthofinder_dir, "/run_orthofinder.sh")
-            incProgress(amount=.3, message="Create inputs file for OrthoFinder ...")
+            incProgress(amount=.1, message="Create inputs file for OrthoFinder ...")
             system(
                 paste(
                     "cp",
@@ -907,6 +960,10 @@ observeEvent(input$orthofinder_go, {
                     orthofinder_dir
                 )
             )
+            incProgress(amount=.1, message="Translate CDS into proteins ...")
+            updateProgress("orthofinder_progress_container_js", 30, "OrthoFinder")
+            Sys.sleep(1)
+
             system(
                 paste(
                     "Rscript tools/prepare_orthofinder.R",
@@ -915,8 +972,10 @@ observeEvent(input$orthofinder_go, {
                     "-c", cmd_file
                 )
             )
-            incProgress(amount=1)
-            Sys.sleep(.1)
+
+            incProgress(amount=1, message="Done")
+            updateProgress("orthofinder_progress_container_js", 100, "OrthoFinder")
+            Sys.sleep(1)
         })
     }
     else{

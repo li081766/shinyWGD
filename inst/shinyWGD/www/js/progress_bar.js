@@ -36,14 +36,15 @@ Shiny.addCustomMessageHandler("UpdateProgressBar", function (message) {
     var containerId = message.container;
     var progressBar = $("#" + containerId).find(".progress-bar");
     var progressText = $("#" + containerId).find(".progress-text");
+    var programType = message.type;
 
-    var width = message.width; // Set the width directly
+    var width = message.width; 
 
     progressBar.css("width", width + "%");
     progressBar.attr("aria-valuenow", width);
 
     if (width >= 100) {
         progressBar.removeClass("active");
-        progressText.text("Create ksrates codes complete").css("color", "#fff");
+        progressText.text("Create " +  programType + " codes complete").css("color", "#fff");
     }
 });

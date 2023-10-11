@@ -53,6 +53,7 @@ ui <- tagList(
     includeScript("www/js/findOutgroup.js"),
     includeScript("https://unpkg.com/@popperjs/core@2"),
     includeScript("www/js/tippy-bundle.umd.v6.3.7.min.js"),
+    includeScript("www/js/progress_bar.js"),
     shinyjs::useShinyjs(),
     tags$head(
         tags$link(
