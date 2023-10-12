@@ -37,7 +37,7 @@ Please refer to the [shinyWGD server](https://bioinformatics.psb.ugent.be/webtoo
 
 ### The structure of`shinyWGD`
 
-- ##### <img src="inst/shinyWGD/www/images/house-solid.svg" alt="Icon" width="15" height="15"> Home
+- ##### <img src="inst/shinyWGD/www/images/house-solid.svg" alt="Icon" width="15" height="15" style="margin-top: 5px;"> Home
 - ##### <img src="inst/shinyWGD/www/images/terminal-solid.svg" alt="Icon" width="15" height="15"> Scripts
   - <img src="inst/shinyWGD/www/images/microscope-solid.svg" alt="Icon" width="15" height="15"> Data Preparation
   - <img src="inst/shinyWGD/www/images/code-solid.svg" alt="Icon" width="15" height="15"> Codes
