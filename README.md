@@ -30,10 +30,15 @@ if (!require("devtools")) {
 devtools::install_github("li081766/shinyWGD", dependencies = TRUE, build_vignettes = FALSE)
 ```
 
-### Examples
+### Usage
 
-Please refer to the [shinyWGD server](https://bioinformatics.psb.ugent.be/webtools/shinyWGD) to see the detailed usage. 
+Please refer to the [shinyWGD server](https://bioinformatics.psb.ugent.be/webtools/shinyWGD) or the vignettes of **`shinyWGD`** to see the detailed usage. 
 
+```r
+library(shinyWGD)
+runshinyWGD()
+help(package="shinyWGD")
+```
 
 ### The structure of`shinyWGD`
 
