@@ -430,12 +430,12 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     system(paste("cp", input$newick_tree$datapath, paste0(workdirname, "/tree.newick")))
 
     SpeciesInfoConf <- file(species_info_file, open="w")
-    withProgress(message='Processing fasta files in progress', value=0, {
+    shiny::withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:input$number_of_study_species ){
             latin_name <- paste0("latin_name_", i)
             latin_name <- gsub("_", " ", latin_name)
 
-            incProgress(
+            shiny::incProgress(
                 amount=0.8/input$number_of_study_species,
                 message=paste0("Dealing with ", latin_name, " ...")
             )
@@ -486,7 +486,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
                 cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
             }
         }
-        incProgress(amount=1)
+        shiny::incProgress(amount=1)
         Sys.sleep(.1)
     })
 
@@ -555,12 +555,14 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
     collinearity <- "yes"
 
     SpeciesInfoConf <- file(species_info_file, open="w")
-    withProgress(message='Processing fasta files in progress', value=0, {
+
+
+    shiny::withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:nrow(data_table) ){
             latin_name <- data_table[i, 1]
             latin_name <- gsub("_", " ", latin_name)
 
-            incProgress(
+            shiny::incProgress(
                 amount=0.8/nrow(data_table),
                 message=paste0("Dealing with ", data_table[i, 1], " ...")
             )
@@ -596,7 +598,7 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
                 cat(paste0(latin_name_temp, "\t", proteome_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
             }
         }
-        incProgress(amount=1)
+        shiny::incProgress(amount=1)
         Sys.sleep(.1)
     })
 
