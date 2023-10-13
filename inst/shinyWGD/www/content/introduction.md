@@ -12,7 +12,6 @@ This page gives users a brief introduction to this software. Please go to the <f
 
 #### The structure of **`shinyWGD`**
 
-
 - ##### <font color="#6650C9"><i class="fa-solid fa-home"></i> Home</font>
 - ##### <font color="#6650C9"><i aria-label="terminal icon" class="fa fa-terminal fa-fw fa-fade" role="presentation"></i>Scripts</font>
   - <font color="orange"><i aria-label="microscope icon" class="fa fa-microscope fa-fw fa-fade" role="presentation"></i> Data Preparation</font>
@@ -35,6 +34,12 @@ This page gives users a brief introduction to this software. Please go to the <f
   - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
   - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
   - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
+  - [`diamond`](https://github.com/bbuchfink/diamond)
+  - [`MAFFT`](https://mafft.cbrc.jp/alignment/software/)
+  - [`trimAl`](http://trimal.cgenomics.org/)
+  - [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)
+  - [`MrBayes`](https://nbisweden.github.io/MrBayes/)
+  - [`ALE`](https://github.com/ssolo/ALE)
 
 - ###### <font color="#6650C9">R packages</font>
   - `{shiny}`

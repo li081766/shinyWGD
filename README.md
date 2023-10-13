@@ -65,6 +65,8 @@ help(package="shinyWGD")
   - [`MAFFT`](https://mafft.cbrc.jp/alignment/software/)
   - [`trimAl`](http://trimal.cgenomics.org/)
   - [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)
+  - [`MrBayes`](https://nbisweden.github.io/MrBayes/)
+  - [`ALE`](https://github.com/ssolo/ALE)
 
 - ##### R packages
   - `{shiny}`
