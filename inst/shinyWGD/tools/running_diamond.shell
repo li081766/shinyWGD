@@ -177,6 +177,7 @@ run_diamond_and_filter() {
 				run_diamond_2sp "$species" "$fasta_file" "$other_species" "$other_fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
 				run_filter_blast "$blastOutFile" "$filteredFile"
 			fi
+			gzip "$blastOutFile"
 		done
 	done
 }
