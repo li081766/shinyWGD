@@ -1,7 +1,6 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![R-CMD-check](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/ShinyWGD)](https://github.com/li081766/ShinyWGD/issues)
