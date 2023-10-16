@@ -1,6 +1,7 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
+[![R-CMD-check-bioc](https://github.com/li081766/ShinyWGD/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/li081766/ShinyWGD/actions)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
 <!-- badges: end -->
