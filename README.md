@@ -3,6 +3,7 @@
 <!-- badges: start -->
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
+[![R-CMD-check](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 ### Overview
