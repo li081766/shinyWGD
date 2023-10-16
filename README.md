@@ -35,7 +35,7 @@ To ensure the successfully loading of `Gallery` and `Help` pages in `shinyWGD`, 
 
 ### Usage
 
-Please refer to the [shinyWGD server](https://bioinformatics.psb.ugent.be/webtools/shinyWGD) or the vignettes of **`shinyWGD`** to see the detailed usage. 
+Please refer to the [`shinyWGD` server](https://bioinformatics.psb.ugent.be/webtools/shinyWGD) or the vignettes of `shinyWGD` to see the detailed usage. 
 
 ```r
 library(shinyWGD)
