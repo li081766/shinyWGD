@@ -24,7 +24,7 @@ for species in "${species_array[@]}"; do
 	if [[ "$species" == "" ]]; then
 		continue
 	fi
-	
+
 	gff_file="../$species.gff"
 
 	if [[ -f "$gff_file" ]]; then
@@ -39,6 +39,7 @@ for species in "${species_array[@]}"; do
 
 	ksrates init ksrates_conf_$species.txt
 	ksrates paralogs-ks ksrates_conf_$species.txt --n-threads 4
+	gzip paralog_distributions/wgd_$species/$species.blast.tsv
 	rm ksrates_conf_$species.txt
 	rm wgd_runs_$species.txt
 done

@@ -704,12 +704,18 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
             latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
             informal_name_j <- paste0(latin_name_list[1], j)
             if( j > i ){
-                cat(paste("ksrates orthologs-ks",
-                           ksratesconf,
-                           informal_name_i,
-                           informal_name_j,
-                          "--n-threads 1"
-                        ),
+                cat(
+                    paste0(
+                        "ksrates orthologs-ks ",
+                        ksratesconf, " ",
+                        informal_name_i, " ",
+                        informal_name_j, " ",
+                        "--n-threads 1; ",
+                        "gzip ",
+                        "ortholog_distributions/wgd_",
+                        informal_name_i, "_", informal_name_j, "/",
+                        informal_name_i, "_", informal_name_j, ".blast.tsv"
+                    ),
                     file=cmd, append=TRUE, sep="\n"
                 )
             }
@@ -759,12 +765,14 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
                 cat(
                     paste0(
                         "ksrates orthologs-ks ",
-                        ksratesconf,
-                        " ",
-                        informal_name_i,
-                        " ",
-                        informal_name_j,
-                        " --n-threads 1"
+                        ksratesconf, " ",
+                        informal_name_i, " ",
+                        informal_name_j, " ",
+                        "--n-threads 1; ",
+                        "gzip ",
+                        "ortholog_distributions/wgd_",
+                        informal_name_i, "_", informal_name_j, "/",
+                        informal_name_i, "_", informal_name_j, ".blast.tsv"
                     ),
                     file=cmd, append=TRUE, sep="\n"
                 )
