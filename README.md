@@ -31,7 +31,7 @@ if (!require("devtools")) {
 devtools::install_github("li081766/shinyWGD", dependencies = TRUE, build_vignettes = TRUE)
 ```
 
-To ensure the successfully loading of `Gallery` and `Help` pages in `shinyWGD`, please set `build_vignettes` to `TRUE`.
+To ensure the successfully loading of `Gallery` and `Help` pages in `shinyWGD`, please set `build_vignettes` to `TRUE` when installing the package.
 
 ### Usage
 
