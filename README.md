@@ -4,6 +4,7 @@
 [![R-CMD-check](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/li081766/ShinyWGD/actions/workflows/R-CMD-check.yaml)
 [![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
+[![GitHub issues](https://img.shields.io/github/issues/li081766/ShinyWGD)](https://github.com/li081766/ShinyWGD/issues)
 <!-- badges: end -->
 
 ### Overview
@@ -28,8 +29,10 @@ install.packages("shinyWGD")
 if (!require("devtools")) {
   install.packages("devtools")
 }
-devtools::install_github("li081766/shinyWGD", dependencies = TRUE, build_vignettes = FALSE)
+devtools::install_github("li081766/shinyWGD", dependencies = TRUE, build_vignettes = TRUE)
 ```
+
+To ensure the successfully loading of `Gallery` and `Help` pages in `shinyWGD`, please set `build_vignettes` to `TRUE`.
 
 ### Usage
 
