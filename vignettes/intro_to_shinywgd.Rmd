@@ -21,7 +21,18 @@ vignette: >
 blockquote {
   font-size: 14px;
   background-color: #F0FFFF;
-  padding: 10px;
+  border-left: none;
+  border-right: none;
+  margin-bottom: 30px;
+}
+
+.note {
+  width: 830px;
+  font-size: 16px;
+  color: white;
+  background-color: #6AAFDE;
+  padding: 5px;
+  margin-top: 30px;
 }
 </style>
 
@@ -85,8 +96,16 @@ help(package="shinyWGD")
 
 Please select the proper number of species you want to study in <font color="9f5000">Select Number of Species to Analyze:</font> first.
 
-  <blockquote>
-  `r fa(name="exclamation-triangle", fill="green")` If only one species is set, the core program will be set to <b>`wgd`</b>, otherwise, <b>`ksrates`</b> will be chosen.</blockquote>
+<!-- <div class="note">💡 Note</div>
+<div class="note" style="color: #FFE906;">⚠️ Warning</div> 
+  `r fa(name="exclamation-triangle", fill="green")`
+-->
+
+
+<div class="note">&nbsp;&nbsp;💡 Note</div>
+<blockquote>
+If only one species is set, the core program will be set to <b>`wgd`</b>, otherwise, <b>`ksrates`</b> will be chosen.
+</blockquote>
 
 **`shinyWGD`** provides two options to upload the data in the `Data Preparation` Page.
 
@@ -124,10 +143,18 @@ The detailed format of this file is below: </br>
     </table>
 
     - **<sup>a</sup>** `cds` is the coding region of a gene or the portion of a gene's DNA or RNA that codes for protein. This file can be `fasta` or `gzipped-fasta`. <br>This column is **mandatory**. 
-    - `r fa(name="exclamation-triangle", fill="red")` Do not contain the [alternative isoforms](https://en.wikipedia.org/wiki/Alternative_splicing) of each gene.
-    - **<sup>b</sup>** `gff` is the format consists of one line per feature, each containing nine columns of data, plus optional track definition lines, see more [click here](https://www.ensembl.org/info/website/upload/gff.html). <br>The file can be `gff`, `gff3`, `gzipped-gff`, or `gzipped-gff3`. <br>This column is **mandatory** for **`focal species`** and is **optional** for **`other species`**.</br>
-
+    - **<sup>b</sup>** `gff` is the format consists of one line per feature, each containing nine columns of data, plus optional track definition lines, see more [click here](https://www.ensembl.org/info/website/upload/gff3.html). <br>The file can be `gff`, `gff3`, `gzipped-gff`, or `gzipped-gff3`. <br>This column is **optional**.</br>
     - **`focal species`** is the parameter in `ksrates`, which will be set in the [`configure file`](https://ksrates.readthedocs.io/en/latest/configuration.html) of `ksrates`.
+
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote> 
+Do not contain the [alternative isoforms](https://en.wikipedia.org/wiki/Alternative_splicing) of each gene.
+</blockquote>  
+
+<div class="note">&nbsp;&nbsp;💡 Note</div>
+<blockquote>
+To ensure the successful transformation of  of annotation file, please review the **type** (the third column) and **attributes** (the ninth column) of the `GFF` file and make sure that when the **type** is equal to `mRNA`, the **attributes** column starts with **`ID=`**. Download the example `GFF` file of <i>`Arabidopsis thaliana`</i> from [PLAZA](https://ftp.psb.ugent.be/pub/plaza/plaza_public_dicots_05/GFF/ath/annotation.selected_transcript.exon_features.ath.gff3.gz).
+</blockquote>
 
 After successfully uploading the tab-separated file, the number of species in the file will be calculated. 
 
@@ -167,14 +194,19 @@ This option provide users a more straightforward way to upload data.
   
   - After reviewing and downloading the necessary files, users can execute `wgd`, `ksrates`, `i-ADHoRe` or `OrthoFinder` in their local environment. 
   
-    
- <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` **`shinyWGD`** will exclude genes with internal stop codons and genes whose lengths are not divisible by three. You can find details on the gene filtering process in the *Sequence_processing.log* file located in the **`Analysis_Date`** folder.
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote>
+**`shinyWGD`** will exclude genes with internal stop codons and genes whose lengths are not divisible by three. You can find details on the gene filtering process in the *Sequence_processing.log* file located in the **`Analysis_Date`** folder.
 </blockquote>
 
 ### <font color="#23B395">Executing `wgd`, `krates`, `i-ADHoRe` or `OrthoFinder`</font>
 
 After decompressing the downloaded compressed file (**`Analysis_Date.tgz`**), users will find the `bash` and `configure` files (`run_wgd.sh` / `run_ksrates.sh`, `run_paralog_ks_rest_species.sh`, `run_iadhore.sh`, `run_orthofinder.sh`). 
+
+<div class="note">&nbsp;&nbsp;💡 Note</div>
+<blockquote>
+In the first several lines of each `run_*.sh` file, we include the `#SBATCH` directive to specify the memory and thread usage. This is essential because our cluster relies on <i>SLURM</i> for workload management. Users can modify these lines to align with their specific cluster configurations.
+</blockquote>
   
 Users can execute them in their local environment.  
     
@@ -183,14 +215,15 @@ Users can execute them in their local environment.
 - How to install `i-ADHoRe` to your local environment, please read the [`i-ADHoRe` document](https://www.vandepeerlab.org/?q=tools/i-adhore30).
 - How to install `OrthoFinder` to your local environment, please read the [`OrthoFinder` document](https://github.com/davidemms/OrthoFinder).
     
+    
+<div class="note">&nbsp;&nbsp;💡 Note</div>
 <blockquote>
-  `r fa(name="exclamation-triangle", fill="green")` When using <font color="green">`i-ADHoRe`</font> to do synteny analysis, the alignment will be produced. The alignment process will use the <font color="green">[`diamond`](https://github.com/bbuchfink/diamond)</font> program. So please install <font color="green">[`diamond`](https://github.com/bbuchfink/diamond)</font> program first.
+When using `i-ADHoRe` to do synteny analysis, the alignment will be produced firstly. The alignment process will use the [`diamond`](https://github.com/bbuchfink/diamond) program. So please install [`diamond`](https://github.com/bbuchfink/diamond) program first.
 </blockquote>
 
+<div class="note">&nbsp;&nbsp;💡 Note</div>
 <blockquote>
-  `r fa(name="exclamation-triangle", fill="green")` To compute the <i>K</i><sub>s</sub> value of each anchored gene pair and the <i>K</i><sub>s</sub> unit tree of studied species, the [`MAFFT`](https://mafft.cbrc.jp/alignment/software/), [`trimAl`](http://trimal.cgenomics.org/), and [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html) will be used for aligning the proteins, obtaining the nucleotide alignment and calculating the <i>K</i><sub>s</sub> value, respectively. So please install <font color="green">[`MAFFT`](https://mafft.cbrc.jp/alignment/software/)</font>, <font color="green">[`trimAl`](http://trimal.cgenomics.org/)</font>, and <font color="green">[`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)</font> first.
-  
-  
+To compute the <i>K</i><sub>s</sub> value of each anchored gene pair and the <i>K</i><sub>s</sub> unit tree of studied species, the [`MAFFT`](https://mafft.cbrc.jp/alignment/software/), [`trimAl`](http://trimal.cgenomics.org/), and [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html) will be used for aligning the proteins, obtaining the nucleotide alignment and calculating the <i>K</i><sub>s</sub> value, respectively. So please install <font color="green">[`MAFFT`](https://mafft.cbrc.jp/alignment/software/)</font>, <font color="green">[`trimAl`](http://trimal.cgenomics.org/)</font>, and <font color="green">[`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)</font> first.
 </blockquote>
 
 ### <font color="#23B395">Extracting the tree from [TimeTree.org](http://www.timetree.org/)</font>
@@ -198,9 +231,10 @@ Users can execute them in their local environment.
   If users don’t ensure the evolutionary relationships among the studied species, **`shinyWGD`**
    provides an alternative way to generate the newick tree through interacting with [TimeTree.org](http://www.timetree.org/) database.
 
-  <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` TimeTree database does not include all the species.
-  <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the species are not included in the TimeTree database, you should ensure the relationship in other ways.</blockquote>
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote>
+`TimeTree` database does not include all the species. If the species are not included in the `TimeTree` database, you should ensure the relationship in other ways.
+</blockquote>
 
 Please click the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="tree")` Extract Tree</font> button to extract a tree from TimTree.org database.<br>
   
@@ -214,8 +248,10 @@ Users need to save this tree to a local file and then upload the file to `newick
 
 After successfully running the corresponding shell files locally, the necessary outputs will be saved in the **`Analysis_Date`** folder. Then users can choose this folder in the `Uploading` panel in <img src="../inst/shinyWGD/www/images/ksIcon.svg" alt="Icon" width="10" height="10"> page.
 
-  <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` Users should choose the folder which is originated from the folder created by **`shinyWGD`** program to avoid the failure of displaying the correct file names.</blockquote>
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote>
+Users should choose the folder which is originated from the folder created by **`shinyWGD`** program to avoid the failure of displaying the correct file names.
+</blockquote>
 
 ### <font color="#23B395">Paralog <i>K</i><sub>s</sub> age distribution</font>
 
@@ -229,7 +265,8 @@ First, **`shinyWGD`** fits normal mixture models to the <b><i>K</i><sub>s</sub><
 
 Second, **`shinyWGD`** uses SiZer to identify significant peaks based on the significant zero crossings of derivatives from kernel density estimation. Then, a subplot to show the output of SiZer will be added under the bar plot.
 
-  <blockquote>
+<div class="note">&nbsp;&nbsp;📚 Reference</div>
+<blockquote>
 Please refer to the papers below to see details about EMMIX and SiZer.
   
   - McLachlan G, Peel D. (1999) <i>The EMMIX algorithm for the fitting of normal and t-components</i>. <b>Journal of Statistical Software</b>. 4:1–14.
@@ -296,8 +333,10 @@ In the multiple species alignment panel, users can define the order of species i
 
 **`shinyWGD`** employs the Hierarchical clustering method for constructing putative ancestral regions (PARs). The segments are identified from the outputs of `i-ADHoRe`, and the **homolog concentration scores** are calculated using `-log(p)`, where `p` is the probability of the observed number of homolog pairs as modeled by a Poisson distribution.
 
-  <blockquote>
-  <font color="green">`r fa(name="exclamation-triangle")`</font> To read more about <b><i>homolog concentration scores</i></b>, please refer to Putnam NH, et al. (2008) <i>The amphioxus genome and the evolution of the chordate karyotype</i>. <b>Nature</b> 453:1064–1071.</blockquote> 
+<div class="note">&nbsp;&nbsp;📚 Reference</div>
+<blockquote>
+To read more about <b><i>homolog concentration scores</i></b>, please refer to Putnam NH, et al. (2008) <i>The amphioxus genome and the evolution of the chordate karyotype</i>. <b>Nature</b> 453:1064–1071.
+</blockquote> 
   
 For each segment, the array of scores against all segments in the other genome forms a unique profile. The segments are then clustered based on the similarity of these profiles (determined by **Pearson correlation coefficient r**) using the average linkage method. The default cutoff of r is 0.3. Users can change this cutoff through the sliding block. The faint yellow rectangle will highlight the significantly enriched regions (`P < 1E-10`). Then, users can zoom in each PAR through the <font color="green"><b>Putative Ancestral Regions</b></font> block.
 
@@ -410,12 +449,18 @@ In the above figure, the left subplot is the <i>K</i><sub>s</sub> unit tree. The
 
 In this page, users can use `Whale` to operate the gene tree - species tree reconciliation analysis.
 
-Users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all ALE files. If users use `OrthoFinder` in **`shinyWGD`**, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the ALE files by using the gene families built by other software.
+Users need to upload two inputs to operate `Whale.jl`. One is the species time tree in `Newick` format. Another is the folder which includes all `ALE` files. If users use `OrthoFinder` in **`shinyWGD`**, users can find the folder in `Orthofinder_wd`, named *all_tree_ALE_files*. Users can also follow the [instruction](https://github.com/arzwa/whaleprep/tree/master) of `Whale.jl` to prepare the `ALE` files by using the gene families built by other software.
+
+<div class="note">&nbsp;&nbsp;💡 Note</div>
+<blockquote>To run the `run_Whale_preparing.sh` to prepare the `ALE` inputs for `Whale`, the [`MrBayes`](https://nbisweden.github.io/MrBayes/) and  [`ALE`](https://github.com/ssolo/ALE) will be operated to transform each gene family into its corresponding `ALE` file. How to install these two software, please refer to their websites.
+</blockquote>
 
 Once the tree file uploaded, users can check the topology of the tree in the right panel. Then users can add the **hypothetical WGD event** to a certain branch by clicking the branch.
 
-  <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` Users should use <font color="green"><b>wgd</b></font> as the prefix for the name of <b>hypothetical WGD event</b> to satisfy the requirements of <i>Whale.jl</i>.</blockquote>
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote>
+Users should use <font color="green"><b>wgd</b></font> as the prefix for the name of <b>hypothetical WGD event</b> to satisfy the requirements of `Whale.jl`.
+</blockquote>
 
  <img src="../inst/shinyWGD/www/images/speciesTree.whale.svg" width="800px">
 
@@ -436,8 +481,10 @@ The example output is below.
 <br></br>
 We can judge whether the **hypothetical WGD event** is true or not based on the Bayes factor (*K*) to compare the likelihood of q = 0(H<sub>0</sub>) to the likelihood of q > 0(H<sub>1</sub>) using the Savage–Dickey density ratio.
 
-  <blockquote>
-  `r fa(name="exclamation-triangle", fill="red")` Please Note: the log10 Bayes factor is calculated. Thus, a Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode.</blockquote>
+<div class="note" style="color: #FFE906;">&nbsp;&nbsp;⚠️ Warning</div> 
+<blockquote>
+Please Note: the log10 Bayes factor is calculated. Thus, a Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode.
+</blockquote>
 
 Besides, users should also check the **ESS** values. Generally, ESS values exceeding at least 100 is better for a good model, although short chains may be good for exploring and testing different models. If the ESS values below 100, please increase the **Chain Rounds** in the left setting panel.
 
