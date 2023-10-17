@@ -683,6 +683,14 @@ updateProgress <- function(container, width, type) {
     )
 }
 
+observeEvent(input$upload_data_file,{
+    withProgress(message='Checking the path of input files', value=0, {
+        data_table <- read_data_file(input$upload_data_file)
+        checkFileExistence(data_table)
+        incProgress(amount=1)
+    })
+})
+
 observeEvent(input$ksrates_go, {
     if( is.null(input$upload_data_file) ){
         progress_data <- list("actionbutton"="ksrates_go",
@@ -728,6 +736,7 @@ observeEvent(input$ksrates_go, {
                 }
                 ksratesconf <- paste0(ksratesDir, "/ksrates_conf.txt")
                 speciesinfoconf <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/Species.info.xls")
+
                 create_ksrates_configure_file_v2(input, ksratesconf, speciesinfoconf)
 
                 incProgress(amount=.6, message="Preparing ksrates expert parameters...")
@@ -972,6 +981,45 @@ observeEvent(input$orthofinder_go, {
                     "-c", cmd_file
                 )
             )
+
+            system(
+                paste(
+                    "cp",
+                    paste0(getwd()[1], "/tools/preparing_Whale_inputs.shell"),
+                    orthofinder_dir
+                )
+            )
+
+            whale_prepare_cmd_file <- paste0(orthofinder_dir, "/run_Whale_preparing.sh")
+            cmd_con <- file(whale_prepare_cmd_file, open="w")
+            writeLines(
+                c(
+                    "#!/bin/bash",
+                    "",
+                    "#SBATCH -p all",
+                    "#SBATCH -c 4",
+                    "#SBATCH --mem 2G",
+                    paste0("#SBATCH -o ", basename(whale_prepare_cmd_file), ".os%j"),
+                    paste0("#SBATCH -o ", basename(whale_prepare_cmd_file), ".es%j"),
+                    ""
+                ),
+                cmd_con
+            )
+
+            writeLines("orthogroupFile=$(ls orthofinderOutputDir/Results*/Orthogroups/Orthogroups.tsv)", cmd_con)
+            writeLines(
+                paste0(
+                    "sh ",
+                    "./preparing_Whale_inputs.shell \\\n",
+                    "\t$orthogroupFile \\\n",
+                    "\t../tree.newick \\\n",
+                    "\t", input$select_focal_species, " \\\n",
+                    "\t", getwd()[1], "/tools \\\n",
+                    "\t4"
+                ),
+                cmd_con
+            )
+            close(cmd_con)
 
             incProgress(amount=1, message="Done")
             updateProgress("orthofinder_progress_container_js", 100, "OrthoFinder")
