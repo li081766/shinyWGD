@@ -1,0 +1,274 @@
+#!/bin/bash
+
+# Check if the correct number of arguments is provided
+if [ $# -ne 5 ]; then
+	echo "Usage: $0 <Orthogroups.tsv> <tree.newick> <focal_species> <ShinyWGD_dir> <num_threads>"
+	exit 1
+fi
+
+
+# Check if the files exist
+if [ ! -f "$1" ]; then
+	echo "Error: the output of OrthoFinder is not found. Please check the run log of OrthoFinder."
+	exit 1
+fi
+
+if [ ! -f "$2" ]; then
+	echo "Error: the tree file is not found. Please ensure the tree file first."
+	exit 1
+fi
+
+
+# Number of threads
+num_threads="$5"
+
+start_time=$(date +%s) 
+
+tmp_fifofile="/tmp/$$.fifo"
+mkfifo "$tmp_fifofile"   
+exec 6<> "$tmp_fifofile"
+rm "$tmp_fifofile" 
+
+for ((i=0; i<${num_threads}; i++)); do
+	 echo >&6
+done
+
+# Function to determine the clade for orthofilter.py from the tree in newick format and filter the orthogroups
+determine_clade_filter_orthofinder(){
+	local orthogroup="$1"
+	local tree_file="$2"
+	local focal_species="$3"
+	local wgd_bin="$4"
+
+	sed 's/, /,/g' "$tree_file" | sed 's/ /_/g' >tree.newick
+	
+    tree=$(cat tree.newick)
+    
+    # Remove unnecessary characters and split the tree into species names
+    species=($(echo "$tree" | tr -d '();' | tr ',' '\n'))
+
+    # Find the index of the input species
+    index=-1
+    for ((i=0; i<${#species[@]}; i++)); do
+        if [[ "${species[i]}" == "$focal_species" ]]; then
+            index=$i
+            break
+        fi
+    done
+	   
+	# Check if the input species was found
+	if (( index >= 0 )); then
+		# Find the common parent index
+		parent_index=$(( index / 2 ))
+
+		# Calculate the index of the sister species
+		if (( index % 2 == 0 )); then
+			sister_index=$(( parent_index * 2 + 1 ))
+		else
+			sister_index=$(( parent_index * 2 ))
+		fi		
+		# Retrieve the sister species
+		sister_species="${species[sister_index]}"			
+	fi
+
+	# Filter the orthogroups.tsv
+	python $wgd_bin/Whale.jl/scripts/orthofilter.py $orthogroup $focal_species,$sister_species orthogroups.filtered.tsv
+
+}
+
+# Function to randomly select 1000 gene families from filtered orthogroups
+select_random_1000_genefamily() {
+    file="$1"
+	out_file=$2
+
+    total_gfs=$(wc -l < "$file")
+	awk -v min=1 -v max="$total_gfs" 'BEGIN{srand(); for(i=1;i<=1000;i++) print int(min+rand()*(max-min+1))}' > random_lines.tmp
+	while read -r i; do awk -v id="$i" 'NR==id' $file; done < random_lines.tmp >"$out_file"
+	rm random_lines.tmp
+}
+
+# Function to change the fasta format into nexus format
+fasta_to_nexus() {
+    fasta_file="$1"
+    nexus_file="$2"
+
+	while read -r line; do
+        if [[ "$line" =~ ^>(.*)$ ]]; then
+            if [[ -n "$current_sequence" ]]; then
+                sequences+=("$current_sequence")
+                current_sequence=""
+            fi
+			matched_group=${BASH_REMATCH[1]}
+		    modified_name=${matched_group//-/_}  
+			sequence_names+=("$modified_name")
+        else
+			tmp_line=${line//\*/-}
+            current_sequence+="$tmp_line"
+        fi
+    done < "$fasta_file"
+
+    # Add the last sequence
+    if [[ -n "$current_sequence" ]]; then
+        sequences+=("$current_sequence")
+    fi
+
+	# Get the length of the longest name plus one
+	max_name_length=0
+	for name in "${sequence_names[@]}"; do
+		if (( ${#name} > max_name_length )); then
+			max_name_length=${#name}
+		fi
+	done
+	(( max_name_length++ ))
+	
+    # Get the number of sequences and sequence length
+    num_sequences=${#sequence_names[@]}
+	#sequence_length=$(( ${#sequences[0]} - 1 ))
+	sequence_length=${#sequences[0]}
+
+    # Create the Nexus file header
+    echo "#NEXUS" > "$nexus_file"
+    echo "" >> "$nexus_file"
+    echo "BEGIN DATA;" >> "$nexus_file"
+    echo "    DIMENSIONS NTAX=$num_sequences NCHAR=$sequence_length;" >> "$nexus_file"
+    echo "    FORMAT DATATYPE=PROTEIN MISSING=? GAP=-;" >> "$nexus_file"
+    echo "MATRIX" >> "$nexus_file"
+
+    # Write the sequence names and sequences in PHYLIP format
+    for ((i = 0; i < num_sequences; i++)); do
+		printf "%-${max_name_length}s%s\n" "${sequence_names[i]}" "${sequences[i]%\*}" >> "$nexus_file"
+    done
+
+    # Close the Nexus file
+    echo ";" >> "$nexus_file"
+    echo "END;" >> "$nexus_file"
+}
+
+# Function to run MrBayes and ALEobserve to generate CCD files
+run_mrbayes_ALEobserve() {
+	aln=$1
+	samplefreq=$2
+	ngen=$3
+
+	if [ -d ${aln}_mb ]; then
+		rm -r ${aln}_mb
+	fi
+
+	mkdir ${aln}_mb
+	sed  "s/|/_/g" ${aln} > ${aln}_mb/${aln} 
+	cd ${aln}_mb
+
+	# Prepare input file for MrBayes
+	echo "set autoclose=yes nowarn=yes" > ./mbconf.txt
+	echo "execute ./${aln}" >> ./mbconf.txt
+	echo "prset aamodelpr=fixed(lg)" >> ./mbconf.txt  # LG model
+	echo "lset rates=gamma" >> ./mbconf.txt           # G  model
+	echo "mcmcp diagnfreq=100" >> ./mbconf.txt        # diagnostics every 100 gns
+	echo "mcmcp samplefreq=${samplefreq}" >> ./mbconf.txt        # sample every 10 gns
+	echo "mcmc ngen=${ngen} savebrlens=yes nchains=4" >> ./mbconf.txt
+	echo "sumt" >> ./mbconf.txt
+	echo "sump" >> ./mbconf.txt
+	echo "quit" >> ./mbconf.txt
+
+	module load mrbayes
+	mb < ./mbconf.txt > ./log.txt
+	
+	python - <<EOF
+from Bio import Phylo
+
+with open("${aln}.treesample", "w") as f:
+	for i, t in enumerate(Phylo.parse("${aln}.run1.t", format="nexus")):
+		if i % 10 == 0 and i > 1000:
+			Phylo.write(t, f, format="newick")
+EOF
+
+	# Run ALEobserve 
+	module load ALE_trees
+	ALEobserve ${aln}.treesample 
+
+	cd ..
+}
+
+# Main body
+determine_clade_filter_orthofinder $1 $2 $3 $4
+
+#total_genefamily=$(wc -l < orthogroups.filtered.tsv)
+#if (( $total_genefamily >= 1000 )); then
+#	select_random_1000_genefamily orthogroups.filtered.tsv orthogroups.filtered_1000gf.tsv
+#fi
+
+orthogroup_dir=$(dirname "$1")
+align_dir=$(dirname $orthogroup_dir)
+
+if [ ! -d "geneTreeCCD" ]; then
+    mkdir "geneTreeCCD"
+fi
+
+module load trimal 
+if [ -f orthogroups.filtered_1000gf.tsv ]; then
+	cut -f 1 orthogroups.filtered_1000gf.tsv | grep -v Orthogroup | while read -r gf; 
+	do
+		read -u6
+		{
+			#fasta_to_nexus $align_dir/MultipleSequenceAlignments/$gf.fa geneTreeCCD/$gf.nexus
+			# Use trimAl to transform fasta into nexus
+			trimal -in $align_dir/MultipleSequenceAlignments/$gf.fa -out geneTreeCCD/$gf.nexus -nexus	
+			cd geneTreeCCD
+			run_mrbayes_ALEobserve $gf.nexus 10 110000
+			cd ..
+			echo >&6
+		} &
+	done	
+else
+	cut -f 1 orthogroups.filtered.tsv | grep -v Orthogroup | while read -r gf;
+	do
+		read -u6
+		{
+			# skip the gene family which was done in the previous runs
+			ale_file="geneTreeCCD/$gf.nexus_mb/$gf.nexus.treesample.ale"
+			if [[ -f "$ale_file" ]]; then
+				continue
+			else
+    			trimal -in $align_dir/MultipleSequenceAlignments/$gf.fa -out geneTreeCCD/$gf.nexus -nexus
+    			cd geneTreeCCD
+    			run_mrbayes_ALEobserve $gf.nexus 10 110000
+    			cd ..
+			fi
+			echo >&6
+		} &
+	done
+fi
+
+# Wait for all processes to complete
+wait
+
+
+# Move all ale_files into a new folder to filter 
+if [ -d "all_tree_ALE_files" ]; then
+	rm -r "all_tree_ALE_files"
+else
+	mkdir "all_tree_ALE_files"
+fi
+
+mv geneTreeCCD/*/*ale "all_tree_ALE_files"
+python $4/Whale.jl/scripts/ccddata.py all_tree_ALE_files > all_tree_ALE_files.tsv
+python $4/Whale.jl/scripts/ccdfilter.py all_tree_ALE_files.tsv 2 >filtered_tree_ALE_files.tsv
+
+# Move filtered ale_files into the final output folder
+if [ -d "selected_tree_ALE_files" ]; then
+	rm -r "selected_tree_ALE_files"
+else
+	mkdir "selected_tree_ALE_files"
+fi
+
+cat filtered_tree_ALE_files.tsv | while read i; do cp $i selected_tree_ALE_files; done
+
+#tar czf all_tree_ALE_files.tar.gz all_tree_ALE_files && rm -r all_tree_ALE_files 
+#tar czf geneTreeCCD.tar.gz geneTreeCCD && rm -r geneTreeCCD 
+
+
+# Get the end time of the script
+end_time=$(date +%s)
+runtime=$((end_time - start_time))
+
+echo "Script execution time: $runtime seconds"

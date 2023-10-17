@@ -409,6 +409,54 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
     return(proteome_file)
 }
 
+#' Check File Existence in a Data Table
+#'
+#' This function checks the existence of files specified in a data table.
+#'
+#' @param data_table A data table with file paths in columns V2 and V3.
+#'
+#' @return This function has no return value. It prints messages to the console.
+#'
+#' @export
+#'
+#' @examples
+#' data_table <- read.table(text = "V1 V2 V3
+#'         'Apostasia fujianica'    '../Apostasia1.fa'    '../Apostasia1.gff'
+#'         'Apostasia shenzhenica'    '../Apostasia2.fa'    '../Apostasia2.gff'
+#'         'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header = TRUE)
+#'
+#' checkFileExistence(data_table)
+checkFileExistence <- function(data_table){
+    for( i in 1:nrow(data_table) ){
+        file1 <- as.character(data_table[i, "V2"])
+        file2 <- as.character(data_table[i, "V3"])
+
+        if( !file.exists(file1) ){
+            shinyalert(
+                paste0("Oops!",
+                       " Fail to open ",
+                       file1, ".",
+                       " Please set the correct proteome file for ",
+                       as.character(data_table[i, "V1"]), ". ",
+                       "Then continue ..."),
+                type="error"
+            )
+        }
+
+        if( !file.exists(file2) ){
+            shinyalert(
+                paste0("Oops!",
+                       "Fail to open ",
+                       file2, ".",
+                       " Please set the correct annotation file for ",
+                       as.character(data_table[i, "V1"]),". ",
+                       "Then continue ..."),
+                type="error"
+            )
+        }
+    }
+}
+
 #' Create Ksrates Configuration File
 #'
 #' This function generates a configuration file for the Ksrates pipeline based on Shiny input.
