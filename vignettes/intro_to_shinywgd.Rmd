@@ -466,7 +466,7 @@ Users should use <font color="green"><b>wgd</b></font> as the prefix for the nam
 
 In the above tree figure, four hypothetical WGD events are tested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
 
-Users can review the added **hypothetical WGD event** in the **<font color='#AD1F1F'>Hypothetical WGDs</font> to test** panel in the left side.
+Users can review the added **hypothetical WGD event** in the **<font color='#AD1F1F'><i>Hypothetical WGDs</font> to test:</i>** panel in the left side.
 
 Users can define the **Base Model** in the **Base Model** for **Whale** panel and set the **Chain** rounds in the **Set the <b><font color='orange'>Chain</font></b> for <b><i>Whale</b></i>** panel.
 
