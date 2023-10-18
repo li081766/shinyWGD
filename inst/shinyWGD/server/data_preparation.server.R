@@ -1007,13 +1007,14 @@ observeEvent(input$orthofinder_go, {
             )
 
             writeLines("orthogroupFile=$(ls orthofinderOutputDir/Results*/Orthogroups/Orthogroups.tsv)", cmd_con)
+            focal_species_w <- gsub(" ", "_", input$select_focal_species)
             writeLines(
                 paste0(
                     "sh ",
                     "./preparing_Whale_inputs.shell \\\n",
                     "\t$orthogroupFile \\\n",
                     "\t../tree.newick \\\n",
-                    "\t", input$select_focal_species, " \\\n",
+                    "\t", focal_species_w, " \\\n",
                     "\t", getwd()[1], "/tools \\\n",
                     "\t4"
                 ),
