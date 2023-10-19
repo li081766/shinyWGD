@@ -112,7 +112,7 @@ ui <- tagList(
             }"
         ))
     ),
-    tags$a(href="https://www.ugent.be/", id="mylink2",
+    tags$a(href="https://www.ugent.be/en", id="mylink2",
            tags$img(
                src="images/logo_ugent.png",
                width="100.65",
