@@ -95,7 +95,7 @@ ui <- tagList(
     ),
 
     # add website for lab and UGent
-    tags$a(href="https://www.vandepeerlab.org/", id="mylink1",
+    tags$a(href="https://www.vandepeerlab.org/", id="mylink1", target="_blank", rel="noopener",
            tags$img(
                src="images/logo_lab.png",
                width="222.50",
@@ -112,7 +112,7 @@ ui <- tagList(
             }"
         ))
     ),
-    tags$a(href="https://www.ugent.be/en", id="mylink2",
+    tags$a(href="https://www.ugent.be/en", id="mylink2", target="_blank", rel="noopener",
            tags$img(
                src="images/logo_ugent.png",
                width="100.65",
