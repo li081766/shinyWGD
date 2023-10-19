@@ -429,7 +429,6 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
 checkFileExistence <- function(data_table){
     for( i in 1:nrow(data_table) ){
         file1 <- as.character(data_table[i, "V2"])
-        file2 <- as.character(data_table[i, "V3"])
 
         if( !file.exists(file1) ){
             shinyalert(
@@ -443,16 +442,19 @@ checkFileExistence <- function(data_table){
             )
         }
 
-        if( !file.exists(file2) ){
-            shinyalert(
-                paste0("Oops!",
-                       "Fail to open ",
-                       file2, ".",
-                       " Please set the correct annotation file for ",
-                       as.character(data_table[i, "V1"]),". ",
-                       "Then continue ..."),
-                type="error"
-            )
+        if( !is.na(data_table[i, "V3"]) ){
+            file2 <- as.character(data_table[i, "V3"])
+            if( !file.exists(file2) ){
+                shinyalert(
+                    paste0("Oops!",
+                           "Fail to open ",
+                           file2, ".",
+                           " Please set the correct annotation file for ",
+                           as.character(data_table[i, "V1"]),". ",
+                           "Then continue ..."),
+                    type="error"
+                )
+            }
         }
     }
 }
