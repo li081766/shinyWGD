@@ -157,7 +157,8 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
     # }
     else{
         shinyalert(
-            paste0("Oops!", "Please upload the correct annotatoin file for ", gff_input_name, " then switch this on"),
+            "Oops!",
+            paste0("Please upload the correct annotatoin file for ", gff_input_name, " then switch this on"),
             type="error"
         )
     }
@@ -269,7 +270,8 @@ check_proteome_input <- function(proteome_name, proteome_input){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
-            paste0("Oops!", " Please upload the correct proteome file for ", proteome_name, " then switch this on"),
+            "Oops!",
+            paste0("Please upload the correct proteome file for ", proteome_name, " then switch this on"),
             type="error"
         )
         return(NULL)
@@ -281,11 +283,13 @@ check_proteome_input <- function(proteome_name, proteome_input){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
-            paste0("Oops!",
-                   " Please upload the correct proteome file for ",
-                   proteome_name,
-                   ". Do not keep \"|\" in the identifier of each sequences.",
-                   "Then switch this on"),
+            "Oops!",
+            paste0(
+                "Please upload the correct proteome file for ",
+                proteome_name,
+                ". Do not keep \"|\" in the identifier of each sequences.",
+                "Then switch this on"
+            ),
             type="error"
         )
         return(NULL)
@@ -353,7 +357,8 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
-            paste0("Oops!", " Please upload the correct proteome file for ", proteome_name, " then switch this on"),
+            "Oops!",
+            paste0("Please upload the correct proteome file for ", proteome_name, " then switch this on"),
             type="error"
         )
         return(NULL)
@@ -364,11 +369,13 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
     if( any(grepl("\\|", names(sequences))) ){
         proteome_name <- gsub("[0-9_]", " ", proteome_name)
         shinyalert(
-            paste0("Oops!",
-                   " Please upload the correct proteome file for ",
-                   proteome_name,
-                   ". Do not keep \"|\" in the identifier of each sequences.",
-                   "Then switch this on"),
+            "Oops!",
+            paste0(
+                "Please upload the correct proteome file for ",
+                proteome_name,
+                ". Do not keep \"|\" in the identifier of each sequences.",
+                "Then switch this on"
+            ),
             type="error"
         )
         return(NULL)
@@ -432,12 +439,14 @@ checkFileExistence <- function(data_table){
 
         if( !file.exists(file1) ){
             shinyalert(
-                paste0("Oops!",
-                       " Fail to open ",
-                       file1, ".",
-                       " Please set the correct proteome file for ",
-                       as.character(data_table[i, "V1"]), ". ",
-                       "Then continue ..."),
+                "Oops!",
+                paste0(
+                    "Fail to open ",
+                    file1, ".",
+                    " Please set the correct proteome file for ",
+                    as.character(data_table[i, "V1"]), ". ",
+                    "Then continue ..."
+                ),
                 type="error"
             )
         }
@@ -446,12 +455,14 @@ checkFileExistence <- function(data_table){
             file2 <- as.character(data_table[i, "V3"])
             if( !file.exists(file2) ){
                 shinyalert(
-                    paste0("Oops!",
-                           "Fail to open ",
-                           file2, ".",
-                           " Please set the correct annotation file for ",
-                           as.character(data_table[i, "V1"]),". ",
-                           "Then continue ..."),
+                    "Oops!",
+                    paste0(
+                        "Fail to open ",
+                        file2, ".",
+                        " Please set the correct annotation file for ",
+                        as.character(data_table[i, "V1"]),". ",
+                        "Then continue ..."
+                    ),
                     type="error"
                 )
             }
