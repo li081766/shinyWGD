@@ -903,26 +903,27 @@ observeEvent(input$ks_plot_go, {
         # infer the peaks of paralog ks
         ksPeaksFile <- paste0(dirPath, "/ksrates_wd/ksPeaks.xls")
         if( !(isTruthy(input$ortholog_ks_files_list_A)) & isTruthy(input$paralog_ks_files_list) ){
+            names_df <- map_informal_name_to_latin_name(species_info_file[1])
+
+            species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
+                replace_informal_name_to_latin_name(names_df, x)
+            })
+
+            paralog_ksfile_df <- data.frame(
+                species=unlist(species_list),
+                path=paralog_ksfiles)
+
             if( !(file.exists(ksPeaksFile)) ){
-                names_df <- map_informal_name_to_latin_name(species_info_file[1])
-
-                species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
-                    replace_informal_name_to_latin_name(names_df, x)
-                })
-
-                paralog_ksfile_df <- data.frame(
-                    species=unlist(species_list),
-                    path=paralog_ksfiles)
-                # source(file="tools/find_peaks_resample_95_CI.R", local=TRUE, encoding="UTF-8")
+                selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
                 withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
                     combined_i <- "multiple"
                     maxK <- input[[paste0("ks_maxK_", combined_i)]]
                     peaks_df <- data.frame()
-                    for( i in 1:nrow(paralog_ksfile_df) ){
-                        each_row = paralog_ksfile_df[i, ]
+                    for( i in 1:nrow(selected_paralog_ksfile_df) ){
+                        each_row = selected_paralog_ksfile_df[i, ]
 
                         incProgress(
-                            amount=0.8/nrow(paralog_ksfile_df),
+                            amount=0.8/nrow(selected_paralog_ksfile_df),
                             message=paste0("Find peaks for ", each_row$species, " ...")
                         )
 
@@ -959,14 +960,13 @@ observeEvent(input$ks_plot_go, {
                             all_peaks <- PeaksInKsDistributionValues(raw_ks, peak.maxK=3)
                             bs_CI_list <- c()
                             for( i in 1:length(all_peaks) ){
-                                each_peak <- round(all_equal[i], 2)
                                 bootPeak <- bootStrapPeaks(raw_ks, peak.index=i, rep=500, peak.maxK=3)
                                 bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
                                 bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
                                 bs_CI_list <- c(bs_CI_list, bs_CI)
                             }
                             each_peak_df <- data.frame(
-                                species=rep(each_row$species, length(anchors_peaks)),
+                                species=rep(each_row$species, length(all_peaks)),
                                 peak=format(all_peaks, nsmall=2),
                                 CI=bs_CI_list
                             )
@@ -993,6 +993,90 @@ observeEvent(input$ks_plot_go, {
                     header=TRUE,
                     sep="\t"
                 )
+                tested_species <- unique(peaksInfo$Species)
+
+                if( !(all(input$paralog_ks_files_list %in% tested_species)) ){
+                    need_to_test_speices <- setdiff(input$paralog_ks_files_list, tested_species)
+                    need_to_test_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% need_to_test_speices, ]
+                    withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
+                        combined_i <- "multiple"
+                        maxK <- input[[paste0("ks_maxK_", combined_i)]]
+                        peaks_df <- data.frame()
+                        for( i in 1:nrow(need_to_test_df) ){
+                            each_row = need_to_test_df[i, ]
+
+                            incProgress(
+                                amount=0.8/nrow(need_to_test_df),
+                                message=paste0("Find peaks for ", each_row$species, " ...")
+                            )
+
+                            anchors_file <- gsub("ks.tsv", "ks_anchors.tsv", each_row$path)
+                            if( file.exists(anchors_file) ){
+                                anchors_df <- read.table(
+                                    anchors_file,
+                                    header=TRUE,
+                                    sep="\t"
+                                )
+                                anchors_ks <- anchors_df[anchors_df$Ks>=0 & anchors_df$Ks<=maxK, ]$Ks
+                                anchors_peaks <- PeaksInKsDistributionValues(anchors_ks, peak.maxK=3)
+                                bs_CI_list <- c()
+                                for( i in 1:length(anchors_peaks) ){
+                                    bootPeak <- bootStrapPeaks(anchors_ks, peak.index=i, rep=500, peak.maxK=3)
+                                    bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
+                                    bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
+                                    bs_CI_list <- c(bs_CI_list, bs_CI)
+                                }
+                                each_peak_df <- data.frame(
+                                    species=rep(each_row$species, length(anchors_peaks)),
+                                    peak=anchors_peaks,
+                                    CI=bs_CI_list
+                                )
+                                peaks_df <- rbind(peaks_df, each_peak_df)
+                            }
+                            else{
+                                raw_df <- read.table(
+                                    each_row$path,
+                                    header=TRUE,
+                                    sep="\t"
+                                )
+                                raw_ks <- raw_df[raw_df$Ks>=0 & raw_df$Ks<=maxK, ]$Ks
+                                all_peaks <- PeaksInKsDistributionValues(raw_ks, peak.maxK=3)
+                                bs_CI_list <- c()
+                                for( i in 1:length(all_peaks) ){
+                                    bootPeak <- bootStrapPeaks(raw_ks, peak.index=i, rep=500, peak.maxK=3)
+                                    bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
+                                    bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
+                                    bs_CI_list <- c(bs_CI_list, bs_CI)
+                                }
+                                each_peak_df <- data.frame(
+                                    species=rep(each_row$species, length(all_peaks)),
+                                    peak=format(all_peaks, nsmall=2),
+                                    CI=bs_CI_list
+                                )
+                                peaks_df <- rbind(peaks_df, each_peak_df)
+                            }
+                        }
+
+                        write.table(
+                            peaks_df,
+                            file=ksPeaksFile,
+                            row.names=FALSE,
+                            col.names=FALSE,
+                            sep="\t",
+                            quote=FALSE,
+                            append=TRUE
+                        )
+                        Sys.sleep(.2)
+                        incProgress(amount=.2, message="Find peaks done")
+                    })
+                }
+
+                peaksInfo <- read.table(
+                    ksPeaksFile,
+                    header=TRUE,
+                    sep="\t"
+                )
+
                 output$ks_peak_table_output <- renderUI({
                     selected_peaks_info <- peaksInfo[peaksInfo$Species %in% input$paralog_ks_files_list, ]
                     output$ks_peak_table_output <- renderUI({
