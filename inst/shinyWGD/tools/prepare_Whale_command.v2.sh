@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if the correct number of arguments is provided
-if [ $# -ne 6 ]; then
-    echo "Usage: $0 <tree.newick> <aleDir> <wgdNodes> <outShellFile> <model> <chain>"
+if [ $# -ne 6 ] && [ $# -ne 7 ]; then
+    echo "Usage: $0 <tree.newick> <aleDir> <wgdNodes> <outShellFile> <model> <chain> <number>"
     exit 1
 fi
 
@@ -13,7 +13,7 @@ whale_configure() {
 	local outFile=$4
 	local whaleModel=$5
 	local whaleChain=$6
-	
+
 	whaleDir=$(dirname "$outFile")
 
 	cat >$outFile <<EOF
@@ -22,13 +22,13 @@ using Whale, NewickTree, Turing, DataFrames, CSV, JSON, Serialization, LinearAlg
 
 
 function compute_average_q(df)
-	qcols = filter(x -> occursin("q", x), names(df))			   
+	qcols = filter(x -> occursin("q", x), names(df))
 	avg_q = [mean(df[!, col]) for col in qcols]
     return avg_q
 end
 
 
-out = mkpath("${whaleDir}/output") 
+out = mkpath("${whaleDir}/output")
 log_file = joinpath(out, "run.log")
 logger = SimpleLogger(open(log_file, "w"), LogLevel(Info))
 global_logger(logger)
@@ -79,12 +79,12 @@ EOF
 		echo "write(joinpath(out, \"model.txt\"), repr(model))" >>$outFile
 		echo "data = read_ale(\"${aleDir}\", model)" >>$outFile
 		echo "@info \"ccd data\" data" >>$outFile
-		
+
 		echo "@model constantrates(model, data) = begin" >>$outFile
 		echo "\tλ  ~ Exponential()" >>$outFile
 		echo "\tμ  ~ Exponential()" >>$outFile
 		echo "\tη  ~ Beta(3,1)" >>$outFile
-		
+
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
 			if ((i != 0)); then
@@ -95,10 +95,10 @@ EOF
 			qq+="q$j"
 		done
 		qq+="]"
-	
+
 		echo "\tdata ~ model((λ=λ, μ=μ, η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
-		
+
 		echo "chain0 = sample(constantrates(model, data), NUTS(), ${whaleChain})" >>$outFile
 		echo "summary_file = joinpath(out, \"MCMCchain.s\")" >>$outFile
 		echo "summary_stream = open(summary_file, \"w\")" >>$outFile
@@ -133,14 +133,14 @@ EOF
 		echo "write(joinpath(out, \"model.txt\"), repr(model))" >>$outFile
 		echo "data = read_ale(\"${aleDir}\", model)" >>$outFile
 		echo "@info \"ccd data\" data" >>$outFile
-		
+
 		echo "@model critical(model, X, nn) = begin" >>$outFile
 		echo "\tη ~ Beta(3,1)" >>$outFile
 		echo "\tr ~ Turing.Flat()" >>$outFile
 		echo "\tσ ~ Exponential(0.1)" >>$outFile
 		echo "\tλ ~ MvNormal(repeat([r], nn-1), σ)" >>$outFile
 		echo "\tl = [λ; r]" >>$outFile
-		
+
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
 			if ((i != 0)); then
@@ -151,7 +151,7 @@ EOF
 			qq+="q$j"
 		done
 		qq+="]"
-		
+
 		echo "\tX ~ model((λ=l, μ=l, η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
 
@@ -191,7 +191,7 @@ EOF
 		echo "write(joinpath(out, \"model.txt\"), repr(model))" >>$outFile
 		echo "data = read_ale(\"${aleDir}\", model)" >>$outFile
 		echo "@info \"ccd data\" data" >>$outFile
-		
+
 		echo "@model branchrates(model, X, n, τmean=1.) = begin" >>$outFile
 		echo "\tη ~ Beta(3,1)" >>$outFile
 		echo "\tρ ~ Uniform(-1, 1.)" >>$outFile
@@ -208,7 +208,7 @@ EOF
 		echo "\t\ti == o && continue" >>$outFile
 		echo "\t\tr[:,i] ~ MvNormal(r[:,o], Σ)" >>$outFile
 		echo "\tend" >>$outFile
-		
+
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
 			if ((i != 0)); then
@@ -219,10 +219,10 @@ EOF
 			qq+="q$j"
 		done
 		qq+="]"
-	
+
 		echo "\tX ~ model((λ=r[1,:], μ=r[2,:], η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
-	
+
 		echo "bmodel = branchrates(model, data, nn)" >>$outFile
 		echo "@info \"relaxed branch model\" bmodel" >>$outFile
 		echo "write(joinpath(out, \"bmodel.txt\"), repr(bmodel))" >>$outFile
@@ -253,7 +253,7 @@ EOF
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
     fi
-	
+
 	echo "wgd_data = readlines(joinpath(out, \"../..\", \"wgdNodes.txt\"))" >>$outFile
 	echo "wgd_names = String[]" >>$outFile
 	echo "for line in wgd_data" >>$outFile
@@ -265,10 +265,51 @@ EOF
 	echo "end" >>$outFile
 	echo "dfQK_modified = hcat(DataFrame(Hypotheses = wgd_names), dfQK)" >>$outFile
 	echo "dfQK_modified.q̅ = round.(dfQK_modified.q̅; digits = 5)" >>$outFile
-	#echo "dfQK_modified.K = round.(dfQK_modified.K; digits = 3)" >>$outFile 
+	#echo "dfQK_modified.K = round.(dfQK_modified.K; digits = 3)" >>$outFile
 	echo "@info dfQK_modified" >>$outFile
 	echo "write(joinpath(out, \"posterior_mean_of_duplicate_retention_rate_Bayes_factor.txt\"), repr(dfQK_modified))" >>$outFile
 
 }
 
-whale_configure $1 $2 $3 $4 $5 $6
+randomly_selecting_gf() {
+    local dirpath="$1"
+    local num_files="$2"
+    local random_seed="$3"
+
+    if [ -n "$random_seed" ]; then
+        RANDOM="$random_seed"
+    fi
+
+    local selected_dir="${dirpath}.selected"
+
+    if [ -d "$selected_dir" ]; then
+        rm -r "$selected_dir"
+    fi
+
+    mkdir "$selected_dir"
+
+    shopt -s nullglob
+    files=("$dirpath"/*)
+    shopt -u nullglob
+
+    for ((i = 0; i < num_files; i++)); do
+        random_index=$((RANDOM % ${#files[@]}))
+        selected_file="${files[random_index]}"
+
+        cp "$selected_file" "$selected_dir"
+
+        unset "files[random_index]"
+        files=("${files[@]}")
+    done
+}
+
+if [ $# -eq 6 ]; then
+    whale_configure $1 $2 $3 $4 $5 $6
+elif [ $# -eq 7 ]; then
+    randomly_selecting_gf $2 $7 42
+    newAleDir="$2.selected"
+    whale_configure $1 $newAleDir $3 $4 $5 $6
+else
+    echo "Usage: $0 <tree.newick> <aleDir> <wgdNodes> <outShellFile> <model> <chain> <number>"
+    exit 1
+fi

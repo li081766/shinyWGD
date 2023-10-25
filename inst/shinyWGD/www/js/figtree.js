@@ -54,8 +54,13 @@ function speciesTreePlot(InputData) {
     // console.log(speciesTree);
 
     if (typeof speciesTree !== 'undefined') {
-        var speciesTreeJson = parseKsTree(speciesTree);
-        // console.log(speciesTreeJson);
+        var speciesTreeJson;
+        try {
+            speciesTreeJson = parseKsTree(speciesTree);
+        } catch (error) {
+            var warningMessage = "An error occurred while parsing the species tree. Please check the format and ensure the tree in Newick format.";
+            alert(warningMessage); 
+        }
     }
     if (typeof wgdNodes !== 'undefined') {
         var wgdNodesInfo = convertShinyData(wgdNodes);
@@ -2191,7 +2196,8 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                     "<p><font color='#A6A600'>Set a Name: </font>" +
                     "<input type='text' id='name-input'>" +
                     "&nbsp;&nbsp;&nbsp;&nbsp;<button class='symbol-btn'><font color='#66c2a5'><b><b>&#43;</b></b></font></button>" +
-                    "<p>Note: input should start with \"wgd\"<\p>"
+                    "<p>Note: Input should start with 'wgd' followed by a number </p>" +
+                    "<p>e.g., 'wgd1', 'wgd2'."
                 );
 
                 var closeButton = document.getElementById('close-btn-two');
@@ -2201,6 +2207,19 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                 }
 
                 var nameInput = document.getElementById('name-input');
+
+                // Add an event listener to the input field
+                nameInput.addEventListener('blur', function () {
+                    var inputValue = nameInput.value;
+
+                    var rule = /^wgd\d+$/;
+
+                    if (!rule.test(inputValue)) {
+                        nameInput.value = '';
+                        var warningMessage = "Input should start with 'wgd' followed by a number (e.g., 'wgd1', 'wgd2').";
+                        alert(warningMessage);
+                    }
+                });
 
                 var clickedPath = this;
                 var pathData = clickedPath.getAttribute('d');
