@@ -86,12 +86,12 @@ Data_preparation_ui <- tabPanel(
                     )
                 )
             ),
-            fluidRow(
-                column(
-                    12,
-                    uiOutput("ObtainTreeFromTimeTreeSettingDisplay")
-                )
-            )
+            # fluidRow(
+            #     column(
+            #         12,
+            #         uiOutput("ObtainTreeFromTimeTreeSettingDisplay")
+            #     )
+            # )
         ),
         column(
             id="refs",
