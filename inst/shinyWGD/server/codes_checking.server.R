@@ -191,9 +191,32 @@ observeEvent(input$orthofinder_go, {
     })
 })
 
-observeEvent(input$whale_go, {
-    output$whaleCommandTxt <- renderText({
-        whaleCommandFile <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/whale_wd/run_whale.sh")
+observeEvent(input$whale_configure_go, {
+    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+    whale_dir <- paste0(analysisDir, "/OrthoFinder_wd/Whale_wd")
+    output$aleCommandText <- renderText({
+        alePreparingCommadFile <- paste0(whale_dir, "/run_ale_preparing.sh")
+        if( file.exists(alePreparingCommadFile) ){
+            ale_command_info <- readChar(
+                alePreparingCommadFile,
+                file.info(alePreparingCommadFile)$size
+            )
+        }
+    })
+    output$whaleCommandText <- renderText({
+        whaleModel <- ""
+        if( input$select_whale_model == "Constant-rates model" ){
+            whaleModel <- "Constant_rates"
+        }else if( input$select_whale_model == "Relaxed branch-specific DL+WGD model" ){
+            whaleModel <- "Relaxed_branch"
+        }else{
+            whaleModel <- "Critical_branch"
+        }
+
+        running_dir <- paste0(whale_dir, "/run_", whaleModel, "_model_", input$select_chain_num)
+
+        whaleCommandFile <- paste0(running_dir, "/run_Whale_", whaleModel, ".sh")
+
         if( file.exists(whaleCommandFile) ){
             command_info <- readChar(
                 whaleCommandFile,
@@ -210,22 +233,36 @@ observeEvent(input$whale_go, {
                     style="background-color: #e6f5c9;",
                     h4(icon("cog"), "Whale parameter"),
                     hr(class="setting"),
+                    h5(HTML(paste0("The command line for creating ALE files as the inputs for <font color='#a23400'><i></b>whale</b></i></font>:"))),
+                    fluidRow(
+                        column(
+                            12,
+                            verbatimTextOutput(
+                                "aleCommandText",
+                                placeholder=TRUE)
+                        )
+                    ),
                     h5(HTML(paste0("The command line for <font color='#a23400'><i></b>whale</b></i></font>:"))),
                     fluidRow(
                         column(
                             12,
                             verbatimTextOutput(
-                                "WhaleCommandTxt",
+                                "whaleCommandText",
                                 placeholder=TRUE)
                         ),
                         column(
                             12,
                             actionLink(
-                                "back_datapreparation_4",
-                                h5(HTML(paste0("<font color='#5151A2'>",
-                                               icon("share"),
-                                               " Back to <i><b>Data Preparation</b></i> Page")
-                                ))
+                                "back_datapreparation_5",
+                                h5(
+                                    HTML(
+                                        paste0(
+                                            "<font color='#5151A2'>",
+                                            icon("share"),
+                                            " Back to <i><b>Whale Preparation</b></i> Page"
+                                        )
+                                    )
+                                )
                             )
                         )
                     )
@@ -249,5 +286,5 @@ observeEvent(input$back_datapreparation_4, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
 })
 observeEvent(input$back_datapreparation_5, {
-    updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
+    updateTabsetPanel(inputId="shinywgd", selected="whale_preparation")
 })

@@ -36,10 +36,12 @@ options(shiny.maxRequestSize=5000*1024^2)
 source(file="ui/introduction.ui.R", local=T, encoding="UTF-8")
 source(file="ui/data_preparation.ui.R", local=T, encoding="UTF-8")
 source(file="ui/codes_checking.ui.R", local=T, encoding="UTF-8")
+source(file="ui/whale_preparation.ui.R", local=T, encoding="UTF-8")
+source(file="ui/extracting_tree.ui.R", local=T, encoding="UTF-8")
 source(file="ui/ks_age_distribution.ui.R", local=T, encoding="UTF-8")
 source(file="ui/joint_tree.ui.R", local=T, encoding="UTF-8")
 source(file="ui/synteny_analysis.ui.R", local=T, encoding="UTF-8")
-source(file="ui/tree_reconciliation.ui.R", local=T, encoding="UTF-8")
+#source(file="ui/tree_reconciliation.ui.R", local=T, encoding="UTF-8")
 source(file="ui/gallery.ui.R", local=T, encoding="UTF-8")
 source(file="ui/help.ui.R", local=T, encoding="UTF-8")
 
@@ -74,13 +76,14 @@ ui <- tagList(
             width="80",
         ),
         windowTitle="shinyWGD",
-        # position="fixed-top",
         Introduction_ui,
         navbarMenu(
             "Scripts",
             icon=icon("terminal"),
             Data_preparation_ui,
-            Codes_checking_ui
+            Whale_Preparation_ui,
+            Codes_checking_ui,
+            Extracting_Tree_ui,
         ),
         navbarMenu(
             "Analysis",
@@ -88,7 +91,7 @@ ui <- tagList(
             Ks_Age_Distribution_ui,
             Synteny_Analysis_ui,
             Joint_Tree_ui,
-            Tree_Reconciliation_ui
+            #Tree_Reconciliation_ui
         ),
         Gallery_ui,
         Help_ui
@@ -149,10 +152,12 @@ server <- function(input, output, session){
     source(file="server/introduction.server.R", local=T, encoding="UTF-8")
     source(file="server/data_preparation.server.R", local=T, encoding="UTF-8")
     source(file="server/codes_checking.server.R", local=T, encoding="UTF-8")
+    source(file="server/whale_preparation.server.R", local=T, encoding="UTF-8")
+    source(file="server/extracting_tree.server.R", local=T, encoding="UTF-8")
     source(file="server/ks_age_distribution.server.R", local=T, encoding="UTF-8")
     source(file="server/joint_tree.server.R", local=T, encoding="UTF-8")
     source(file="server/synteny_analysis.server.R", local=T, encoding="UTF-8")
-    source(file="server/tree_reconciliation.server.R", local=T, encoding="UTF-8")
+    #source(file="server/tree_reconciliation.server.R", local=T, encoding="UTF-8")
     source(file="server/gallery.server.R", local=T, encoding="UTF-8")
     source(file="server/help.server.R", local=T, encoding="UTF-8")
 }
