@@ -59,7 +59,7 @@ function mixBarDensityPlotting(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -84,7 +84,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -340,7 +340,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", width - rightPadding + 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -683,6 +683,8 @@ function mixBarDensityPlotting(InputData) {
             return { key: d.key, density: density };
         });
 
+        console.log("densityData", densityData);
+
         var iterations = 1000;
         var confidenceLevel = 0.95;
         var binWidth = 0.01;
@@ -761,7 +763,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1159,7 +1161,7 @@ function mixBarDensityPlottingOld(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -1176,7 +1178,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1413,7 +1415,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", width - rightPadding + 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1665,11 +1667,11 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding + 145)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .html("")
             .append("tspan")
             .attr("font-weight", "bold")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("fill", "#00AEAE")
             .text("Original ")
             .append("tspan")
@@ -1693,7 +1695,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding + 45)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .html("Corrected <b><i>K</b></i><sub>s</sub> Distribution Plot"); */
 
     } else {
@@ -1753,13 +1755,18 @@ Shiny.addCustomMessageHandler("Paralog_Bar_Plotting", MultipleBarPlotting);
 function MultipleBarPlotting(InputData) {
     var plotId = InputData.plot_id;
     var KsInfo = convertShinyData(InputData.ks_bar_df);
-    var KsMclust = convertShinyData(InputData.mclust_df);
+    if (typeof InputData.mclust_df !== 'undefined') {
+        var KsMclust = convertShinyData(InputData.mclust_df);
+    }
     var KsSizerInfo = InputData.sizer_list;
     var KsXlimit = InputData.xlim;
+    var KsYlimit = InputData.ylim;
     var barOpacity = InputData.opacity;
     var height = InputData.height;
     var width = InputData.width;
+    var ksTitle = InputData.ks_title;
     var namesInfo = convertShinyData(InputData.species_list);
+
     /*     console.log("KsInfo", KsInfo);
         console.log("namesInfo", namesInfo);
         console.log("KsMclust", KsMclust);
@@ -1776,80 +1783,127 @@ function MultipleBarPlotting(InputData) {
         "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
     ];
 
-    d3.select("#" + plotId).selectAll("svg").remove();
-    d3.selectAll("body svg").remove();
+    // Create a div for the modal
+    var modal = d3.select("body")
+        .append("div")
+        .attr("class", "modal")
+        .style("display", "none");
 
-    var subplotWidth = width / 2;
-    var subplotHeight = height / numRows;
+    // Style the modal
+    modal.style("position", "fixed")
+        .style("z-index", "1")
+        .style("left", "50%")
+        .style("top", "50%")
+        .style("transform", "translate(-50%, -50%)")
+        .style("width", "200px")
+        .style("height", "80px")
+        .style("background-image", "linear-gradient(to right, #007bff 50%, #f5f5f5 50%)")
+        .style("background-size", "200% 100%")
+        .style("text-align", "center")
+        .style("border-radius", "10px")
+        .style("box-shadow", "0px 0px 10px rgba(0, 123, 255, 0.5)");
 
-    var svg = d3.select("#" + plotId)
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height);
+    // Create a div for the modal content
+    var modalContent = modal.append("div")
+        .attr("class", "modal-content");
 
-    speciesList.forEach((species, index) => {
-        var nameInfo = namesInfo.find(function (info) {
-            return info.informal_name === species;
+    // Style the modal content
+    modalContent.style("position", "absolute")
+        .style("top", "0")
+        .style("left", "0")
+        .style("width", "100%")
+        .style("height", "100%")
+        .style("background-color", "#f5f5f5")
+        .style("border-radius", "10px")
+        .style("opacity", "0.9")
+        .style("text-align", "center")
+        .style("padding", "20px");
+
+
+    modalContent.append("div")
+        .style("text-align", "center")
+        .style("font-size", "20px")
+        .style("font-weight", "bold")
+        .text("Updating ...");
+
+    // Show the modal
+    modal.style("display", "block");
+
+    setTimeout(function () {
+        var subplotWidth = width / 2;
+        var subplotHeight = height / numRows;
+
+        d3.select("#" + plotId).selectAll("svg").remove();
+        var svg = d3.select("#" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        speciesList.forEach((species, index) => {
+            var nameInfo = namesInfo.find(function (info) {
+                return info.informal_name === species;
+            });
+            if (nameInfo) {
+                var latinName = nameInfo.latin_name;
+            }
+            var paralogData = KsInfo.filter(function (d) {
+                var paralogSpeciesFile = species + ".ks";
+                var paralogSpeciesAnchorsFile = species + ".ks_anchors";
+                return (d.title === paralogSpeciesFile) || (d.title === paralogSpeciesAnchorsFile);
+            });
+
+            var eachKsMclustData;
+            if (typeof KsMclust !== 'undefined') {
+                var eachKsMclustData = KsMclust.filter(function (d) {
+                    var titleParts = d.title.split(".");
+                    return titleParts[0] === species;
+                })
+            }
+
+            var maxHeight = d3.max(paralogData, function (d) { return d.x; });
+
+            // Calculate the row and column position for the current subplot
+            var row = Math.floor(index / 2);
+            var col = index % 2;
+
+            // Calculate the translate values for the subplot position
+            var translateX = col * subplotWidth;
+            var translateY = row * subplotHeight;
+
+            // Create a new group element for the subplot with a unique ID
+            var subplot = svg.append("g")
+                .attr("id", "subplot-bar-" + species)
+                .attr("transform", "translate(" + translateX + ", " + translateY + ")");
+
+            barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWidth, subplotHeight * (3 / 4), KsXlimit, maxHeight, barOpacity, ksTitle, KsYlimit);
+
+            var sizerPlot = KsSizerInfo[ksTitle];
+
+            if (sizerPlot) {
+                // var sizerTranslateY = translateY + (3 * subplotHeight) / 4; // Start position for SiZer plot
+                // var sizerTranslateY = translateY + (3 * subplotHeight) / 4 + row * subplotHeight;
+                var sizerTranslateY = translateY + subplotHeight * (3 / 4);
+                var sizerHeight = subplotHeight / 4;
+
+                // console.log(species, "row", row, "subplotHeight", subplotHeight, "translateY", translateY, "sizerTranslateY", sizerTranslateY)
+
+                var sizerGroup = svg.append("g")
+                    .attr("id", "subplot-sizer-" + species)
+                    .attr("transform", "translate(" + translateX + ", " + sizerTranslateY + ")");
+
+                siZerPlot(sizerPlot, sizerGroup, subplotWidth, sizerHeight, KsXlimit);
+            }
         });
-        if (nameInfo) {
-            var latinName = nameInfo.latin_name;
-        }
-        var paralogData = KsInfo.filter(function (d) {
-            var paralogSpeciesFile = species + ".ks";
-            var paralogSpeciesAnchorsFile = species + ".ks_anchors";
-            return (d.title === paralogSpeciesFile) || (d.title === paralogSpeciesAnchorsFile);
-        });
-
-        var eachKsMclustData = KsMclust.filter(function (d) {
-            var titleParts = d.title.split(".");
-            return titleParts[0] === species;
-        })
-
-        var maxHeight = d3.max(paralogData, function (d) { return d.x; });
-
-        // Calculate the row and column position for the current subplot
-        var row = Math.floor(index / 2);
-        var col = index % 2;
-
-        // Calculate the translate values for the subplot position
-        var translateX = col * subplotWidth;
-        var translateY = row * subplotHeight;
-
-        // Create a new group element for the subplot with a unique ID
-        var subplot = svg.append("g")
-            .attr("id", "subplot-bar-" + species)
-            .attr("transform", "translate(" + translateX + ", " + translateY + ")");
-
-        barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWidth, subplotHeight * (3 / 4), KsXlimit, maxHeight, barOpacity);
-        // console.log("Bar Plot Done: ", species);
-
-        var sizerPlot = KsSizerInfo[species + ".ks_anchors"];
-
-        // console.log("sizerPlot", sizerPlot);
-
-        if (sizerPlot) {
-            // var sizerTranslateY = translateY + (3 * subplotHeight) / 4; // Start position for SiZer plot
-            // var sizerTranslateY = translateY + (3 * subplotHeight) / 4 + row * subplotHeight;
-            var sizerTranslateY = translateY + subplotHeight * (3 / 4);
-            var sizerHeight = subplotHeight / 4;
-
-            // console.log(species, "row", row, "subplotHeight", subplotHeight, "translateY", translateY, "sizerTranslateY", sizerTranslateY)
-
-            var sizerGroup = svg.append("g")
-                .attr("id", "subplot-sizer-" + species)
-                .attr("transform", "translate(" + translateX + ", " + sizerTranslateY + ")");
-
-            siZerPlot(sizerPlot, sizerGroup, subplotWidth, sizerHeight, KsXlimit);
-        }
-    });
+        modal.style("display", "none");
+    }, 10);
 
     downloadSVG("ksPlotParalogousDownload",
         plotId,
-        "Paralogous_Ks.svg"
+        "Paralogous_Ks." + ksTitle + ".svg"
     )
 }
 
-function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWidth, subplotHeight, KsXlimit, maxHeight, barOpacity) {
+function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWidth, subplotHeight, KsXlimit, maxHeight, barOpacity, ksTitle, KsYlimit) {
     let topPadding = 50;
     let bottomPadding = 40;
     let leftPadding = 80;
@@ -1886,7 +1940,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("y", subplotHeight - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -1902,14 +1956,14 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("x", leftPadding - 50)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
         .text("Number of retained duplicates");
 
     // console.log("maxHeight", maxHeight);
-    var KsYlimit = Math.ceil(maxHeight / 500) * 500;
+    // var KsYlimit = Math.ceil(maxHeight / 500) * 500;
     // console.log("KsYlimit", KsYlimit);
 
     var yScale = d3.scaleLinear()
@@ -1986,131 +2040,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
             tippy.hideAll();
         });
 
-    var line = d3.line()
-        .x(function (d) { return xScale(d.ks); })
-        .y(function (d) { return yScale(d.x); })
-        .curve(d3.curveCatmullRom.alpha(0.9));
-
-    // Group the data by title
-    var groupedLineData = d3.group(paralogData, function (d) {
-        return d.title;
-    });
-
-    // Draw separate lines for each group
-    groupedLineData.forEach(function (dataGroup) {
-        var stepSize = Math.ceil(dataGroup.length / 25);
-        var reducedData = dataGroup.filter(function (d, i) {
-            return i % stepSize === 0;
-        });
-
-        subplot.append("path")
-            .datum(reducedData)
-            .attr("class", "line")
-            .attr("d", line)
-            .attr("fill", "none")
-            .attr("stroke", function (d) {
-                var titlePrefix = d[0].title.split(".")[0];
-                return barColorScale(titlePrefix);
-            })
-            .attr("stroke-width", 1.5)
-            .attr("stroke-opacity", function (d) {
-                if (d[0].title.includes("ks_anchor")) {
-                    return anchorsOpacity + 0.2;
-                } else {
-                    return ksOpacity + 0.2;
-                }
-            });
-    });
-
     const colors = ["blue", "red", "green", "orange", "purple"];
-
-    const componentData = eachKsMclustData;
-    // console.log("componentData", componentData);
-
-    // Function to calculate the standard deviation
-    function calculateStandardDeviation(data) {
-        const n = data.length;
-        const mean = data.reduce((sum, value) => sum + value, 0) / n;
-        const variance = data.reduce((sum, value) => sum + (value - mean) ** 2, 0) / n;
-        const standardDeviation = Math.sqrt(variance);
-        return standardDeviation;
-    }
-
-    const propZScores = componentData.map((d) => {
-        const prop = d.prop;
-        const mean = d.mean;
-        const sigmasq = d.sigmasq;
-        const zScore = (prop - mean) / Math.sqrt(sigmasq);
-        return Math.abs(zScore);
-    });
-
-    const thresholdMultiplier = 2;
-    const propThreshold = thresholdMultiplier * calculateStandardDeviation(propZScores);
-
-    const filteredComponentData = componentData.filter((d, index) => {
-        const propZScore = propZScores[index];
-        return propZScore <= propThreshold && d.mode < KsXlimit;
-    });
-
-    const colorModeScale = d3.scaleOrdinal()
-        .domain(filteredComponentData.map((d, i) => i))
-        .range(["red", "blue", "green", "orange", "purple"]);
-
-    const paths = subplot.selectAll(".line")
-        .data(filteredComponentData);
-
-    var ySimHeight;
-    if (paralogData.some(d => d.title.includes("ks_anchors"))) {
-        ySimHeight = d3.max(paralogData.filter(d => d.title.includes("ks_anchors")), function (d) { return d.x; });
-    } else {
-        ySimHeight = d3.max(paralogData, function (d) { return d.x; });
-    }
-
-    paths.enter()
-        .append("path")
-        .attr("class", "line")
-        .merge(paths)
-        .attr("d", (d) => {
-            const prop = d.prop;
-            const mean = d.mean;
-            const sigmasq = d.sigmasq;
-            const sim = d3.range(0.05, KsXlimit, 0.01).map((x) => ({
-                x,
-                y: ySimHeight * prop * logNormalPDF(x, mean, Math.sqrt(sigmasq)),
-            }));
-            return d3.line()
-                .x((d) => xScale(d.x))
-                .y((d) => yScale(d.y))(sim);
-        })
-        .style("stroke", (d, i) => colorModeScale(i))
-        .style("stroke-width", 2.6)
-        .style("fill", "none")
-        .attr("data-tippy-content", function (d, i) {
-            const prop = floatFormatter(d.prop);
-            const mean = floatFormatter(d.mean);
-            const sigmasq = floatFormatter(d.sigmasq);
-            const mode = floatFormatter(d.mode);
-            content = "<b>Mode: " + mode + "</b><br>Prop: " + prop +
-                "<br>Mean: " + mean;
-            return content;
-        })
-        .on("mouseover", function (event, d) {
-            tippy(this, {
-                theme: "light",
-                placement: "top-start",
-                allowHTML: true,
-                animation: "scale",
-                delay: [1000, 0],
-                duration: [200, 200]
-            });
-        })
-        .on("mouseout", function (event, d) {
-            tippy.hideAll();
-        });
-
-    // Remove unnecessary paths
-    paths.exit().remove();
-
     var legendData = [...new Set(paralogData.map((d) => d.title))];
 
     // Merge the two legends
@@ -2118,29 +2048,126 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("class", "legend")
         .attr("transform", `translate(${ subplotWidth - 120 }, 30)`);
 
-    // Add mode value to the legend
-    const modeLegendItems = mergedLegend.selectAll(".mode-legend-item")
-        .data(filteredComponentData)
-        .enter()
-        .append("g")
-        .attr("class", "mode-legend-item")
-        .attr("transform", (d, i) => `translate(0, ${ (legendData.length + i) * 20 + 5 })`);
+    if (typeof eachKsMclustData !== 'undefined') {
+        const componentData = eachKsMclustData;
+        // console.log("componentData", componentData);
 
-    modeLegendItems.append("line")
-        .attr("x1", 0)
-        .attr("y1", 10)
-        .attr("x2", 20)
-        .attr("y2", 10)
-        .style("stroke", (d, i) => colorModeScale(i))
-        .style("stroke-width", 2.6);
+        // Function to calculate the standard deviation
+        /* function calculateStandardDeviation(data) {
+            const n = data.length;
+            const mean = data.reduce((sum, value) => sum + value, 0) / n;
+            const variance = data.reduce((sum, value) => sum + (value - mean) ** 2, 0) / n;
+            const standardDeviation = Math.sqrt(variance);
+            return standardDeviation;
+        }
 
-    modeLegendItems.append("text")
-        .attr("x", 30)
-        .attr("y", 15)
-        .text((d) => `Mode: ${ floatFormatter(d.mode) }`)
-        .attr("font-family", "calibri")
-        .attr("font-size", "12px")
-        .attr("fill", "#333");
+        const propZScores = componentData.map((d) => {
+            const prop = d.prop;
+            const mean = d.mean;
+            const sigmasq = d.sigmasq;
+            const zScore = (prop - mean) / Math.sqrt(sigmasq);
+            return Math.abs(zScore);
+        }); */
+
+        // console.log("propZscore", propZScores);
+
+        // const thresholdMultiplier = 2;
+        // const propThreshold = thresholdMultiplier * calculateStandardDeviation(propZScores);
+        // console.log("propThreshold", propThreshold);
+
+        const filteredComponentData = componentData.filter((d, index) => {
+            // const propZScore = propZScores[index];
+            // console.log("d", d);
+            return d.mode < KsXlimit;
+            // return propZScore <= propThreshold && d.mode < KsXlimit;
+        });
+
+        // console.log("filteredComponentData", filteredComponentData);
+
+        const colorModeScale = d3.scaleOrdinal()
+            .domain(filteredComponentData.map((d, i) => i))
+            .range(["#F08080", "skyblue", "#98FB98", "orange", "purple", "#F4A460", "#8B4513", "#7FFFD4"]);
+
+        const paths = subplot.selectAll(".line")
+            .data(filteredComponentData);
+
+        var ySimHeight;
+        // console.log("paralogData", paralogData);
+        if (ksTitle.includes("ks_anchors")) {
+            ySimHeight = d3.max(paralogData.filter(d => d.title.includes("ks_anchors")), function (d) { return d.x; });
+        } else {
+            ySimHeight = d3.max(paralogData, function (d) { return d.x; });
+        }
+
+        paths.enter()
+            .append("path")
+            .attr("class", "line")
+            .merge(paths)
+            .attr("d", (d) => {
+                const prop = d.prop;
+                const mean = d.mean;
+                const sigmasq = d.sigmasq;
+                const sim = d3.range(0.05, KsXlimit, 0.01).map((x) => ({
+                    x,
+                    y: ySimHeight * prop * logNormalPDF(x, mean, Math.sqrt(sigmasq)),
+                }));
+                return d3.line()
+                    .x((d) => xScale(d.x))
+                    .y((d) => yScale(d.y))(sim);
+            })
+            .style("stroke", (d, i) => colorModeScale(i))
+            .style("stroke-width", 2.3)
+            .style("fill", "none")
+            .attr("data-tippy-content", function (d, i) {
+                const prop = floatFormatter(d.prop);
+                const mean = floatFormatter(d.mean);
+                const sigmasq = floatFormatter(d.sigmasq);
+                const mode = floatFormatter(d.mode);
+                content = "<b>Mode: " + mode + "</b><br>Prop: " + prop +
+                    "<br>Mean: " + mean;
+                return content;
+            })
+            .on("mouseover", function (event, d) {
+                tippy(this, {
+                    theme: "light",
+                    placement: "top-start",
+                    allowHTML: true,
+                    animation: "scale",
+                    delay: [1000, 0],
+                    duration: [200, 200]
+                });
+            })
+            .on("mouseout", function (event, d) {
+                tippy.hideAll();
+            });
+
+        // Remove unnecessary paths
+        paths.exit().remove();
+
+        // Add mode value to the legend
+        const modeLegendItems = mergedLegend.selectAll(".mode-legend-item")
+            .data(filteredComponentData)
+            .enter()
+            .append("g")
+            .attr("class", "mode-legend-item")
+            .attr("transform", (d, i) => `translate(0, ${ (legendData.length + i) * 20 + 5 })`);
+
+        modeLegendItems.append("line")
+            .attr("x1", 0)
+            .attr("y1", 10)
+            .attr("x2", 20)
+            .attr("y2", 10)
+            .style("stroke", (d, i) => colorModeScale(i))
+            .style("stroke-width", 2.6);
+
+        modeLegendItems.append("text")
+            .attr("x", 30)
+            .attr("y", 15)
+            .text((d) => `Mode: ${ floatFormatter(d.mode) }`)
+            .attr("font-family", "calibri")
+            .attr("font-size", "12px")
+            .attr("fill", "#333");
+    }
 
     // Data legend
     const pairLegendItems = mergedLegend.selectAll(".pair-legend-item")
@@ -2190,7 +2217,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("x", leftPadding + 145)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .attr("font-style", "italic")
         .attr("fill", "#8E549E");
 
@@ -2240,7 +2267,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("y", svgHeight - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -2255,7 +2282,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("y", d3.mean([0, svgHeight - bottomPadding]))
         .attr("x", leftPadding - 50)
         .attr("text-anchor", "middle")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
@@ -2294,13 +2321,13 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .call(yAxis)
         .attr("font-size", "10px")
         .attr("font-family", "calibri");
-/* 
-    yAxisGroup.selectAll(".tick line")
-        .attr("transform", `translate(6, 0)`)
-        .style("stroke", "black");
-    
-    yAxisGroup.selectAll(".tick text")
-        .attr("transform", `translate(3, 0)`); */
+    /* 
+        yAxisGroup.selectAll(".tick line")
+            .attr("transform", `translate(6, 0)`)
+            .style("stroke", "black");
+        
+        yAxisGroup.selectAll(".tick text")
+            .attr("transform", `translate(3, 0)`); */
 
     var xScale = d3.scaleLinear()
         .domain([0, KsXlimit])
@@ -2469,7 +2496,7 @@ function DensityPlotting(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -2582,7 +2609,7 @@ function DensityPlotting(InputData) {
         .attr("x", leftPadding - 45)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "times")
+        .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
@@ -2731,11 +2758,11 @@ function DensityPlotting(InputData) {
             .attr("x", leftPadding + 145)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .html("")
             .append("tspan")
             .attr("font-weight", "bold")
-            .attr("font-family", "times")
+            .attr("font-family", "calibri")
             .attr("fill", "#9B3A4D")
             .text("Orthologous ")
             .append("tspan")

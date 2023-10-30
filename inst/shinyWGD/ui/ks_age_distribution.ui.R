@@ -31,7 +31,7 @@ Ks_Age_Distribution_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("Upload <font color='green'><br><b>wgd</b> / <b>ksrates</b></font><br>Output Folder")),
+                h5(HTML("Upload <font color='green'><b><i>shinyWGD</i></b></font> Output Folder")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 5px;
@@ -43,11 +43,15 @@ Ks_Age_Distribution_ui <- tabPanel(
                 ),
                 fluidRow(
                     class="justify-content-left",
-                    style="padding-bottom: 5px;
+                    style="padding-bottom: 15px;
                            padding-top: 5px",
                     column(
                         12,
                         shinyDirButton("dir", "Select a Folder", "Upload"),
+                    ),
+                    column(
+                        12,
+                        uiOutput("selectedKsDirName")
                     )
                 )
             ),
