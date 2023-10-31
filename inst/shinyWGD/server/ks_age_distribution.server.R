@@ -1,7 +1,7 @@
-shinyDirChoose(input, "dir", roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"))
+shinyDirChoose(input, "dir", roots=c(computer="/"))
 
 observe({
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$dir)
     if( length(analysisDir) > 0 ){
         dirName <- basename(analysisDir)
         output$selectedKsDirName <- renderUI({
@@ -21,7 +21,7 @@ observe({
 })
 
 output$ksanalysisPanel <- renderUI({
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
     ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
     species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
@@ -295,7 +295,7 @@ output$ksanalysisPanel <- renderUI({
 
 observeEvent(input$ortholog_ks_files_list_A, {
     if( !is.null(input$dir) ){
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
@@ -451,11 +451,11 @@ observeEvent(input$confirm_paralog_ks_go, {
 
     shinyjs::runjs(setTimeoutFunction)
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
     species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -870,11 +870,11 @@ observeEvent(input$confirm_paralog_ks_go, {
 observeEvent(input$paralog_ks_plot_go, {
     #shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
     withProgress(message='Analyzing in progress', value=0, {
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         if( file.exists(species_info_file[1]) ){
             paralog_species <- input$paralog_ks_files_list
-            dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+            dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
             ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
             species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
             ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -1330,11 +1330,11 @@ observeEvent(input$confirm_ortholog_ks_go, {
 
     shinyjs::runjs(setTimeoutFunction)
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
     species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -1545,11 +1545,11 @@ observeEvent(input$ortholog_ks_plot_go, {
     #shinyjs::runjs('document.getElementById("Wgd_plot_ortholog").innerHTML="";')
     withProgress(message='Analyzing in progress', value=0, {
         session$sendCustomMessage("Progress_Bar_Update", "")
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         if( file.exists(species_info_file[1]) ){
             paralog_species <- input$paralog_ks_files_list
-            dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+            dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
             ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
             species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
             ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -1639,11 +1639,11 @@ observeEvent(input$confirm_rate_correction_go, {
     shinyjs::runjs(setTimeoutFunction)
 
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
     species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -1986,11 +1986,11 @@ observeEvent(input$rate_plot_go, {
         icon=icon("check")
     )
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+    dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
     species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/orchids/selected_species"), input$dir)
+        dirPath <- parseDirPath(roots=c(computer="/"), input$dir)
         ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
