@@ -14,13 +14,13 @@ function mixBarDensityPlotting(InputData) {
     var barOpacity = InputData.opacity;
     var height = InputData.height;
     var width = InputData.width;
+    var namesInfo = convertShinyData(InputData.species_list);
 
     const colors = [
         "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
         "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
     ];
 
-    // draw a wgd bar plot
     d3.select("#" + plotId).select("svg").remove();
     d3.selectAll("body svg").remove();
 
@@ -49,8 +49,7 @@ function mixBarDensityPlotting(InputData) {
         .attr("class", "axis axis--x")
         .attr("transform", `translate(0, ${ height - bottomPadding })`)
         .call(xAxis)
-        .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+        .attr("font-size", "12px");
 
     svg.append("g")
         .attr("class", "xTitle")
@@ -59,7 +58,6 @@ function mixBarDensityPlotting(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -71,7 +69,6 @@ function mixBarDensityPlotting(InputData) {
     if (typeof paralogId !== 'undefined') {
         var KsInfo = convertShinyData(InputData.ks_bar_df);
         var titles = [...new Set(KsInfo.map(d => d.title))];
-        // console.log("titles", titles);
 
         const colorScale = d3.scaleOrdinal()
             .domain(KsInfo.map(function (d) { return d.title; }))
@@ -84,7 +81,6 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -101,8 +97,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("class", "axis axis--y")
             .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
             .call(yAxis)
-            .attr("font-size", "12px")
-            .attr("font-family", "calibri");
+            .attr("font-size", "12px");
 
         var paralogData = KsInfo.filter(function (d) {
             var paralogIdFile = paralogId + ".ks";
@@ -235,7 +230,6 @@ function mixBarDensityPlotting(InputData) {
         legendItems.append("text")
             .attr("x", 20)
             .attr("y", 10)
-            .attr("font-family", "calibri")
             .attr("font-size", "12px")
             .attr("fill", "#333")
             .html(function (d) {
@@ -330,8 +324,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("class", "axis axis--y2")
             .attr("transform", `translate(${ width - rightPadding + 5 }, 0)`)
             .call(y2Axis)
-            .attr("font-size", "12px")
-            .attr("font-family", "calibri");
+            .attr("font-size", "12px");
 
         svg.append("g")
             .attr("class", "y2Title")
@@ -340,7 +333,6 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", width - rightPadding + 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -372,45 +364,9 @@ function mixBarDensityPlotting(InputData) {
 
                 var maxDensityKs = maxDensityData ? maxDensityData[0] : undefined;
 
-                /* svg.append("line")
-                    .attr("x1", xScale(maxDensityData[0]))
-                    .attr("y1", y2Scale(0))
-                    .attr("x2", xScale(maxDensityData[0]))
-                    .attr("y2", y2Scale(KsY2limit))
-                    .style("stroke", colorScale(d.key))
-                    .style("stroke-width", "1.4")
-                    .style("stroke-dasharray", "5, 5"); */
                 peaksInfo.push({ group: d.key, peak: maxDensityData[0] });
 
                 var nintyfiveCI = confidenceIntervals[i].confidenceInterval;
-                /* svg.append("rect")
-                    .attr("x", xScale(nintyfiveCI[0]))
-                    .attr("y", y2Scale(KsY2limit))
-                    .attr("width", xScale(nintyfiveCI[1]) - xScale(nintyfiveCI[0]))
-                    .attr("height", y2Scale(0) - 50)
-                    .style("fill", colorScale(d.key))
-                    .style("fill-opacity", 0.2)
-                    .attr("data-tippy-content", function () {
-                        var peakContent = "Peak: <span style='color: " + colorScale(d.key.replace(".ks", "")) + ";'>" + maxDensityKs + "</span><br>" +
-                            "95% CIs: <span style='color: " + highlightColor + "; background-color: " + color + "';>" +
-                            nintyfiveCI[0].toFixed(2) + " <--> " + nintyfiveCI[1].toFixed(2) + "</span>";
-                        return peakContent;
-                    })
-                    .on("mouseover", function (event, d) {
-                        tippy(this, {
-                            theme: "light",
-                            placement: "right",
-                            allowHTML: true,
-                            animation: "scale",
-                            delay: [1000, 0],
-                            duration: [200, 200],
-                            followCursor: true,
-                            offset: [-15, 15]
-                        });
-                    })
-                    .on("mouseout", function (event, d) {
-                        tippy.hideAll();
-                    }); */
 
                 var highlightColors = {
                     "red": "yellow",
@@ -475,18 +431,25 @@ function mixBarDensityPlotting(InputData) {
             var ref_full = parseFloat(each.a_mode) + parseFloat(each.c_mode);
             var cal_full = parseFloat(each.b_mode) + parseFloat(each.c_mode);
 
-            var firstStudyElement = each.study.split(' ')[0];
-            var firstOutgroupElement = each.outgroup.split(' ')[0];
-            var firstRefElement = each.ref.split(" ")[0];
+            var firstOutgroupElement = namesInfo.find(function (info) {
+                return info.latin_name === each.outgroup.replace("_", " ");
+            });
+            var firstRefElement = namesInfo.find(function (info) {
+                return info.latin_name === each.ref.replace("_", " ");
+            });
+            var firstStudyElement = namesInfo.find(function (info) {
+                return info.latin_name === each.study.replace("_", " ");
+            });
+
             var matchingTitles = titles.filter(function (item) {
-                return item.includes(firstOutgroupElement);
+                return item.includes(firstOutgroupElement.informal_name);
             });
             var study2outgroup = matchingTitles.find(function (item) {
-                return item.includes(firstStudyElement);
+                return item.includes(firstStudyElement.informal_name);
             });
             var ref2outgroup = matchingTitles.find(function (item) {
-                return item.includes(firstRefElement);
-            })
+                return item.includes(firstRefElement.informal_name);
+            });
 
             var study2outgroupYpos = maxYvalueInfo.find(function (item) {
                 var pos = item.group.includes(study2outgroup);
@@ -500,7 +463,6 @@ function mixBarDensityPlotting(InputData) {
 
             var rateYpos = d3.max(highestYValues) + 0.2;
 
-            // rect(mode.3$c.low.bound, 1-0.25, mode.3$c.up.bound, 1+0.25, col = "#8080804D", border = NA)
             svg.append('circle')
                 .attr("class", "rate test")
                 .attr("r", 2)
@@ -533,8 +495,13 @@ function mixBarDensityPlotting(InputData) {
                 .attr('fill', 'grey');
 
             if (i === 0) {
-                var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
-                    " - " + each.ref.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                if (each.outgroup.includes("_")) {
+                    var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+_(\w+)/, "$1. $2") +
+                        " - " + each.ref.replace(/(\w)\w+_(\w+)/, "$1. $2");
+                } else {
+                    var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                        " - " + each.ref.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                }
                 svg.append('text')
                     .attr('x', xScale(maxModeSum + 0.1))
                     .attr('y', y2Scale(rateYpos + i * 0.4) + 3)
@@ -542,7 +509,7 @@ function mixBarDensityPlotting(InputData) {
                     .attr('fill', colorScale(ref2outgroup))
                     .attr("font-size", "10px")
                     .attr('text-anchor', 'start')
-                    .attr("font-family", "calibri")
+                    // .attr("font-family", "calibri")
                     .attr("font-style", "italic");
             }
 
@@ -623,8 +590,13 @@ function mixBarDensityPlotting(InputData) {
                 .attr('opacity', '0.6')
                 .attr("stroke-dasharray", "5 3");
 
-            var study2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
-                " - " + each.study.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+            if (each.outgroup.includes("_")) {
+                var study2outgroupLabel = each.outgroup.replace(/(\w)\w+_(\w+)/, "$1. $2") +
+                    " - " + each.study.replace(/(\w)\w+_(\w+)/, "$1. $2");
+            } else {
+                var study2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                    " - " + each.study.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+            }
 
             svg.append('text')
                 .attr('x', xScale(maxModeSum + 0.1))
@@ -633,7 +605,7 @@ function mixBarDensityPlotting(InputData) {
                 .attr('fill', colorScale(study2outgroup))
                 .attr("font-size", "10px")
                 .attr('text-anchor', 'start')
-                .attr("font-family", "calibri")
+                // .attr("font-family", "calibri")
                 .attr("font-style", "italic");
 
             svg.append('text')
@@ -643,7 +615,7 @@ function mixBarDensityPlotting(InputData) {
                 .attr('fill', 'grey')
                 .attr("font-size", "10px")
                 .attr('text-anchor', 'end')
-                .attr("font-family", "calibri");
+            // .attr("font-family", "calibri");
 
             svg.append('text')
                 .attr('x', xScale(parseFloat(each.c_mode) + 0.2))
@@ -651,7 +623,7 @@ function mixBarDensityPlotting(InputData) {
                 .text(floatFormatter(each.a_mode))
                 .attr('fill', colorScale(ref2outgroup))
                 .attr("font-size", "10px")
-                .attr("font-family", "calibri");
+            // .attr("font-family", "calibri");
 
             svg.append('text')
                 .attr('x', xScale(parseFloat(each.c_mode) + 0.2))
@@ -659,7 +631,7 @@ function mixBarDensityPlotting(InputData) {
                 .text(floatFormatter(each.b_mode))
                 .attr('fill', colorScale(study2outgroup))
                 .attr("font-size", "10px")
-                .attr("font-family", "calibri");
+            // .attr("font-family", "calibri");
         });
     } else {
         var KsDensityInfo = convertShinyData(InputData.ks_density_df);
@@ -682,8 +654,6 @@ function mixBarDensityPlotting(InputData) {
             var density = kde(d.values.map(function (d) { return d.ks; }));
             return { key: d.key, density: density };
         });
-
-        console.log("densityData", densityData);
 
         var iterations = 1000;
         var confidenceLevel = 0.95;
@@ -753,8 +723,7 @@ function mixBarDensityPlotting(InputData) {
             .attr("class", "axis axis--y2")
             .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
             .call(y2Axis)
-            .attr("font-size", "12px")
-            .attr("font-family", "calibri");
+            .attr("font-size", "12px");
 
         svg.append("g")
             .attr("class", "y2Title")
@@ -763,7 +732,6 @@ function mixBarDensityPlotting(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -854,25 +822,32 @@ function mixBarDensityPlotting(InputData) {
                 return Math.max(sumAC, sumBC);
             })
         )
-        // ("maxModeSum", maxModeSum, xScale(maxModeSum + 0.2));
 
         // Add relative rate test output to plot
         rateCorrectionInfo.forEach(function (each, i) {
+
             var ref_full = parseFloat(each.a_mode) + parseFloat(each.c_mode);
             var cal_full = parseFloat(each.b_mode) + parseFloat(each.c_mode);
 
-            var firstStudyElement = each.study.split(' ')[0];
-            var firstOutgroupElement = each.outgroup.split(' ')[0];
-            var firstRefElement = each.ref.split(" ")[0];
+            var firstOutgroupElement = namesInfo.find(function (info) {
+                return info.latin_name === each.outgroup.replace("_", " ");
+            });
+            var firstRefElement = namesInfo.find(function (info) {
+                return info.latin_name === each.ref.replace("_", " ");
+            })
+            var firstStudyElement = namesInfo.find(function (info) {
+                return info.latin_name === each.study.replace("_", " ");
+            })
+
             var matchingTitles = titles.filter(function (item) {
-                return item.includes(firstOutgroupElement);
+                return item.includes(firstOutgroupElement.informal_name);
             });
             var study2outgroup = matchingTitles.find(function (item) {
-                return item.includes(firstStudyElement);
+                return item.includes(firstStudyElement.informal_name);
             });
             var ref2outgroup = matchingTitles.find(function (item) {
-                return item.includes(firstRefElement);
-            })
+                return item.includes(firstRefElement.informal_name);
+            });
 
             var study2outgroupYpos = maxYvalueInfo.find(function (item) {
                 var pos = item.group.includes(study2outgroup);
@@ -917,8 +892,13 @@ function mixBarDensityPlotting(InputData) {
                 .attr('fill', 'grey');
 
             if (i === 0) {
-                var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
-                    " - " + each.ref.replace(/(\w)\w+\s(\w+)/, "$1. $2")
+                if (each.outgroup.includes("_")) {
+                    var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+_(\w+)/, "$1. $2") +
+                        " - " + each.ref.replace(/(\w)\w+_(\w+)/, "$1. $2");
+                } else {
+                    var ref2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                        " - " + each.ref.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                }
                 svg.append('text')
                     .attr('x', xScale(maxModeSum + 0.1))
                     .attr('y', y2Scale(rateYpos + i * 0.4) + 3)
@@ -926,7 +906,6 @@ function mixBarDensityPlotting(InputData) {
                     .attr('fill', colorScale(ref2outgroup))
                     .attr("font-size", "10px")
                     .attr('text-anchor', 'start')
-                    .attr("font-family", "calibri")
                     .attr("font-style", "italic");
             }
 
@@ -1007,8 +986,14 @@ function mixBarDensityPlotting(InputData) {
                 .attr('opacity', '0.6')
                 .attr("stroke-dasharray", "5 3");
 
-            var study2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
-                " - " + each.study.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+            if (each.outgroup.includes("_")) {
+                var study2outgroupLabel = each.outgroup.replace(/(\w)\w+_(\w+)/, "$1. $2") +
+                    " - " + each.study.replace(/(\w)\w+_(\w+)/, "$1. $2");
+            } else {
+                var study2outgroupLabel = each.outgroup.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                    " - " + each.study.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+            }
+
             svg.append('text')
                 .attr('x', xScale(maxModeSum + 0.1))
                 .attr('y', y2Scale(rateYpos + i * 0.4 + 0.15) + 3)
@@ -1016,7 +1001,6 @@ function mixBarDensityPlotting(InputData) {
                 .attr('fill', colorScale(study2outgroup))
                 .attr("font-size", "10px")
                 .attr('text-anchor', 'start')
-                .attr("font-family", "calibri")
                 .attr("font-style", "italic");
 
             svg.append('text')
@@ -1025,46 +1009,23 @@ function mixBarDensityPlotting(InputData) {
                 .text(floatFormatter(parseFloat(each.c_mode)))
                 .attr('fill', 'grey')
                 .attr("font-size", "10px")
-                .attr('text-anchor', 'end')
-                .attr("font-family", "calibri");
+                .attr('text-anchor', 'end');
 
             svg.append('text')
                 .attr('x', xScale(parseFloat(each.c_mode) + 0.2))
                 .attr('y', y2Scale(rateYpos + i * 0.4 + 0.05))
                 .text(floatFormatter(each.a_mode))
                 .attr('fill', colorScale(ref2outgroup))
-                .attr("font-size", "10px")
-                .attr("font-family", "calibri");
+                .attr("font-size", "10px");
 
             svg.append('text')
                 .attr('x', xScale(parseFloat(each.c_mode) + 0.2))
                 .attr('y', y2Scale(rateYpos + i * 0.4 + 0.2))
                 .text(floatFormatter(each.b_mode))
                 .attr('fill', colorScale(study2outgroup))
-                .attr("font-size", "10px")
-                .attr("font-family", "calibri");
+                .attr("font-size", "10px");
         });
     }
-
-    // add the vertical lines
-    /* // Define the vertical line data
-    var verticalLineData = InputData.vlines;
-
-    // Append the vertical lines to the SVG
-    if (verticalLineData.length > 0) {
-        svg.selectAll(".vertical-line")
-            .data(verticalLineData)
-            .enter()
-            .append("line")
-            .attr("class", "vertical-line")
-            .attr("x1", function (d) { return xScale(d); })
-            .attr("x2", function (d) { return xScale(d); })
-            .attr("y1", topPadding)
-            .attr("y2", height - bottomPadding)
-            .attr("stroke", "orange")
-            .attr("stroke-width", 2)
-            .attr("stroke-dasharray", "5,5");
-    } */
 
     tippy(".rect bar", { trigger: "mouseenter", followCursor: "initial", delay: [tooltipDelay, null] });
 
@@ -1152,7 +1113,7 @@ function mixBarDensityPlottingOld(InputData) {
         .attr("transform", `translate(0, ${ height - bottomPadding })`)
         .call(xAxis)
         .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     svg.append("g")
         .attr("class", "xTitle")
@@ -1161,7 +1122,7 @@ function mixBarDensityPlottingOld(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -1178,7 +1139,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding - 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1197,7 +1158,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
             .call(yAxis)
             .attr("font-size", "12px")
-            .attr("font-family", "calibri");
+        // .attr("font-family", "calibri");
 
         var paralogData = KsInfo.filter(function (d) {
             var paralogSpeciesFile = paralogSpecies + ".ks";
@@ -1406,7 +1367,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("transform", `translate(${ width - rightPadding + 5 }, 0)`)
             .call(y2Axis)
             .attr("font-size", "12px")
-            .attr("font-family", "calibri");
+        // .attr("font-family", "calibri");
 
         svg.append("g")
             .attr("class", "y2Title")
@@ -1415,7 +1376,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", width - rightPadding + 50)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1535,7 +1496,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
             .call(yAxis)
             .attr("font-size", "12px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .selectAll(".tick line")
             .style("z-index", "-100")
             .attr("stroke", "black")
@@ -1641,7 +1602,7 @@ function mixBarDensityPlottingOld(InputData) {
             .text(function (d) { return d.replace(/\d+|\.ks/g, ""); });
 
         legend.selectAll("text")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("font-size", "12px")
             .attr("fill", "#333");
 
@@ -1667,11 +1628,11 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding + 145)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .html("")
             .append("tspan")
             .attr("font-weight", "bold")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("fill", "#00AEAE")
             .text("Original ")
             .append("tspan")
@@ -1695,7 +1656,7 @@ function mixBarDensityPlottingOld(InputData) {
             .attr("x", leftPadding + 45)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .html("Corrected <b><i>K</b></i><sub>s</sub> Distribution Plot"); */
 
     } else {
@@ -1731,7 +1692,7 @@ function mixBarDensityPlottingOld(InputData) {
             .text(function (d) { return d; });
 
         legend.selectAll("text")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("font-size", "12px")
             .attr("fill", "#333");
 
@@ -1931,7 +1892,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("transform", `translate(0, ${ subplotHeight - bottomPadding })`)
         .call(xAxis)
         .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     subplot.append("g")
         .attr("class", "xTitle")
@@ -1940,7 +1901,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("y", subplotHeight - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -1956,7 +1917,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("x", leftPadding - 50)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
@@ -1979,7 +1940,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
         .call(yAxis)
         .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     var barWidth;
     if (paralogData.some(d => d.title.includes("ks_anchor"))) {
@@ -2164,7 +2125,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
             .attr("x", 30)
             .attr("y", 15)
             .text((d) => `Mode: ${ floatFormatter(d.mode) }`)
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("font-size", "12px")
             .attr("fill", "#333");
     }
@@ -2204,7 +2165,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
                 return "All pairs";
             }
         })
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("font-size", "12px")
         .attr("fill", "#333");
 
@@ -2217,7 +2178,7 @@ function barSubplot(paralogData, eachKsMclustData, latinName, subplot, subplotWi
         .attr("x", leftPadding + 145)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("font-style", "italic")
         .attr("fill", "#8E549E");
 
@@ -2267,7 +2228,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("y", svgHeight - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -2282,7 +2243,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("y", d3.mean([0, svgHeight - bottomPadding]))
         .attr("x", leftPadding - 50)
         .attr("text-anchor", "middle")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
@@ -2320,7 +2281,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("transform", `translate(${ leftPadding }, 0)`)
         .call(yAxis)
         .attr("font-size", "10px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
     /* 
         yAxisGroup.selectAll(".tick line")
             .attr("transform", `translate(6, 0)`)
@@ -2343,7 +2304,7 @@ function siZerPlot(data, svg, subplotWidth, sizerHeight, KsXlimit) {
         .attr("transform", `translate(0, ${ svgHeight - bottomPadding })`)
         .call(xAxis)
         .attr("font-size", "10px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     // Calculate the middle point of the plot
     const xMidpoint = KsXlimit / 2;
@@ -2445,6 +2406,8 @@ function DensityPlotting(InputData) {
     var densityOpacity = InputData.opacity || 0.6;
     var height = InputData.height;
     var width = InputData.width;
+    var namesInfo = convertShinyData(InputData.names_df);
+    console.log(namesInfo);
 
     // console.log("KsDensity", KsDensityInfo);
     var titles = [...new Set(KsDensityInfo.map(d => d.title))];;
@@ -2487,7 +2450,7 @@ function DensityPlotting(InputData) {
         .attr("transform", `translate(0, ${ height - bottomPadding })`)
         .call(xAxis)
         .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     svg.append("g")
         .attr("class", "xTitle")
@@ -2496,7 +2459,7 @@ function DensityPlotting(InputData) {
         .attr("y", height - 10)
         .attr("text-anchor", "middle")
         .append("tspan")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .html("<tspan style='font-style: italic;'>K</tspan>")
         .style("font-size", "14px")
         .append("tspan")
@@ -2600,7 +2563,7 @@ function DensityPlotting(InputData) {
         .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
         .call(y2Axis)
         .attr("font-size", "12px")
-        .attr("font-family", "calibri");
+    // .attr("font-family", "calibri");
 
     svg.append("g")
         .attr("class", "y2Title")
@@ -2609,7 +2572,7 @@ function DensityPlotting(InputData) {
         .attr("x", leftPadding - 45)
         .attr("text-anchor", "middle")
         .attr("font-size", "14px")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("transform", function () {
             return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
         })
@@ -2696,8 +2659,15 @@ function DensityPlotting(InputData) {
 
             var color = colorScale(d.key);
             var highlightColor = highlightColors[color] || "white";
-            var name = d.key.replace(/\d+/g, "");
-            var content = "<span style='color: " + highlightColor + "; background-color: " + color + ";'>" + name + "</span> <br> Peak: <span style='color: red;'>" +
+
+            var speciesList = d.key.replace(/\.ks/, "").split('_');
+            var speciesOne = namesInfo.find(info => info.informal_name === speciesList[0]).latin_name;
+            var speciesTwo = namesInfo.find(info => info.informal_name === speciesList[1]).latin_name;
+
+            var name = speciesOne.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                " - " + speciesTwo.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+
+            var content = "<span style='color: " + highlightColor + "; background-color: " + color + ";'><i>" + name + "</i></span> <br> Peak: <span style='color: red;'>" +
                 maxDensityKs + "</span> (Density: <span style='color: " + color + ";'>" + maxDensity.toFixed(2) + "</span>)<br>" +
                 "95% CIs: <span style='color: " + highlightColor + "; background-color: " + color + "';>" + nintyfiveCI[0].toFixed(2) + " <--> " + nintyfiveCI[1].toFixed(2) + "</span>";
 
@@ -2742,12 +2712,20 @@ function DensityPlotting(InputData) {
     legendItems.append("text")
         .attr("x", 20)
         .attr("y", 10)
-        .text(function (d) { return d.replace(/\d+|\.ks/g, ""); });
+        .text(function (d) {
+            var speciesList = d.replace(/\.ks/, "").split('_');
+            var speciesOne = namesInfo.find(info => info.informal_name === speciesList[0]).latin_name;
+            var speciesTwo = namesInfo.find(info => info.informal_name === speciesList[1]).latin_name;
 
-    legend.selectAll("text")
-        .attr("font-family", "calibri")
+            var label = speciesOne.replace(/(\w)\w+\s(\w+)/, "$1. $2") +
+                " - " + speciesTwo.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+
+            return label;
+        })
+        .attr('text-anchor', 'start')
+        // .attr("font-family", "calibri")
         .attr("font-size", "12px")
-        .attr("fill", "#333");
+        .attr("font-style", "italic");
 
 
     // Add the title of the figure
@@ -2758,11 +2736,11 @@ function DensityPlotting(InputData) {
             .attr("x", leftPadding + 145)
             .attr("text-anchor", "middle")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .html("")
             .append("tspan")
             .attr("font-weight", "bold")
-            .attr("font-family", "calibri")
+            // .attr("font-family", "calibri")
             .attr("fill", "#9B3A4D")
             .text("Orthologous ")
             .append("tspan")
@@ -2813,7 +2791,7 @@ function DensityPlotting(InputData) {
         .text(function (d) { return d; });
 
     legend.selectAll("text")
-        .attr("font-family", "calibri")
+        // .attr("font-family", "calibri")
         .attr("font-size", "12px")
         .attr("fill", "#333"); */
 

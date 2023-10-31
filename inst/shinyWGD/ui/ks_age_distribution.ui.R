@@ -73,7 +73,6 @@ Ks_Age_Distribution_ui <- tabPanel(
             )
         )
     ),
-    #icon=icon("search")
     icon=icon(
         name=NULL,
         style="

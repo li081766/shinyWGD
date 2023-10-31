@@ -36,9 +36,9 @@ obtain_chromosome_length <- function(species_info_file){
     len_df <- data.frame(sp=character(),
                          chr=character(),
                          len=integer())
-    num_df <- data.frame(sp=character(),
-                         chr=character(),
-                         num=integer())
+    # num_df <- data.frame(sp=character(),
+    #                      chr=character(),
+    #                      num=integer())
 
     for( i in 1:nrow(df) ){
         each_row <- df[i, ]
@@ -53,17 +53,18 @@ obtain_chromosome_length <- function(species_info_file){
 
         gff_grouped <- group_by(gff_df, seqchr)
         max_pos <- summarise(gff_grouped, len=max(end))
-        max_pos$sp <- each_row$sp
+        max_pos$sp <- gsub(" ", "_", each_row$sp)
         len_df <- rbind(len_df, max_pos)
-        mRNA_counts <- gff_grouped %>%
-            filter(type=="mRNA") %>%
-            group_by(seqchr) %>%
-            summarise(count=dplyr::n())
-        mRNA_counts$sp <- each_row$sp
-        num_df <- rbind(num_df, mRNA_counts)
+        # mRNA_counts <- gff_grouped %>%
+        #     filter(type=="mRNA") %>%
+        #     group_by(seqchr) %>%
+        #     summarise(count=dplyr::n())
+        # mRNA_counts$sp <- gsub(" ", "_", each_row$sp)
+        # num_df <- rbind(num_df, mRNA_counts)
     }
-    colnames(num_df) <- c("seqchr", "num", "sp")
-    return(list(len_df=len_df, num_df=num_df))
+    #colnames(num_df) <- c("seqchr", "num", "sp")
+    #return(list(len_df=len_df, num_df=num_df))
+    return(len_df)
 }
 
 #' obtain_chromosome_length_filter
@@ -108,13 +109,13 @@ obtain_chromosome_length_filter <- function(species_info_df){
 
         gff_grouped <- group_by(gff_df, seqchr)
         max_pos <- summarise(gff_grouped, len=max(end))
-        max_pos$sp <- each_row$sp
+        max_pos$sp <- gsub(" ", "_", each_row$sp)
         len_df <- rbind(len_df, max_pos)
         mRNA_counts <- gff_grouped %>%
             filter(type=="mRNA") %>%
             group_by(seqchr) %>%
             summarise(count=dplyr::n())
-        mRNA_counts$sp <- each_row$sp
+        mRNA_counts$sp <- gsub(" ", "_", each_row$sp)
         num_df <- rbind(num_df, mRNA_counts)
     }
     colnames(num_df) <- c("seqchr", "num", "sp")
