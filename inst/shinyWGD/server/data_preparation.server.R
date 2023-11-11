@@ -726,7 +726,7 @@ observeEvent(input$ksrates_go, {
                 updateProgress(
                     container="ksrates_progress_container_js",
                     width=15,
-                    type="ksrates"
+                    type="Create ksrates code"
                 )
                 Sys.sleep(1)
 
@@ -743,14 +743,14 @@ observeEvent(input$ksrates_go, {
                 updateProgress(
                     container="ksrates_progress_container_js",
                     width=60,
-                    type="ksrates"
+                    type="Create ksrates code"
                 )
                 Sys.sleep(1)
                 # create Ksrate expert parameters file
                 ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                 create_ksrates_expert_parameter_file(ksratesexpert)
 
-                updateProgress("ksrates_progress_container_js", 80, "ksrates")
+                updateProgress("ksrates_progress_container_js", 80, "Create ksrates code")
                 incProgress(amount=.8, message="Creating ksrates Runing Script ...")
                 Sys.sleep(1)
                 ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
@@ -764,7 +764,7 @@ observeEvent(input$ksrates_go, {
                     )
                 )
 
-                updateProgress("ksrates_progress_container_js", 100, "ksrates")
+                updateProgress("ksrates_progress_container_js", 100, "Create ksrates code")
                 incProgress(amount=1)
                 Sys.sleep(1)
             })
@@ -799,7 +799,7 @@ observeEvent(input$ksrates_go, {
             else{
                 withProgress(message='Creating in progress', value=0, {
                     incProgress(amount=.15, message="Preparing ksrates Configure File ...")
-                    updateProgress("ksrates_progress_container_js", 15, "ksrates")
+                    updateProgress("ksrates_progress_container_js", 15, "Create ksrates code")
                     Sys.sleep(1)
                     ksratesDir <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/ksrates_wd")
                     if( !file.exists(ksratesDir) ){
@@ -816,14 +816,14 @@ observeEvent(input$ksrates_go, {
                     )
 
                     incProgress(amount=.6, message="Preparing ksrates Expert Parameters ...")
-                    updateProgress("ksrates_progress_container_js", 60, "ksrates")
+                    updateProgress("ksrates_progress_container_js", 60, "Create ksrates code")
                     Sys.sleep(1)
 
                     ksratesexpert <- paste0(ksratesDir, "/ksrates_expert_parameter.txt")
                     create_ksrates_expert_parameter_file(ksratesexpert)
 
                     incProgress(amount=.8, message="Create ksrates Running Script ...")
-                    updateProgress("ksrates_progress_container_js", 80, "ksrates")
+                    updateProgress("ksrates_progress_container_js", 80, "Create ksrates code")
                     Sys.sleep(1)
                     ksrates_cmd_sh_file <- paste0(ksratesDir, "/run_ksrates.sh")
                     ksrates_cmd <- create_ksrates_cmd_from_table(data_table, "ksrates_conf.txt", ksrates_cmd_sh_file, input$select_focal_species)
@@ -837,7 +837,7 @@ observeEvent(input$ksrates_go, {
                     )
 
                     incProgress(amount=1)
-                    updateProgress("ksrates_progress_container_js", 100, "ksrates")
+                    updateProgress("ksrates_progress_container_js", 100, "Create ksrates code")
                     Sys.sleep(.1)
                 })
             }
@@ -870,7 +870,7 @@ observeEvent(input$iadhore_go, {
         )
         withProgress(message='Creating in progress', value=0, {
             incProgress(amount=.2, message="Preparing i-ADHoRe configure file...")
-            updateProgress("iadhore_progress_container_js", 20, "i-ADHoRe")
+            updateProgress("iadhore_progress_container_js", 20, "Creat i-ADHoRe code")
             Sys.sleep(1)
 
             syn_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/i-ADHoRe_wd"))
@@ -894,7 +894,7 @@ observeEvent(input$iadhore_go, {
             )
 
             incProgress(amount=.1, message="Dealing with gff files...")
-            updateProgress("iadhore_progress_container_js", 30, "i-ADHoRe")
+            updateProgress("iadhore_progress_container_js", 30, "Creat i-ADHoRe code")
             Sys.sleep(1)
 
             system(
@@ -905,7 +905,7 @@ observeEvent(input$iadhore_go, {
                 )
             )
             incProgress(amount=.4, message="Generating the codes for diamond and i-ADHoRe")
-            updateProgress("iadhore_progress_container_js", 70, "i-ADHoRe")
+            updateProgress("iadhore_progress_container_js", 70, "Creat i-ADHoRe code")
             Sys.sleep(1)
 
             if( input$multiple_iadhore ){
@@ -935,7 +935,7 @@ observeEvent(input$iadhore_go, {
                 )
             }
             incProgress(amount=1, message="Done")
-            updateProgress("iadhore_progress_container_js", 100, "i-ADHoRe")
+            updateProgress("iadhore_progress_container_js", 100, "Creat i-ADHoRe code")
             Sys.sleep(1)
         })
     }
@@ -953,7 +953,7 @@ observeEvent(input$orthofinder_go, {
     if( file.exists(species_info) ){
         withProgress(message='Creating in progress', value=0, {
             incProgress(amount=.1, message="Preparing OrthoFinder input file...")
-            updateProgress("orthofinder_progress_container_js", 10, "OrthoFinder")
+            updateProgress("orthofinder_progress_container_js", 10, "Create OrthoFinder code")
             Sys.sleep(1)
 
             orthofinder_dir <- paste0(paste0(tempdir(), "/Analysis_", Sys.Date(), "/OrthoFinder_wd"))
@@ -974,7 +974,7 @@ observeEvent(input$orthofinder_go, {
                 )
             )
             incProgress(amount=.1, message="Translate CDS into proteins ...")
-            updateProgress("orthofinder_progress_container_js", 30, "OrthoFinder")
+            updateProgress("orthofinder_progress_container_js", 30, "Create OrthoFinder code")
             Sys.sleep(1)
 
             system(
@@ -987,7 +987,7 @@ observeEvent(input$orthofinder_go, {
             )
 
             incProgress(amount=1, message="Done")
-            updateProgress("orthofinder_progress_container_js", 100, "OrthoFinder")
+            updateProgress("orthofinder_progress_container_js", 100, "Create OrthoFinder code")
             Sys.sleep(1)
         })
     }

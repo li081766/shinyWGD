@@ -96,7 +96,9 @@ generate_shell() {
     echo "#SBATCH -e $cmd_basename.e%j" >>$cmd_file
     echo "" >>$cmd_file
 
-	echo "module load diamond i-adhore; sh ${diamondShell} ../Species.info.xls ./ ${num_thread}" >>$cmd_file
+	echo "module load diamond i-adhore" >>$cmd_file
+
+    echo "sh ${diamondShell} ../Species.info.xls ./ ${num_thread}" >>$cmd_file
 
 	# mapfile -t input_data_array < "$input_data_file"
 	IFS=$'\n' read -d '' -r -a input_data_array < "$input_data_file"
@@ -123,7 +125,9 @@ generate_shell() {
 		# Add script to calculate the Ks of anchorpoints
 		cdsFile="${species}.cds.fasta"
 		pepFile="${species}.pep.fasta"
-		echo "cd i-adhore.${species}_vs_${species}/; sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile $pepFile 4; cd .." >> "$config_file_con"
+		echo "cd i-adhore.${species}_vs_${species}/" >> "$config_file_con"
+        echo "sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile $pepFile 4" >> "$config_file_con"
+        echo "cd .." >> "$config_file_con"
 
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
@@ -149,7 +153,9 @@ generate_shell() {
 			# Add script to calculate the Ks of anchorpoints
 			cdsFile="${species1}_vs_${species2}.cds.fasta"
 			pepFile="${species1}_vs_${species2}.pep.fasta"
-			echo "cd i-adhore.${species1}_vs_${species2}/; sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile $pepFile 4; cd .." >> "$config_file_con"
+			echo "cd i-adhore.${species1}_vs_${species2}/" >> "$config_file_con"
+			echo "sh ../computing_anchorpoint_ks.MultiThreads.shell anchorpoints.txt $cdsFile $pepFile 4" >> "$config_file_con"
+			echo "cd .." >> "$config_file_con"
 		done
 	done
 	cat "$config_file_con" >> "$cmd_file"
