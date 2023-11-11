@@ -3,11 +3,11 @@ Extracting_Tree_ui <- tabPanel(
     value='extracting_tree',
     fluidRow(
         column(
-            4,
+            3,
             uiOutput("ObtainTreeFromTimeTreeSettingDisplay")
         ),
         column(
-            8,
+            9,
             uiOutput("timeTreeOrgPlot")
         )
     ),

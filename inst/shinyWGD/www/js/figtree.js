@@ -17,6 +17,208 @@ function plotFigtree(InputData) {
     downloadSVG("Treeplot_download", "timetree_plot", "TimeTree.plot.svg")
 }
 
+Shiny.addCustomMessageHandler("timeTreeOrgPlot", timeTreeOrgPlot);
+function timeTreeOrgPlot(InputData) {
+    var timetreeOrg = InputData.timeTreeOrgTree;
+    var height = InputData.height;
+    var width = InputData.width;
+
+    const treeLine = timetreeOrg.find(line => line.includes("\tTREE * UNTITLED ="));
+
+    const timeTreeOrgString = treeLine.replace(/^\s*TREE \* UNTITLED = \[&R\]\s*/, "");
+
+    const numbers = timeTreeOrgString.match(/\d+(\.\d+)?/g);
+
+    if (numbers) {
+        const dividedNumbers = numbers.map(number => {
+            const parsedNumber = parseFloat(number);
+            return isNaN(parsedNumber) ? number : (parsedNumber / 100).toFixed(2);
+        });
+
+        let index = 0;
+        const modifiedString = timeTreeOrgString.replace(/\d+(\.\d+)?/g, () => dividedNumbers[index++]);
+
+        var timeTreeOrgJson = parseKsTree(modifiedString);
+        timeTreeOrgBuilding("#timetreeOrg_plot", timeTreeOrgJson, height, width);
+    } else {
+        console.log("No numbers found in the input string.");
+    }
+}
+
+function timeTreeOrgBuilding(selector, timeTreeOrgJson, height, width) {
+
+    var script = document.createElement('script');
+    script.src = 'https://d3js.org/d3.v3.min.js';
+    document.head.appendChild(script);
+    script.onload = function () {
+        var w = width;
+        var h = height;
+        d3.select(selector).select("svg").remove();
+
+        var vis = d3.select(selector).append("svg:svg")
+            .attr("width", w + 600)
+            .attr("height", h + 100)
+            .append("svg:g")
+            .attr("transform", "translate(120, 20)");
+
+        var ori = 'right';
+
+        var tree = d3.layout.cluster()
+            .size([h, w])
+            .separation(function (a, b) {
+                return 1;
+            })
+            .sort(function (node) {
+                return node.children ? node.children.length : -1;
+            })
+            .children(function (node) {
+                return node.branchset
+            });
+
+        var diagonal = rightAngleDiagonal();
+        var nodes = tree(timeTreeOrgJson);
+        var yscale = scaleBranchLengths(nodes, w).range([w, 0]);
+
+        vis.selectAll('.rule-line')
+            .data(yscale.ticks(11))
+            .enter().append('svg:line')
+            .attr('class', 'rule-line')
+            .attr('y1', 0)
+            .attr('y2', h)
+            .attr('x1', yscale)
+            .attr('x2', yscale)
+            .attr("stroke-dasharray", "4 1")
+            .attr("stroke-width", 0.66)
+            .attr("stroke-opacity", 0.2)
+            .attr("stroke", "blue");
+
+        vis.selectAll("text.rule")
+            .data(yscale.ticks(11))
+            .enter().append("svg:text")
+            .attr("class", "rule")
+            .attr("x", yscale)
+            .attr("y", h + 15)
+            .attr("dy", -3)
+            .attr("text-anchor", "middle")
+            .attr("font-size", "10px")
+            .attr('fill', 'blue')
+            .attr('opacity', 0.3)
+            .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
+
+        var legend = vis.append('g')
+            .attr('class', 'legend')
+            .append('text')
+            .attr('x', function () {
+                return w + 8;
+            })
+            .attr('y', h + 12)
+            .attr('text-anchor', 'start')
+            .attr('font-size', '10px')
+            .attr('font-family', 'calibri')
+            .attr('fill', 'blue')
+            .attr('opacity', 0.3)
+            .text('million years ago');
+
+        var node = vis.selectAll("g.node")
+            .data(nodes)
+            .enter().append("svg:g")
+            .attr("class", function (n) {
+                if (n.children) {
+                    if (n.depth == 0) {
+                        return "root node"
+                    } else {
+                        return "inner node"
+                    }
+                } else {
+                    return "leaf node"
+                }
+            })
+            .attr("transform", function (d) { return "translate(" + d.y + "," + d.x + ")"; });
+
+        vis.selectAll('g.leaf.node')
+            .append("svg:text")
+            .attr("class", "my-text")
+            .attr("dx", 8)
+            .attr("dy", 3)
+            .attr("text-anchor", "start")
+            .attr("font-size", "14px")
+            .attr('fill', 'black')
+            .text(function (d) {
+                var name = d.name.replace(/_/g, ' ');
+                return name;
+            })
+            .attr('font-style', function (d) {
+                if (d.name.match(/\_/)) {
+                    return 'italic';
+                } else {
+                    return 'normal';
+                }
+            })
+            .attr("data-tippy-content", (d) => {
+                return "<font color='#00DB00'>" + d.name +
+                    "</font>: <font color='orange'>" + numFormatter(d.length) + " Mya</font>";
+            })
+            .on("mouseover", function () {
+                ribbonEnterTime = new Date().getTime();
+                d3.select(this)
+                    .transition()
+                    .delay(100)
+                    .duration(50)
+                    .attr("fill", "#E1E100")
+            })
+            .on("mouseout", function () {
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 1000) {
+                    d3.select(this)
+                        .transition()
+                        .duration(50)
+                        .attr("fill", "black")
+                }
+            })
+
+        tippy(".my-text rect", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [200, null] });
+
+        const link = vis.selectAll("path.link")
+            .data(tree.links(nodes))
+            .enter().append("svg:path")
+            .attr("class", "link")
+            .attr("d", diagonal)
+            .attr("fill", "none")
+            .attr("stroke", "#aaa") 
+            .attr("stroke-width", "2.45px")
+            // .attr("stroke-dasharray", d => (d.source.y === 0) ? "6 8" : "none")
+            .on("mouseover", function () {
+                ribbonEnterTime = new Date().getTime();
+                d3.select(this)
+                    .transition()
+                    .delay(100)
+                    .duration(50)
+                    .attr("stroke", "#E1E100")
+                    .attr("stroke-width", "4px")
+            })
+            .on("mouseout", function () {
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 1000) {
+                    d3.select(this)
+                        .transition()
+                        .duration(50)
+                        .attr("stroke", "#aaa")
+                        .attr("stroke-width", "2.45px")
+                }
+            })
+
+        vis.selectAll("path.link").each(function () {
+            var firstChild = this.parentNode.firstChild;
+            if (firstChild) {
+                this.parentNode.insertBefore(this, firstChild);
+            }
+        });
+
+        var maxLength = getMaxNodeLength(nodes);
+        drawGeologicTimeBar(maxLength, vis, yscale, h, ori);
+    }
+}
+
 Shiny.addCustomMessageHandler("jointTreePlot", jointTreePlot)
 function jointTreePlot(InputData) {
     var ksTree = InputData.ksTree;
@@ -30,6 +232,7 @@ function jointTreePlot(InputData) {
 
     if (typeof ksTree !== 'undefined') {
         var ksTreeJson = parseKsTree(ksTree);
+        console.log("ksTreeJson", ksTreeJson);
     }
     if (typeof timeTree !== 'undefined') {
         var timeTreeJson = parseTimeTree(timeTree);
@@ -59,12 +262,11 @@ function speciesTreePlot(InputData) {
             speciesTreeJson = parseKsTree(speciesTree);
         } catch (error) {
             var warningMessage = "An error occurred while parsing the species tree. Please check the format and ensure the tree in Newick format.";
-            alert(warningMessage); 
+            alert(warningMessage);
         }
     }
     if (typeof wgdNodes !== 'undefined') {
         var wgdNodesInfo = convertShinyData(wgdNodes);
-        // console.log(wgdNodesInfo);
     }
     speciesTreeBuilding("#speciesTree_plot", speciesTreeJson, wgdNodesInfo, height, width);
 }
@@ -321,7 +523,6 @@ function parseKsTree(ksTree) {
         .map(token => token.trim())
         .filter(Boolean);
     var cid = 0;
-    var hpdRegex = /^\[&(.*)\]$/;
     for (var i = 0; i < tokens.length; i++) {
         var token = tokens[i];
         switch (token) {
@@ -634,7 +835,6 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
             .attr("dy", 4.5)
             .attr("text-anchor", "end")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .text("MRCA"); */
 
     vis.selectAll('g.ks-root-node')
@@ -677,7 +877,6 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                 }
             })
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .attr('fill', 'black')
             .text(function (d) {
                 var name = d.name.replace(/_/g, ' ');
@@ -1175,7 +1374,6 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
                 }
             })
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .text("MRCA"); */
 
     d3.select('.leaf-pop-up-menu').remove();
@@ -2262,7 +2460,6 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                         })
                         .attr("text-anchor", "middle")
                         .attr("font-size", "13px")
-                        .attr("font-family", "calibri")
                         .attr("data-tippy-content", (d) => {
                             return "text:" + nameInput.value;
                         });
@@ -2848,7 +3045,6 @@ function phylogramBuild(selector, treeJson, wgdTableInfo, height, width) {
             .attr("dy", -3)
             .attr("text-anchor", "middle")
             .attr("font-size", "10px")
-            .attr("font-family", "calibri")
             .attr('fill', 'blue')
             .attr('opacity', 0.3)
             .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
@@ -2895,7 +3091,6 @@ function phylogramBuild(selector, treeJson, wgdTableInfo, height, width) {
             .attr("dy", 4.5)
             .attr("text-anchor", "end")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .text("MRCA");
 
         // add a condition when hpd is missing
@@ -2983,7 +3178,6 @@ function phylogramBuild(selector, treeJson, wgdTableInfo, height, width) {
             .attr("dy", 3)
             .attr("text-anchor", "start")
             .attr("font-size", "14px")
-            .attr("font-family", "calibri")
             .attr('fill', 'black')
             .text(function (d) {
                 var name = d.name.replace(/_/g, ' ');
