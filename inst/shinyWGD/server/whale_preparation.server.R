@@ -62,17 +62,17 @@ observeEvent(input$go_extracting_tree, {
     ')
 })
 
-shinyDirChoose(input, "analysisDir", roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"))
+shinyDirChoose(input, "analysisDir", roots=c(computer="/"))
 observeEvent(input$analysisDir, {
     output$selectedAnalysisDir <- renderText({
         if( !is.null(input$analysisDir) ){
-             parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+             parseDirPath(roots=c(computer="/"), input$analysisDir)
         }
     })
 })
 
 observe({
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$analysisDir)
     if( length(analysisDir) > 0 ){
         dirName <- basename(analysisDir)
         output$selectedWhaleDirName <- renderUI({
@@ -142,7 +142,7 @@ observe({
 })
 
 observe({
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$analysisDir)
     if( length(analysisDir) > 0 ){
         wgdNum <- toupper(as.english(length(input$wgdInput)))
         if( length(input$wgdInput) > 0 ){
@@ -314,7 +314,7 @@ output$wgdNeededTestedID <- renderText({
 
 
 observeEvent(input$whale_configure_go, {
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$analysisDir)
     whale_dir <- paste0(analysisDir, "/OrthoFinder_wd/Whale_wd")
     if( !dir.exists(whale_dir) ){
         dir.create(whale_dir)
@@ -527,7 +527,7 @@ observeEvent(input$whale_configure_go, {
 })
 
 observeEvent(input$go_whale_codes, {
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data/"), input$analysisDir)
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$analysisDir)
     whale_dir <- paste0(analysisDir, "/OrthoFinder_wd/Whale_wd")
     alePreparingCommadFile <- paste0(whale_dir, "/run_ale_preparing.sh")
 
