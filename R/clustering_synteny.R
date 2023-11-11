@@ -301,10 +301,10 @@ cluster_synteny <- function(
     #     requireNamespace("ape", quietly=TRUE)
     #     #library(ape)
     # )
-    newick_tree_bycol <- as.phylo(cluster_info[['bycol']])
+    newick_tree_bycol <- ape::as.phylo(cluster_info[['bycol']])
     write.tree(newick_tree_bycol, file=newick_bycol_file)
 
-    newick_tree_byrow <- as.phylo(cluster_info[['byrow']])
+    newick_tree_byrow <- ape::as.phylo(cluster_info[['byrow']])
     write.tree(newick_tree_byrow, file=newick_byrow_file)
 
     save(cluster_info, file=out_file)

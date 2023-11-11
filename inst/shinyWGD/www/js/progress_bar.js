@@ -38,13 +38,48 @@ Shiny.addCustomMessageHandler("UpdateProgressBar", function (message) {
     var progressText = $("#" + containerId).find(".progress-text");
     var programType = message.type;
 
-    var width = message.width; 
+    var width = message.width;
 
     progressBar.css("width", width + "%");
     progressBar.attr("aria-valuenow", width);
 
     if (width >= 100) {
         progressBar.removeClass("active");
-        progressText.text("Create " +  programType + " codes complete").css("color", "#fff");
+        progressText.text(programType + " complete").css("color", "#fff");
     }
 });
+
+
+Shiny.addCustomMessageHandler("Progress_Bar_Update", showPopup);
+function showPopup() {
+    var modal = $("<div>")
+        .addClass("modal")
+        .appendTo("body");
+
+    modal.css("position", "fixed")
+        .css("z-index", "1")
+        .css("left", "0")
+        .css("top", "0")
+        .css("width", "100%")
+        .css("height", "100%")
+        .css("background-color", "rgba(0, 0, 0, 0.7)")
+        .css("text-align", "center");
+
+    var modalContent = $("<div>")
+        .addClass("modal-content")
+        .appendTo(modal);
+
+    modalContent.css("position", "absolute")
+        .css("top", "50%")
+        .css("left", "50%")
+        .css("transform", "translate(-50%, -50%)")
+        .css("padding", "20px");
+
+    modalContent.append(createProgressBar());
+
+    modal.css("display", "block");
+
+    setTimeout(function () {
+        modal.css("display", "none");
+    }, 5000000);
+}

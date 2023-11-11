@@ -8,7 +8,7 @@ Synteny_Analysis_ui <- tabPanel(
             h3(icon(
                 name=NULL,
                 style="
-                    background: url('../images/syntenyIcon.svg');
+                    background: url('images/syntenyIcon.svg');
                     background-size: contain;
                     background-position: center;
                     background-repeat: no-repeat;
@@ -30,7 +30,7 @@ Synteny_Analysis_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("Upload <font color='green'><br><b>i-ADHoRe</b></font><br>Output Folder")),
+                h5(HTML("Upload <font color='green'><b><i>shinyWGD</i></b></font> Output Folder")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 5px;
@@ -42,18 +42,22 @@ Synteny_Analysis_ui <- tabPanel(
                 ),
                 fluidRow(
                     class="justify-content-left",
-                    style="padding-bottom: 5px;
+                    style="padding-bottom: 15px;
                            padding-top: 5px",
                     column(
                         12,
                         shinyDirButton("iadhoredir", "Select a Folder", "Upload"),
+                    ),
+                    column(
+                        12,
+                        uiOutput("selectedSyntenyDirName")
                     )
                 )
             ),
             fluidRow(
                 column(
                     12,
-                    uiOutput("iadhoreanalysisPanel")
+                    uiOutput("iadhoreAnalysisPanel")
                 )
             )
         ),
@@ -65,10 +69,10 @@ Synteny_Analysis_ui <- tabPanel(
                     12,
                     uiOutput("iadhore_output"),
                 ),
-                column(
-                    12,
-                    uiOutput("iadhore_multiple_species_output")
-                )
+                # column(
+                #     12,
+                #     uiOutput("iadhore_multiple_species_output")
+                # )
             )
         )
     ),
@@ -76,7 +80,7 @@ Synteny_Analysis_ui <- tabPanel(
     icon=icon(
         name=NULL,
         style="
-            background: url('../images/syntenyIcon.svg');
+            background: url('images/syntenyIcon.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;

@@ -1,25 +1,49 @@
-suppressPackageStartupMessages(
+suppressPackageStartupMessages({
     library(shiny)
-)
-suppressPackageStartupMessages(library(shinyjs))
-library(shinyFiles)
-library(bslib)
-library(shinyBS)
-suppressPackageStartupMessages(library(bsplus))
-suppressPackageStartupMessages(library(htmltools))
-library(shinyWidgets)
-library(shinyalert)
-library(stringi)
-library(tidyverse)
-library(vroom)
-library(fs)
-library(english)
-library(data.table)
-library(argparse)
-library(dplyr)
-library(tools)
-library(seqinr)
-library(DT)
+    library(shinyjs)
+    library(shinyFiles)
+    library(bslib)
+    library(shinyBS)
+    library(bsplus)
+    library(htmltools)
+    library(igraph)
+    library(shinyWidgets)
+    library(shinyalert)
+    library(stringi)
+    library(tidyverse)
+    library(vroom)
+    library(fs)
+    library(english)
+    library(data.table)
+    library(argparse)
+    library(dplyr)
+    library(tools)
+    library(seqinr)
+    library(DT)
+    library(ape)
+})
+
+
+# suppressPackageStartupMessages(library(shinyjs))
+# library(shinyFiles)
+# library(bslib)
+# library(shinyBS)
+# suppressPackageStartupMessages(library(bsplus))
+# suppressPackageStartupMessages(library(htmltools))
+# suppressPackageStartupMessages(library(igraph))
+# library(shinyWidgets)
+# library(shinyalert)
+# library(stringi)
+# library(tidyverse)
+# library(vroom)
+# library(fs)
+# library(english)
+# library(data.table)
+# library(argparse)
+# library(dplyr)
+# library(tools)
+# library(seqinr)
+# library(DT)
 
 ## clean r session and temporary folder first
 rm(list=ls())
@@ -55,6 +79,7 @@ ui <- tagList(
     includeScript("https://unpkg.com/@popperjs/core@2"),
     includeScript("www/js/tippy-bundle.umd.v6.3.7.min.js"),
     includeScript("www/js/progress_bar.js"),
+    includeScript("https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"),
     shinyjs::useShinyjs(),
     tags$head(
         tags$link(

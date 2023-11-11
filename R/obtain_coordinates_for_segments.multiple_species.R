@@ -63,17 +63,23 @@ obtain_coordinates_for_segments_multiple <- function(
     final_df <- data.frame()
     for( i in multiplicon_list ){
         df_subset <- merged_data[merged_data$multiplicon==i, ]
-        df_row1 <- df_subset[1, ]
-        for( y in 2:nrow(df_subset) ){
-            df_row2 <- df_subset[y, ]
-            new_row <- c(df_row1, df_row2)
-            final_df <- rbind(final_df, new_row)
+        for( x in 1:nrow(df_subset) ){
+            df_row1 <- df_subset[x, ]
+            for( y in 1:nrow(df_subset) ){
+                if( y > x ){
+                    df_row2 <- df_subset[y, ]
+                    new_row <- c(df_row1, df_row2)
+                    final_df <- rbind(final_df, new_row)
+                }
+            }
         }
     }
-    final_output <- select(final_df, multiplicon, genome, list, first, last, start, end, order,
-                           genome.1, list.1, first.1, last.1, start.1, end.1, order.1)
-    colnames(final_output) <- c("multiplicon", "genomeX", "listX", "firstX", "lastX", "startX", "endX", "orderX",
-                                "genomeY", "listY", "firstY", "lastY", "startY", "endY", "orderY")
+    final_output <- select(final_df, multiplicon,
+                           genome, list, first, last, start, end, min, max, order,
+                           genome.1, list.1, first.1, last.1, start.1, end.1, min.1, max.1, order.1)
+    colnames(final_output) <- c("multiplicon", "genomeX",
+                                "listX", "firstX", "lastX", "startX", "endX", "coordStartX", "coordEndX", "orderX",
+                                "genomeY", "listY", "firstY", "lastY", "startY", "endY", "coordStartY", "coordEndY", "orderY")
     rownames(final_output) <- NULL
     final_output1 <- subset(final_output, genomeX != genomeY)
     write.table(

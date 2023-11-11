@@ -1,237 +1,326 @@
 shinyDirChoose(input, "iadhoredir", roots=c(computer="/"))
-observeEvent(input$iadhoredir, {
-    output$selectediadhoreDir <- renderText({
-        if( !is.null(input$iadhoredir) ){
-            parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        }
-    })
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    iadhorefiles <- list.files(path=dirPath, pattern="multiplicons.txt", full.names=TRUE, recursive=TRUE)
-    multipleSpeciesIadhoreFile <- iadhorefiles[grepl("Multiple_Species", iadhorefiles)]
-    iadhorefiles <- iadhorefiles[!(grepl("paralog_distributions", iadhorefiles))]
-    iadhorefiles <- iadhorefiles[!(grepl("Multiple_Species", iadhorefiles))]
-    if( length(dirPath) > 0 ){
-        if( length(iadhorefiles) == 0 ){
-            shinyalert(
-                "Oops!",
-                "No i-ADHoRe output file found. Please provide the correct path...",
-                type="error",
-            )
-        }
-    }
-    output$iadhoreanalysisPanel <- renderUI({
-        div(class="boxLike",
-            style="background-color: #FBFEEC;
-                       padding-bottom: 10px;
-                       padding-top: 10px",
-            fluidRow(
+observe({
+    analysisDir <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(analysisDir) > 0 ){
+        dirName <- basename(analysisDir)
+        output$selectedSyntenyDirName <- renderUI({
+            column(
+                12,
                 div(
-                    style="padding-right: 10px;
-                           padding-left: 10px;",
-                    h5(icon("cog"), HTML("<font color='#bb5e00'><b>Synteny Analysis<b></font>")),
-                    column(
-                        12,
-                        uiOutput("iadhoresettingPanel")
-                    ),
-                    hr(class="setting"),
-                    h5(icon("cog"), HTML("<font color='#bb5e00'><b>Clustering Analysis<b></font>")),
-                    column(
-                        12,
-                        uiOutput("clusteringSettingPanel")
-                    ),
-                    hr(class="setting"),
-                    column(
-                        12,
-                        actionButton(
-                            inputId="iadhore_config_go",
-                            "Configure Analysis",
-                            width="200px",
-                            icon=icon("cog"),
-                            status="secondary",
-                            style="color: #fff;
-                                   background-color: #27ae60;
-                                   border-color: #fff;
-                                   padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;
-                                   animation: glowing 5300ms infinite;"
+                    style="background-color: #FAF0E6;
+                           margin-top: 5px;
+                           padding: 10px 10px 1px 10px;
+                           border-radius: 10px;
+                           text-align: center;",
+                    HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+                )
+            )
+        })
+    }
+})
+
+observe({
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        iadhorefiles <- list.files(path=dirPath, pattern="multiplicons.txt", full.names=TRUE, recursive=TRUE)
+        multipleSpeciesIadhoreFile <- iadhorefiles[grepl("Multiple_Species", iadhorefiles)]
+        iadhorefiles <- iadhorefiles[!(grepl("paralog_distributions", iadhorefiles))]
+        iadhorefiles <- iadhorefiles[!(grepl("Multiple_Species", iadhorefiles))]
+
+        if( length(iadhorefiles) > 0 ){
+            split_paths <- strsplit(iadhorefiles, split="/")
+            comparing_list <- lapply(split_paths, function(x){
+                x[length(x)-1]
+            })
+            comparing_list <- gsub("i-adhore.", "", comparing_list)
+            intra_list <- list()
+            inter_list <- list()
+            lapply(seq_along(comparing_list), function(i){
+                sp_list_tmp <- unique(strsplit(comparing_list[i], split="_vs_")[[1]])
+                if( length(sp_list_tmp) == 1 ){
+                    intra_list <<- append(intra_list, sp_list_tmp[1])
+                }else{
+                    inter_list <<- append(inter_list, comparing_list[i])
+                }
+            })
+
+            inter_list <- unlist(inter_list)
+            intra_list <- unlist(intra_list)
+
+            path_df <- data.frame(
+                comparing_ID=character(),
+                comparing_Type=character(),
+                comparing_Path=character()
+            )
+            for( i in intra_list ){
+                tmp_path_i <- iadhorefiles[grepl(paste0(i, "_vs_", i), iadhorefiles)]
+                path_df <- rbind(
+                    path_df,
+                    data.frame(
+                        comparing_ID=i,
+                        comparing_Type="Intra",
+                        comparing_Path=tmp_path_i
+                    )
+                )
+            }
+            for( i in inter_list ){
+                tmp_path_i <- iadhorefiles[grepl(i, iadhorefiles)]
+                path_df <- rbind(
+                    path_df,
+                    data.frame(
+                        comparing_ID=i,
+                        comparing_Type="Inter",
+                        comparing_Path=tmp_path_i
+                    )
+                )
+            }
+
+            output$iadhoreAnalysisPanel <- renderUI({
+                div(class="boxLike",
+                    style="background-color: #FBFEEC;
+                               padding-bottom: 10px;
+                               padding-top: 10px",
+                    fluidRow(
+                        div(
+                            style="padding-right: 5px;
+                                   padding-left: 5px;",
+                            h5(icon("cog"), HTML("<font color='#bb5e00'>Synteny Analysis</font>")),
+                            column(
+                                12,
+                                uiOutput("iadhoreSettingPanel")
+                            ),
+                            hr(class="setting"),
+                            h5(icon("cog"), HTML("<font color='#bb5e00'>Clustering Analysis</font>")),
+                            column(
+                                12,
+                                uiOutput("clusteringSettingPanel")
+                            ),
+                            # column(
+                            #     12,
+                            #     hr(class="setting"),
+                            #     actionButton(
+                            #         inputId="iadhore_config_go",
+                            #         "Configure Analysis",
+                            #         width="200px",
+                            #         icon=icon("cog"),
+                            #         status="secondary",
+                            #         style="color: #fff;
+                            #                background-color: #27ae60;
+                            #                border-color: #fff;
+                            #                padding: 5px 14px 5px 14px;
+                            #                margin: 5px 5px 5px 5px;
+                            #                animation: glowing 5300ms infinite;"
+                            #     )
+                            # )
                         )
                     )
                 )
-            )
-        )
-    })
+            })
 
-    split_paths <- strsplit(iadhorefiles, split="/")
-    comparing_list <- lapply(split_paths, function(x){
-        x[length(x)-1]
-    })
-    comparing_list <- gsub("i-adhore.", "", comparing_list)
-    intra_list <- list()
-    inter_list <- list()
-    lapply(seq_along(comparing_list), function(i){
-        sp_list_tmp <- unique(strsplit(comparing_list[i], split="_vs_")[[1]])
-        if( length(sp_list_tmp) == 1 ){
-            intra_list <<- append(intra_list, sp_list_tmp[1])
-        }else{
-            inter_list <<- append(inter_list, comparing_list[i])
-        }
-    })
+            # Add multiple species to the path_df
+            if( length(multipleSpeciesIadhoreFile) > 0 ){
+                path_df <- rbind(
+                    path_df,
+                    data.frame(
+                        comparing_ID="Multiple",
+                        comparing_Type="Multiple",
+                        comparing_Path=multipleSpeciesIadhoreFile[1]
+                    )
+                )
+            }
 
-    inter_list <- unlist(inter_list)
-    intra_list <- unlist(intra_list)
+            if( is.not.null(intra_list) && is.not.null(inter_list) ){
+                output$iadhoreSettingPanel <- renderUI({
+                    output <- tagList(
+                        fluidRow(
+                            # style="padding-right: 5px;
+                            #        padding-left: 5px;",
+                            column(
+                                width=12,
+                                div(
+                                    style="padding-bottom: 10px;",
+                                    bsButton(
+                                        inputId="iadhore_intra_species_list_button",
+                                        label=HTML("<font color='white'><b>&nbsp;Intra-species comparing: &nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                        icon=icon("list"),
+                                        style="success"
+                                    ) %>%
+                                        bs_embed_tooltip(
+                                            title="Click to choose species",
+                                            placement="right",
+                                            trigger="hover",
+                                            options=list(container="body")
+                                        ) %>%
+                                        bs_attach_collapse("iadhore_intra_species_list_collapse"),
+                                    bs_collapse(
+                                        id="iadhore_intra_species_list_collapse",
+                                        content=tags$div(
+                                            class="well",
+                                            pickerInput(
+                                                inputId="iadhore_intra_species_list",
+                                                label=HTML("<b><font color='#38B0E4'>Species:</font></b>"),
+                                                options=list(title='Please select species below'),
+                                                choices=intra_list,
+                                                choicesOpt=list(
+                                                    content=lapply(intra_list, function(choice) {
+                                                        species <- gsub("_", " ", choice)
+                                                        HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                                    })
+                                                ),
+                                                multiple=FALSE
 
-    path_df <- data.frame(
-        comparing_ID=character(),
-        comparing_Type=character(),
-        comparing_Path=character()
-    )
-    for( i in intra_list ){
-        tmp_path_i <- iadhorefiles[grepl(paste0(i, "_vs_", i), iadhorefiles)]
-        path_df <- rbind(
-            path_df,
-            data.frame(
-                comparing_ID=i,
-                comparing_Type="Intra",
-                comparing_Path=tmp_path_i
-            )
-        )
-    }
-    for( i in inter_list ){
-        tmp_path_i <- iadhorefiles[grepl(i, iadhorefiles)]
-        path_df <- rbind(
-            path_df,
-            data.frame(
-                comparing_ID=i,
-                comparing_Type="Inter",
-                comparing_Path=tmp_path_i
-            )
-        )
-    }
-    # Add multiple species to the path_df
-    if( length(multipleSpeciesIadhoreFile) > 0 ){
-        path_df <- rbind(
-            path_df,
-            data.frame(
-                comparing_ID="Multiple",
-                comparing_Type="Multiple",
-                comparing_Path=multipleSpeciesIadhoreFile[1]
-            )
-        )
-    }
-    if( is.not.null(intra_list) && is.not.null(inter_list) ){
-        output$iadhoresettingPanel <- renderUI({
-            output <- tagList(
-                fluidRow(
-                    style="padding-right: 10px;
-                           padding-left: 10px;",
-                    column(
-                        width=12,
-                        div(
-                            style="padding-bottom: 10px;",
-                            bsButton(
-                                inputId="iadhore_intra_species_list_button",
-                                label=HTML("<font color='#DCFEE3'><b>&nbsp;Intra-comparing: &nbsp;&#x25BC;</b></font>"),
-                                icon=icon("list"),
-                                style="info"
-                            ) %>%
-                                bs_embed_tooltip(
-                                    title="Click to choose species",
-                                    placement="right",
-                                    trigger="hover",
-                                    options=list(container="body")
-                                ) %>%
-                                bs_attach_collapse("iadhore_intra_species_list_collapse"),
-                            bs_collapse(
-                                id="iadhore_intra_species_list_collapse",
-                                content=tags$div(
-                                    class="well",
-                                    pickerInput(
-                                        inputId="iadhore_intra_species_list",
-                                        label=HTML("<b><font color='#38B0E4'>Species:</font></b>"),
-                                        options=list(
-                                            title='Please select species below'
-                                        ),
-                                        choices=intra_list,
-                                        choicesOpt=list(
-                                            content=lapply(intra_list, function(choice) {
-                                                species <- gsub("_", " ", choice)
-                                                HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                            })
-                                        ),
-                                        multiple=FALSE
+                                            ),
+                                            div(
+                                                class="d-flex justify-content-end",
+                                                actionButton(
+                                                    inputId="confirm_intra_comparing_go",
+                                                    "Confirm analysis",
+                                                    status="secondary",
+                                                    style="color: #fff; background-color: #C0C0C0; border-color: #fff; margin: 22px 0px 0px 0px; "
+                                                )
+                                            )
+                                        )
                                     )
                                 )
-                            )
-                        )
-                    ),
-                    column(
-                        width=12,
-                        div(
-                            style="padding-bottom: 10px;",
-                            bsButton(
-                                inputId="iadhore_inter_species_list_button",
-                                label=HTML("<font color='#FFD374'><b>&nbsp;Inter-comparing:&nbsp;&#x25BC;</b></font>"),
-                                icon=icon("list"),
-                                style="info"
-                            ) %>%
-                                bs_embed_tooltip(
-                                    title="Click to choose species",
-                                    placement="right",
-                                    trigger="hover",
-                                    options=list(container="body")
-                                ) %>%
-                                bs_attach_collapse("ortholog_ks_files_collapse"),
-                            bs_collapse(
-                                id="ortholog_ks_files_collapse",
-                                content=tags$div(
-                                    class="well",
-                                    pickerInput(
-                                        inputId="inter_list_A",
-                                        label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
-                                        options=list(
-                                            title='Please select species below'
-                                        ),
-                                        choices=intra_list,
-                                        choicesOpt=list(
-                                            content=lapply(intra_list, function(choice) {
-                                                species <- gsub("_", " ", choice)
-                                                HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                            })
-                                        ),
-                                        multiple=FALSE
-                                    ),
-                                    pickerInput(
-                                        inputId="inter_list_B",
-                                        label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
-                                        options=list(
-                                            title='Please select species below',
-                                            `selected-text-format`="count > 1",
-                                            `actions-box`=TRUE
-                                        ),
-                                        choices=intra_list,
-                                        choicesOpt=list(
-                                            content=lapply(intra_list, function(choice) {
-                                                species <- gsub("_", " ", choice)
-                                                HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                                            })
-                                        ),
-                                        multiple=FALSE
+                            ),
+                            column(
+                                width=12,
+                                div(
+                                    style="padding-bottom: 10px;",
+                                    bsButton(
+                                        inputId="iadhore_inter_species_list_button",
+                                        label=HTML("<font color='white'><b>&nbsp;Inter-species comparing:&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                        icon=icon("list"),
+                                        style="success"
+                                    ) %>%
+                                        bs_embed_tooltip(
+                                            title="Click to choose species",
+                                            placement="right",
+                                            trigger="hover",
+                                            options=list(container="body")
+                                        ) %>%
+                                        bs_attach_collapse("iadhore_inter_species_list_collapse"),
+                                    bs_collapse(
+                                        id="iadhore_inter_species_list_collapse",
+                                        content=tags$div(
+                                            class="well",
+                                            pickerInput(
+                                                inputId="inter_list_A",
+                                                label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
+                                                options=list(
+                                                    title='Please select species below'
+                                                ),
+                                                choices=intra_list,
+                                                choicesOpt=list(
+                                                    content=lapply(intra_list, function(choice) {
+                                                        species <- gsub("_", " ", choice)
+                                                        HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                                    })
+                                                ),
+                                                multiple=FALSE
+                                            ),
+                                            pickerInput(
+                                                inputId="inter_list_B",
+                                                label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
+                                                options=list(
+                                                    title='Please select species below',
+                                                    `selected-text-format`="count > 1",
+                                                    `actions-box`=TRUE
+                                                ),
+                                                choices=intra_list,
+                                                choicesOpt=list(
+                                                    content=lapply(intra_list, function(choice) {
+                                                        species <- gsub("_", " ", choice)
+                                                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                                                    })
+                                                ),
+                                                multiple=FALSE
+                                            ),
+                                            div(
+                                                class="d-flex justify-content-end",
+                                                actionButton(
+                                                    inputId="confirm_inter_comparing_go",
+                                                    "Confirm analysis",
+                                                    status="secondary",
+                                                    style="color: #fff;
+                                                           background-color: #C0C0C0;
+                                                           border-color: #fff;
+                                                           margin: 22px 0px 0px 0px; "
+                                                )
+                                            )
+                                        )
                                     )
                                 )
-                            )
+                            ),
+                            if( length(multipleSpeciesIadhoreFile) > 0 ){
+                                column(
+                                    width=12,
+                                    div(
+                                        style="padding-bottom: 10px;",
+                                        bsButton(
+                                            inputId="iadhore_multiple_species_list_button",
+                                            label=HTML("<font color='white'><b>&nbsp;Multiple species comparing: &nbsp;&#x25BC;</b></font>"),
+                                            icon=icon("list"),
+                                            style="success",
+                                            #size="small"
+                                        ) %>%
+                                            bs_embed_tooltip(
+                                                title="Click to choose species",
+                                                placement="right",
+                                                trigger="hover",
+                                                options=list(container="body")
+                                            ) %>%
+                                            bs_attach_collapse("iadhore_multiple_species_list_collapse"),
+                                        bs_collapse(
+                                            id="iadhore_multiple_species_list_collapse",
+                                            content=tags$div(
+                                                class="well",
+                                                style="background-color: #F5FFE8;",
+                                                prettyCheckboxGroup(
+                                                    inputId="iadhore_multiple_species_list",
+                                                    label=HTML("Choose <b><i><font color='#E46A1B'>at least Three</font></b></i> Species:"),
+                                                    choiceValues=intra_list,
+                                                    choiceNames=lapply(intra_list, function(choice) {
+                                                        HTML(paste0("<div style='color: #727EFA; font-style: italic;'>", gsub("_", " ", choice), "</div>"))
+                                                    }),
+                                                    icon=icon("check"),
+                                                    shape="round",
+                                                    status="success",
+                                                    fill=TRUE,
+                                                    animation="jelly"
+                                                ),
+                                                div(
+                                                    class="d-flex justify-content-end",
+                                                    actionButton(
+                                                        inputId="confirm_multi_comparing_go",
+                                                        "Confirm analysis",
+                                                        status="secondary",
+                                                        style="color: #fff;
+                                                           background-color: #C0C0C0;
+                                                           border-color: #fff;
+                                                           margin: 22px 0px 0px 0px; "
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            }
                         )
-                    ),
-                    if( length(multipleSpeciesIadhoreFile) > 0 ){
+                    )
+                })
+                output$clusteringSettingPanel <- renderUI({
+                    fluidRow(
+                        #style="padding-right: 10px; padding-left: 10px",
                         column(
                             width=12,
                             div(
                                 style="padding-bottom: 10px;",
                                 bsButton(
-                                    inputId="iadhore_multiple_species_list_button",
-                                    label=HTML("<font color='white'><b>&nbsp;Multiple Species comparing: &nbsp;&#x25BC;</b></font>"),
+                                    inputId="clustering_button",
+                                    label=HTML("<font color='white'><b>&nbsp;Clustering analysis setting:&nbsp;&#x25BC;&nbsp;&nbsp;</b></font>"),
                                     icon=icon("list"),
-                                    style="warning",
-                                    size="small"
+                                    style="success"
                                 ) %>%
                                     bs_embed_tooltip(
                                         title="Click to choose species",
@@ -239,356 +328,286 @@ observeEvent(input$iadhoredir, {
                                         trigger="hover",
                                         options=list(container="body")
                                     ) %>%
-                                    bs_attach_collapse("iadhore_multiple_species_list_collapse"),
+                                    bs_attach_collapse("clustering_files_collapse"),
                                 bs_collapse(
-                                    id="iadhore_multiple_species_list_collapse",
+                                    id="clustering_files_collapse",
                                     content=tags$div(
                                         class="well",
-                                        style="background-color: #F5FFE8;",
-                                        prettyCheckboxGroup(
-                                            inputId="iadhore_multiple_species_list",
-                                            label=HTML("Choose <b><i><font color='#E46A1B'>at least Three</font></b></i> Species:"),
-                                            choiceValues=intra_list,
-                                            choiceNames=lapply(intra_list, function(choice) {
-                                                HTML(paste0("<div style='color: #727EFA; font-style: italic;'>", gsub("_", " ", choice), "</div>"))
-                                            }),
-                                            icon=icon("check"),
-                                            shape="round",
-                                            status="success",
-                                            fill=TRUE,
-                                            animation="jelly"
+                                        pickerInput(
+                                            inputId="cluster_species_A",
+                                            label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
+                                            options=list(
+                                                title='Please select species below'
+                                            ),
+                                            choices=intra_list,
+                                            choicesOpt=list(
+                                                content=lapply(intra_list, function(choice) {
+                                                    species <- gsub("_", " ", choice)
+                                                    HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                                })
+                                            ),
+                                            multiple=FALSE
+                                        ),
+                                        pickerInput(
+                                            inputId="cluster_species_B",
+                                            label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
+                                            options=list(
+                                                title='Please select species below',
+                                                `selected-text-format`="count > 1",
+                                                `actions-box`=TRUE
+                                            ),
+                                            choices=intra_list,
+                                            choicesOpt=list(
+                                                content=lapply(intra_list, function(choice) {
+                                                    species <- gsub("_", " ", choice)
+                                                    HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                                                })
+                                            ),
+                                            multiple=FALSE
+                                        ),
+                                        div(
+                                            class="d-flex justify-content-end",
+                                            actionButton(
+                                                inputId="confirm_clustering_go",
+                                                "Confirm analysis",
+                                                status="secondary",
+                                                style="color: #fff;
+                                                       background-color: #C0C0C0;
+                                                       border-color: #fff;
+                                                       margin: 22px 0px 0px 0px; "
+                                            )
                                         )
                                     )
                                 )
                             )
                         )
-                    }
-                )
-            )
-        })
-        output$clusteringSettingPanel <- renderUI({
-            fluidRow(
-                style="padding-right: 10px; padding-left: 10px",
-                column(
-                    width=12,
-                    div(
-                        style="padding-bottom: 10px;",
-                        bsButton(
-                            inputId="clustering_button",
-                            label=HTML("<font color='#93F35F'><b>&nbsp;Setting:&nbsp;&#x25BC;</b></font>"),
-                            icon=icon("list"),
-                            style="info"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to choose species",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ) %>%
-                            bs_attach_collapse("clustering_files_collapse"),
-                        bs_collapse(
-                            id="clustering_files_collapse",
-                            content=tags$div(
-                                class="well",
-                                pickerInput(
-                                    inputId="cluster_species_A",
-                                    label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
-                                    options=list(
-                                        title='Please select species below'
-                                    ),
-                                    choices=intra_list,
-                                    choicesOpt=list(
-                                        content=lapply(intra_list, function(choice) {
-                                            species <- gsub("_", " ", choice)
-                                            HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                        })
-                                    ),
-                                    multiple=FALSE
-                                ),
-                                pickerInput(
-                                    inputId="cluster_species_B",
-                                    label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
-                                    options=list(
-                                        title='Please select species below',
-                                        `selected-text-format`="count > 1",
-                                        `actions-box`=TRUE
-                                    ),
-                                    choices=intra_list,
-                                    choicesOpt=list(
-                                        content=lapply(intra_list, function(choice) {
-                                            species <- gsub("_", " ", choice)
-                                            HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                                        })
-                                    ),
-                                    multiple=FALSE
-                                )
-                            )
-                        )
                     )
-                )
+                })
+            }
+            rds_file <- paste0(dirPath, "/synteny.comparing.RData")
+            if( !file.exists(rds_file) ){
+                if( nrow(path_df) > 0 ){
+                    save(path_df, file=rds_file)
+                }
+            }
+        }
+        else{
+            shinyalert(
+                "Oops!",
+                "No i-ADHoRe output file found. Please provide the correct path...",
+                type="error",
             )
-        })
+        }
     }
-    if( nrow(path_df) > 0 ){
-        save(path_df, file=paste0(dirPath, "/tmp.comparing.RData"))
-    }
-    observe({
-        if( isTruthy(input$inter_list_A) ){
-            list_A_species <- input$inter_list_A
-            remaining_species <- setdiff(intra_list, list_A_species)
-            updatePickerInput(
-                session,
-                "inter_list_B",
-                choices=remaining_species,
-                choicesOpt=list(
-                    content=lapply(remaining_species, function(choice) {
-                        species <- gsub("_", " ", choice)
-                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                    })
-                )
-            )
-            updatePickerInput(
-                session,
-                "iadhore_intra_species_list",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_B",
-                selected=character(0)
-            )
-            updatePrettyCheckboxGroup(
-                session,
-                "iadhore_multiple_species_list",
-                selected=character(0)
-            )
-        }
-        if( isTruthy(input$iadhore_intra_species_list) ){
-            updatePickerInput(
-                session,
-                "inter_list_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "inter_list_B",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_B",
-                selected=character(0)
-            )
-            updatePrettyCheckboxGroup(
-                session,
-                "iadhore_multiple_species_list",
-                selected=character(0)
-            )
-        }
-        if( isTruthy(input$cluster_species_A) ){
-            list_A_species <- input$cluster_species_A
-            remaining_species <- setdiff(intra_list, list_A_species)
-            updatePickerInput(
-                session,
-                "cluster_species_B",
-                choices=remaining_species,
-                choicesOpt=list(
-                    content=lapply(remaining_species, function(choice) {
-                        species <- gsub("_", " ", choice)
-                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                    })
-                )
-            )
-            updatePickerInput(
-                session,
-                "iadhore_intra_species_list",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "inter_list_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "inter_list_B",
-                selected=character(0)
-            )
-            updatePrettyCheckboxGroup(
-                session,
-                "iadhore_multiple_species_list",
-                selected=character(0)
-            )
-        }
-        if( isTruthy(input$iadhore_multiple_species_list) ){
-            updatePickerInput(
-                session,
-                "iadhore_intra_species_list",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "inter_list_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "inter_list_B",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_A",
-                selected=character(0)
-            )
-            updatePickerInput(
-                session,
-                "cluster_species_B",
-                selected=character(0)
-            )
-        }
-    })
 })
 
-observeEvent(input$iadhore_config_go, {
-    withProgress(message='Configuration in progress', value=0, {
-        Sys.sleep(.2)
-        incProgress(amount=.3, message="Configuring...")
-
-        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        load(paste0(dirPath, "/tmp.comparing.RData"))
-
-        color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
-                        "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
-        color_list_selected <- rep(color_list, length.out=nrow(path_df))
-
-        intra_list <- input$iadhore_intra_species_list
-        intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
-        inter_list_A <- input$inter_list_A
-        inter_list_B <- input$inter_list_B
-        inter_list_A_linked <- gsub(" ", "_", inter_list_A)
-        inter_list_B_linked <- gsub(" ", "_", inter_list_B)
-        inter_selected_df <- data.frame()
-        for( each in inter_list_B_linked ){
-            pattern1 <- paste0(inter_list_A_linked[1], "_vs_", each)
-            pattern2 <- paste0(each, "_vs_", inter_list_A_linked[1])
-            matched_df <- path_df[(path_df$comparing_ID %in% pattern1) | (path_df$comparing_ID %in% pattern2), ]
-            inter_selected_df <- rbind(inter_selected_df, matched_df)
+observe({
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        rds_file <- paste0(dirPath, "/synteny.comparing.RData")
+        if( file.exists(rds_file) ){
+            load(rds_file)
+            intra_list <- path_df[path_df$comparing_Type == "Intra", ]$comparing_ID
+            if( isTruthy(input$inter_list_A) ){
+                list_A_species <- input$inter_list_A
+                remaining_species <- setdiff(intra_list, list_A_species)
+                updatePickerInput(
+                    session,
+                    "inter_list_B",
+                    choices=remaining_species,
+                    choicesOpt=list(
+                        content=lapply(remaining_species, function(choice) {
+                            species <- gsub("_", " ", choice)
+                            HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                        })
+                    )
+                )
+            }
+            if( isTruthy(input$cluster_species_A) ){
+                list_A_species <- input$cluster_species_A
+                remaining_species <- setdiff(intra_list, list_A_species)
+                updatePickerInput(
+                    session,
+                    "cluster_species_B",
+                    choices=remaining_species,
+                    choicesOpt=list(
+                        content=lapply(remaining_species, function(choice) {
+                            species <- gsub("_", " ", choice)
+                            HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                        })
+                    )
+                )
+            }
         }
-        selected_df <- rbind(intra_selected_df, inter_selected_df)
-        if( nrow(selected_df) > 0 ){
+    }
+})
+
+observeEvent(input$iadhore_intra_species_list_button, {
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "block";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+})
+
+observeEvent(input$iadhore_inter_species_list_button, {
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "block";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+})
+
+observeEvent(input$iadhore_multiple_species_list_button, {
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "block";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+})
+
+observeEvent(input$clustering_button, {
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "block";')
+})
+
+observeEvent(input$confirm_intra_comparing_go, {
+    if( isTruthy(input$iadhore_intra_species_list) && input$iadhore_intra_species_list != "" ){
+        # shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
+        shinyjs::runjs("$('#confirm_intra_comparing_go').css('background-color', 'green');")
+        updateActionButton(
+            session,
+            "confirm_intra_comparing_go",
+            icon=icon("check")
+        )
+
+        setTimeoutFunction <- "setTimeout(function() {
+              $('#confirm_intra_comparing_go').css('background-color', '#C0C0C0');
+            }, 6000);"
+
+        shinyjs::runjs(setTimeoutFunction)
+
+        withProgress(message='Configuration in progress', value=0, {
+            Sys.sleep(.2)
+            incProgress(amount=.3, message="Configuring...")
+
+            dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+
+            color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
+                            "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
+            color_list_selected <- rep(color_list, length.out=nrow(path_df))
+
+            intra_list <- input$iadhore_intra_species_list
+            intra_species <- gsub("_", " ", input$iadhore_intra_species_list)
+
+            panelTitle <- paste0("<font color='#DCFEE3'><b><i>", intra_species, "</i></b></font>")
+            queryChrPanelTitle <- HTML(paste("Select <font color='#68AC57'><i><b>", intra_species, "</b></i></font> chromosomes:"))
+
             output$iadhore_output <- renderUI({
-                plot_output_list <- lapply(1:nrow(selected_df), function(x) {
-                    each_row <- selected_df[x, ]
-                    each_title <- strsplit(each_row$comparing_ID, split="_vs_")[[1]]
-                    each_title[1] <- gsub("_", " ", each_title[1])
-                    if( length(each_title) == 1 ){
-                        panelTitle <- paste0("<font color='#DCFEE3'><b>", x, ".&nbsp;<i>", each_title[1], "</i></b></font>")
-                        queryChrPanelTitle <- HTML(paste("<font color='#68AC57'>", icon("dna"), "</font>Select <font color='#68AC57'><i><b>", each_title[1], "</b></i></font> Chromosomes:"))
-                        button_style <- "info"
-                    }else{
-                        each_title[2] <- gsub("_", " ", each_title[2])
-                        panelTitle <- paste0("<font color='#FFD374'><b>", x,".&nbsp;<i>", each_title[1], "</i></font> versus <font color='#E1B8FF'><i>", each_title[2], "</i></b></font>")
-                        queryChrPanelTitle <- HTML(paste("<font color='#68AC57'>", icon("dna"), "</font>Select <font color='#68AC57'><i><b>", each_title[1], "</b></i></font> Chromosomes:"))
-                        subjectChrPanelTitle <- HTML(paste("<font color='#8E549E'>", icon("dna"), "</font>Select <font color='#8E549E'><i><b>", each_title[2], "</b></i></font> Chromosomes:"))
-                        button_style <- "success"
-                    }
-                    div(
-                        class="boxLike",
-                        style="padding-right: 50px;
+                div(
+                    class="boxLike",
+                    style="padding-right: 50px;
                                padding-left: 50px;
                                padding-top: 10px;
                                padding-bottom: 10px;
                                background-color: white",
-                        fluidRow(
-                            column(
-                                width=12,
-                                div(
-                                    style="padding-bottom: 10px;",
-                                    bsButton(
-                                        inputId=paste0("plot_button_", x),
-                                        label=HTML(panelTitle),
-                                        style=button_style
+                    fluidRow(
+                        column(
+                            width=12,
+                            div(
+                                style="padding-bottom: 10px;",
+                                bsButton(
+                                    inputId="plot_intra_button",
+                                    label=HTML(panelTitle),
+                                    style="info"
+                                ) %>%
+                                    bs_embed_tooltip(
+                                        title="Click to see more details",
+                                        placement="right",
+                                        trigger="hover",
+                                        options=list(container="body")
                                     ) %>%
-                                        bs_embed_tooltip(
-                                            title="Click to see more details",
-                                            placement="right",
-                                            trigger="hover",
-                                            options=list(container="body")
-                                        ) %>%
-                                        bs_attach_collapse(
-                                            paste0("plot_panel_collapse_", x)
-                                        ),
-                                    bs_collapse(
-                                        id=paste0("plot_panel_collapse_", x),
-                                        show=TRUE,
-                                        content=tags$div(
-                                            class="well",
-                                            fluidRow(
-                                                div(
-                                                    style=paste0(
-                                                        "background-color: ",
-                                                        color_list_selected[x],
-                                                        "; padding-right: 50px;
-                                                             padding-left: 50px;
-                                                             padding-top: 10px;
-                                                             padding-bottom: 10px;"
+                                    bs_attach_collapse("plot_panel_collapse_intra"),
+                                bs_collapse(
+                                    id="plot_panel_collapse_intra",
+                                    show=TRUE,
+                                    content=tags$div(
+                                        class="well",
+                                        fluidRow(
+                                            div(
+                                                style="padding-right: 30px;
+                                                      padding-left: 30px;
+                                                      padding-top: 10px;
+                                                      padding-bottom: 10px;",
+                                                fluidRow(
+                                                    column(
+                                                        2,
+                                                        h5(HTML(paste0("<font color='orange'>", icon("dna"), "&nbsp;Chromosome</font> setting")))
                                                     ),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h5(HTML("<font color='#FFA500'><b>Chromosome-level Synteny</b></font><br>"))
-                                                        ),
-                                                        column(
-                                                            6,
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="padding: 12px 10px 5px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
+                                                            sliderInput(
+                                                                inputId="chr_num_cutoff",
+                                                                label=HTML("Set the <font color='orange'>mininum gene number</font> in the chromosome:"),
+                                                                min=0,
+                                                                max=500,
+                                                                step=50,
+                                                                value=100
+                                                            ),
+                                                        )
+                                                    ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="padding: 12px 10px 20px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
                                                             pickerInput(
-                                                                inputId=paste0("synteny_query_chr_", x),
+                                                                inputId="synteny_query_chr_intra",
                                                                 label=queryChrPanelTitle,
                                                                 options=list(
                                                                     title='Please select chromosomes below',
-                                                                    `selected-text-format`="count > 2",
+                                                                    `selected-text-format`="count > 1",
                                                                     `actions-box`=TRUE
                                                                 ),
                                                                 choices=NULL,
                                                                 selected=NULL,
                                                                 multiple=TRUE
                                                             )
-                                                        ),
-                                                        column(
-                                                            6,
-                                                            if( length(each_title) == 2 ){
-                                                                uiOutput(paste0("subjectChrPanel_", x))
-                                                            }
                                                         )
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        2,
+                                                        h5(HTML("<font color='orange'>Anchor points</font> setting:"))
                                                     ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            4,
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="padding: 12px 10px 5px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #FFF5EE;",
                                                             sliderInput(
-                                                                inputId=paste0("anchoredPointsCutoff_", x),
-                                                                label=HTML("<font color='orange'>Set Anchored Points per Multiplicon:</font>"),
+                                                                inputId="anchoredPointsCutoff_intra",
+                                                                label=HTML("Set <font color='orange'>anchor points per multiplicon:</font>"),
                                                                 min=3,
                                                                 max=30,
                                                                 step=1,
                                                                 value=3
                                                             )
-                                                        ),
-                                                        column(
-                                                            6,
-                                                            tags$head(
-                                                                tags$style(HTML(
-                                                                    "@keyframes glowing {
+                                                        )
+                                                    ),
+                                                    column(
+                                                        4,
+                                                        tags$head(
+                                                            tags$style(HTML(
+                                                                "@keyframes glowing {
                                                                      0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
                                                                      50% { background-color: #64A600; box-shadow: 0 0 20px #43b0d1; }
                                                                      100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
@@ -598,49 +617,107 @@ observeEvent(input$iadhore_config_go, {
                                                                      50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
                                                                      100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
                                                                      }"
-                                                                ))
-                                                            ),
-                                                            actionButton(
-                                                                inputId=paste0("synplot_go_", x),
-                                                                "Draw Syntenty Plot",
-                                                                icon=icon("pencil-alt"),
-                                                                status="secondary",
-                                                                style="color: #fff;
-                                                                       background-color: #009393;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 10px 5px 10px;
-                                                                       margin: 50px 5px 5px 35px;
-                                                                       animation: glowing 5000ms infinite; "
-                                                            )
+                                                            ))
+                                                        ),
+                                                        actionButton(
+                                                            inputId="synplot_go_intra",
+                                                            "Draw Syntenty Plot",
+                                                            icon=icon("pencil-alt"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #009393;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 10px 5px 10px;
+                                                                   margin: 50px 5px 5px 35px;
+                                                                   animation: glowing 5000ms infinite; "
                                                         )
-                                                    ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h6(HTML("<b>The Dot Plot:</b>")),
-                                                            tags$style(
-                                                                HTML(".rotate-135 {
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h6(HTML("<b>The Dot Plot:</b>")),
+                                                        tags$style(
+                                                            HTML(".rotate-135 {
                                                                     transform: rotate(135deg);
                                                                 }"),
-                                                                HTML(".rotate-45{
+                                                            HTML(".rotate-45{
                                                                     transform: rotate(45deg);
                                                                 }")
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_add_dot_intra",
+                                                            "",
+                                                            icon("arrows-alt-v", class="rotate-45"),
+                                                            title="Expand spacing"
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_sub_dot_intra",
+                                                            "",
+                                                            icon("compress"),
+                                                            title="Compress spacing"
+                                                        ),
+                                                        downloadButton_custom(
+                                                            "download_dotView_intra",
+                                                            title="Download the Plot",
+                                                            status="secondary",
+                                                            icon=icon("download"),
+                                                            label=HTML(""),
+                                                            style="color: #fff;
+                                                                   background-color: #019858;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 14px 5px 14px;
+                                                                   margin: 5px 5px 5px 5px;
+                                                                   animation: glowingD 5000ms infinite;"
+                                                        )
+                                                    ),
+                                                    column(
+                                                        width=12,
+                                                        id="dotView_intra"
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h6(HTML("<b>The Parallel Link Plot:</b>"))
+                                                    ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="/*display: flex; align-items: center;*/
+                                                                   text-align: center;
+                                                                   margin-bottom: 10px;                                                   border-radius: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 10px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            actionButton(
+                                                                "svg_vertical_spacing_add_rainbow_intra",
+                                                                "",
+                                                                icon("arrows-alt-v"),
+                                                                title="Expand vertical spacing"
                                                             ),
                                                             actionButton(
-                                                                paste0("svg_spacing_add_dot_", x),
+                                                                "svg_vertical_spacing_sub_rainbow_intra",
                                                                 "",
-                                                                icon("arrows-alt-v", class="rotate-45"),
-                                                                title="Expand spacing"
+                                                                icon("compress", class="rotate-135"),
+                                                                title="Compress vertical spacing"
                                                             ),
                                                             actionButton(
-                                                                paste0("svg_spacing_sub_dot_", x),
+                                                                "svg_horizontal_spacing_add_rainbow_intra",
                                                                 "",
-                                                                icon("compress"),
-                                                                title="Compress spacing"
+                                                                icon("arrows-alt-h"),
+                                                                title="Expand horizontal spacing"
+                                                            ),
+                                                            actionButton(
+                                                                "svg_horizontal_spacing_sub_rainbow_intra",
+                                                                "",
+                                                                icon("compress", class="rotate-45"),
+                                                                title="Compress horizontal spacing"
                                                             ),
                                                             downloadButton_custom(
-                                                                paste0("Dot_download_", x),
+                                                                "download_SyntenicBlock_intra",
                                                                 title="Download the Plot",
                                                                 status="secondary",
                                                                 icon=icon("download"),
@@ -652,176 +729,92 @@ observeEvent(input$iadhore_config_go, {
                                                                    margin: 5px 5px 5px 5px;
                                                                    animation: glowingD 5000ms infinite;"
                                                             )
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id=paste0("dotView_", x)
-                                                        ),
-                                                    ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h6(HTML("<b>The Parallel Link Plot:</b>")),
-                                                            actionButton(
-                                                                paste0("svg_vertical_spacing_add_rainbow_", x),
-                                                                "",
-                                                                icon("arrows-alt-v"),
-                                                                title="Expand vertical spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_vertical_spacing_sub_rainbow_", x),
-                                                                "",
-                                                                icon("compress", class="rotate-135"),
-                                                                title="Compress vertical spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_horizontal_spacing_add_rainbow_", x),
-                                                                "",
-                                                                icon("arrows-alt-h"),
-                                                                title="Expand horizontal spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_horizontal_spacing_sub_rainbow_", x),
-                                                                "",
-                                                                icon("compress", class="rotate-45"),
-                                                                title="Compress horizontal spacing"
-                                                            ),
-                                                            downloadButton_custom(
-                                                                paste0("Synteny_download_", x),
-                                                                title="Download the Plot",
-                                                                status="secondary",
-                                                                icon=icon("download"),
-                                                                label=HTML(""),
-                                                                style="color: #fff;
-                                                                       background-color: #019858;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 14px 5px 14px;
-                                                                       margin: 5px 5px 5px 5px;
-                                                                       animation: glowingD 5000ms infinite;"
-                                                            )
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id=paste0("SyntenicBlock_", x)
                                                         )
                                                     ),
-                                                    hr(class="splitting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
-                                                        )
-                                                    ),
-                                                    fluidRow(
-                                                        column(
-                                                            5,
-                                                            textInput(
-                                                                inputId=paste0("gene_", x),
-                                                                label="Seach the Gene:",
-                                                                value="",
-                                                                width="100%",
-                                                                placeholder="Gene Id"
-                                                            )
-                                                        ),
-                                                        column(
-                                                            1,
-                                                            actionButton(
-                                                                inputId=paste0("searchButton_", x),
-                                                                "",
-                                                                width="40px",
-                                                                icon=icon("search"),
-                                                                status="secondary",
-                                                                style="color: #fff;
-                                                                       background-color: #8080C0;
-                                                                       border-color: #fff;
-                                                                       margin: 32px 0px 0px -15px; "
-                                                            )
-                                                        ),
-                                                        column(
-                                                            6,
-                                                            uiOutput(paste0("foundItemsMessage_", x))
-                                                        ),
-                                                    ),
-                                                    fluidRow(
-                                                        column(
-                                                            6,
-                                                            pickerInput(
-                                                                inputId=paste0("multiplicon_plot_", x),
-                                                                label=HTML("Choose <b>Multiplicon</b> to Plot"),
-                                                                options=list(
-                                                                    title='Please select multiplicon below',
-                                                                    `selected-text-format`="count > 2",
-                                                                    `actions-box`=TRUE
-                                                                ),
-                                                                choices=NULL,
-                                                                selected=NULL,
-                                                                multiple=TRUE
-                                                            )
-                                                        ),
-                                                        column(
-                                                            6,
-                                                            actionButton(
-                                                                inputId=paste0("plotMicro_", x),
-                                                                "Draw Plot",
-                                                                icon=icon("pencil-alt"),
-                                                                status="secondary",
-                                                                style="color: #fff;
-                                                                       background-color: #8080C0;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 14px 5px 14px;
-                                                                       margin: 35px 5px 5px 5px;
-                                                                       animation: glowing 5000ms infinite; "
+                                                    # column(
+                                                    #     4,
+                                                    #     div(
+                                                    #         style="/*margin-bottom: 10px;*/
+                                                    #                border-radius: 10px;
+                                                    #                padding: 5px 10px 0px 10px;
+                                                    #                background-color: #FFF5EE;",
+                                                    #         prettyRadioButtons(
+                                                    #             inputId="scale_data_intra",
+                                                    #             label=HTML("<font color='orange'>Data used</font>:"),
+                                                    #             choices=c("Anchor points", "Segments"),
+                                                    #             selected="Anchor points",
+                                                    #             icon=icon("check"),
+                                                    #             inline=TRUE,
+                                                    #             status="info",
+                                                    #             animation="jelly"
+                                                    #         )
+                                                    #     )
+                                                    # ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="margin-bottom: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 5px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            prettyRadioButtons(
+                                                                inputId="scale_link_intra",
+                                                                label=HTML("<font color='orange'>Scale in</font>:"),
+                                                                choices=c("Gene number", "True length"),
+                                                                selected="Gene number",
+                                                                icon=icon("check"),
+                                                                inline=TRUE,
+                                                                status="info",
+                                                                animation="jelly"
                                                             )
                                                         )
                                                     ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h6(HTML("<b>The Synteny Link Plot:</b>")),
-                                                            actionButton(
-                                                                paste0("svg_vertical_spacing_add_micro_", x),
-                                                                "",
-                                                                icon("arrows-alt-v"),
-                                                                title="Expand vertical spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_vertical_spacing_sub_micro_", x),
-                                                                "",
-                                                                icon("compress", class="rotate-135"),
-                                                                title="Compress vertical spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_horizontal_spacing_add_micro_", x),
-                                                                "",
-                                                                icon("arrows-alt-h"),
-                                                                title="Expand horizontal spacing"
-                                                            ),
-                                                            actionButton(
-                                                                paste0("svg_horizontal_spacing_sub_micro_", x),
-                                                                "",
-                                                                icon("compress", class="rotate-45"),
-                                                                title="Compress horizontal spacing"
-                                                            ),
-                                                            downloadButton_custom(
-                                                                paste0("microSyn_download_", x),
-                                                                title="Download the Plot",
-                                                                status="secondary",
-                                                                icon=icon("download"),
-                                                                label=HTML(""),
-                                                                style="color: #fff;
-                                                                       background-color: #019858;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 14px 5px 14px;
-                                                                       margin: 5px 5px 5px 5px;
-                                                                       animation: glowingD 5000ms infinite;"
-                                                            )
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id=paste0("microSyntenicBlock_", x)
+                                                    column(
+                                                        width=12,
+                                                        id="SyntenicBlock_intra"
+                                                    )
+                                                ),
+                                                hr(class="splitting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
+                                                    )
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        4,
+                                                        textInput(
+                                                            inputId="gene_intra",
+                                                            label="Seach the Gene:",
+                                                            value="",
+                                                            width="100%",
+                                                            placeholder="Gene Id"
                                                         )
+                                                    ),
+                                                    column(
+                                                        1,
+                                                        actionButton(
+                                                            inputId="searchButton_intra",
+                                                            "",
+                                                            width="40px",
+                                                            icon=icon("search"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #8080C0;
+                                                                   border-color: #fff;
+                                                                   margin: 30px 0px 0px -15px; "
+                                                        )
+                                                    ),
+                                                    column(
+                                                        7,
+                                                        uiOutput("foundItemsMessage_intra")
+                                                    ),
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        uiOutput("multiplicon_mirco_intra_plot")
                                                     )
                                                 )
                                             )
@@ -831,138 +824,1215 @@ observeEvent(input$iadhore_config_go, {
                             )
                         )
                     )
-                })
+                )
             })
 
-            # update the chromosome options for inter- / intra- comparing
-            incProgress(amount=.9, message="Updating Chromosomes Setting...")
-            lapply(1:nrow(selected_df), function(x){
-                each_row <- selected_df[x, ]
-                each_dir <- dirname(each_row$comparing_Path)
-                genesFile <- paste0(each_dir, "/genes.txt")
-                if( file.exists(genesFile) ){
-                    genes <- suppressMessages(
-                        vroom(
-                            genesFile,
-                            delim="\t",
-                            col_names=TRUE
+            incProgress(amount=1, message="Configuration Done")
+            Sys.sleep(.4)
+        })
+
+        observe({
+            if( length(dirPath) > 0 && !is.null(input$chr_num_cutoff) ){
+                intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+                intra_species_dir <- dirname(intra_selected_df$comparing_Path)
+                genesFile <- paste0(intra_species_dir, "/genes.txt")
+                chr_gene_num_file <- paste0(intra_species_dir, "/chr_gene_nums.txt")
+
+                if( !file.exists(chr_gene_num_file) ){
+                    if( file.exists(genesFile) ){
+                        genes <- suppressMessages(
+                            vroom(
+                                genesFile,
+                                delim="\t",
+                                col_names=TRUE
+                            )
+                        )
+                        gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                        colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
+                        gene_num_df$gene_num <- gene_num_df$gene_num + 1
+                        write.table(
+                            gene_num_df,
+                            file=chr_gene_num_file,
+                            sep="\t",
+                            quote=F,
+                            row.names=FALSE
+                        )
+                    }
+                    else{
+                        shinyalert(
+                            "Oops",
+                            "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
+                            type="error"
+                        )
+                    }
+                }else{
+                    gene_num_df <- read.table(
+                        chr_gene_num_file,
+                        sep="\t",
+                        header=TRUE
+                    )
+                }
+
+                if( is.null(gene_num_df) ){
+                    querys <- NULL
+                }else{
+                    querys <- gene_num_df %>%
+                        filter(gene_num >= input$chr_num_cutoff) %>%
+                        arrange(seqchr) %>%
+                        pull(seqchr)
+                }
+                if( length(querys) > 0 ){
+                    updatePickerInput(
+                        session,
+                        "synteny_query_chr_intra",
+                        choices=querys,
+                        choicesOpt=list(
+                            content=lapply(gtools::mixedsort(querys), function(choice) {
+                                HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
+                            })
                         )
                     )
-                    gene_num_df <- aggregate(remapped_coordinate ~ genome + list, genes, max)
-                    colnames(gene_num_df) <- c("sp", "chr", "gene_num")
-                    gene_num_df$gene_num <- gene_num_df$gene_num + 1
-                    if( each_row$comparing_Type=="Inter" ){
-                        sp_list_tmp <- unique(strsplit(each_row$comparing_ID, split="_vs_")[[1]])
+                }else{
+                    shinyalert(
+                        "Oops",
+                        "No chromosome found. Please lower the cutoff of gene number in the chromosome, and then try again...",
+                        type="error"
+                    )
+                }
+            }
+        })
+    }else{
+        shinyalert(
+            "Oops",
+            "Please select the species first, and then click the confirm button...",
+            type="error"
+        )
+    }
+})
 
-                        queryChrs <- gene_num_df %>%
-                            filter(sp==sp_list_tmp[1])
+observe({
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$iadhore_intra_species_list) && input$iadhore_intra_species_list != "" ){
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+            intra_list <- input$iadhore_intra_species_list
+            intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+            intra_species_dir <- dirname(intra_selected_df$comparing_Path)
 
-                        observe({
-                            if( is.null(queryChrs) ){
-                                querys <- NULL
-                            }else{
-                                querys <- queryChrs %>%
-                                    filter(gene_num>500) %>%
-                                    arrange(desc(gene_num)) %>%
-                                    pull(chr)
-                            }
-                            updatePickerInput(
-                                session,
-                                paste0("synteny_query_chr_", x),
-                                choices=querys,
-                                choicesOpt=list(
-                                    content=lapply(querys, function(choice) {
-                                        HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
-                                    })
-                                )
-                            )
-                        })
+            syn_dir <- dirname(dirname(dirname(intra_selected_df$comparing_Path)))[1]
+            sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
 
-                        subjectChrs <- gene_num_df %>%
-                            filter(sp==sp_list_tmp[2])
-                        if( is.null(subjectChrs) ){
-                            subjects <- NULL
-                        }else{
-                            subjects <- subjectChrs %>%
-                                filter(gene_num>500) %>%
-                                arrange(desc(gene_num)) %>%
-                                pull(chr)
-                        }
+            sp_chr_len_file <- paste0(dirname(sp_gff_info_xls), "/species_chr_len.RData")
+            if( !file.exists(sp_chr_len_file) ){
+                chr_len_df <- obtain_chromosome_length(sp_gff_info_xls)
+                save(chr_len_df, file=sp_chr_len_file)
+            }
+        }
+    }
+})
 
-                        subjectChrPanelTitle <- HTML(paste("<font color='#8E549E'>", icon("dna"), "</font>Select <font color='#8E549E'><i><b>", gsub("_", " ", sp_list_tmp[2]), "</b></i></font> Chromosomes:"))
-                        output[[paste0("subjectChrPanel_", x)]] <- renderUI({
-                            column(
-                                12,
-                                pickerInput(
-                                    inputId=paste0("synteny_subject_chr_", x),
-                                    label=subjectChrPanelTitle,
-                                    options=list(
-                                        title='Please select chromosomes below',
-                                        `selected-text-format`="count > 2",
-                                        `actions-box`=TRUE
-                                    ),
-                                    choices=subjects,
-                                    choicesOpt=list(
-                                        content=lapply(subjects, function(choice) {
-                                            HTML(paste0("<div style='color: #8E549E;'>", choice, "</div>"))
-                                        })
-                                    ),
-                                    selected=NULL,
-                                    multiple=TRUE
-                                )
-                            )
-                        })
+observeEvent(input$synplot_go_intra, {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( !is.null(input$synteny_query_chr_intra) && input$iadhore_intra_species_list != "" ){
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+            intra_list <- input$iadhore_intra_species_list
+            intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+            intra_species_dir <- dirname(intra_selected_df$comparing_Path)
+
+            syn_dir <- dirname(dirname(dirname(intra_selected_df$comparing_Path)))[1]
+            sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+
+            sp_chr_len_file <- paste0(dirname(sp_gff_info_xls), "/species_chr_len.RData")
+            load(sp_chr_len_file)
+
+            sp_gff_info_df <- suppressMessages(
+                vroom(
+                    sp_gff_info_xls,
+                    col_names=c("species", "cdsPath", "gffPath"),
+                    delim="\t"
+                )
+            )
+            cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+            gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+            new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+            new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+            sp_gff_info_df$cdsPath <- new_cds_files
+            sp_gff_info_df$gffPath <- new_gff_files
+
+            querySpecies <- gsub("_", " ", intra_selected_df$comparing_ID)
+            subjectSpecies <- querySpecies
+
+            query_chr_Input <- "synteny_query_chr_intra"
+
+            query_selected_chr_list <- input[[query_chr_Input]]
+            query_chr_len_df <- chr_len_df[chr_len_df$sp==intra_selected_df$comparing_ID, ] %>%
+                filter(seqchr %in% query_selected_chr_list)
+
+            chr_gene_num_file <- paste0(intra_species_dir, "/chr_gene_nums.txt")
+
+            gene_num_df <- read.table(
+                chr_gene_num_file,
+                sep="\t",
+                header=TRUE
+            )
+
+            iadhoreDir <- dirname(intra_selected_df$comparing_Path)
+
+            withProgress(message='Analyzing in progress', value=0, {
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Preparing Data...")
+                genesFile <- paste0(iadhoreDir, "/genes.txt")
+                multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
+                multiplicon_ks_file <- paste0(iadhoreDir, "/multiplicons.merged_ks.txt")
+                anchorpointfile <- paste0(iadhoreDir, "/anchorpoints.txt")
+                anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
+                anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
+                ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
+
+                if( file.exists(ks_file) ){
+                    if( !file.exists(anchorpointout_file) ){
+                        obtain_coordiantes_for_anchorpoints(
+                            anchorpoints=anchorpointfile,
+                            species1=querySpecies,
+                            gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                            out_file=anchorpoint_merged_file
+                        )
                     }
-                    if( each_row$comparing_Type=="Intra" ){
-                        sp_list_tmp <- unique(strsplit(each_row$comparing_ID, split="_vs_")[[1]])
-                        queryChrs <- gene_num_df %>%
-                            filter(sp==sp_list_tmp[1])
 
-                        observe({
-                            if( is.null(queryChrs) ){
-                                querys <- NULL
-                            }else{
-                                querys <- queryChrs %>%
-                                    filter(gene_num>500) %>%
-                                    arrange(desc(gene_num)) %>%
-                                    pull(chr)
-                            }
-                            updatePickerInput(
-                                session,
-                                paste0("synteny_query_chr_", x),
-                                choices=querys,
-                                choicesOpt=list(
-                                    content=lapply(querys, function(choice) {
-                                        HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
-                                    })
-                                )
-                            )
-                        })
+                    if( !file.exists(multiplicon_ks_file) ){
+                        obtain_mean_ks_for_each_multiplicon(
+                            multiplicon_file=multiplicon_file,
+                            anchorpoint_file=anchorpoint_merged_file,
+                            ks_file=ks_file,
+                            species1=querySpecies,
+                            anchorpointout_file=anchorpointout_file,
+                            outfile=multiplicon_ks_file
+                        )
                     }
                 }
+                else{
+                    shinyalert(
+                        "Opps!",
+                        paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
+                        type="error",
+                    )
+                }
+
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Calculating Done")
+
+                final_multiplicons <- suppressMessages(
+                    vroom(
+                        multiplicon_ks_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                final_anchorpoints <- suppressMessages(
+                    vroom(
+                        anchorpointout_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                query_chr_num_df <- gene_num_df %>%
+                    filter(sp==gsub(" ", "_", querySpecies)) %>%
+                    filter(seqchr %in% query_selected_chr_list)
+
+                anchoredPointScutoff <- "anchoredPointsCutoff_intra"
+
+                selected_multiplicons <- final_multiplicons %>%
+                    filter(listX %in% query_selected_chr_list) %>%
+                    filter(listY %in% query_selected_chr_list) %>%
+                    filter(num_anchorpoints >= input[[anchoredPointScutoff]])
+                selected_multiplicons_Id <- selected_multiplicons$multiplicon
+
+                # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
+                depth_list <- computing_depth_paranome(
+                    anchorpoint_ks_file=anchorpointout_file,
+                    multiplicon_id=selected_multiplicons_Id,
+                    selected_query_chr=query_selected_chr_list
+                )
+                query_selected_depth_list <- depth_list$depth
+                subject_selected_depth_list <- depth_list$depth
+
+                selected_anchorpoints <- final_anchorpoints %>%
+                    filter(listX %in% query_selected_chr_list) %>%
+                    filter(listY %in% query_selected_chr_list) %>%
+                    filter(multiplicon %in% selected_multiplicons_Id)
+
+                plotSize <- reactiveValues(
+                    value=400
+                )
+                observeEvent(input[["svg_spacing_add_dot_intra"]], {
+                    plotSize$value <- plotSize$value + 50
+                })
+                observeEvent(input[["svg_spacing_sub_dot_intra"]], {
+                    plotSize$value <- plotSize$value - 50
+                })
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Drawing Dot Plot...")
+
+                observe({
+                    plot_dot_num_data <- list(
+                        "plot_id"="dotView_intra",
+                        "multiplicons"=selected_multiplicons,
+                        "anchorpoints"=selected_anchorpoints,
+                        "query_sp"=querySpecies,
+                        "query_chr_gene_nums"=query_chr_num_df,
+                        "query_depths"=query_selected_depth_list,
+                        "subject_sp"=subjectSpecies,
+                        "subject_chr_gene_nums"=query_chr_num_df,
+                        "subject_depths"=subject_selected_depth_list,
+                        "size"=plotSize$value
+                    )
+                    session$sendCustomMessage("Dot_Num_Plotting_paranome", plot_dot_num_data)
+                })
+                Sys.sleep(.2)
+                incProgress(amount=1, message="Drawing Dot Plot Done")
+            })
+
+            # plot parallel figure
+            withProgress(message='Parallel Syntenty Figure in progress', value=0, {
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
+                segmentsfile <- paste0(iadhoreDir, "/segments.txt")
+                segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
+                subject_chr_len_df <- query_chr_len_df
+
+                observe({
+                    # if( input$scale_data_intra == "Segments" ){
+                    #     if( !file.exists(segs_pos_file) ){
+                    #         obtain_coordiantes_for_segments(
+                    #             seg_file=segmentsfile,
+                    #             gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                    #             out_file=segs_pos_file
+                    #         )
+                    #     }
+                    #     segs_data <- suppressMessages(
+                    #         vroom(
+                    #             segs_pos_file,
+                    #             delim="\t"
+                    #         )
+                    #     )
+                    #     selected_segs_data <- segs_data %>%
+                    #         filter(listX %in% query_selected_chr_list) %>%
+                    #         filter(listY %in% query_selected_chr_list) %>%
+                    #         filter(multiplicon %in% selected_multiplicons_Id)
+                    #
+                    #     widthSpacingRainbow <- reactiveValues(
+                    #         value=800
+                    #     )
+                    #     heightSpacingRainbow <- reactiveValues(
+                    #         value=300
+                    #     )
+                    #     observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
+                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
+                    #     })
+                    #     observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
+                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                    #     })
+                    #     observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
+                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
+                    #     })
+                    #     observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
+                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
+                    #     })
+                    #     if( input$scale_link_intra == "True length" ){
+                    #         plot_parallel_data <- list(
+                    #             "plot_id"="SyntenicBlock_intra",
+                    #             "segs"=selected_segs_data,
+                    #             "query_sp"=querySpecies,
+                    #             "query_chr_lens"=query_chr_len_df,
+                    #             "subject_sp"=subjectSpecies,
+                    #             "subject_chr_lens"=subject_chr_len_df,
+                    #             "width"=widthSpacingRainbow$value,
+                    #             "height"=heightSpacingRainbow$value
+                    #         )
+                    #         session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                    #     }
+                    #     else{
+                    #         plot_parallel_data <- list(
+                    #             "plot_id"="SyntenicBlock_intra",
+                    #             "anchorpoints"=selected_anchorpoints,
+                    #             "query_sp"=querySpecies,
+                    #             "query_chr_nums"=query_chr_num_df,
+                    #             "subject_sp"=subjectSpecies,
+                    #             "subject_chr_nums"=query_chr_num_df,
+                    #             "width"=widthSpacingRainbow$value,
+                    #             "height"=heightSpacingRainbow$value
+                    #         )
+                    #         session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
+                    #     }
+                    # }
+                    # else{
+                        widthSpacingRainbow <- reactiveValues(
+                            value=800
+                        )
+                        heightSpacingRainbow <- reactiveValues(
+                            value=300
+                        )
+                        observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
+                            heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
+                        })
+                        observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
+                            heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                        })
+                        observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
+                            widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
+                        })
+                        observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
+                            widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
+                        })
+                        if( input$scale_link_intra == "True length" ){
+                            plot_parallel_data <- list(
+                                "plot_id"="SyntenicBlock_intra",
+                                "segs"=selected_anchorpoints,
+                                "query_sp"=querySpecies,
+                                "query_chr_lens"=query_chr_len_df,
+                                "subject_sp"=subjectSpecies,
+                                "subject_chr_lens"=subject_chr_len_df,
+                                "width"=widthSpacingRainbow$value,
+                                "height"=heightSpacingRainbow$value,
+                                "anchor_pair"="anchor_pair"
+                            )
+                            session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                        }
+                        else{
+                            plot_parallel_data <- list(
+                                "plot_id"="SyntenicBlock_intra",
+                                "anchorpoints"=selected_anchorpoints,
+                                "query_sp"=querySpecies,
+                                "query_chr_nums"=query_chr_num_df,
+                                "subject_sp"=subjectSpecies,
+                                "subject_chr_nums"=query_chr_num_df,
+                                "width"=widthSpacingRainbow$value,
+                                "height"=heightSpacingRainbow$value
+                            )
+                            session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
+                        }
+                    # }
+                })
+
+                Sys.sleep(.3)
+                incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
             })
         }
+        else{
+            shinyalert(
+                "Oops",
+                "Please select the chromosome first, and then click the button...",
+                type="error"
+            )
+        }
+    }
+})
 
-        if( isTruthy(input$cluster_species_A) ){
-            cluster_species_A <- gsub("_", " ", input$cluster_species_A)
-            cluster_species_B <- gsub("_", " ", input$cluster_species_B)
+observeEvent(input[["searchButton_intra"]], {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
+            withProgress(message='Searching Gene in progress', value=0, {
+                Sys.sleep(.8)
+                incProgress(amount=.2, message="Preparing Data...")
+
+                load(paste0(dirPath, "/synteny.comparing.RData"))
+                intra_list <- input$iadhore_intra_species_list
+                intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+                intra_species_dir <- dirname(intra_selected_df$comparing_Path)
+                genesFile <- paste0(intra_species_dir, "/genes.txt")
+                multiplicon_file <- paste0(intra_species_dir, "/multiplicons.txt")
+                multiplicon_ks_file <- paste0(intra_species_dir, "/multiplicons.merged_ks.txt")
+                anchorpointfile <- paste0(intra_species_dir, "/anchorpoints.txt")
+                anchorpoint_merged_file <- paste0(intra_species_dir, "/anchorpoints.merged_pos.txt")
+                anchorpointout_file <- paste0(intra_species_dir, "/anchorpoints.merged_pos_ks.txt")
+                ks_file <- paste0(intra_species_dir, "/anchorpoints.ks.txt")
+
+                syn_dir <- dirname(dirname(dirname(intra_selected_df$comparing_Path)))[1]
+                sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+                sp_gff_info_df <- suppressMessages(
+                    vroom(
+                        sp_gff_info_xls,
+                        col_names=c("species", "cdsPath", "gffPath"),
+                        delim="\t"
+                    )
+                )
+                cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+                gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+                new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+                new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+                sp_gff_info_df$cdsPath <- new_cds_files
+                sp_gff_info_df$gffPath <- new_gff_files
+
+                querySpecies <- gsub("_", " ", intra_selected_df$comparing_ID)
+                subjectSpecies <- querySpecies
+
+                if( file.exists(ks_file) ){
+                    if( !file.exists(anchorpointout_file) ){
+                        obtain_coordiantes_for_anchorpoints(
+                            anchorpoints=anchorpointfile,
+                            species1=querySpecies,
+                            gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                            out_file=anchorpoint_merged_file
+                        )
+                    }
+
+                    if( !file.exists(multiplicon_ks_file) ){
+                        obtain_mean_ks_for_each_multiplicon(
+                            multiplicon_file=multiplicon_file,
+                            anchorpoint_file=anchorpoint_merged_file,
+                            ks_file=ks_file,
+                            species1=querySpecies,
+                            anchorpointout_file=anchorpointout_file,
+                            outfile=multiplicon_ks_file
+                        )
+                    }
+                }
+                else{
+                    shinyalert(
+                        "Opps!",
+                        paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
+                        type="error",
+                    )
+                }
+
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Calculating Done")
+
+                final_anchorpoints <- suppressMessages(
+                    vroom(
+                        anchorpointout_file,
+                        col_names=TRUE,
+                        delim="\t")
+                )
+
+                multiplicons <- suppressMessages(
+                    vroom(
+                        multiplicon_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+                final_multiplicons <- fill(multiplicons, genome_x, list_x, .direction="down")
+                colnames(final_multiplicons) <- c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY", "level",
+                                                  "num_anchorpoints", "profile_len", "startX", "endX", "startY", "endY", "is_redundant")
+
+                searchGene <- input[["gene_intra"]]
+                if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
+                    searched_multiplicon_list <- unique(final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]$multiplicon)
+                    searched_multiplicon_df <- final_multiplicons[final_multiplicons$multiplicon %in% searched_multiplicon_list, ]
+                    searched_multiplicon_list <- searched_multiplicon_df[searched_multiplicon_df$is_redundant == 0, ]$multiplicon
+                    searched_anchor_points <- distinct(final_anchorpoints[final_anchorpoints$multiplicon %in% searched_multiplicon_list, ])
+
+                    uiId <- "foundItemsMessage_intra"
+                    output[[uiId]] <- renderUI({
+                        if( length(searched_multiplicon_list) > 0 ){
+                            # updatePickerInput(
+                            #     session,
+                            #     "multiplicon_plot_intra",
+                            #     choices=searched_multiplicon_list,
+                            #     choicesOpt=list(
+                            #         content=lapply(searched_multiplicon_list, function(choice) {
+                            #             HTML(paste0("<div style='color: orange; font-style: italic;'>Multiplicon: ", choice, "</div>"))
+                            #         })
+                            #     ),
+                            # )
+                            fluidRow(
+                                column(
+                                    8,
+                                    div(
+                                        style="border: 1px solid #ccc;
+                                           padding: 2px;
+                                           margin-top: 35px;
+                                           margin-left: -40px;
+                                           border-radius: 10px;
+                                           background-color: white;
+                                           font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
+
+                                        if( length(searched_multiplicon_list) == 1 ){
+                                            HTML(
+                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
+                                                      nrow(searched_anchor_points),
+                                                      " Anchor Point is in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                      searched_multiplicon_list[1],
+                                                      "</span>)"
+                                                )
+                                            )
+                                        }else{
+                                            HTML(
+                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
+                                                      nrow(searched_anchor_points),
+                                                      " Anchor Points are in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                      paste(searched_multiplicon_list, collapse=", "),
+                                                      "</span>)"
+                                                )
+                                            )
+                                        }
+                                    )
+                                ),
+                                column(
+                                    4,
+                                    actionButton(
+                                        inputId="plotMicro_intra",
+                                        "Draw Plot",
+                                        icon=icon("pencil-alt"),
+                                        status="secondary",
+                                        style="color: #fff;
+                                               background-color: #8080C0;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 32px 5px 5px 5px;
+                                               animation: glowing 5000ms infinite; "
+                                    )
+                                )
+                            )
+                        }
+                        else{
+                            div(
+                                style="border: 1px solid #ccc;
+                                       padding: 2px;
+                                       margin-top: 30px;
+                                       margin-left: -40px;
+                                       border-radius: 10px;
+                                       background-color: white;
+                                       font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
+                                HTML("<span style='color: #FF79BC; font-weight: bold;'> No Anchor Point</span> is found!")
+                            )
+                        }
+                    })
+
+                    output$multiplicon_mirco_intra_plot <- renderUI({
+                        div(
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    3,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        pickerInput(
+                                            inputId="multiplicon_choose_intra",
+                                            label=HTML("Choose a <font color='orange'>multiplicon</font> to plot:"),
+                                            options=list(
+                                                title='Please select multiplicon below',
+                                                `selected-text-format`="count > 1",
+                                                `actions-box`=TRUE
+                                            ),
+                                            choices=NULL,
+                                            selected=NULL,
+                                            multiple=FALSE
+                                        )
+                                    )
+                                ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        prettyRadioButtons(
+                                            inputId="scale_plotMicro_intra",
+                                            label=HTML("<font color='orange'>Scale in</font>:"),
+                                            choices=c("True length", "Gene number"),
+                                            selected="True length",
+                                            icon=icon("check"),
+                                            status="info",
+                                            animation="jelly"
+                                        )
+                                    )
+                                ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        prettyRadioButtons(
+                                            inputId="link_plotMicro_intra",
+                                            label=HTML("<font color='orange'>Link type</font>:"),
+                                            choices=c("Pairwise", "All"),
+                                            selected="Pairwise",
+                                            icon=icon("check"),
+                                            status="info",
+                                            animation="jelly"
+                                        )
+                                    )
+                                ),
+                                # column(
+                                #     3,
+                                #     div(
+                                #         style="margin-bottom: 10px;
+                                #                border-radius: 10px;
+                                #                padding: 10px 10px 0px 10px;
+                                #                background-color: #FFF5EE;",
+                                #         sliderInput(
+                                #             inputId="level_intra",
+                                #             label=HTML("Set <font color='orange'>maximum level of multiplicon:</font>"),
+                                #             min=2,
+                                #             max=10,
+                                #             step=1,
+                                #             value=5
+                                #         )
+                                #     )
+                                # ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        HTML("Color <font color='orange'>homolog genes</font>:"),
+                                        div(
+                                            style="padding: 20px 10px 5px 10px;
+                                                   background-color: #FFF5EE;",
+                                            prettyToggle(
+                                                inputId="color_homolog_intra",
+                                                label_on="Yes!",
+                                                icon_on=icon("check"),
+                                                status_on="info",
+                                                status_off="warning",
+                                                label_off="No..",
+                                                value=TRUE,
+                                                icon_off=icon("remove", verify_fa=FALSE)
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    12,
+                                    h6(HTML("<b>The Synteny Link Plot:</b>")),
+                                    actionButton(
+                                        "svg_vertical_spacing_add_micro_intra",
+                                        "",
+                                        icon("arrows-alt-v"),
+                                        title="Expand vertical spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_vertical_spacing_sub_micro_intra",
+                                        "",
+                                        icon("compress", class="rotate-135"),
+                                        title="Compress vertical spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_horizontal_spacing_add_micro_intra",
+                                        "",
+                                        icon("arrows-alt-h"),
+                                        title="Expand horizontal spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_horizontal_spacing_sub_micro_intra",
+                                        "",
+                                        icon("compress", class="rotate-45"),
+                                        title="Compress horizontal spacing"
+                                    ),
+                                    downloadButton_custom(
+                                        "download_microSyntenicBlock_intra",
+                                        title="Download the Plot",
+                                        status="secondary",
+                                        icon=icon("download"),
+                                        label=HTML(""),
+                                        style="color: #fff;
+                                               background-color: #019858;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 5px 5px 5px 5px;
+                                               animation: glowingD 5000ms infinite;"
+                                    )
+                                ),
+                                column(
+                                    width=12,
+                                    id="microSyntenicBlock_intra"
+                                )
+                            )
+                        )
+                    })
+
+                    observe({
+                        selected_multiplicons_df <- searched_multiplicon_df %>%
+                            filter(is_redundant == 0)
+
+                        selected_multiplicons_list <- selected_multiplicons_df$multiplicon
+
+                        updatePickerInput(
+                            session,
+                            "multiplicon_choose_intra",
+                            choices=selected_multiplicons_list,
+                            selected=selected_multiplicons_list[1],
+                            choicesOpt=list(
+                                content=lapply(selected_multiplicons_list, function(choice) {
+                                    tmp_level <- selected_multiplicons_df %>%
+                                        filter(multiplicon == choice)
+                                    HTML(
+                                        paste0(
+                                            "<div>Multiplicon: <span style='color: #2E8B57; font-weight: bold;'>", choice, "</span>",
+                                            " Level <span style='color: #6A5ACD; font-weight: bold;'>", tmp_level$level, "</span></div>"
+                                        )
+                                    )
+                                })
+                            )
+                        )
+                    })
+
+                }else{
+                    shinyalert(
+                        "Warning!",
+                        "Please input the correct gene name ...",
+                        type="warning",
+                    )
+                }
+                Sys.sleep(.9)
+                incProgress(amount=1, message="Searching Done")
+            })
+        }
+    }
+})
+
+observeEvent(input[["plotMicro_intra"]], {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$multiplicon_choose_intra) && !is.null(input$multiplicon_choose_intra) ){
+            if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
+                withProgress(message='Drawing Micro Synteny in progress', value=0, {
+                    Sys.sleep(.5)
+                    load(paste0(dirPath, "/synteny.comparing.RData"))
+                    intra_list <- input$iadhore_intra_species_list
+                    intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+                    intra_species_dir <- dirname(intra_selected_df$comparing_Path)
+                    genesFile <- paste0(intra_species_dir, "/genes.txt")
+                    multiplicon_file <- paste0(intra_species_dir, "/multiplicons.txt")
+                    anchorpointfile <- paste0(intra_species_dir, "/anchorpoints.txt")
+                    anchorpoint_merged_file <- paste0(intra_species_dir, "/anchorpoints.merged_pos.txt")
+                    anchorpointout_file <- paste0(intra_species_dir, "/anchorpoints.merged_pos_ks.txt")
+                    ks_file <- paste0(intra_species_dir, "/anchorpoints.ks.txt")
+                    genes_file <- paste0(intra_species_dir, "/genes.txt")
+
+                    genes_df <- suppressMessages(
+                        vroom(
+                            genes_file,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+
+                    syn_dir <- dirname(dirname(dirname(intra_selected_df$comparing_Path)))[1]
+                    sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+                    sp_gff_info_df <- suppressMessages(
+                        vroom(
+                            sp_gff_info_xls,
+                            col_names=c("species", "cdsPath", "gffPath"),
+                            delim="\t"
+                        )
+                    )
+                    cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+                    gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+                    new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+                    new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+                    sp_gff_info_df$cdsPath <- new_cds_files
+                    sp_gff_info_df$gffPath <- new_gff_files
+
+                    querySpecies <- gsub("_", " ", intra_selected_df$comparing_ID)
+                    subjectSpecies <- querySpecies
+
+                    segmentsfile <- paste0(intra_species_dir, "/segments.txt")
+
+                    segs <- suppressMessages(
+                        vroom(
+                            segmentsfile,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+
+                    multiplicons <- suppressMessages(
+                        vroom(
+                            multiplicon_file,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+                    final_multiplicons <- fill(multiplicons, genome_x, list_x, .direction="down")
+                    colnames(final_multiplicons) <- c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY", "level",
+                                                      "num_anchorpoints", "profile_len", "startX", "endX", "startY", "endY", "is_redundant")
+
+                    final_anchorpoints <- suppressMessages(
+                        vroom(
+                            anchorpointout_file,
+                            col_names=TRUE,
+                            delim="\t")
+                    )
+
+                    searchGene <- input[["gene_intra"]]
+
+                    if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
+                        searched_multiplicon_list <- unique(final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]$multiplicon)
+                        searched_multiplicons_df <- final_multiplicons[final_multiplicons$multiplicon %in% searched_multiplicon_list, ]
+                        searched_multiplicons_df <- searched_multiplicons_df[searched_multiplicons_df$is_redundant == 0, ]
+                        searched_multiplicon_list <- searched_multiplicons_df$multiplicon
+                        searched_anchor_points_df <- final_anchorpoints[final_anchorpoints$multiplicon %in% searched_multiplicon_list, ]
+
+                        if( length(searched_multiplicon_list) == 0 ){
+                            shinyalert(
+                                "Warning!",
+                                "No Multiplicon found! Please search the target gene or select multiplcon to plot first...",
+                                type="warning"
+                            )
+                        }
+                        else{
+                            # print(searchGene)
+                            query_selected_chr_list <- unique(c(searched_anchor_points_df$listX, searched_anchor_points_df$listY))
+                            subject_selected_chr_list <- query_selected_chr_list
+
+                            searched_chrs_coord_df <- data.frame()
+
+                            searched_multiplicon_df <- data.frame()
+                            searched_chrs_df <- data.frame()
+                            searched_genes_df <- data.frame()
+                            searched_anchor_points_df <- data.frame()
+                            for( i in 1:length(searched_multiplicon_list) ){
+                                each_multiplicon <- searched_multiplicon_list[i]
+                                # get the multiplicon level
+                                each_multiplicon_df <- final_multiplicons %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_level <- each_multiplicon_df$level
+                                # print(paste("multiplicon:", each_multiplicon, "level:", each_level))
+                                each_multiplicon_df$searched_multiplicon <- each_multiplicon
+
+                                tmp_multiplicon_df <- data.frame()
+
+                                tmp_multiplicon_df <- rbind(tmp_multiplicon_df, each_multiplicon_df)
+                                if( each_level > 2 ){
+                                    # find the parent multiplcon
+                                    previous_parent_multiplicon <- NA
+
+                                    parent_multiplicon <- each_multiplicon_df$parent
+                                    parent_multiplicon_df <- final_multiplicons %>%
+                                        filter(multiplicon == parent_multiplicon)
+                                    parent_multiplicon_df$searched_multiplicon <- each_multiplicon
+                                    tmp_multiplicon_df <- rbind(tmp_multiplicon_df, parent_multiplicon_df)
+
+                                    not_parent_multiplicon <- TRUE
+                                    while( not_parent_multiplicon ){
+                                        parent_multiplicon <- unique(final_multiplicons[final_multiplicons$multiplicon == parent_multiplicon, ]$parent)
+                                        pre_multiplicon_df <- final_multiplicons %>%
+                                            filter(multiplicon == parent_multiplicon)
+                                        pre_multiplicon_df$searched_multiplicon <- each_multiplicon
+                                        tmp_multiplicon_df <- rbind(tmp_multiplicon_df, pre_multiplicon_df)
+                                        if( is.na(parent_multiplicon) ){
+                                            break
+                                        }
+                                    }
+                                }
+
+                                searched_multiplicon_df <- rbind(searched_multiplicon_df, tmp_multiplicon_df)
+
+                                # get segments
+                                each_segs_df <- segs %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_segs_df$searched_multiplicon <- each_multiplicon
+
+                                gff_file1 <- sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath
+                                gff_df1 <- suppressMessages(
+                                    vroom(
+                                        gff_file1,
+                                        delim="\t",
+                                        comment="#",
+                                        col_names=FALSE
+                                    )
+                                )
+                                position_df1 <- gff_df1 %>%
+                                    filter(gff_df1$X3=="mRNA") %>%
+                                    select(X1, X9, X4, X5, X7) %>%
+                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9)) %>%
+                                    filter(X1 %in% query_selected_chr_list)
+                                colnames(position_df1) <- c("seqchr", "gene", "start", "end", "strand")
+
+                                start_subset <- select(position_df1, gene, start)
+                                merged_data <- left_join(
+                                    each_segs_df,
+                                    start_subset,
+                                    by=c("first"="gene")
+                                )
+                                end_subset <- select(position_df1, gene, end)
+                                merged_data <- left_join(
+                                    merged_data,
+                                    end_subset,
+                                    by=c("last"="gene")
+                                )
+                                each_segs_df <- merged_data %>%
+                                    select(-id)
+                                colnames(each_segs_df) <- c(
+                                    "multiplicon", "genome", "list",
+                                    "first", "last", "order", "searched_multiplicon",
+                                    "min", "max"
+                                )
+
+                                searched_chrs_df <- rbind(searched_chrs_df, each_segs_df)
+
+                                # get segments coord
+                                each_seg_coord_df <- segs %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_seg_coord_df$searched_multiplicon <- each_multiplicon
+
+                                genes_coord_subset <- select(genes_df, id, coordinate)
+                                merged_data_tmp <- left_join(
+                                    each_seg_coord_df,
+                                    genes_coord_subset,
+                                    by=c("first"="id")
+                                )
+
+                                merged_data_tmp <- left_join(
+                                    merged_data_tmp,
+                                    genes_coord_subset,
+                                    by=c("last"="id")
+                                )
+                                each_seg_coord_df <- merged_data_tmp %>%
+                                    select(-id)
+
+                                colnames(each_seg_coord_df) <- c(
+                                    "multiplicon", "genome", "list",
+                                    "first", "last", "order", "searched_multiplicon",
+                                    "min", "max"
+                                )
+
+                                searched_chrs_coord_df <- rbind(searched_chrs_coord_df, each_seg_coord_df)
+
+                                # get gene info
+                                each_genes_df <- position_df1 %>%
+                                    inner_join(each_segs_df, by=c("seqchr"="list"), multiple="all") %>%
+                                    filter(start >= min, end <= max) %>%
+                                    distinct() %>%
+                                    select(seqchr, gene, start, end, strand, searched_multiplicon, min, max) %>%
+                                    mutate(start=start-min, end=end-min) %>%
+                                    select(-min, -max)
+
+                                tmp_genes_df <- each_genes_df %>%
+                                    inner_join(genes_df, by=c("gene"="id"), multiple="all") %>%
+                                    select(-genome, -list, -orientation)
+
+                                tmp_genes_df$searched_multiplicon <- each_multiplicon
+                                searched_genes_df <- rbind(searched_genes_df, tmp_genes_df)
+
+                                # get anchor points
+                                each_anchor_points_df <- final_anchorpoints %>%
+                                    filter(geneX %in% tmp_genes_df$gene | geneY %in% tmp_genes_df$gene) %>%
+                                    filter(multiplicon %in% tmp_multiplicon_df$multiplicon)
+                                each_anchor_points_df$searched_multiplicon <- each_multiplicon
+
+                                searched_anchor_points_df <- rbind(searched_anchor_points_df, each_anchor_points_df)
+                            }
+
+                            # print(searched_multiplicon_df)
+                            # print(searched_genes_df)
+                            # print(searched_chrs_df)
+                            # print(searched_anchor_points_df)
+
+                            # draw the micro level plot
+                            widthSpacingMicro <- reactiveValues(
+                                value=800
+                            )
+                            heightSpacingMicro <- reactiveValues(
+                                value=50
+                            )
+                            observeEvent(input[["svg_vertical_spacing_add_micro_intra"]], {
+                                heightSpacingMicro$value <- heightSpacingMicro$value + 50
+                            })
+                            observeEvent(input[["svg_vertical_spacing_sub_micro_intra"]], {
+                                heightSpacingMicro$value <- heightSpacingMicro$value - 50
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_add_micro_intra"]], {
+                                widthSpacingMicro$value <- widthSpacingMicro$value + 50
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_sub_micro_intra"]], {
+                                widthSpacingMicro$value <- widthSpacingMicro$value - 50
+                            })
+
+                            #selectedGene_df <- rbind(selectedQueryGenes, selectedSubjectGenes)
+
+                            # write.table(
+                            #     searched_chrs_coord_df,
+                            #     file=paste0(intra_species_dir, "/test.chr_coord.txt"),
+                            #     col.names=T,
+                            #     row.names=F,
+                            #     quote=F,
+                            #     sep="\t"
+                            # )
+                            # print(input$multiplicon_choose_intra)
+                            # print(input[["gene_intra"]])
+                            observe({
+                                selected_multiplicons_df <- searched_multiplicon_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_intra)
+
+                                heightMicroPlot_intra <- 150 * nrow(selected_multiplicons_df) + 100
+
+                                selected_gene_df <- searched_genes_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_intra)
+
+                                selected_anchor_point_df <- searched_anchor_points_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_intra)
+
+                                # cluster genes
+                                anchor_point_group_df <- selected_anchor_point_df[, c("geneX", "geneY")]
+
+                                tmp_links_g <- graph_from_data_frame(anchor_point_group_df)
+                                tmp_cluster_g <- clusters(tmp_links_g)
+
+                                anchor_point_group_df$group <- tmp_cluster_g$membership[as.character(anchor_point_group_df$geneX)]
+
+                                if( input$scale_plotMicro_intra == "True length" ){
+                                    selected_chr_df <- searched_chrs_df %>%
+                                        filter(searched_multiplicon == input$multiplicon_choose_intra)
+
+                                    microSynPlotData <- list(
+                                        "plot_id"="intra",
+                                        "anchorpoints"=selected_anchor_point_df,
+                                        "multiplicons"=selected_multiplicons_df,
+                                        "genes"=distinct(selected_gene_df),
+                                        "achorPointGroups"=anchor_point_group_df,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "chrs"=selected_chr_df,
+                                        "targe_gene"=input[["gene_intra"]],
+                                        "width"=widthSpacingMicro$value,
+                                        "height"=heightMicroPlot_intra,
+                                        "heightScale"=heightSpacingMicro$value
+                                    )
+                                    if( isTruthy(input$color_homolog_intra) && input$color_homolog_intra){
+                                        microSynPlotData[["color_gene"]] <- 1
+                                    }else{
+                                        microSynPlotData[["color_gene"]] <- 0
+                                    }
+
+                                    if( isTruthy(input$link_plotMicro_intra) && input$link_plotMicro_intra == "Pairwise" ){
+                                        microSynPlotData[["link_all"]] <- 0
+                                    }else{
+                                        microSynPlotData[["link_all"]] <- 1
+                                    }
+                                    session$sendCustomMessage("microSynPlotting", microSynPlotData)
+                                }
+                                else{
+                                    selected_chr_coord_df <- searched_chrs_coord_df %>%
+                                        filter(searched_multiplicon == input$multiplicon_choose_intra)
+
+                                    microSynPlotData <- list(
+                                        "plot_id"="intra",
+                                        "anchorpoints"=selected_anchor_point_df,
+                                        "multiplicons"=selected_multiplicons_df,
+                                        "genes"=distinct(selected_gene_df),
+                                        "achorPointGroups"=anchor_point_group_df,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "chrs"=selected_chr_coord_df,
+                                        "targe_gene"=input[["gene_intra"]],
+                                        "width"=widthSpacingMicro$value,
+                                        "height"=heightMicroPlot_intra,
+                                        "heightScale"=heightSpacingMicro$value
+                                    )
+                                    if( isTruthy(input$color_homolog_intra) && input$color_homolog_intra){
+                                        microSynPlotData[["color_gene"]] <- 1
+                                    }else{
+                                        microSynPlotData[["color_gene"]] <- 0
+                                    }
+
+                                    if( isTruthy(input$link_plotMicro_intra) && input$link_plotMicro_intra == "Pairwise" ){
+                                        microSynPlotData[["link_all"]] <- 0
+                                    }else{
+                                        microSynPlotData[["link_all"]] <- 1
+                                    }
+                                    session$sendCustomMessage("microSynPlottingGeneNumber", microSynPlotData)
+                                }
+
+                            })
+                        }
+                    }
+
+                    Sys.sleep(.9)
+                    incProgress(amount=1, message="Drawing Micro Synteny Done")
+                })
+            }
+        }
+        else{
+            shinyalert(
+                "Warning!",
+                "Please select a multiplicon first and then switch on this ...",
+                type="warning",
+            )
+        }
+    }
+})
+
+observeEvent(input$confirm_inter_comparing_go, {
+    if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
+        # shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
+        shinyjs::runjs("$('#confirm_inter_comparing_go').css('background-color', 'green');")
+        updateActionButton(
+            session,
+            "confirm_inter_comparing_go",
+            icon=icon("check")
+        )
+
+        setTimeoutFunction <- "setTimeout(function() {
+              $('#confirm_inter_comparing_go').css('background-color', '#C0C0C0');
+            }, 6000);"
+
+        shinyjs::runjs(setTimeoutFunction)
+
+        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+        load(paste0(dirPath, "/synteny.comparing.RData"))
+
+        tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
+        tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
+        comparing_df <- path_df[path_df$comparing_ID == tmp_comparing_id_1 |
+                                    path_df$comparing_ID == tmp_comparing_id_2, ]
+
+        split_values <- strsplit(comparing_df$comparing_ID, "_vs_")[[1]]
+
+        query_species <- gsub("_", " ", split_values[1])
+        subject_species <- gsub("_", " ", split_values[2])
+
+        withProgress(message='Configuration in progress', value=0, {
+            Sys.sleep(.2)
+            incProgress(amount=.3, message="Configuring...")
+
+            color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
+                            "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
+            color_list_selected <- rep(color_list, length.out=nrow(path_df))
+
+            panelTitle <- paste0("<font color='#FFD374'><b><i>",
+                                 query_species,
+                                 "</i></font> versus <font color='#E1B8FF'><i>",
+                                 subject_species, "</i></b></font>")
+            queryChrPanelTitle <- HTML(paste("Select <font color='#68AC57'><i><b>", query_species, "</b></i></font> chromosomes:"))
+
+            subjectChrPanelTitle <- HTML(paste("Select <font color='#8E549E'><i><b>", subject_species, "</b></i></font> Chromosomes:"))
+
             output$iadhore_output <- renderUI({
                 div(
                     class="boxLike",
                     style="padding-right: 50px;
-                           padding-left: 50px;
-                           padding-top: 10px;
-                           padding-bottom: 10px;
-                           background-color: white",
+                               padding-left: 50px;
+                               padding-top: 10px;
+                               padding-bottom: 10px;
+                               background-color: white",
                     fluidRow(
                         column(
                             width=12,
                             div(
                                 style="padding-bottom: 10px;",
                                 bsButton(
-                                    inputId="cluster_plot_button",
-                                    label=h5(HTML(paste0("<font color='#F4FFEE'><b>Clustering Analysis</b></font> for <font color='#FFD374'><b><i>", cluster_species_A, "</i></font> and <font color='#E1B8FF'><i>", cluster_species_B, "</i></b></font>"))),
-                                    style="success"
+                                    inputId="plot_inter_button",
+                                    label=HTML(panelTitle),
+                                    style="info"
                                 ) %>%
                                     bs_embed_tooltip(
                                         title="Click to see more details",
@@ -970,187 +2040,314 @@ observeEvent(input$iadhore_config_go, {
                                         trigger="hover",
                                         options=list(container="body")
                                     ) %>%
-                                    bs_attach_collapse(
-                                        id="cluster_plot_panel_collapse"
-                                    ),
+                                    bs_attach_collapse("plot_panel_collapse_inter"),
                                 bs_collapse(
-                                    id="cluster_plot_panel_collapse",
+                                    id="plot_panel_collapse_inter",
                                     show=TRUE,
                                     content=tags$div(
                                         class="well",
                                         fluidRow(
-                                            column(
-                                                12,
-                                                div(
-                                                    style="background-color: #F4FFEE;
-                                                           padding-right: 50px;
-                                                           padding-left: 50px;
-                                                           padding-top: 10px;
-                                                           padding-bottom: 10px;",
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            5,
+                                            div(
+                                                style="padding-right: 30px;
+                                                      padding-left: 30px;
+                                                      padding-top: 10px;
+                                                      padding-bottom: 10px;",
+                                                fluidRow(
+                                                    column(
+                                                        2,
+                                                        h5(HTML(paste0("<font color='orange'>", icon("dna"), "&nbsp;Chromosome</font> setting")))
+                                                    ),
+                                                    column(
+                                                        3,
+                                                        div(
+                                                            style="padding: 12px 10px 5px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
                                                             sliderInput(
-                                                                inputId="interactPointsCutoff",
-                                                                label=HTML("Set threshold for <font color='#C4EC00'><b>anchor points between segments</b></font>:"),
+                                                                inputId="chr_num_cutoff",
+                                                                label=HTML("Set the <font color='orange'>mininum gene number</font> in the chromosome:"),
                                                                 min=0,
-                                                                max=30,
-                                                                step=1,
-                                                                value=20
-                                                            )
-                                                        ),
-                                                        column(
-                                                            4,
-                                                            sliderInput(
-                                                                inputId="corRCutoff",
-                                                                label=HTML("Set threshold for <font color='#00ECE5'><b>Pearson correlation coefficient <i>r</i></b></font> :"),
-                                                                min=0,
-                                                                max=1,
-                                                                step=0.1,
-                                                                value=0.3
-                                                            )
-                                                        ),
-                                                        column(
-                                                            3,
-                                                            actionButton(
-                                                                inputId="cluster_go",
-                                                                "Start Clustering Analysis",
-                                                                icon=icon("play"),
-                                                                status="secondary",
-                                                                style="color: #fff;
-                                                                       background-color: #009393;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 10px 5px 10px;
-                                                                       margin: 50px 5px 5px 35px;
-                                                                       animation: glowing 5000ms infinite; "
+                                                                max=500,
+                                                                step=50,
+                                                                value=100
+                                                            ),
+                                                        )
+                                                    ),
+                                                    column(
+                                                        3,
+                                                        div(
+                                                            style="padding: 12px 10px 20px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
+                                                            pickerInput(
+                                                                inputId="synteny_query_chr_inter",
+                                                                label=queryChrPanelTitle,
+                                                                options=list(
+                                                                    title='Please select chromosomes below',
+                                                                    `selected-text-format`="count > 1",
+                                                                    `actions-box`=TRUE
+                                                                ),
+                                                                choices=NULL,
+                                                                selected=NULL,
+                                                                multiple=TRUE
                                                             )
                                                         )
                                                     ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h6(HTML("<b>The Hierarchical Clustering Plot:</b>")),
-                                                            tags$style(
-                                                                HTML(".rotate-135 {
+                                                    column(
+                                                        3,
+                                                        div(
+                                                            style="padding: 12px 10px 20px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
+                                                            pickerInput(
+                                                                inputId="synteny_subject_chr_inter",
+                                                                label=subjectChrPanelTitle,
+                                                                options=list(
+                                                                    title='Please select chromosomes below',
+                                                                    `selected-text-format`="count > 1",
+                                                                    `actions-box`=TRUE
+                                                                ),
+                                                                choices=NULL,
+                                                                selected=NULL,
+                                                                multiple=TRUE
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        2,
+                                                        h5(HTML("<font color='orange'>Anchor points</font> setting:"))
+                                                    ),
+                                                    column(
+                                                        3,
+                                                        div(
+                                                            style="padding: 12px 10px 5px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            sliderInput(
+                                                                inputId="anchoredPointsCutoff_inter",
+                                                                label=HTML("Set <font color='orange'>anchor points per multiplicon:</font>"),
+                                                                min=3,
+                                                                max=30,
+                                                                step=1,
+                                                                value=3
+                                                            )
+                                                        )
+                                                    ),
+                                                    column(
+                                                        3,
+                                                        tags$head(
+                                                            tags$style(HTML(
+                                                                "@keyframes glowing {
+                                                                     0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
+                                                                     50% { background-color: #64A600; box-shadow: 0 0 20px #43b0d1; }
+                                                                     100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
+                                                                     }
+                                                                @keyframes glowingD {
+                                                                     0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
+                                                                     50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
+                                                                     100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
+                                                                     }"
+                                                            ))
+                                                        ),
+                                                        actionButton(
+                                                            inputId="synplot_go_inter",
+                                                            "Draw Syntenty Plot",
+                                                            icon=icon("pencil-alt"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #009393;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 10px 5px 10px;
+                                                                   margin: 50px 5px 5px 35px;
+                                                                   animation: glowing 5000ms infinite; "
+                                                        )
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h6(HTML("<b>The Dot Plot:</b>")),
+                                                        tags$style(
+                                                            HTML(".rotate-135 {
                                                                     transform: rotate(135deg);
                                                                 }"),
-                                                                HTML(".rotate-45{
+                                                            HTML(".rotate-45{
                                                                     transform: rotate(45deg);
                                                                 }")
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_add_dot_inter",
+                                                            "",
+                                                            icon("arrows-alt-v", class="rotate-45"),
+                                                            title="Expand spacing"
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_sub_dot_inter",
+                                                            "",
+                                                            icon("compress"),
+                                                            title="Compress spacing"
+                                                        ),
+                                                        downloadButton_custom(
+                                                            "download_dotView_inter",
+                                                            title="Download the Plot",
+                                                            status="secondary",
+                                                            icon=icon("download"),
+                                                            label=HTML(""),
+                                                            style="color: #fff;
+                                                                   background-color: #019858;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 14px 5px 14px;
+                                                                   margin: 5px 5px 5px 5px;
+                                                                   animation: glowingD 5000ms infinite;"
+                                                        )
+                                                    ),
+                                                    column(
+                                                        width=12,
+                                                        id="dotView_inter"
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h6(HTML("<b>The Parallel Link Plot:</b>"))
+                                                    ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="/*display: flex; align-items: center;*/
+                                                                   text-align: center;
+                                                                   margin-bottom: 10px;                                                   border-radius: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 10px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            actionButton(
+                                                                "svg_vertical_spacing_add_rainbow_inter",
+                                                                "",
+                                                                icon("arrows-alt-v"),
+                                                                title="Expand vertical spacing"
                                                             ),
                                                             actionButton(
-                                                                "svg_spacing_add_cluster",
+                                                                "svg_vertical_spacing_sub_rainbow_inter",
                                                                 "",
-                                                                icon("arrows-alt-v", class="rotate-45"),
-                                                                title="Expand spacing"
+                                                                icon("compress", class="rotate-135"),
+                                                                title="Compress vertical spacing"
                                                             ),
                                                             actionButton(
-                                                                "svg_spacing_sub_cluster",
+                                                                "svg_horizontal_spacing_add_rainbow_inter",
                                                                 "",
-                                                                icon("compress"),
-                                                                title="Compress spacing"
+                                                                icon("arrows-alt-h"),
+                                                                title="Expand horizontal spacing"
+                                                            ),
+                                                            actionButton(
+                                                                "svg_horizontal_spacing_sub_rainbow_inter",
+                                                                "",
+                                                                icon("compress", class="rotate-45"),
+                                                                title="Compress horizontal spacing"
                                                             ),
                                                             downloadButton_custom(
-                                                                "cluster_download",
+                                                                "download_SyntenicBlock_inter",
                                                                 title="Download the Plot",
                                                                 status="secondary",
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
                                                                 style="color: #fff;
-                                                                       background-color: #019858;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 14px 5px 14px;
-                                                                       margin: 5px 5px 5px 5px;
-                                                                       animation: glowingD 5000ms infinite;"
-                                                            )
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id="clusterView"
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id="dendrogramTreeView"
-                                                        )
-                                                    ),
-                                                    hr(class="splitting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h5(HTML("<font color='#00DB00'><b>Putative Ancestral Regions</b></font>"))
-                                                        ),
-                                                        column(
-                                                            12,
-                                                            uiOutput("foundParsMessage")
-                                                        ),
-                                                    ),
-                                                    fluidRow(
-                                                        column(
-                                                            6,
-                                                            pickerInput(
-                                                                inputId="pars_list",
-                                                                label=HTML("Choose <b><font color='green'>PARs</font></b> to zoom in"),
-                                                                options=list(
-                                                                    title='Please select PAR below',
-                                                                    `selected-text-format`="count > 2",
-                                                                    `actions-box`=TRUE
-                                                                ),
-                                                                choices=NULL,
-                                                                selected=NULL,
-                                                                multiple=FALSE
-                                                            )
-                                                        ),
-                                                        column(
-                                                            6,
-                                                            actionButton(
-                                                                inputId="zoomInPAR",
-                                                                "",
-                                                                icon=icon("search"),
-                                                                status="secondary",
-                                                                style="color: #fff;
-                                                                       background-color: #8080C0;
-                                                                       border-color: #fff;
-                                                                       margin: 32px 0px 0px -15px; "
+                                                                   background-color: #019858;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 14px 5px 14px;
+                                                                   margin: 5px 5px 5px 5px;
+                                                                   animation: glowingD 5000ms infinite;"
                                                             )
                                                         )
                                                     ),
-                                                    hr(class="setting"),
-                                                    fluidRow(
-                                                        column(
-                                                            12,
-                                                            h6(HTML("<b>The PARs Dot Plot:</b>")),
-                                                            actionButton(
-                                                                "svg_vertical_spacing_add_par",
-                                                                "",
-                                                                icon("arrows-alt-v", class="rotate-45"),
-                                                                title="Expand spacing"
-                                                            ),
-                                                            actionButton(
-                                                                "svg_vertical_spacing_sub_par",
-                                                                "",
-                                                                icon("compress"),
-                                                                title="Compress spacing"
-                                                            ),
-                                                            downloadButton_custom(
-                                                                "PAR_download",
-                                                                title="Download the Plot",
-                                                                status="secondary",
-                                                                icon=icon("download"),
-                                                                label="",
-                                                                style="color: #fff;
-                                                                       background-color: #019858;
-                                                                       border-color: #fff;
-                                                                       padding: 5px 14px 5px 14px;
-                                                                       margin: 5px 5px 5px 5px;
-                                                                       animation: glowingD 5000ms infinite;"
+                                                    # column(
+                                                    #     4,
+                                                    #     div(
+                                                    #         style="/*margin-bottom: 10px;*/
+                                                    #                border-radius: 10px;
+                                                    #                padding: 5px 10px 0px 10px;
+                                                    #                background-color: #FFF5EE;",
+                                                    #         prettyRadioButtons(
+                                                    #             inputId="scale_data_inter",
+                                                    #             label=HTML("<font color='orange'>Data used</font>:"),
+                                                    #             choices=c("Anchor points", "Segments"),
+                                                    #             selected="Anchor points",
+                                                    #             icon=icon("check"),
+                                                    #             inline=TRUE,
+                                                    #             status="info",
+                                                    #             animation="jelly"
+                                                    #         )
+                                                    #     )
+                                                    # ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="margin-bottom: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 5px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            prettyRadioButtons(
+                                                                inputId="scale_link_inter",
+                                                                label=HTML("<font color='orange'>Scale in</font>:"),
+                                                                choices=c("Gene number", "True length"),
+                                                                selected="Gene number",
+                                                                icon=icon("check"),
+                                                                inline=TRUE,
+                                                                status="info",
+                                                                animation="jelly"
                                                             )
-                                                        ),
-                                                        column(
-                                                            width=12,
-                                                            id="ParZoomIn"
                                                         )
+                                                    ),
+                                                    column(
+                                                        width=12,
+                                                        id="SyntenicBlock_inter"
+                                                    )
+                                                ),
+                                                hr(class="splitting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
+                                                    )
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        4,
+                                                        textInput(
+                                                            inputId="gene_inter",
+                                                            label="Seach the Gene:",
+                                                            value="",
+                                                            width="100%",
+                                                            placeholder="Gene Id"
+                                                        )
+                                                    ),
+                                                    column(
+                                                        1,
+                                                        actionButton(
+                                                            inputId="searchButton_inter",
+                                                            "",
+                                                            width="40px",
+                                                            icon=icon("search"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #8080C0;
+                                                                   border-color: #fff;
+                                                                   margin: 30px 0px 0px -15px; "
+                                                        )
+                                                    ),
+                                                    column(
+                                                        7,
+                                                        uiOutput("foundItemsMessage_inter")
+                                                    ),
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        uiOutput("multiplicon_mirco_inter_plot")
                                                     )
                                                 )
                                             )
@@ -1162,138 +2359,1360 @@ observeEvent(input$iadhore_config_go, {
                     )
                 )
             })
-        }
 
-        if( !is.null(input$iadhore_multiple_species_list) ){
-            if( length(input$iadhore_multiple_species_list) < 3 ){
-                shinyalert(
-                    "Opps!",
-                    "Please choose at least three species to analyze the multiple-species-alignment",
-                    type="error"
-                )
+            incProgress(amount=1, message="Configuration Done")
+            Sys.sleep(.4)
+        })
+
+        observe({
+            if( length(dirPath) > 0 && !is.null(input$chr_num_cutoff) ){
+                inter_species_dir <- dirname(comparing_df$comparing_Path)
+                genesFile <- paste0(inter_species_dir, "/genes.txt")
+                chr_gene_num_file <- paste0(inter_species_dir, "/chr_gene_nums.txt")
+
+                if( !file.exists(chr_gene_num_file) ){
+                    if( file.exists(genesFile) ){
+                        genes <- suppressMessages(
+                            vroom(
+                                genesFile,
+                                delim="\t",
+                                col_names=TRUE
+                            )
+                        )
+                        gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                        colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
+                        gene_num_df$gene_num <- gene_num_df$gene_num + 1
+                        write.table(
+                            gene_num_df,
+                            file=chr_gene_num_file,
+                            sep="\t",
+                            quote=F,
+                            row.names=FALSE
+                        )
+                    }
+                    else{
+                        shinyalert(
+                            "Oops",
+                            "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
+                            type="error"
+                        )
+                    }
+                }else{
+                    gene_num_df <- read.table(
+                        chr_gene_num_file,
+                        sep="\t",
+                        header=TRUE
+                    )
+                }
+
+                if( is.null(gene_num_df) ){
+                    querys <- NULL
+                }else{
+                    querys <- gene_num_df %>%
+                        filter(
+                            gene_num >= input$chr_num_cutoff,
+                            sp == gsub(" ", "_", query_species)
+                        ) %>%
+                        arrange(seqchr) %>%
+                        pull(seqchr)
+                }
+                if( length(querys) > 0 ){
+                    updatePickerInput(
+                        session,
+                        "synteny_query_chr_inter",
+                        choices=querys,
+                        choicesOpt=list(
+                            content=lapply(gtools::mixedsort(querys), function(choice) {
+                                HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
+                            })
+                        )
+                    )
+                }else{
+                    shinyalert(
+                        "Oops",
+                        "No chromosome found. Please lower the cutoff of gene number in the chromosome, and then try again...",
+                        type="error"
+                    )
+                }
+
+                if( is.null(gene_num_df) ){
+                    subjects <- NULL
+                }else{
+                    subjects <- gene_num_df %>%
+                        filter(
+                            gene_num >= input$chr_num_cutoff,
+                            sp == gsub(" ", "_", subject_species)
+                        ) %>%
+                        arrange(seqchr) %>%
+                        pull(seqchr)
+                }
+                if( length(subjects) > 0 ){
+                    updatePickerInput(
+                        session,
+                        "synteny_subject_chr_inter",
+                        choices=subjects,
+                        choicesOpt=list(
+                            content=lapply(gtools::mixedsort(subjects), function(choice) {
+                                HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
+                            })
+                        )
+                    )
+                }else{
+                    shinyalert(
+                        "Oops",
+                        "No chromosome found. Please lower the cutoff of gene number in the chromosome, and then try again...",
+                        type="error"
+                    )
+                }
             }
-            else{
-                multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
-                color_list_renew <- c(
-                    "#ff7f00", "#FFA750", "#0064A7", "#008DEC",
-                    "#088A00", "#0CD300", "#e31a1c", "#fb9a99", "#cab2d6"
+        })
+    }else{
+        shinyalert(
+            "Oops",
+            "Please select the species first, and then click the confirm button...",
+            type="error"
+        )
+    }
+})
+
+observeEvent(input$synplot_go_inter, {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+
+            tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
+            tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
+            comparing_df <- path_df[path_df$comparing_ID == tmp_comparing_id_1 |
+                                        path_df$comparing_ID == tmp_comparing_id_2, ]
+
+            inter_species_dir <- dirname(comparing_df$comparing_Path)
+
+            split_values <- strsplit(comparing_df$comparing_ID, "_vs_")[[1]]
+
+            querySpecies <- gsub("_", " ", split_values[1])
+            subjectSpecies <- gsub("_", " ", split_values[2])
+
+            syn_dir <- dirname(dirname(dirname(comparing_df$comparing_Path)))[1]
+            sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+
+            sp_chr_len_file <- paste0(dirname(sp_gff_info_xls), "/species_chr_len.RData")
+            load(sp_chr_len_file)
+
+            sp_gff_info_df <- suppressMessages(
+                vroom(
+                    sp_gff_info_xls,
+                    col_names=c("species", "cdsPath", "gffPath"),
+                    delim="\t"
                 )
-                total_species <- path_df %>%
-                    filter(comparing_ID %in% input$iadhore_multiple_species_list)
-                color_list_selected_new <- rep(color_list_renew, length.out=nrow(total_species))
-                species_choice <- gsub("_", " ", total_species$comparing_ID)
-                output$iadhore_multiple_species_output <- renderUI({
-                    div(
-                        style="padding-right: 10px;
-                               padding-left: 10px;
+            )
+            cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+            gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+            new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+            new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+            sp_gff_info_df$cdsPath <- new_cds_files
+            sp_gff_info_df$gffPath <- new_gff_files
+
+            query_selected_chr_list <- input$synteny_query_chr_inter
+            query_chr_len_df <- chr_len_df[chr_len_df$sp==split_values[1], ] %>%
+                filter(seqchr %in% query_selected_chr_list)
+
+            subject_selected_chr_list <- input$synteny_subject_chr_inter
+            subject_chr_len_df <- chr_len_df[chr_len_df$sp==split_values[2], ] %>%
+                filter(seqchr %in% subject_selected_chr_list)
+
+            chr_gene_num_file <- paste0(inter_species_dir, "/chr_gene_nums.txt")
+
+            gene_num_df <- read.table(
+                chr_gene_num_file,
+                sep="\t",
+                header=TRUE
+            )
+
+            withProgress(message='Analyzing in progress', value=0, {
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Preparing Data...")
+                genesFile <- paste0(inter_species_dir, "/genes.txt")
+                multiplicon_file <- paste0(inter_species_dir, "/multiplicons.txt")
+                multiplicon_ks_file <- paste0(inter_species_dir, "/multiplicons.merged_ks.txt")
+                anchorpointfile <- paste0(inter_species_dir, "/anchorpoints.txt")
+                anchorpoint_merged_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos.txt")
+                anchorpointout_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos_ks.txt")
+                ks_file <- paste0(inter_species_dir, "/anchorpoints.ks.txt")
+
+                if( file.exists(ks_file) ){
+                    if( !file.exists(anchorpointout_file) ){
+                        obtain_coordiantes_for_anchorpoints(
+                            anchorpoints=anchorpointfile,
+                            species1=querySpecies,
+                            gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                            species2=subjectSpecies,
+                            gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
+                            out_file=anchorpoint_merged_file
+                        )
+                    }
+
+                    if( !file.exists(multiplicon_ks_file) ){
+                        obtain_mean_ks_for_each_multiplicon(
+                            multiplicon_file=multiplicon_file,
+                            anchorpoint_file=anchorpoint_merged_file,
+                            ks_file=ks_file,
+                            species1=querySpecies,
+                            species2=subjectSpecies,
+                            anchorpointout_file=anchorpointout_file,
+                            outfile=multiplicon_ks_file
+                        )
+                    }
+                }
+                else{
+                    shinyalert(
+                        "Opps!",
+                        paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
+                        type="error",
+                    )
+                }
+
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Calculating Done")
+
+                final_multiplicons <- suppressMessages(
+                    vroom(
+                        multiplicon_ks_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                final_anchorpoints <- suppressMessages(
+                    vroom(
+                        anchorpointout_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                query_chr_num_df <- gene_num_df %>%
+                    filter(sp==gsub(" ", "_", querySpecies)) %>%
+                    filter(seqchr %in% query_selected_chr_list)
+
+                subject_chr_num_df <- gene_num_df %>%
+                    filter(sp==gsub(" ", "_", subjectSpecies)) %>%
+                    filter(seqchr %in% subject_selected_chr_list)
+
+                anchoredPointScutoff <- "anchoredPointsCutoff_inter"
+
+                selected_multiplicons <- final_multiplicons %>%
+                    filter(listX %in% query_selected_chr_list) %>%
+                    filter(listY %in% subject_selected_chr_list) %>%
+                    filter(num_anchorpoints >= input[[anchoredPointScutoff]])
+
+                selected_multiplicons_Id <- selected_multiplicons$multiplicon
+
+                depth_list <- computing_depth(
+                    anchorpoint_ks_file=anchorpointout_file,
+                    multiplicon_id=selected_multiplicons_Id,
+                    selected_query_chr=query_selected_chr_list,
+                    selected_subject_chr=subject_selected_chr_list
+                )
+                query_selected_depth_list <- depth_list$query_depth
+                subject_selected_depth_list <- depth_list$subject_depth
+
+                selected_anchorpoints <- final_anchorpoints %>%
+                    filter(listX %in% query_selected_chr_list) %>%
+                    filter(listY %in% subject_selected_chr_list) %>%
+                    filter(multiplicon %in% selected_multiplicons_Id)
+
+                plotSize <- reactiveValues(
+                    value=400
+                )
+                observeEvent(input[["svg_spacing_add_dot_inter"]], {
+                    plotSize$value <- plotSize$value + 50
+                })
+                observeEvent(input[["svg_spacing_sub_dot_inter"]], {
+                    plotSize$value <- plotSize$value - 50
+                })
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Drawing Dot Plot...")
+
+                observe({
+                    plot_dot_num_data <- list(
+                        "plot_id"="dotView_inter",
+                        "multiplicons"=selected_multiplicons,
+                        "anchorpoints"=selected_anchorpoints,
+                        "query_sp"=querySpecies,
+                        "query_chr_gene_nums"=query_chr_num_df,
+                        "query_depths"=query_selected_depth_list,
+                        "subject_sp"=subjectSpecies,
+                        "subject_chr_gene_nums"=subject_chr_num_df,
+                        "subject_depths"=subject_selected_depth_list,
+                        "size"=plotSize$value
+                    )
+                    session$sendCustomMessage("Dot_Num_Plotting", plot_dot_num_data)
+                })
+                Sys.sleep(.2)
+                incProgress(amount=1, message="Drawing Dot Plot Done")
+            })
+
+            # plot parallel figure
+            withProgress(message='Parallel Syntenty Figure in progress', value=0, {
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
+                segmentsfile <- paste0(inter_species_dir, "/segments.txt")
+                segs_pos_file <- paste0(inter_species_dir, "/segments.merged_pos.txt")
+
+                observe({
+                    # if( input$scale_data_inter == "Segments" ){
+                    #     if( !file.exists(segs_pos_file) ){
+                    #         obtain_coordiantes_for_segments(
+                    #             seg_file=segmentsfile,
+                    #             sp1=gsub(" ", "_", querySpecies),
+                    #             gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                    #             sp2=gsub(" ", "_", subjectSpecies),
+                    #             gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
+                    #             out_file=segs_pos_file
+                    #         )
+                    #     }
+                    #     segs_data <- suppressMessages(
+                    #         vroom(
+                    #             segs_pos_file,
+                    #             delim="\t"
+                    #         )
+                    #     )
+                    #     selected_segs_data <- segs_data %>%
+                    #         filter(listX %in% query_selected_chr_list) %>%
+                    #         filter(listY %in% subject_selected_chr_list) %>%
+                    #         filter(multiplicon %in% selected_multiplicons_Id)
+                    #
+                    #     widthSpacingRainbow <- reactiveValues(
+                    #         value=800
+                    #     )
+                    #     heightSpacingRainbow <- reactiveValues(
+                    #         value=300
+                    #     )
+                    #     observeEvent(input[["svg_vertical_spacing_add_rainbow_inter"]], {
+                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value + 50
+                    #     })
+                    #     observeEvent(input[["svg_vertical_spacing_sub_rainbow_inter"]], {
+                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value - 50
+                    #     })
+                    #     observeEvent(input[["svg_horizontal_spacing_add_rainbow_inter"]], {
+                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value + 50
+                    #     })
+                    #     observeEvent(input[["svg_horizontal_spacing_sub_rainbow_inter"]], {
+                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value - 50
+                    #     })
+                    #     if( input$scale_link_inter == "True length" ){
+                    #         print(nrow(selected_segs_data))
+                    #         plot_parallel_data <- list(
+                    #             "plot_id"="SyntenicBlock_inter",
+                    #             "segs"=selected_segs_data,
+                    #             "query_sp"=querySpecies,
+                    #             "query_chr_lens"=query_chr_len_df,
+                    #             "subject_sp"=subjectSpecies,
+                    #             "subject_chr_lens"=subject_chr_len_df,
+                    #             "width"=widthSpacingRainbow$value,
+                    #             "height"=heightSpacingRainbow$value
+                    #         )
+                    #         session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                    #     }
+                    #     else{
+                    #         plot_parallel_data <- list(
+                    #             "plot_id"="SyntenicBlock_inter",
+                    #             "anchorpoints"=selected_anchorpoints,
+                    #             "query_sp"=querySpecies,
+                    #             "query_chr_nums"=query_chr_num_df,
+                    #             "subject_sp"=subjectSpecies,
+                    #             "subject_chr_nums"=subject_chr_num_df,
+                    #             "width"=widthSpacingRainbow$value,
+                    #             "height"=heightSpacingRainbow$value
+                    #         )
+                    #         session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
+                    #     }
+                    # }
+                    # else{
+                        widthSpacingRainbow <- reactiveValues(
+                            value=800
+                        )
+                        heightSpacingRainbow <- reactiveValues(
+                            value=300
+                        )
+                        observeEvent(input[["svg_vertical_spacing_add_rainbow_inter"]], {
+                            heightSpacingRainbow$value <- heightSpacingRainbow$value + 50
+                        })
+                        observeEvent(input[["svg_vertical_spacing_sub_rainbow_inter"]], {
+                            heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                        })
+                        observeEvent(input[["svg_horizontal_spacing_add_rainbow_inter"]], {
+                            widthSpacingRainbow$value <- widthSpacingRainbow$value + 50
+                        })
+                        observeEvent(input[["svg_horizontal_spacing_sub_rainbow_inter"]], {
+                            widthSpacingRainbow$value <- widthSpacingRainbow$value - 50
+                        })
+                        if( input$scale_link_inter == "True length" ){
+                            plot_parallel_data <- list(
+                                "plot_id"="SyntenicBlock_inter",
+                                "segs"=selected_anchorpoints,
+                                "query_sp"=querySpecies,
+                                "query_chr_lens"=query_chr_len_df,
+                                "subject_sp"=subjectSpecies,
+                                "subject_chr_lens"=subject_chr_len_df,
+                                "width"=widthSpacingRainbow$value,
+                                "height"=heightSpacingRainbow$value #,
+                                # "anchor_pair"="anchor_pair"
+                            )
+                            session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                        }
+                        else{
+                            plot_parallel_data <- list(
+                                "plot_id"="SyntenicBlock_inter",
+                                "anchorpoints"=selected_anchorpoints,
+                                "query_sp"=querySpecies,
+                                "query_chr_nums"=query_chr_num_df,
+                                "subject_sp"=subjectSpecies,
+                                "subject_chr_nums"=subject_chr_num_df,
+                                "width"=widthSpacingRainbow$value,
+                                "height"=heightSpacingRainbow$value
+                            )
+                            session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
+                        }
+                    # }
+                })
+
+                Sys.sleep(.3)
+                incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+            })
+        }
+    }
+})
+
+observeEvent(input[["searchButton_inter"]], {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+
+            tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
+            tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
+            comparing_df <- path_df[path_df$comparing_ID == tmp_comparing_id_1 |
+                                        path_df$comparing_ID == tmp_comparing_id_2, ]
+
+            split_values <- strsplit(comparing_df$comparing_ID, "_vs_")[[1]]
+
+            querySpecies <- gsub("_", " ", split_values[1])
+            subjectSpecies <- gsub("_", " ", split_values[2])
+
+            inter_species_dir <- dirname(comparing_df$comparing_Path)
+            genesFile <- paste0(inter_species_dir, "/genes.txt")
+            multiplicon_file <- paste0(inter_species_dir, "/multiplicons.txt")
+            multiplicon_ks_file <- paste0(inter_species_dir, "/multiplicons.merged_ks.txt")
+            anchorpointfile <- paste0(inter_species_dir, "/anchorpoints.txt")
+            anchorpoint_merged_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos.txt")
+            anchorpointout_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos_ks.txt")
+            ks_file <- paste0(inter_species_dir, "/anchorpoints.ks.txt")
+
+            withProgress(message='Searching Gene in progress', value=0, {
+                Sys.sleep(.8)
+                incProgress(amount=.2, message="Preparing Data...")
+                syn_dir <- dirname(dirname(dirname(comparing_df$comparing_Path)))[1]
+                sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+                sp_gff_info_df <- suppressMessages(
+                    vroom(
+                        sp_gff_info_xls,
+                        col_names=c("species", "cdsPath", "gffPath"),
+                        delim="\t"
+                    )
+                )
+                cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+                gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+                new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+                new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+                sp_gff_info_df$cdsPath <- new_cds_files
+                sp_gff_info_df$gffPath <- new_gff_files
+
+                if( file.exists(ks_file) ){
+                    if( !file.exists(anchorpointout_file) ){
+                        obtain_coordiantes_for_anchorpoints(
+                            anchorpoints=anchorpointfile,
+                            species1=querySpecies,
+                            gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                            species2=subjectSpecies,
+                            gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
+                            out_file=anchorpoint_merged_file
+                        )
+                    }
+
+                    if( !file.exists(multiplicon_ks_file) ){
+                        obtain_mean_ks_for_each_multiplicon(
+                            multiplicon_file=multiplicon_file,
+                            anchorpoint_file=anchorpoint_merged_file,
+                            ks_file=ks_file,
+                            species1=querySpecies,
+                            species2=subjectSpecies,
+                            anchorpointout_file=anchorpointout_file,
+                            outfile=multiplicon_ks_file
+                        )
+                    }
+                    Sys.sleep(.2)
+                    incProgress(amount=.3, message="Calculating Done")
+                }
+                else{
+                    shinyalert(
+                        "Opps!",
+                        paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
+                        type="error",
+                    )
+                }
+
+                final_anchorpoints <- suppressMessages(
+                    vroom(
+                        anchorpointout_file,
+                        col_names=TRUE,
+                        delim="\t")
+                )
+
+                multiplicons <- suppressMessages(
+                    vroom(
+                        multiplicon_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+                final_multiplicons <- fill(multiplicons, genome_x, list_x, .direction="down")
+                colnames(final_multiplicons) <- c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY", "level",
+                                                  "num_anchorpoints", "profile_len", "startX", "endX", "startY", "endY", "is_redundant")
+
+                searchGene <- input[["gene_inter"]]
+                if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
+                    searched_multiplicon_list <- unique(final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]$multiplicon)
+                    searched_multiplicon_df <- final_multiplicons[final_multiplicons$multiplicon %in% searched_multiplicon_list, ]
+                    searched_multiplicon_list <- searched_multiplicon_df[searched_multiplicon_df$is_redundant == 0, ]$multiplicon
+                    searched_anchor_points <- distinct(final_anchorpoints[final_anchorpoints$multiplicon %in% searched_multiplicon_list, ])
+
+                    uiId <- "foundItemsMessage_inter"
+                    output[[uiId]] <- renderUI({
+                        if( length(searched_multiplicon_list) > 0 ){
+                            fluidRow(
+                                column(
+                                    8,
+                                    div(
+                                        style="border: 1px solid #ccc;
+                                               padding: 2px;
+                                               margin-top: 35px;
+                                               margin-left: -40px;
+                                               border-radius: 10px;
+                                               background-color: white;
+                                               font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
+
+                                        if( length(searched_multiplicon_list) == 1 ){
+                                            HTML(
+                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
+                                                      nrow(searched_anchor_points),
+                                                      " Anchor Point is in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                      searched_multiplicon_list[1],
+                                                      "</span>)"
+                                                )
+                                            )
+                                        }else{
+                                            HTML(
+                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
+                                                      nrow(searched_anchor_points),
+                                                      " Anchor Points are in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                      paste(searched_multiplicon_list, collapse=", "),
+                                                      "</span>)"
+                                                )
+                                            )
+                                        }
+                                    )
+                                ),
+                                column(
+                                    4,
+                                    actionButton(
+                                        inputId="plotMicro_inter",
+                                        "Draw Plot",
+                                        icon=icon("pencil-alt"),
+                                        status="secondary",
+                                        style="color: #fff;
+                                               background-color: #8080C0;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 32px 5px 5px 5px;
+                                               animation: glowing 5000ms infinite; "
+                                    )
+                                )
+                            )
+                        }
+                        else{
+                            div(
+                                style="border: 1px solid #ccc;
+                                       padding: 2px;
+                                       margin-top: 30px;
+                                       margin-left: -40px;
+                                       border-radius: 10px;
+                                       background-color: white;
+                                       font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
+                                HTML("<span style='color: #FF79BC; font-weight: bold;'> No Anchor Point</span> is found!")
+                            )
+                        }
+                    })
+
+                    output$multiplicon_mirco_inter_plot <- renderUI({
+                        div(
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    3,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        pickerInput(
+                                            inputId="multiplicon_choose_inter",
+                                            label=HTML("Choose a <font color='orange'>multiplicon</font> to plot:"),
+                                            options=list(
+                                                title='Please select multiplicon below',
+                                                `selected-text-format`="count > 1",
+                                                `actions-box`=TRUE
+                                            ),
+                                            choices=NULL,
+                                            selected=NULL,
+                                            multiple=FALSE
+                                        )
+                                    )
+                                ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        prettyRadioButtons(
+                                            inputId="scale_plotMicro_inter",
+                                            label=HTML("<font color='orange'>Scale in</font>:"),
+                                            choices=c("True length", "Gene number"),
+                                            selected="True length",
+                                            icon=icon("check"),
+                                            status="info",
+                                            animation="jelly"
+                                        )
+                                    )
+                                ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        prettyRadioButtons(
+                                            inputId="link_plotMicro_inter",
+                                            label=HTML("<font color='orange'>Link type</font>:"),
+                                            choices=c("Pairwise", "All"),
+                                            selected="Pairwise",
+                                            icon=icon("check"),
+                                            status="info",
+                                            animation="jelly"
+                                        )
+                                    )
+                                ),
+                                # column(
+                                #     3,
+                                #     div(
+                                #         style="margin-bottom: 10px;
+                                #                border-radius: 10px;
+                                #                padding: 10px 10px 0px 10px;
+                                #                background-color: #FFF5EE;",
+                                #         sliderInput(
+                                #             inputId="level_intra",
+                                #             label=HTML("Set <font color='orange'>maximum level of multiplicon:</font>"),
+                                #             min=2,
+                                #             max=10,
+                                #             step=1,
+                                #             value=5
+                                #         )
+                                #     )
+                                # ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        HTML("Color <font color='orange'>homolog genes</font>:"),
+                                        div(
+                                            style="padding: 20px 10px 5px 10px;
+                                                   background-color: #FFF5EE;",
+                                            prettyToggle(
+                                                inputId="color_homolog_inter",
+                                                label_on="Yes!",
+                                                icon_on=icon("check"),
+                                                status_on="info",
+                                                status_off="warning",
+                                                label_off="No..",
+                                                value=TRUE,
+                                                icon_off=icon("remove", verify_fa=FALSE)
+                                            )
+                                        )
+                                    )
+                                )
+                            ),
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    12,
+                                    h6(HTML("<b>The Synteny Link Plot:</b>")),
+                                    actionButton(
+                                        "svg_vertical_spacing_add_micro_inter",
+                                        "",
+                                        icon("arrows-alt-v"),
+                                        title="Expand vertical spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_vertical_spacing_sub_micro_inter",
+                                        "",
+                                        icon("compress", class="rotate-135"),
+                                        title="Compress vertical spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_horizontal_spacing_add_micro_inter",
+                                        "",
+                                        icon("arrows-alt-h"),
+                                        title="Expand horizontal spacing"
+                                    ),
+                                    actionButton(
+                                        "svg_horizontal_spacing_sub_micro_inter",
+                                        "",
+                                        icon("compress", class="rotate-45"),
+                                        title="Compress horizontal spacing"
+                                    ),
+                                    downloadButton_custom(
+                                        "download_microSyntenicBlock_inter",
+                                        title="Download the Plot",
+                                        status="secondary",
+                                        icon=icon("download"),
+                                        label=HTML(""),
+                                        style="color: #fff;
+                                               background-color: #019858;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 5px 5px 5px 5px;
+                                               animation: glowingD 5000ms infinite;"
+                                    )
+                                ),
+                                column(
+                                    width=12,
+                                    id="microSyntenicBlock_inter"
+                                )
+                            )
+                        )
+                    })
+
+                    observe({
+                        selected_multiplicons_df <- searched_multiplicon_df %>%
+                            filter(is_redundant == 0)
+
+                        selected_multiplicons_list <- selected_multiplicons_df$multiplicon
+
+                        updatePickerInput(
+                            session,
+                            "multiplicon_choose_inter",
+                            choices=selected_multiplicons_list,
+                            selected=selected_multiplicons_list[1],
+                            choicesOpt=list(
+                                content=lapply(selected_multiplicons_list, function(choice) {
+                                    tmp_level <- selected_multiplicons_df %>%
+                                        filter(multiplicon == choice)
+                                    HTML(
+                                        paste0(
+                                            "<div>Multiplicon: <span style='color: #2E8B57; font-weight: bold;'>", choice, "</span>",
+                                            " Level <span style='color: #6A5ACD; font-weight: bold;'>", tmp_level$level, "</span></div>"
+                                        )
+                                    )
+                                })
+                            )
+                        )
+                    })
+
+                }else{
+                    shinyalert(
+                        "Warning!",
+                        "Please input the correct gene name ...",
+                        type="warning",
+                    )
+                }
+                Sys.sleep(.9)
+                incProgress(amount=1, message="Searching Done")
+            })
+        }
+    }
+})
+
+observeEvent(input[["plotMicro_inter"]], {
+    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+    if( length(dirPath) > 0 ){
+        if( isTruthy(input$multiplicon_choose_inter) && !is.null(input$multiplicon_choose_inter) ){
+            if( isTruthy(input$gene_inter) && input$gene_inter != "" ){
+                withProgress(message='Drawing Micro Synteny in progress', value=0, {
+                    Sys.sleep(.5)
+                    load(paste0(dirPath, "/synteny.comparing.RData"))
+                    tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
+                    tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
+                    comparing_df <- path_df[path_df$comparing_ID == tmp_comparing_id_1 |
+                                                path_df$comparing_ID == tmp_comparing_id_2, ]
+
+                    split_values <- strsplit(comparing_df$comparing_ID, "_vs_")[[1]]
+
+                    querySpecies <- gsub("_", " ", split_values[1])
+                    subjectSpecies <- gsub("_", " ", split_values[2])
+
+                    inter_species_dir <- dirname(comparing_df$comparing_Path)
+
+                    genesFile <- paste0(inter_species_dir, "/genes.txt")
+                    multiplicon_file <- paste0(inter_species_dir, "/multiplicons.txt")
+                    anchorpointfile <- paste0(inter_species_dir, "/anchorpoints.txt")
+                    anchorpoint_merged_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos.txt")
+                    anchorpointout_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos_ks.txt")
+                    ks_file <- paste0(inter_species_dir, "/anchorpoints.ks.txt")
+                    genes_file <- paste0(inter_species_dir, "/genes.txt")
+
+                    genes_df <- suppressMessages(
+                        vroom(
+                            genes_file,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+
+                    syn_dir <- dirname(dirname(dirname(comparing_df$comparing_Path)))[1]
+                    sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
+                    sp_gff_info_df <- suppressMessages(
+                        vroom(
+                            sp_gff_info_xls,
+                            col_names=c("species", "cdsPath", "gffPath"),
+                            delim="\t"
+                        )
+                    )
+                    cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+                    gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+                    new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+                    new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+                    sp_gff_info_df$cdsPath <- new_cds_files
+                    sp_gff_info_df$gffPath <- new_gff_files
+
+                    segmentsfile <- paste0(inter_species_dir, "/segments.txt")
+
+                    segs <- suppressMessages(
+                        vroom(
+                            segmentsfile,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+
+                    multiplicons <- suppressMessages(
+                        vroom(
+                            multiplicon_file,
+                            col_names=TRUE,
+                            delim="\t"
+                        )
+                    )
+                    final_multiplicons <- fill(multiplicons, genome_x, list_x, .direction="down")
+                    colnames(final_multiplicons) <- c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY", "level",
+                                                      "num_anchorpoints", "profile_len", "startX", "endX", "startY", "endY", "is_redundant")
+
+                    final_anchorpoints <- suppressMessages(
+                        vroom(
+                            anchorpointout_file,
+                            col_names=TRUE,
+                            delim="\t")
+                    )
+
+                    searchGene <- input[["gene_inter"]]
+                    if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
+                        searched_multiplicon_list <- unique(final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]$multiplicon)
+                        searched_multiplicons_df <- final_multiplicons[final_multiplicons$multiplicon %in% searched_multiplicon_list, ]
+                        searched_multiplicons_df <- searched_multiplicons_df[searched_multiplicons_df$is_redundant == 0, ]
+                        searched_multiplicon_list <- searched_multiplicons_df$multiplicon
+                        searched_anchor_points_df <- final_anchorpoints[final_anchorpoints$multiplicon %in% searched_multiplicon_list, ]
+
+                        if( length(searched_multiplicon_list) == 0 ){
+                            shinyalert(
+                                "Warning!",
+                                "No Multiplicon found! Please search the target gene or select multiplcon to plot first...",
+                                type="warning"
+                            )
+                        }
+                        else{
+                            # print(searchGene)
+                            query_selected_chr_list <- unique(c(searched_anchor_points_df$listX, searched_anchor_points_df$listY))
+                            subject_selected_chr_list <- query_selected_chr_list
+
+                            searched_chrs_coord_df <- data.frame()
+
+                            searched_multiplicon_df <- data.frame()
+                            searched_chrs_df <- data.frame()
+                            searched_genes_df <- data.frame()
+                            searched_anchor_points_df <- data.frame()
+                            for( i in 1:length(searched_multiplicon_list) ){
+                                each_multiplicon <- searched_multiplicon_list[i]
+                                # get the multiplicon level
+                                each_multiplicon_df <- final_multiplicons %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_level <- each_multiplicon_df$level
+                                # print(paste("multiplicon:", each_multiplicon, "level:", each_level))
+                                each_multiplicon_df$searched_multiplicon <- each_multiplicon
+
+                                tmp_multiplicon_df <- data.frame()
+
+                                tmp_multiplicon_df <- rbind(tmp_multiplicon_df, each_multiplicon_df)
+                                if( each_level > 2 ){
+                                    # find the parent multiplcon
+                                    previous_parent_multiplicon <- NA
+
+                                    parent_multiplicon <- each_multiplicon_df$parent
+                                    parent_multiplicon_df <- final_multiplicons %>%
+                                        filter(multiplicon == parent_multiplicon)
+                                    parent_multiplicon_df$searched_multiplicon <- each_multiplicon
+                                    tmp_multiplicon_df <- rbind(tmp_multiplicon_df, parent_multiplicon_df)
+
+                                    not_parent_multiplicon <- TRUE
+                                    while( not_parent_multiplicon ){
+                                        parent_multiplicon <- unique(final_multiplicons[final_multiplicons$multiplicon == parent_multiplicon, ]$parent)
+                                        pre_multiplicon_df <- final_multiplicons %>%
+                                            filter(multiplicon == parent_multiplicon)
+                                        if( nrow(pre_multiplicon_df) > 0 ){
+                                            pre_multiplicon_df$searched_multiplicon <- each_multiplicon
+                                            tmp_multiplicon_df <- rbind(tmp_multiplicon_df, pre_multiplicon_df)
+                                            if( is.na(parent_multiplicon) ){
+                                                break
+                                            }
+                                        }else{
+                                            break
+                                        }
+                                    }
+                                }
+
+                                searched_multiplicon_df <- rbind(searched_multiplicon_df, tmp_multiplicon_df)
+
+                                # get segments
+                                each_segs_df <- segs %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_segs_df$searched_multiplicon <- each_multiplicon
+
+                                gff_file1 <- sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath
+                                gff_df1 <- suppressMessages(
+                                    vroom(
+                                        gff_file1,
+                                        delim="\t",
+                                        comment="#",
+                                        col_names=FALSE
+                                    )
+                                )
+                                position_df1 <- gff_df1 %>%
+                                    filter(gff_df1$X3=="mRNA") %>%
+                                    select(X1, X9, X4, X5, X7) %>%
+                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))
+                                colnames(position_df1) <- c("seqchr", "gene", "start", "end", "strand")
+
+                                gff_file2 <- sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath
+                                gff_df2 <- suppressMessages(
+                                    vroom(
+                                        gff_file2,
+                                        delim="\t",
+                                        comment="#",
+                                        col_names=FALSE
+                                    )
+                                )
+                                position_df2 <- gff_df2 %>%
+                                    filter(gff_df2$X3=="mRNA") %>%
+                                    select(X1, X9, X4, X5, X7) %>%
+                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))
+                                colnames(position_df2) <- c("seqchr", "gene", "start", "end", "strand")
+
+                                position_df <- rbind(position_df1, position_df2)
+
+                                start_subset <- select(position_df, gene, start)
+                                merged_data <- left_join(
+                                    each_segs_df,
+                                    start_subset,
+                                    by=c("first"="gene")
+                                )
+
+                                end_subset <- select(position_df, gene, end)
+                                merged_data <- left_join(
+                                    merged_data,
+                                    end_subset,
+                                    by=c("last"="gene")
+                                )
+
+                                each_segs_df <- merged_data %>%
+                                    select(-id)
+                                colnames(each_segs_df) <- c(
+                                    "multiplicon", "genome", "list",
+                                    "first", "last", "order", "searched_multiplicon",
+                                    "min", "max"
+                                )
+
+                                searched_chrs_df <- rbind(searched_chrs_df, each_segs_df)
+
+                                # get segments coord
+                                each_seg_coord_df <- segs %>%
+                                    filter(multiplicon == each_multiplicon)
+                                each_seg_coord_df$searched_multiplicon <- each_multiplicon
+
+                                genes_coord_subset <- select(genes_df, id, coordinate)
+                                merged_data_tmp <- left_join(
+                                    each_seg_coord_df,
+                                    genes_coord_subset,
+                                    by=c("first"="id")
+                                )
+
+                                merged_data_tmp <- left_join(
+                                    merged_data_tmp,
+                                    genes_coord_subset,
+                                    by=c("last"="id")
+                                )
+                                each_seg_coord_df <- merged_data_tmp %>%
+                                    select(-id)
+
+                                colnames(each_seg_coord_df) <- c(
+                                    "multiplicon", "genome", "list",
+                                    "first", "last", "order", "searched_multiplicon",
+                                    "min", "max"
+                                )
+
+                                searched_chrs_coord_df <- rbind(searched_chrs_coord_df, each_seg_coord_df)
+
+                                # get gene info
+                                each_genes_df <- position_df %>%
+                                    inner_join(each_segs_df, by=c("seqchr"="list"), multiple="all") %>%
+                                    filter(start >= min, end <= max) %>%
+                                    distinct() %>%
+                                    select(seqchr, gene, start, end, strand, searched_multiplicon, min, max) %>%
+                                    mutate(start=start-min, end=end-min) %>%
+                                    select(-min, -max)
+
+                                tmp_genes_df <- each_genes_df %>%
+                                    inner_join(genes_df, by=c("gene"="id"), multiple="all") %>%
+                                    select(-genome, -list, -orientation)
+
+                                tmp_genes_df$searched_multiplicon <- each_multiplicon
+                                searched_genes_df <- rbind(searched_genes_df, tmp_genes_df)
+
+                                # get anchor points
+                                each_anchor_points_df <- final_anchorpoints %>%
+                                    filter(geneX %in% tmp_genes_df$gene | geneY %in% tmp_genes_df$gene) %>%
+                                    filter(multiplicon %in% tmp_multiplicon_df$multiplicon)
+                                each_anchor_points_df$searched_multiplicon <- each_multiplicon
+
+                                searched_anchor_points_df <- rbind(searched_anchor_points_df, each_anchor_points_df)
+                            }
+
+                            # draw the micro level plot
+                            widthSpacingMicro <- reactiveValues(
+                                value=900
+                            )
+                            heightSpacingMicro <- reactiveValues(
+                                value=50
+                            )
+                            observeEvent(input[["svg_vertical_spacing_add_micro_inter"]], {
+                                heightSpacingMicro$value <- heightSpacingMicro$value + 50
+                            })
+                            observeEvent(input[["svg_vertical_spacing_sub_micro_inter"]], {
+                                heightSpacingMicro$value <- heightSpacingMicro$value - 50
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_add_micro_inter"]], {
+                                widthSpacingMicro$value <- widthSpacingMicro$value + 50
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_sub_micro_inter"]], {
+                                widthSpacingMicro$value <- widthSpacingMicro$value - 50
+                            })
+
+                            # print(input$multiplicon_choose_inter)
+                            # print(input[["gene_inter"]])
+                            observe({
+                                selected_multiplicons_df <- searched_multiplicon_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_inter)
+
+                                heightMicroPlot_intra <- 150 * nrow(selected_multiplicons_df) + 100
+
+                                selected_gene_df <- searched_genes_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_inter)
+
+                                selected_anchor_point_df <- searched_anchor_points_df %>%
+                                    filter(searched_multiplicon == input$multiplicon_choose_inter)
+
+                                # cluster genes
+                                anchor_point_group_df <- selected_anchor_point_df[, c("geneX", "geneY")]
+
+                                tmp_links_g <- graph_from_data_frame(anchor_point_group_df)
+                                tmp_cluster_g <- clusters(tmp_links_g)
+
+                                anchor_point_group_df$group <- tmp_cluster_g$membership[as.character(anchor_point_group_df$geneX)]
+
+                                if( input$scale_plotMicro_inter == "True length" ){
+                                    selected_chr_df <- searched_chrs_df %>%
+                                        filter(searched_multiplicon == input$multiplicon_choose_inter)
+
+                                    microSynPlotData <- list(
+                                        "plot_id"="inter",
+                                        "anchorpoints"=selected_anchor_point_df,
+                                        "multiplicons"=selected_multiplicons_df,
+                                        "genes"=distinct(selected_gene_df),
+                                        "achorPointGroups"=anchor_point_group_df,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "chrs"=selected_chr_df,
+                                        "targe_gene"=input[["gene_inter"]],
+                                        "width"=widthSpacingMicro$value,
+                                        "height"=heightMicroPlot_intra,
+                                        "heightScale"=heightSpacingMicro$value
+                                    )
+                                    if( isTruthy(input$color_homolog_inter) && input$color_homolog_inter ){
+                                        microSynPlotData[["color_gene"]] <- 1
+                                    }else{
+                                        microSynPlotData[["color_gene"]] <- 0
+                                    }
+
+                                    if( isTruthy(input$link_plotMicro_inter) && input$link_plotMicro_inter == "Pairwise" ){
+                                        microSynPlotData[["link_all"]] <- 0
+                                    }else{
+                                        microSynPlotData[["link_all"]] <- 1
+                                    }
+                                    session$sendCustomMessage("microSynInterPlotting", microSynPlotData)
+                                }
+                                else{
+                                    selected_chr_coord_df <- searched_chrs_coord_df %>%
+                                        filter(searched_multiplicon == input$multiplicon_choose_inter)
+
+                                    microSynPlotData <- list(
+                                        "plot_id"="inter",
+                                        "anchorpoints"=selected_anchor_point_df,
+                                        "multiplicons"=selected_multiplicons_df,
+                                        "genes"=distinct(selected_gene_df),
+                                        "achorPointGroups"=anchor_point_group_df,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "chrs"=selected_chr_coord_df,
+                                        "targe_gene"=input[["gene_inter"]],
+                                        "width"=widthSpacingMicro$value,
+                                        "height"=heightMicroPlot_intra,
+                                        "heightScale"=heightSpacingMicro$value
+                                    )
+                                    if( isTruthy(input$color_homolog_inter) && input$color_homolog_inter ){
+                                        microSynPlotData[["color_gene"]] <- 1
+                                    }else{
+                                        microSynPlotData[["color_gene"]] <- 0
+                                    }
+
+                                    if( isTruthy(input$link_plotMicro_inter) && input$link_plotMicro_inter == "Pairwise" ){
+                                        microSynPlotData[["link_all"]] <- 0
+                                    }else{
+                                        microSynPlotData[["link_all"]] <- 1
+                                    }
+                                    session$sendCustomMessage("microSynInterPlottingGeneNumber", microSynPlotData)
+                                }
+
+                            })
+                        }
+                    }
+
+                    Sys.sleep(.9)
+                    incProgress(amount=1, message="Drawing Micro Synteny Done")
+                })
+            }
+        }
+        else{
+            shinyalert(
+                "Warning!",
+                "Please select a multiplicon first and then switch on this ...",
+                type="warning",
+            )
+        }
+    }
+})
+
+observeEvent(input$confirm_multi_comparing_go, {
+    if( isTruthy(input$iadhore_multiple_species_list) && !is.null(input$iadhore_multiple_species_list) ){
+        if( length(input$iadhore_multiple_species_list) < 3 ){
+            shinyalert(
+                "Opps!",
+                "Please choose at least three species to analyze the multiple-species-alignment",
+                type="error"
+            )
+        }
+        else{
+            shinyjs::runjs("$('#confirm_multi_comparing_go').css('background-color', 'green');")
+            updateActionButton(
+                session,
+                "confirm_multi_comparing_go",
+                icon=icon("check")
+            )
+
+            setTimeoutFunction <- "setTimeout(function() {
+                  $('#confirm_multi_comparing_go').css('background-color', '#C0C0C0');
+                }, 6000);"
+
+            shinyjs::runjs(setTimeoutFunction)
+
+            dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+            load(paste0(dirPath, "/synteny.comparing.RData"))
+
+            multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
+
+            color_list_renew <- c(
+                "#ff7f00", "#FFA750", "#0064A7", "#008DEC",
+                "#088A00", "#0CD300", "#e31a1c", "#fb9a99", "#cab2d6"
+            )
+            total_species <- path_df %>%
+                filter(comparing_ID %in% input$iadhore_multiple_species_list)
+            color_list_selected_new <- rep(color_list_renew, length.out=nrow(total_species))
+
+            species_choice <- gsub("_", " ", total_species$comparing_ID)
+
+            output$iadhore_output <- renderUI({
+                div(
+                    class="boxLike",
+                    style="padding-right: 50px;
+                               padding-left: 50px;
                                padding-top: 10px;
                                padding-bottom: 10px;
-                               background-color: rgba(253, 244, 255, 0.4);",
-                        bsButton(
-                            inputId="plot_button_multiple",
-                            label=HTML("<b><font color='white'>X. Multiple Species Alignment</font></b>"),
-                            style="warning"
+                               background-color: white",
+                    bsButton(
+                        inputId="plot_button_multiple",
+                        label=HTML("<b><font color='white'>Multiple Species Alignment</font></b>"),
+                        style="warning"
+                    ) %>%
+                        bs_embed_tooltip(
+                            title="Click to see more details",
+                            placement="right",
+                            trigger="hover",
+                            options=list(container="body")
                         ) %>%
-                            bs_embed_tooltip(
-                                title="Click to see more details",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ) %>%
-                            bs_attach_collapse("plot_panel_multiple_collapse"),
-                        bs_collapse(
-                            id="plot_panel_multiple_collapse",
-                            show=TRUE,
-                            content=tags$div(
-                                class="well",
-                                fluidRow(
-                                    column(
-                                        12,
-                                        h4(HTML("<b><font color='#D9B300'>Multiple Species Alignment</font></b>"))
-                                    ),
-                                    hr(class="setting"),
-                                    lapply(seq_len(nrow(total_species)), function(ii) {
-                                        each_row <- total_species[ii, ]
-                                        each_dir <- dirname(each_row$comparing_Path)
-                                        genesFile <- paste0(each_dir, "/genes.txt")
-                                        if( !file.exists(genesFile) ){
-                                            shinyalert(
-                                                "Opps!",
-                                                paste0("Error! Fail to access ", genesFile, ". Please check the i-ADHoRe outputs..."),
-                                                type="error"
-                                            )
-                                        }
-                                        genes <- suppressMessages(
-                                            vroom(
-                                                genesFile,
-                                                delim="\t",
-                                                col_names=TRUE
-                                            )
-                                        )
-                                        gene_num_df <- aggregate(remapped_coordinate ~ genome + list, genes, max)
-                                        colnames(gene_num_df) <- c("sp", "chr", "gene_num")
-                                        gene_num_df$gene_num <- gene_num_df$gene_num + 1
-
-                                        if( is.null(gene_num_df) ){
-                                            querys <- NULL
-                                        }else{
-                                            querys <- gene_num_df %>%
-                                                filter(gene_num>500) %>%
-                                                arrange(desc(gene_num)) %>%
-                                                pull(chr)
-                                        }
-
-                                        species <- gsub("_", " ", total_species[ii, ]$comparing_ID)
-                                        column(
-                                            6,
-                                            pickerInput(
-                                                inputId=paste0("multiple_synteny_query_chr_", total_species[ii, ]$comparing_ID),
-                                                label=HTML(paste("<font color='", color_list_selected_new[ii], "'>", icon("dna"), "</font>Select <i><b><font color='", color_list_selected_new[ii], "'>", species, "</font></i></b> Chromosomes:")),
-                                                options=list(
-                                                    title='Please select chromosomes below',
-                                                    `selected-text-format`="count > 2",
-                                                    `actions-box`=TRUE
-                                                ),
-                                                choices=querys,
-                                                choicesOpt=list(
-                                                    content=lapply(querys, function(choice) {
-                                                        HTML(paste0("<div style='color: ", color_list_selected_new[ii], ";'>", choice, "</div>"))
-                                                    })
-                                                ),
-                                                multiple=TRUE
-                                            )
-                                        )
-                                    }),
-                                    hr(class="setting"),
-                                    column(
-                                        12,
+                        bs_attach_collapse("plot_panel_multiple_collapse"),
+                    bs_collapse(
+                        id="plot_panel_multiple_collapse",
+                        show=TRUE,
+                        content=tags$div(
+                            class="well",
+                            style="padding-right: 50px;
+                                   padding-left: 50px;
+                                   padding-top: 20px;
+                                   padding-bottom: 20px;",
+                            fluidRow(
+                                column(
+                                    12,
+                                    div(
+                                        style="padding: 12px 10px 5px 10px;
+                                               border-radius: 10px;
+                                               background-color: #F0FFF0",
                                         selectizeInput(
                                             inputId="order_of_display",
-                                            label=HTML(paste0("Set the <font color='#ff7575'><b>Order</b></font> of <font color='#ff7575'><b>Species</b></font> to Display:")),
+                                            label=HTML(paste0("Set the <font color='orange'><b>Order</b></font> of <font color='orange'><b>Species</b></font> to Display:")),
                                             choices=species_choice,
                                             selected=NULL,
                                             multiple=TRUE,
                                             options=list(
                                                 placeholder="Order species below ...",
                                                 render=I("{
-                                                  option: function(item, escape) {
-                                                    var species=item.label.replace(/_/g, ' ');
-                                                    var style='color: #B97D4B; font-style: italic;';
-                                                    return '<div style=\"' + style + '\">&nbsp;&nbsp;' + escape(species) + '</div>';
-                                                  },
-                                                  item: function(item, escape) {
-                                                    var species=item.label.replace(/_/g, ' ');
-                                                    var style='color: #B97D4B; font-style: italic;';
-                                                    return '<div style=\"' + style + '\">&nbsp;&nbsp;' + escape(species) + '</div>';
-                                                  }
-                                                }"
+                                                      option: function(item, escape) {
+                                                        var species=item.label.replace(/_/g, ' ');
+                                                        var style='color: #B97D4B; font-style: italic;';
+                                                        return '<div style=\"' + style + '\">&nbsp;&nbsp;' + escape(species) + '</div>';
+                                                      },
+                                                      item: function(item, escape) {
+                                                        var species=item.label.replace(/_/g, ' ');
+                                                        var style='color: #B97D4B; font-style: italic;';
+                                                        return '<div style=\"' + style + '\">&nbsp;&nbsp;' + escape(species) + '</div>';
+                                                      }
+                                                    }"
                                                 )
                                             )
                                         )
-                                    ),
-                                    hr(class="setting"),
+                                    )
+                                ),
+                                column(
+                                    12,
+                                    hr(class="setting")
+                                ),
+                                column(
+                                    12,
+                                    h5(HTML(paste0("<font color='orange'>", icon("dna"), "&nbsp;Chromosome</font> setting")))
+                                ),
+                                # column(
+                                #     12,
+                                #     hr(class="setting")
+                                # ),
+                                lapply(seq_len(nrow(total_species)), function(ii) {
+                                    each_row <- total_species[ii, ]
+                                    each_dir <- dirname(each_row$comparing_Path)
+                                    genesFile <- paste0(each_dir, "/genes.txt")
+                                    if( !file.exists(genesFile) ){
+                                        shinyalert(
+                                            "Opps!",
+                                            paste0("Error! Fail to access ", genesFile, ". Please check the i-ADHoRe outputs..."),
+                                            type="error"
+                                        )
+                                    }
+                                    genes <- suppressMessages(
+                                        vroom(
+                                            genesFile,
+                                            delim="\t",
+                                            col_names=TRUE
+                                        )
+                                    )
+                                    gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                                    colnames(gene_num_df) <- c("sp", "chr", "gene_num")
+                                    gene_num_df$gene_num <- gene_num_df$gene_num + 1
+
+                                    if( is.null(gene_num_df) ){
+                                        querys <- NULL
+                                    }else{
+                                        querys <- gene_num_df %>%
+                                            filter(gene_num>100) %>%
+                                            # arrange(desc(gene_num)) %>%
+                                            pull(chr)
+                                    }
+
+                                    species <- gsub("_", " ", total_species[ii, ]$comparing_ID)
                                     column(
-                                        4,
+                                        6,
+                                        div(
+                                            style="padding: 12px 10px 5px 10px;
+                                                   border-radius: 10px;
+                                                   background-color: #F8F8FF",
+                                            pickerInput(
+                                                inputId=paste0("multiple_synteny_query_chr_", total_species[ii, ]$comparing_ID),
+                                                label=HTML(paste("<font color='", color_list_selected_new[ii], "'>", icon("dna"), "</font>Select <i><b><font color='", color_list_selected_new[ii], "'>", species, "</font></i></b> Chromosomes:")),
+                                                options=list(
+                                                    title='Please select chromosomes below',
+                                                    `selected-text-format`="count > 1",
+                                                    `actions-box`=TRUE
+                                                ),
+                                                choices=gtools::mixedsort(querys),
+                                                choicesOpt=list(
+                                                    content=lapply(gtools::mixedsort(querys), function(choice) {
+                                                        HTML(paste0("<div style='color: ", color_list_selected_new[ii], ";'>", choice, "</div>"))
+                                                    })
+                                                ),
+                                                multiple=TRUE
+                                            )
+                                        )
+                                    )
+                                }),
+                                column(
+                                    12,
+                                    hr(class="setting")
+                                ),
+                                column(
+                                    4,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
                                         sliderInput(
                                             inputId="anchoredPointsCutoff_multiple",
                                             label=HTML("<font color='orange'>Cutoff for Anchored Points per Multiplicon:</font>"),
@@ -1302,904 +3721,114 @@ observeEvent(input$iadhore_config_go, {
                                             step=1,
                                             value=3
                                         )
-                                    ),
-                                    column(
-                                        4,
-                                        sliderInput(
-                                            inputId="overlapCutoff_multiple",
-                                            label=HTML("<font color='#7D7DFF'>Cutoff for Overlapping between Sgements:</font>"),
-                                            min=10,
-                                            max=80,
-                                            step=5,
-                                            value=10,
-                                            post="%"
+                                    )
+                                ),
+                                column(
+                                    2,
+                                    div(
+                                        style="margin-bottom: 10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 5px 10px;
+                                               background-color: #FFF5EE;",
+                                        prettyRadioButtons(
+                                            inputId="scale_multiple",
+                                            label=HTML("<font color='orange'>Scale in</font>:"),
+                                            choices=c("True length", "Gene number"),
+                                            selected="True length",
+                                            icon=icon("check"),
+                                            status="info",
+                                            animation="jelly"
                                         )
-                                    ),
+                                    )
+                                ),
+                                # column(
+                                #     4,
+                                #     sliderInput(
+                                #         inputId="overlapCutoff_multiple",
+                                #         label=HTML("<font color='#7D7DFF'>Cutoff for Overlapping between Sgements:</font>"),
+                                #         min=10,
+                                #         max=80,
+                                #         step=5,
+                                #         value=10,
+                                #         post="%"
+                                #     )
+                                # ),
+                                column(
+                                    4,
+                                    actionButton(
+                                        inputId="synplot_multiple_go",
+                                        "Draw Plot",
+                                        icon=icon("play"),
+                                        status="secondary",
+                                        style="color: #fff;
+                                               background-color: #009393;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 50px 5px 5px 5px;
+                                               animation: glowing 5300ms infinite; "
+                                    )
+                                ),
+                                column(
+                                    12,
+                                    hr(class="setting")
+                                ),
+                                div(
+                                    h6(HTML("<b>The Multiple Species Parallel Link Plot:</b><br></br>")),
                                     column(
-                                        2,
+                                        12,
                                         actionButton(
-                                            inputId="synplot_go_last",
-                                            "Draw Plot",
-                                            icon=icon("play"),
+                                            "svg_vertical_spacing_add_multiple",
+                                            "",
+                                            icon("arrows-alt-v"),
+                                            title="Expand vertical spacing"
+                                        ),
+                                        actionButton(
+                                            "svg_vertical_spacing_sub_multiple",
+                                            "",
+                                            icon("compress", class="rotate-135"),
+                                            title="Compress vertical spacing"
+                                        ),
+                                        actionButton(
+                                            "svg_horizontal_spacing_add_multiple",
+                                            "",
+                                            icon("arrows-alt-h"),
+                                            title="Expand horizontal spacing"
+                                        ),
+                                        actionButton(
+                                            "svg_horizontal_spacing_sub_multiple",
+                                            "",
+                                            icon("compress", class="rotate-45"),
+                                            title="Compress horizontal spacing"
+                                        ),
+                                        downloadButton_custom(
+                                            "parallel_download_multiple",
+                                            title="Download the Plot",
                                             status="secondary",
+                                            icon=icon("download"),
+                                            label=HTML(""),
                                             style="color: #fff;
-                                                   background-color: #009393;
+                                                   background-color: #019858;
                                                    border-color: #fff;
                                                    padding: 5px 14px 5px 14px;
-                                                   margin: 50px 5px 5px 5px;
-                                                   animation: glowing 5300ms infinite; "
+                                                   margin: 5px 5px 5px 5px;
+                                                   animation: glowingD 5000ms infinite;"
                                         )
                                     ),
-                                    hr(class="setting"),
-                                    div(
-                                        h6(HTML("<b>The Multiple Species Parallel Link Plot:</b><br></br>")),
-                                        column(
-                                            12,
-                                            actionButton(
-                                                "svg_vertical_spacing_add_multiple",
-                                                "",
-                                                icon("arrows-alt-v"),
-                                                title="Expand vertical spacing"
-                                            ),
-                                            actionButton(
-                                                "svg_vertical_spacing_sub_multiple",
-                                                "",
-                                                icon("compress", class="rotate-135"),
-                                                title="Compress vertical spacing"
-                                            ),
-                                            actionButton(
-                                                "svg_horizontal_spacing_add_multiple",
-                                                "",
-                                                icon("arrows-alt-h"),
-                                                title="Expand horizontal spacing"
-                                            ),
-                                            actionButton(
-                                                "svg_horizontal_spacing_sub_multiple",
-                                                "",
-                                                icon("compress", class="rotate-45"),
-                                                title="Compress horizontal spacing"
-                                            ),
-                                            downloadButton_custom(
-                                                "parallel_download_last",
-                                                title="Download the Plot",
-                                                status="secondary",
-                                                icon=icon("download"),
-                                                label=HTML(""),
-                                                style="color: #fff;
-                                                       background-color: #019858;
-                                                       border-color: #fff;
-                                                       padding: 5px 14px 5px 14px;
-                                                       margin: 5px 5px 5px 5px;
-                                                       animation: glowingD 5000ms infinite;"
-                                            )
-                                        ),
-                                        column(
-                                            width=12,
-                                            id="parallel_plot_multiple_species"
-                                        )
+                                    column(
+                                        width=12,
+                                        id="parallel_plot_multiple_species"
                                     )
                                 )
                             )
                         )
                     )
-                })
-            }
-        }
-
-        if( nrow(selected_df) > 0 ){
-            syn_dir <- dirname(dirname(dirname(selected_df$comparing_Path)))[1]
-            # get the segments and chr lengths of selected chrs
-            sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
-            sp_gff_info_df <- suppressMessages(
-                vroom(sp_gff_info_xls,
-                      col_names=c("species", "cdsPath", "gffPath"),
-                      delim="\t")
-            )
-            cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
-            gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
-            new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
-            new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
-            sp_gff_info_df$cdsPath <- new_cds_files
-            sp_gff_info_df$gffPath <- new_gff_files
-            # source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
-            chr_num_len_df <- obtain_chromosome_length(sp_gff_info_xls)
-            lapply(1:nrow(selected_df), function(x){
-                each_row <- selected_df[x, ]
-                if( each_row$comparing_Type=="Inter" ){
-                    sp_list_tmp <- unique(strsplit(each_row$comparing_ID, split="_vs_")[[1]])
-                    querySpecies <- gsub("_", " ", sp_list_tmp[1])
-                    subjectSpecies <- gsub("_", " ", sp_list_tmp[2])
-
-                    synplot_go_tmp <- paste0("synplot_go_", x)
-                    observeEvent(input[[synplot_go_tmp]], {
-                        chr_len_df <- chr_num_len_df$len_df
-                        renew_x <- x
-                        query_chr_Input <- paste0("synteny_query_chr_", renew_x)
-                        query_selected_chr_list <- input[[query_chr_Input]]
-                        query_chr_len_df <- chr_len_df[chr_len_df$sp==querySpecies, ] %>%
-                            filter(seqchr %in% query_selected_chr_list)
-                        subject_chr_Input<- paste0("synteny_subject_chr_", renew_x)
-                        subject_selected_chr_list <- input[[subject_chr_Input]]
-                        subject_chr_len_df <- chr_len_df[chr_len_df$sp==subjectSpecies, ] %>%
-                            filter(seqchr %in% subject_selected_chr_list)
-
-                        iadhoreDir <- dirname(each_row$comparing_Path)
-
-                        withProgress(message='Analyzing in progress', value=0, {
-                            Sys.sleep(.2)
-                            incProgress(amount=.2, message="Calculating ...")
-                            genesFile <- paste0(iadhoreDir, "/genes.txt")
-                            multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
-                            multiplicon_ks_file <- paste0(iadhoreDir, "/multiplicons.merged_ks.txt")
-                            anchorpointfile <- paste0(iadhoreDir, "/anchorpoints.txt")
-                            anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
-                            anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                            ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
-
-                            if( file.exists(ks_file) ){
-                                if( !file.exists(anchorpointout_file) ){
-                                    # source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
-                                    obtain_coordiantes_for_anchorpoints(
-                                        anchorpoints=anchorpointfile,
-                                        species1=querySpecies,
-                                        gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                                        species2=subjectSpecies,
-                                        gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
-                                        out_file=anchorpoint_merged_file
-                                    )
-                                }
-
-                                if( !file.exists(multiplicon_ks_file) ){
-                                    # source(file="tools/obtain_mean_ks_for_multiplicons.v2.R", local=T, encoding="UTF-8")
-                                    obtain_mean_ks_for_each_multiplicon(
-                                        multiplicon_file=multiplicon_file,
-                                        anchorpoint_file=anchorpoint_merged_file,
-                                        ks_file=ks_file,
-                                        species1=querySpecies,
-                                        species2=subjectSpecies,
-                                        anchorpointout_file=anchorpointout_file,
-                                        outfile=multiplicon_ks_file
-                                    )
-                                }
-                            }
-                            else{
-                                shinyalert(
-                                    "Opps!",
-                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
-                                    type="error",
-                                )
-                            }
-
-                            final_multiplicons <- suppressMessages(
-                                vroom(multiplicon_ks_file,
-                                      col_names=TRUE,
-                                      delim="\t")
-                            )
-
-                            final_anchorpoints <- suppressMessages(
-                                vroom(anchorpointout_file,
-                                      col_names=TRUE,
-                                      delim="\t")
-                            )
-
-                            anchoredPointScutoff <- paste0("anchoredPointsCutoff_", renew_x)
-                            selected_multiplicons <- final_multiplicons %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% subject_selected_chr_list) %>%
-                                filter(num_anchorpoints >= input[[anchoredPointScutoff]])
-                            selected_multiplicons_Id <- selected_multiplicons$multiplicon
-
-                            chr_num_df <- chr_num_len_df$num_df
-
-                            genes <- suppressMessages(
-                                vroom(
-                                    genesFile,
-                                    delim="\t",
-                                    col_names=TRUE
-                                )
-                            )
-                            gene_num_df <- aggregate(remapped_coordinate ~ genome + list, genes, max)
-                            colnames(gene_num_df) <- c("sp", "seqchr", "num")
-                            gene_num_df$gene_num <- gene_num_df$num + 1
-
-                            query_chr_num_df <- gene_num_df %>%
-                                filter(sp==gsub(" ", "_", querySpecies)) %>%
-                                filter(seqchr %in% query_selected_chr_list)
-                            subject_chr_num_df <- gene_num_df %>%
-                                filter(sp==gsub(" ", "_", subjectSpecies)) %>%
-                                filter(seqchr %in% subject_selected_chr_list)
-
-                            # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
-                            depth_list <- computing_depth(
-                                anchorpoint_ks_file=anchorpointout_file,
-                                multiplicon_id=selected_multiplicons_Id,
-                                selected_query_chr=query_selected_chr_list,
-                                selected_subject_chr=subject_selected_chr_list
-                            )
-                            query_selected_depth_list <- depth_list$query_depth
-                            subject_selected_depth_list <- depth_list$subject_depth
-
-                            selected_anchorpoints <- final_anchorpoints %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% subject_selected_chr_list) %>%
-                                filter(multiplicon %in% selected_multiplicons_Id)
-
-                            incProgress(amount=.3, message="Drawing Dot Plot...")
-                            Sys.sleep(.2)
-
-                            plotSize <- reactiveValues(
-                                value=400
-                            )
-                            observeEvent(input[[paste0("svg_spacing_add_dot_", renew_x)]], {
-                                plotSize$value <- plotSize$value + 50
-                            })
-                            observeEvent(input[[paste0("svg_spacing_sub_dot_", renew_x)]], {
-                                plotSize$value <- plotSize$value - 50
-                            })
-                            observe({
-                                plot_dot_num_data <- list(
-                                    "plot_id"=x,
-                                    "multiplicons"=selected_multiplicons,
-                                    "anchorpoints"=selected_anchorpoints,
-                                    "query_sp"=querySpecies,
-                                    "query_chr_gene_nums"=query_chr_num_df,
-                                    "query_depths"=query_selected_depth_list,
-                                    "subject_sp"=subjectSpecies,
-                                    "subject_chr_gene_nums"=subject_chr_num_df,
-                                    "subject_depths"=subject_selected_depth_list,
-                                    "size"=plotSize$value
-                                )
-                                session$sendCustomMessage("Dot_Num_Plotting", plot_dot_num_data)
-                            })
-                            Sys.sleep(.2)
-                            incProgress(amount=1, message="Drawing Dot Plot Done")
-                        })
-                        # plot parallel figure
-                        withProgress(message='Parallel Syntenty Figure in progress', value=0, {
-                            Sys.sleep(.2)
-                            incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
-                            segmentsfile <- paste0(iadhoreDir, "/segments.txt")
-                            segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
-                            if( ! file.exists(segs_pos_file) ){
-                                # source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
-                                obtain_coordiantes_for_segments(
-                                    seg_file=segmentsfile,
-                                    sp1=gsub(" ", "_", querySpecies),
-                                    gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                                    sp2=gsub(" ", "_", subjectSpecies),
-                                    gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
-                                    out_file=segs_pos_file
-                                )
-                            }
-                            segs_data <- suppressMessages(
-                                vroom(
-                                    segs_pos_file,
-                                    delim="\t"
-                                )
-                            )
-                            selected_segs_data <- segs_data %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% subject_selected_chr_list) %>%
-                                filter(multiplicon %in% selected_multiplicons_Id)
-
-                            widthSpacingRainbow <- reactiveValues(
-                                value=800
-                            )
-                            heightSpacingRainbow <- reactiveValues(
-                                value=300
-                            )
-                            observeEvent(input[[paste0("svg_vertical_spacing_add_rainbow_", x)]], {
-                                heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
-                            })
-                            observeEvent(input[[paste0("svg_vertical_spacing_sub_rainbow_", x)]], {
-                                heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                            })
-                            observeEvent(input[[paste0("svg_horizontal_spacing_add_rainbow_", x)]], {
-                                widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
-                            })
-                            observeEvent(input[[paste0("svg_horizontal_spacing_sub_rainbow_", x)]], {
-                                widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
-                            })
-                            observe({
-                                plot_parallel_data <- list(
-                                    "plot_id"=x,
-                                    "segs"=selected_segs_data,
-                                    "query_sp"=querySpecies,
-                                    "query_chr_lens"=query_chr_len_df,
-                                    "subject_sp"=subjectSpecies,
-                                    "subject_chr_lens"=subject_chr_len_df,
-                                    "width"=widthSpacingRainbow$value,
-                                    "height"=heightSpacingRainbow$value
-                                )
-                                session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                            })
-
-                            Sys.sleep(.3)
-                            incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
-                        })
-                    })
-                    observeEvent(input[[paste0("searchButton_", x)]], {
-                        iadhoreDir <- dirname(each_row$comparing_Path)
-                        anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                        final_anchorpoints <- suppressMessages(
-                            vroom(anchorpointout_file,
-                                  col_names=TRUE,
-                                  delim="\t")
-                        )
-
-                        searchGene <- input[[paste0("gene_", x)]]
-                        searchMultiplicon <- final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]
-                        if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
-                            withProgress(message='Searching Gene in progress', value=0, {
-                                Sys.sleep(.8)
-                                search_data <- list(
-                                    "plot_id"=x,
-                                    "geneId"=searchMultiplicon
-                                )
-                                session$sendCustomMessage("searchGene", search_data)
-                                output[[paste0("foundItemsMessage_", x)]] <- renderUI({
-                                    if( !is.null(input[[paste0("foundMultiplicons_", x)]]) ){
-                                        updatePickerInput(
-                                            session,
-                                            paste0("multiplicon_plot_", x),
-                                            choices=input[[paste0("foundMultiplicons_", x)]],
-                                            choicesOpt=list(
-                                                content=lapply(input[[paste0("foundMultiplicons_", x)]], function(choice) {
-                                                    HTML(paste0("<div style='color: orange; font-style: italic;'>Multiplicon: ", choice, "</div>"))
-                                                })
-                                            ),
-                                        )
-                                    }
-                                    message <- paste("<div style='border: 1px solid #ccc; padding: 2px; margin-top: 30px; margin-left: -40px; border-radius: 10px; background-color: white; font-family: Times New Roman, Times, serif; white-space: pre-wrap;'>",
-                                                     input[[paste0("foundItemsMessage_", x)]], "</div>")
-                                    HTML(message)
-                                })
-                                Sys.sleep(.9)
-                                incProgress(amount=1, message="Searching Done")
-                            })
-                        }else{
-                            shinyalert(
-                                "Warning!",
-                                "Please input the correct gene name ...",
-                                type="warning",
-                            )
-                        }
-                    })
-                    observeEvent(input[[paste0("plotMicro_", x)]], {
-                        withProgress(message='Drawing Micro Synteny in progress', value=0, {
-                            Sys.sleep(.5)
-
-                            if( is.null(input[[paste0("multiplicon_plot_", x)]]) ){
-                                shinyalert(
-                                    "Warning!",
-                                    "No Multiplicon found! Please search the target gene or select multiplcon to plot first...",
-                                    type="warning"
-                                )
-                            }else{
-                                iadhoreDir <- dirname(each_row$comparing_Path)
-                                anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                                final_anchorpoints <- suppressMessages(
-                                    vroom(
-                                        anchorpointout_file,
-                                        col_names=TRUE,
-                                        delim="\t"
-                                    )
-                                )
-
-                                renew_x <- x
-                                query_chr_Input <- paste0("synteny_query_chr_", renew_x)
-                                query_selected_chr_list <- input[[query_chr_Input]]
-
-                                subject_chr_Input<- paste0("synteny_subject_chr_", renew_x)
-                                subject_selected_chr_list <- input[[subject_chr_Input]]
-
-                                gff_file1 <- sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath
-                                gff_df1 <- suppressMessages(
-                                    vroom(gff_file1,
-                                          delim="\t",
-                                          comment="#",
-                                          col_names=FALSE)
-                                )
-                                position_df1 <- gff_df1 %>%
-                                    filter(gff_df1$X3=="mRNA") %>%
-                                    select(X1, X9, X4, X5, X7) %>%
-                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9)) %>%
-                                    filter(X1 %in% query_selected_chr_list)
-
-                                colnames(position_df1) <- c("seqchr", "gene", "start", "end", "strand")
-
-                                gff_file2 <- sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath
-                                gff_df2 <- suppressMessages(
-                                    vroom(gff_file2,
-                                          delim="\t",
-                                          comment="#",
-                                          col_names=FALSE)
-                                )
-                                position_df2 <- gff_df2 %>%
-                                    filter(gff_df2$X3=="mRNA") %>%
-                                    select(X1, X9, X4, X5, X7) %>%
-                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9)) %>%
-                                    filter(X1 %in% subject_selected_chr_list)
-
-                                colnames(position_df2) <- c("seqchr", "gene", "start", "end", "strand")
-                                selectedQueryGenes <- data.frame()
-                                selectedSubjectGenes <- data.frame()
-                                selectedAnchorPoints <- data.frame()
-                                chrListX <- data.frame()
-                                chrListY <- data.frame()
-                                for( multiplicon in input[[paste0("multiplicon_plot_", x)]] ){
-                                    selectedAnchorPointsT <- final_anchorpoints[final_anchorpoints$multiplicon==multiplicon, ]
-                                    selectedAnchorPoints <- rbind(selectedAnchorPoints, selectedAnchorPointsT)
-                                    suppressMessages(
-                                        cutoffX <- selectedAnchorPointsT %>%
-                                            group_by(listX) %>%
-                                            summarize(min=min(startX),
-                                                      max=max(endX))
-                                    )
-
-                                    cutoffX[["multiplicon"]] <- multiplicon
-                                    chrListX <- rbind(chrListX, cutoffX)
-
-                                    selectedQueryGenesT <- position_df1 %>%
-                                        inner_join(cutoffX, by=c("seqchr"="listX")) %>%
-                                        filter(start >= min, end <= max) %>%
-                                        mutate(start=start - min,
-                                               end=end - min)
-                                    selectedQueryGenesT[["multiplicon"]] <- multiplicon
-                                    selectedQueryGenes <- rbind(selectedQueryGenes, selectedQueryGenesT)
-
-                                    cutoffY <- selectedAnchorPointsT %>%
-                                        group_by(listY) %>%
-                                        summarize(min=min(startY),
-                                                  max=max(endY))
-                                    cutoffY[["multiplicon"]] <- multiplicon
-                                    chrListY <- rbind(chrListY, cutoffY)
-
-                                    selectedSubjectGenesT <- position_df2 %>%
-                                        inner_join(cutoffY, by=c("seqchr"="listY")) %>%
-                                        filter(start >= min, end <= max) %>%
-                                        mutate(start=start - min,
-                                               end=end - min)
-                                    selectedSubjectGenesT[["multiplicon"]] <- multiplicon
-                                    selectedSubjectGenes <- rbind(selectedSubjectGenes, selectedSubjectGenesT)
-                                }
-                                widthSpacingMicro <- reactiveValues(
-                                    value=800
-                                )
-                                heightSpacingMicro <- reactiveValues(
-                                    value=200
-                                )
-                                observeEvent(input[[paste0("svg_vertical_spacing_add_micro_", x)]], {
-                                    heightSpacingMicro$value <- heightSpacingMicro$value + 20
-                                })
-                                observeEvent(input[[paste0("svg_vertical_spacing_sub_micro_", x)]], {
-                                    heightSpacingMicro$value <- heightSpacingMicro$value - 20
-                                })
-                                observeEvent(input[[paste0("svg_horizontal_spacing_add_micro_", x)]], {
-                                    widthSpacingMicro$value <- widthSpacingMicro$value + 20
-
-                                })
-                                observeEvent(input[[paste0("svg_horizontal_spacing_sub_micro_", x)]], {
-                                    widthSpacingMicro$value <- widthSpacingMicro$value - 20
-                                })
-
-                                observe({
-                                    microSynPlotData <- list(
-                                        "plot_id"=renew_x,
-                                        "anchorpoints"=selectedAnchorPoints,
-                                        "query_sp"=querySpecies,
-                                        "query_chr_info"=chrListX,
-                                        "query_chr_genes"=selectedQueryGenes,
-                                        "subject_sp"=subjectSpecies,
-                                        "subject_chr_info"=chrListY,
-                                        "subject_chr_genes"=selectedSubjectGenes,
-                                        "targe_gene"=input[[paste0("gene_", x)]],
-                                        "width"=widthSpacingMicro$value,
-                                        "height"=heightSpacingMicro$value
-                                    )
-                                    session$sendCustomMessage("microSynPlotting", microSynPlotData)
-                                })
-
-                                Sys.sleep(.9)
-                                incProgress(amount=1, message="Drawing Micro Synteny Done")
-                            }
-                        })
-                    })
-                }
-                if( each_row$comparing_Type=="Intra" ){
-                    querySpecies <- gsub("_", " ", each_row$comparing_ID)
-                    subjectSpecies <- gsub("_", " ", each_row$comparing_ID)
-
-                    synplot_go_tmp <- paste0("synplot_go_", x)
-                    observeEvent(input[[synplot_go_tmp]], {
-                        chr_len_df <- chr_num_len_df$len_df
-                        renew_x <- x
-                        query_chr_Input <- paste0("synteny_query_chr_", renew_x)
-                        query_selected_chr_list <- input[[query_chr_Input]]
-                        query_chr_len_df <- chr_len_df[chr_len_df$sp==querySpecies, ] %>%
-                            filter(seqchr %in% query_selected_chr_list)
-                        subject_chr_len_df <- query_chr_len_df
-
-                        iadhoreDir <- dirname(each_row$comparing_Path)
-
-                        withProgress(message='Analyzing in progress', value=0, {
-                            Sys.sleep(.2)
-                            incProgress(amount=.3, message="Preparing Data...")
-                            genesFile <- paste0(iadhoreDir, "/genes.txt")
-                            multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
-                            multiplicon_ks_file <- paste0(iadhoreDir, "/multiplicons.merged_ks.txt")
-                            anchorpointfile <- paste0(iadhoreDir, "/anchorpoints.txt")
-                            anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
-                            anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                            ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
-
-                            if( file.exists(ks_file) ){
-                                if( !file.exists(anchorpointout_file) ){
-                                    # source(file="tools/obtain_coordinates_for_anchorpoints_ks.R", local=T, encoding="UTF-8")
-                                    # obtain_coordiantes_for_anchorpoints_ks(
-                                    #     anchorpoints=anchorpointfile,
-                                    #     anchorpoints_ks=ks_file,
-                                    #     genes_file=genesFile,
-                                    #     out_file=anchorpoint_merged_file,
-                                    #     out_ks_file=anchorpointout_file,
-                                    #     species=gsub(" ", "_", querySpecies)
-                                    # )
-                                    # source(file="tools/obtain_coordinates_for_anchorpoints.R", local=T, encoding="UTF-8")
-                                    obtain_coordiantes_for_anchorpoints(
-                                        anchorpoints=anchorpointfile,
-                                        species1=querySpecies,
-                                        gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                                        out_file=anchorpoint_merged_file
-                                    )
-                                }
-
-                                if( !file.exists(multiplicon_ks_file) ){
-                                    # source(file="tools/obtain_mean_ks_for_multiplicons.R", local=T, encoding="UTF-8")
-                                    obtain_mean_ks_for_each_multiplicon(
-                                        multiplicon_file=multiplicon_file,
-                                        anchorpoint_file=anchorpoint_merged_file,
-                                        ks_file=ks_file,
-                                        species1=querySpecies,
-                                        anchorpointout_file=anchorpointout_file,
-                                        outfile=multiplicon_ks_file
-                                    )
-                                }
-                            }
-                            else{
-                                shinyalert(
-                                    "Opps!",
-                                    paste0("Fail to access the ", ks_file, "! Please run i-ADHoRe mode of shinyWGD first ..."),
-                                    type="error",
-                                )
-                            }
-
-                            Sys.sleep(.2)
-                            incProgress(amount=.3, message="Calculating Done")
-
-                            final_multiplicons <- suppressMessages(
-                                vroom(multiplicon_ks_file,
-                                      col_names=TRUE,
-                                      delim="\t")
-                            )
-
-                            final_anchorpoints <- suppressMessages(
-                                vroom(anchorpointout_file,
-                                      col_names=TRUE,
-                                      delim="\t")
-                            )
-
-                            genes <- suppressMessages(
-                                vroom(
-                                    genesFile,
-                                    delim="\t",
-                                    col_names=TRUE
-                                )
-                            )
-                            gene_num_df <- aggregate(remapped_coordinate ~ genome + list, genes, max)
-                            colnames(gene_num_df) <- c("sp", "seqchr", "num")
-                            gene_num_df$gene_num <- gene_num_df$num + 1
-
-                            query_chr_num_df <- gene_num_df %>%
-                                filter(sp==gsub(" ", "_", querySpecies)) %>%
-                                filter(seqchr %in% query_selected_chr_list)
-
-                            anchoredPointScutoff <- paste0("anchoredPointsCutoff_", renew_x)
-
-                            selected_multiplicons <- final_multiplicons %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% query_selected_chr_list) %>%
-                                filter(num_anchorpoints >= input[[anchoredPointScutoff]])
-                            selected_multiplicons_Id <- selected_multiplicons$multiplicon
-
-                            chr_num_df <- chr_num_len_df$num_df
-
-                            # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
-                            depth_list <- computing_depth_paranome(
-                                anchorpoint_ks_file=anchorpointout_file,
-                                multiplicon_id=selected_multiplicons_Id,
-                                selected_query_chr=query_selected_chr_list
-                            )
-                            query_selected_depth_list <- depth_list$depth
-                            subject_selected_depth_list <- depth_list$depth
-
-                            selected_anchorpoints <- final_anchorpoints %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% query_selected_chr_list) %>%
-                                filter(multiplicon %in% selected_multiplicons_Id)
-
-                            plotSize <- reactiveValues(
-                                value=400
-                            )
-                            observeEvent(input[[paste0("svg_spacing_add_dot_", renew_x)]], {
-                                plotSize$value <- plotSize$value + 50
-                            })
-                            observeEvent(input[[paste0("svg_spacing_sub_dot_", renew_x)]], {
-                                plotSize$value <- plotSize$value - 50
-                            })
-                            Sys.sleep(.2)
-                            incProgress(amount=.3, message="Drawing Dot Plot...")
-
-                            observe({
-                                plot_dot_num_data <- list(
-                                    "plot_id"=x,
-                                    "multiplicons"=selected_multiplicons,
-                                    "anchorpoints"=selected_anchorpoints,
-                                    "query_sp"=querySpecies,
-                                    "query_chr_gene_nums"=query_chr_num_df,
-                                    "query_depths"=query_selected_depth_list,
-                                    "subject_sp"=subjectSpecies,
-                                    "subject_chr_gene_nums"=query_chr_num_df,
-                                    "subject_depths"=subject_selected_depth_list,
-                                    "size"=plotSize$value
-                                )
-                                session$sendCustomMessage("Dot_Num_Plotting_paranome", plot_dot_num_data)
-                            })
-                            Sys.sleep(.2)
-                            incProgress(amount=1, message="Drawing Dot Plot Done")
-                        })
-                        # plot parallel figure
-                        withProgress(message='Parallel Syntenty Figure in progress', value=0, {
-                            Sys.sleep(.2)
-                            incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
-                            segmentsfile <- paste0(iadhoreDir, "/segments.txt")
-                            segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
-                            if( !file.exists(segs_pos_file) ){
-                                # source("tools/obtain_coordinates_for_segments.v2.R", local=T, encoding="UTF-8")
-                                obtain_coordiantes_for_segments(
-                                    seg_file=segmentsfile,
-                                    gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                                    out_file=segs_pos_file
-                                )
-                            }
-                            segs_data <- suppressMessages(
-                                vroom(
-                                    segs_pos_file,
-                                    delim="\t"
-                                )
-                            )
-                            selected_segs_data <- segs_data %>%
-                                filter(listX %in% query_selected_chr_list) %>%
-                                filter(listY %in% query_selected_chr_list) %>%
-                                filter(multiplicon %in% selected_multiplicons_Id)
-
-                            widthSpacingRainbow <- reactiveValues(
-                                value=800
-                            )
-                            heightSpacingRainbow <- reactiveValues(
-                                value=300
-                            )
-                            observeEvent(input[[paste0("svg_vertical_spacing_add_rainbow_", x)]], {
-                                heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
-                            })
-                            observeEvent(input[[paste0("svg_vertical_spacing_sub_rainbow_", x)]], {
-                                heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                            })
-                            observeEvent(input[[paste0("svg_horizontal_spacing_add_rainbow_", x)]], {
-                                widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
-                            })
-                            observeEvent(input[[paste0("svg_horizontal_spacing_sub_rainbow_", x)]], {
-                                widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
-                            })
-                            observe({
-                                plot_parallel_data <- list(
-                                    "plot_id"=x,
-                                    "segs"=selected_segs_data,
-                                    "query_sp"=querySpecies,
-                                    "query_chr_lens"=query_chr_len_df,
-                                    "subject_sp"=subjectSpecies,
-                                    "subject_chr_lens"=subject_chr_len_df,
-                                    "width"=widthSpacingRainbow$value,
-                                    "height"=heightSpacingRainbow$value
-                                )
-                                session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                            })
-
-                            Sys.sleep(.3)
-                            incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
-                        })
-                    })
-                    observeEvent(input[[paste0("searchButton_", x)]], {
-                        iadhoreDir <- dirname(each_row$comparing_Path)
-                        anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                        final_anchorpoints <- suppressMessages(
-                            vroom(anchorpointout_file,
-                                  col_names=TRUE,
-                                  delim="\t")
-                        )
-
-                        searchGene <- input[[paste0("gene_", x)]]
-                        searchMultiplicon <- final_anchorpoints[final_anchorpoints$geneX == searchGene | final_anchorpoints$geneY == searchGene, "multiplicon"]
-                        if( searchGene %in% final_anchorpoints$geneX || searchGene %in% final_anchorpoints$geneY ){
-                            withProgress(message='Searching Gene in progress', value=0, {
-                                Sys.sleep(.8)
-                                search_data <- list(
-                                    "plot_id"=x,
-                                    "geneId"=searchMultiplicon
-                                )
-                                session$sendCustomMessage("searchGene", search_data)
-                                messageContent <- input[[paste0("foundItemsMessage_", x)]]
-                                uiId <- paste0("foundItemsMessage_", x)
-                                output[[uiId]] <- renderUI({
-                                    if( !is.null(input[[paste0("foundMultiplicons_", x)]]) ){
-                                        updatePickerInput(
-                                            session,
-                                            paste0("multiplicon_plot_", x),
-                                            choices=input[[paste0("foundMultiplicons_", x)]],
-                                            choicesOpt=list(
-                                                content=lapply(input[[paste0("foundMultiplicons_", x)]], function(choice) {
-                                                    HTML(paste0("<div style='color: orange; font-style: italic;'>Multiplicon: ", choice, "</div>"))
-                                                })
-                                            ),
-                                        )
-                                    }
-                                    message <- paste("<div style='border: 1px solid #ccc; padding: 2px; margin-top: 20px; margin-left: -40px; border-radius: 10px; background-color: white; font-family: Times New Roman, Times, serif; white-space: pre-wrap;'>", input[[paste0("foundItemsMessage_", x)]], "</div>")
-                                    HTML(message)
-                                })
-                                Sys.sleep(.9)
-                                incProgress(amount=1, message="Searching Done")
-                            })
-                        }else{
-                            shinyalert(
-                                "Warning!",
-                                "Please input the correct gene name ...",
-                                type="warning",
-                            )
-                        }
-                    })
-                    observeEvent(input[[paste0("plotMicro_", x)]], {
-                        withProgress(message='Drawing Micro Synteny in progress', value=0, {
-                            Sys.sleep(.5)
-
-                            if( is.null(input[[paste0("multiplicon_plot_", x)]]) ){
-                                shinyalert(
-                                    "Warning!",
-                                    "No Multiplicon found! Please search the target gene or select multiplcon to plot first...",
-                                    type="warning"
-                                )
-                            }
-                            else{
-                                iadhoreDir <- dirname(each_row$comparing_Path)
-                                anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                                final_anchorpoints <- suppressMessages(
-                                    vroom(anchorpointout_file,
-                                          col_names=TRUE,
-                                          delim="\t")
-                                )
-
-                                renew_x <- x
-                                query_chr_Input <- paste0("synteny_query_chr_", renew_x)
-                                query_selected_chr_list <- input[[query_chr_Input]]
-
-                                subject_selected_chr_list <- query_selected_chr_list
-
-                                gff_file1 <- sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath
-                                gff_df1 <- suppressMessages(
-                                    vroom(gff_file1,
-                                          delim="\t",
-                                          comment="#",
-                                          col_names=FALSE)
-                                )
-                                position_df1 <- gff_df1 %>%
-                                    filter(gff_df1$X3=="mRNA") %>%
-                                    select(X1, X9, X4, X5, X7) %>%
-                                    mutate(X9=gsub("ID=([^;]+).*", "\\1", X9)) %>%
-                                    filter(X1 %in% query_selected_chr_list)
-                                colnames(position_df1) <- c("seqchr", "gene", "start", "end", "strand")
-
-                                position_df2 <- position_df1
-                                selectedQueryGenes <- data.frame()
-                                selectedSubjectGenes <- data.frame()
-                                selectedAnchorPoints <- data.frame()
-                                chrListX <- data.frame()
-                                chrListY <- data.frame()
-                                for( multiplicon in input[[paste0("multiplicon_plot_", x)]] ){
-                                    selectedAnchorPointsT <- final_anchorpoints[final_anchorpoints$multiplicon==multiplicon, ]
-                                    selectedAnchorPoints <- rbind(selectedAnchorPoints, selectedAnchorPointsT)
-                                    # print(selectedAnchorPoints)
-                                    suppressMessages(
-                                        cutoffX <- selectedAnchorPoints %>%
-                                            group_by(listX) %>%
-                                            summarize(min=min(startX),
-                                                      max=max(endX))
-                                    )
-
-                                    cutoffX[["multiplicon"]] <- multiplicon
-                                    chrListX <- rbind(chrListX, cutoffX)
-
-                                    selectedQueryGenesT <- position_df1 %>%
-                                        inner_join(cutoffX, by=c("seqchr"="listX")) %>%
-                                        filter(start >= min, end <= max) %>%
-                                        mutate(start=start - min,
-                                               end=end - min)
-                                    selectedQueryGenesT[["multiplicon"]] <- multiplicon
-                                    selectedQueryGenes <- rbind(selectedQueryGenes, selectedQueryGenesT)
-
-                                    cutoffY <- selectedAnchorPoints %>%
-                                        group_by(listY) %>%
-                                        summarize(min=min(startY),
-                                                  max=max(endY))
-                                    cutoffY[["multiplicon"]] <- multiplicon
-                                    chrListY <- rbind(chrListY, cutoffY)
-
-                                    selectedSubjectGenesT <- position_df2 %>%
-                                        inner_join(cutoffY, by=c("seqchr"="listY")) %>%
-                                        filter(start >= min, end <= max) %>%
-                                        mutate(start=start - min,
-                                               end=end - min)
-                                    selectedSubjectGenesT[["multiplicon"]] <- multiplicon
-                                    selectedSubjectGenes <- rbind(selectedSubjectGenes, selectedSubjectGenesT)
-                                }
-                                widthSpacingMicro <- reactiveValues(
-                                    value=800
-                                )
-                                heightSpacingMicro <- reactiveValues(
-                                    value=200
-                                )
-                                observeEvent(input[[paste0("svg_vertical_spacing_add_micro_", x)]], {
-                                    heightSpacingMicro$value <- heightSpacingMicro$value + 20
-                                })
-                                observeEvent(input[[paste0("svg_vertical_spacing_sub_micro_", x)]], {
-                                    heightSpacingMicro$value <- heightSpacingMicro$value - 20
-                                })
-                                observeEvent(input[[paste0("svg_horizontal_spacing_add_micro_", x)]], {
-                                    widthSpacingMicro$value <- widthSpacingMicro$value + 20
-
-                                })
-                                observeEvent(input[[paste0("svg_horizontal_spacing_sub_micro_", x)]], {
-                                    widthSpacingMicro$value <- widthSpacingMicro$value - 20
-                                })
-
-                                observe({
-                                    microSynPlotData <- list(
-                                        "plot_id"=renew_x,
-                                        #"multiplicon"=multiplicon[1],
-                                        "anchorpoints"=selectedAnchorPoints,
-                                        "query_sp"=querySpecies,
-                                        "query_chr_info"=chrListX,
-                                        "query_chr_genes"=selectedQueryGenes,
-                                        "subject_sp"=subjectSpecies,
-                                        "subject_chr_info"=chrListY,
-                                        "subject_chr_genes"=selectedSubjectGenes,
-                                        "targe_gene"=input[[paste0("gene_", x)]],
-                                        "width"=widthSpacingMicro$value,
-                                        "height"=heightSpacingMicro$value
-                                    )
-                                    session$sendCustomMessage("microSynPlotting", microSynPlotData)
-                                })
-                            }
-                            Sys.sleep(.9)
-                            incProgress(amount=1, message="Drawing Micro Synteny Done")
-                        })
-                    })
-                }
+                )
             })
         }
-        incProgress(amount=1, message="Configuration Done")
-        Sys.sleep(.4)
-    })
+    }
 })
 
-observeEvent(input[["synplot_go_last"]], {
+observeEvent(input$synplot_multiple_go, {
     withProgress(message='Analyzing Multiple Species Alignment in progress...', value=0, {
         Sys.sleep(.2)
         incProgress(amount=.3, message="Computing Multiple Species Alignment...")
@@ -2215,7 +3844,7 @@ observeEvent(input[["synplot_go_last"]], {
         }
         else{
             dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-            load(paste0(dirPath, "/tmp.comparing.RData"))
+            load(paste0(dirPath, "/synteny.comparing.RData"))
             multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
 
             sp_gff_info_xls <- paste0(
@@ -2228,14 +3857,15 @@ observeEvent(input[["synplot_go_last"]], {
                       delim="\t")
             ) %>%
                 filter(species %in% gsub("_", " ", input$iadhore_multiple_species_list))
+
             cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
             gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
             new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
             new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
             sp_gff_info_df$cdsPath <- new_cds_files
             sp_gff_info_df$gffPath <- new_gff_files
-            # source(file="tools/obtain_chromosome_length.R", local=T, encoding="UTF-8")
-            chr_num_len_df <- obtain_chromosome_length_filter(
+
+            chr_len_df <- obtain_chromosome_length_filter(
                 sp_gff_info_df
             )
 
@@ -2259,6 +3889,87 @@ observeEvent(input[["synplot_go_last"]], {
                 )
             )
 
+            genes_file <- paste0(dirname(multiple_species_df$comparing_Path), "/genes.txt")
+            chr_gene_num_file <- paste0(dirname(multiple_species_df$comparing_Path), "/chr_gene_nums.txt")
+
+            if( !file.exists(chr_gene_num_file) ){
+                if( file.exists(genes_file) ){
+                    genes <- suppressMessages(
+                        vroom(
+                            genes_file,
+                            delim="\t",
+                            col_names=TRUE
+                        )
+                    )
+                    gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                    colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
+                    gene_num_df$gene_num <- gene_num_df$gene_num + 1
+                    write.table(
+                        gene_num_df,
+                        file=chr_gene_num_file,
+                        sep="\t",
+                        quote=F,
+                        row.names=FALSE
+                    )
+                }
+                else{
+                    shinyalert(
+                        "Oops",
+                        "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
+                        type="error"
+                    )
+                }
+            }else{
+                gene_num_df <- read.table(
+                    chr_gene_num_file,
+                    sep="\t",
+                    header=TRUE
+                )
+            }
+
+            if( file.exists(genes_file) ){
+                genes_df <- suppressMessages(
+                    vroom(
+                        genes_file,
+                        col_names=T,
+                        delim="\t"
+                    )
+                )
+            }
+
+            # map coordinates to genes
+            genes_coord_subset <- select(genes_df, id, coordinate)
+            merged_data_tmp <- left_join(
+                segs_df,
+                genes_coord_subset,
+                by=c("first"="id")
+            )
+
+            merged_data_tmp <- left_join(
+                merged_data_tmp,
+                genes_coord_subset,
+                by=c("last"="id")
+            )
+            segs_df <- merged_data_tmp %>%
+                select(-id)
+
+            colnames(segs_df) <- c(
+                "multiplicon", "genome", "list",
+                "first", "last", "order",
+                "min", "max"
+            )
+
+            for( species in input$iadhore_multiple_species_list ){
+                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
+                if( is.null(selected_chrs) ){
+                    shinyalert(
+                        "Oops!",
+                        paste0("Please select the chromosome of ", species, " first..."),
+                        type="error"
+                    )
+                }
+            }
+
             selected_multiplicon_df1 <- data.frame()
             selected_segs_df <- data.frame()
             for( species in input$iadhore_multiple_species_list ){
@@ -2274,6 +3985,7 @@ observeEvent(input[["synplot_go_last"]], {
                     filter(list_x %in% selected_chrs)
                 selected_multiplicon_df1 <- rbind(selected_multiplicon_df1, filtered_df1)
             }
+
             selected_multiplicon_df <- data.frame()
             for( species in input$iadhore_multiple_species_list ){
                 selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
@@ -2287,22 +3999,12 @@ observeEvent(input[["synplot_go_last"]], {
             selected_segs_df <- selected_segs_df %>%
                 filter(multiplicon %in% selected_multiplicons$id)
 
-            rm(selected_multiplicon_df1, segs_df, multiplicon_df)
-
-            for( species in input$iadhore_multiple_species_list ){
-                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
-                if( is.null(selected_chrs) ){
-                    shinyalert(
-                        "Oops!",
-                        paste0("Please select the chromosome of ", species, " first..."),
-                        type="error"
-                    )
-                }
-            }
+            rm(selected_multiplicon_df1, multiplicon_df)
 
             segments_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.txt")
             segs_pos_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.merged_pos.txt")
             # source("tools/obtain_coordinates_for_segments.multiple_species.R", local=T, encoding="UTF-8")
+            #if( !file.exists(segs_pos_file) ){
             obtain_coordinates_for_segments_multiple(
                 seg_df=selected_segs_df,
                 gff_df=sp_gff_info_df,
@@ -2318,7 +4020,7 @@ observeEvent(input[["synplot_go_last"]], {
                 )
             )
 
-            chr_len_df <- chr_num_len_df$len_df
+            chr_len_df <- chr_len_df$len_df
 
             selected_chr_len_data <- data.frame()
             selected_chr_order_data <- data.frame()
@@ -2339,11 +4041,12 @@ observeEvent(input[["synplot_go_last"]], {
                 order_list[[i+1]]=gsub(" ", "_", order_list[[i+1]])
                 query_info <- paste0("multiple_synteny_query_chr_", order_list[[i]])
                 subject_info <- paste0("multiple_synteny_query_chr_", order_list[[i+1]])
-                query_selected_chr_list <- input[[query_info]]
-                query_chr_len_df <- chr_len_df[chr_len_df$sp==gsub("_", " ", order_list[[i]]), ] %>%
+                query_selected_chr_list <- gtools::mixedsort(input[[query_info]])
+                query_chr_len_df <- chr_len_df[chr_len_df$sp==gsub(" ", "_", order_list[[i]]), ] %>%
                     filter(seqchr %in% query_selected_chr_list)
-                subject_selected_chr_list <- input[[subject_info]]
-                subject_chr_len_df <- chr_len_df[chr_len_df$sp==sub("_", " ", order_list[[i+1]]), ] %>%
+                subject_selected_chr_list <- gtools::mixedsort(input[[subject_info]])
+
+                subject_chr_len_df <- chr_len_df[chr_len_df$sp==sub(" ", "_", order_list[[i+1]]), ] %>%
                     filter(seqchr %in% subject_selected_chr_list)
 
                 selected_chr_len_data <- rbind(selected_chr_len_data, query_chr_len_df)
@@ -2381,13 +4084,20 @@ observeEvent(input[["synplot_go_last"]], {
                 }
             }
 
+            selected_chr_len_data <- selected_chr_len_data[!duplicated(selected_chr_len_data), ]
+            selected_chr_order_data <- selected_chr_order_data[!duplicated(selected_chr_order_data), ]
+
+            selected_chr_num_df <- left_join(
+                selected_chr_len_data,
+                gene_num_df,
+                by=c("sp"="sp", "seqchr"="seqchr")
+            )
+
             Sys.sleep(.2)
             incProgress(amount=.6, message="Computing Done")
 
             Sys.sleep(.2)
             incProgress(amount=.8, message="Drawing Parallel Syntenty Plot for Multiple Species Alignment...")
-            selected_chr_len_data <- selected_chr_len_data[!duplicated(selected_chr_len_data), ]
-            selected_chr_order_data <- selected_chr_order_data[!duplicated(selected_chr_order_data), ]
 
             widthSpacingMultiple <- reactiveValues(
                 value=800
@@ -2396,30 +4106,44 @@ observeEvent(input[["synplot_go_last"]], {
                 value=100 * nrow(sp_gff_info_df)
             )
             observeEvent(input[["svg_vertical_spacing_add_multiple"]], {
-                heightSpacingMultiple$value <- heightSpacingMultiple$value + 20
+                heightSpacingMultiple$value <- heightSpacingMultiple$value + 50
             })
             observeEvent(input[["svg_vertical_spacing_sub_multiple"]], {
-                heightSpacingMultiple$value <- heightSpacingMultiple$value - 20
+                heightSpacingMultiple$value <- heightSpacingMultiple$value - 50
             })
             observeEvent(input[["svg_horizontal_spacing_add_multiple"]], {
-                widthSpacingMultiple$value <- widthSpacingMultiple$value + 20
+                widthSpacingMultiple$value <- widthSpacingMultiple$value + 50
             })
             observeEvent(input[["svg_horizontal_spacing_sub_multiple"]], {
-                widthSpacingMultiple$value <- widthSpacingMultiple$value - 20
+                widthSpacingMultiple$value <- widthSpacingMultiple$value - 50
             })
 
             observe({
-                plot_parallel_multiple_data <- list(
-                    "plot_id"="multiple",
-                    "segs"=selected_segs_data,
-                    "sp_order"=order_list,
-                    "chr_order"=selected_chr_order_data,
-                    "overlap_cutoff"=input[["overlapCutoff_multiple"]],
-                    "chr_lens"=selected_chr_len_data,
-                    "width"=widthSpacingMultiple$value,
-                    "height"=heightSpacingMultiple$value
-                )
-                session$sendCustomMessage("Parallel_Multiple_Plotting", plot_parallel_multiple_data)
+                if( input$scale_multiple == "True length" ){
+                    plot_parallel_multiple_data <- list(
+                        "plot_id"="multiple",
+                        "segs"=selected_segs_data,
+                        "sp_order"=order_list,
+                        "chr_order"=selected_chr_order_data,
+                        "overlap_cutoff"=input[["overlapCutoff_multiple"]],
+                        "chr_lens"=selected_chr_len_data,
+                        "width"=widthSpacingMultiple$value,
+                        "height"=heightSpacingMultiple$value
+                    )
+                    session$sendCustomMessage("Parallel_Multiple_Plotting", plot_parallel_multiple_data)
+                }else{
+                    plot_parallel_multiple_data <- list(
+                        "plot_id"="multiple",
+                        "segs"=selected_segs_data,
+                        "sp_order"=order_list,
+                        "chr_order"=selected_chr_order_data,
+                        "overlap_cutoff"=input[["overlapCutoff_multiple"]],
+                        "chr_nums"=selected_chr_num_df,
+                        "width"=widthSpacingMultiple$value,
+                        "height"=heightSpacingMultiple$value
+                    )
+                    session$sendCustomMessage("Parallel_Multiple_Gene_Num_Plotting", plot_parallel_multiple_data)
+                }
             })
         }
         Sys.sleep(.3)
@@ -2427,12 +4151,296 @@ observeEvent(input[["synplot_go_last"]], {
     })
 })
 
+observeEvent(input$confirm_clustering_go, {
+    if( isTruthy(input$cluster_species_A) && isTruthy(input$cluster_species_B) ){
+        shinyjs::runjs("$('#confirm_clustering_go').css('background-color', 'green');")
+        updateActionButton(
+            session,
+            "confirm_clustering_go",
+            icon=icon("check")
+        )
+
+        setTimeoutFunction <- "setTimeout(function() {
+                  $('#confirm_clustering_go').css('background-color', '#C0C0C0');
+                }, 6000);"
+
+        shinyjs::runjs(setTimeoutFunction)
+
+        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
+        load(paste0(dirPath, "/synteny.comparing.RData"))
+
+        cluster_species_A <- gsub("_", " ", input$cluster_species_A)
+        cluster_species_B <- gsub("_", " ", input$cluster_species_B)
+        output$iadhore_output <- renderUI({
+            div(
+                class="boxLike",
+                style="padding-right: 50px;
+                       padding-left: 50px;
+                       padding-top: 10px;
+                       padding-bottom: 10px;
+                       background-color: white",
+                fluidRow(
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="cluster_plot_button",
+                                label=HTML(paste0("<font color='#F4FFEE'><b>Clustering Analysis</b></font> for <font color='#FFD374'><b><i>", cluster_species_A, "</i></font> and <font color='#E1B8FF'><i>", cluster_species_B, "</i></b></font>")),
+                                style="success"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to see more details",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse(
+                                    id="cluster_plot_panel_collapse"
+                                ),
+                            bs_collapse(
+                                id="cluster_plot_panel_collapse",
+                                show=TRUE,
+                                content=tags$div(
+                                    class="well",
+                                    fluidRow(
+                                        column(
+                                            12,
+                                            div(
+                                                style="background-color: white;
+                                                       padding-right: 50px;
+                                                       padding-left: 50px;
+                                                       padding-top: 10px;
+                                                       padding-bottom: 10px;",
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="margin-bottom: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 10px 10px 5px 10px;
+                                                                   background-color: #F0FFFF;",
+                                                            sliderInput(
+                                                                inputId="interactPointsCutoff",
+                                                                label=HTML("Threshold for <font color='orange'>Anchor Points between Segments</font>:"),
+                                                                min=0,
+                                                                max=30,
+                                                                step=1,
+                                                                value=20
+                                                            )
+                                                        )
+                                                    ),
+                                                    column(
+                                                        4,
+                                                        div(
+                                                            style="margin-bottom: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 10px 10px 5px 10px;
+                                                                   background-color: #F0FFFF;",
+                                                            sliderInput(
+                                                                inputId="corRCutoff",
+                                                                label=HTML("Threshold for <font color='orange'>Pearson correlation coefficient <i>r</i></font> :"),
+                                                                min=0,
+                                                                max=1,
+                                                                step=0.1,
+                                                                value=0.3
+                                                            )
+                                                        )
+                                                    ),
+                                                    column(
+                                                        3,
+                                                        actionButton(
+                                                            inputId="cluster_go",
+                                                            "Start Clustering Analysis",
+                                                            icon=icon("play"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #009393;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 10px 5px 10px;
+                                                                   margin: 50px 5px 5px 35px;
+                                                                   animation: glowing 5000ms infinite; "
+                                                        )
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h6(HTML("<b>The Hierarchical Clustering Plot:</b>")),
+                                                        tags$style(
+                                                            HTML(".rotate-135 {
+                                                                    transform: rotate(135deg);
+                                                                }"),
+                                                            HTML(".rotate-45{
+                                                                    transform: rotate(45deg);
+                                                                }")
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_add_cluster",
+                                                            "",
+                                                            icon("arrows-alt-v", class="rotate-45"),
+                                                            title="Expand spacing"
+                                                        ),
+                                                        actionButton(
+                                                            "svg_spacing_sub_cluster",
+                                                            "",
+                                                            icon("compress"),
+                                                            title="Compress spacing"
+                                                        ),
+                                                        downloadButton_custom(
+                                                            "cluster_download",
+                                                            title="Download the Plot",
+                                                            status="secondary",
+                                                            icon=icon("download"),
+                                                            label=HTML(""),
+                                                            style="color: #fff;
+                                                                   background-color: #019858;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 14px 5px 14px;
+                                                                   margin: 5px 5px 5px 5px;
+                                                                   animation: glowingD 5000ms infinite;"
+                                                        )
+                                                    ),
+                                                    column(
+                                                        width=12,
+                                                        id="clusterView"
+                                                    ),
+                                                    column(
+                                                        width=12,
+                                                        id="dendrogramTreeView"
+                                                    )
+                                                ),
+                                                hr(class="splitting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        h5(HTML("<font color='#00DB00'><b>Putative Ancestral Regions</b></font>"))
+                                                    ),
+                                                    column(
+                                                        12,
+                                                        uiOutput("foundParsMessage")
+                                                    ),
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        6,
+                                                        pickerInput(
+                                                            inputId="pars_list",
+                                                            label=HTML("Choose <b><font color='green'>PARs</font></b> to zoom in"),
+                                                            options=list(
+                                                                title='Please select PAR below',
+                                                                `selected-text-format`="count > 1",
+                                                                `actions-box`=TRUE
+                                                            ),
+                                                            choices=NULL,
+                                                            selected=NULL,
+                                                            multiple=FALSE
+                                                        )
+                                                    ),
+                                                    column(
+                                                        6,
+                                                        actionButton(
+                                                            inputId="zoomInPAR",
+                                                            "",
+                                                            icon=icon("search"),
+                                                            status="secondary",
+                                                            style="color: #fff;
+                                                                   background-color: #8080C0;
+                                                                   border-color: #fff;
+                                                                   margin: 30px 0px 0px -15px; "
+                                                        )
+                                                    )
+                                                ),
+                                                hr(class="setting"),
+                                                fluidRow(
+                                                    column(
+                                                        12,
+                                                        div(
+                                                            style="padding: 0px 10px 0px 10px;",
+                                                            HTML("<b>The PARs Dot Plot:</b>")
+                                                        )
+                                                    )
+                                                ),
+                                                fluidRow(
+                                                    column(
+                                                        2,
+                                                        div(
+                                                            style="/*margin-bottom: 10px;*/
+                                                                   border-radius: 10px;
+                                                                   padding: 0px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            prettyRadioButtons(
+                                                                inputId="par_plot_type",
+                                                                label=HTML("<font color='orange'>Plot type</font>:"),
+                                                                choices=c("Dot", "Link"),
+                                                                selected="Dot",
+                                                                icon=icon("check"),
+                                                                inline=TRUE,
+                                                                status="info",
+                                                                animation="jelly"
+                                                            )
+                                                        )
+                                                    ),
+                                                    column(
+                                                        2,
+                                                        div(
+                                                            style="/*margin-bottom: 10px;*/
+                                                                   border-radius: 10px;
+                                                                   padding: 5px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                            actionButton(
+                                                                "svg_vertical_spacing_add_par",
+                                                                "",
+                                                                icon("arrows-alt-v", class="rotate-45"),
+                                                                title="Expand spacing"
+                                                            ),
+                                                            actionButton(
+                                                                "svg_vertical_spacing_sub_par",
+                                                                "",
+                                                                icon("compress"),
+                                                                title="Compress spacing"
+                                                            ),
+                                                            downloadButton_custom(
+                                                                "PAR_download",
+                                                                title="Download the Plot",
+                                                                status="secondary",
+                                                                icon=icon("download"),
+                                                                label="",
+                                                                style="color: #fff;
+                                                                           background-color: #019858;
+                                                                           border-color: #fff;
+                                                                           padding: 5px 14px 5px 14px;
+                                                                           margin: 5px 5px 5px 5px;
+                                                                           animation: glowingD 5000ms infinite;"
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                column(
+                                                    width=12,
+                                                    id="ParZoomIn"
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        })
+    }
+})
+
 observeEvent(input$cluster_go, {
     withProgress(message='Clustering Analysis in progress...', value=0, {
         Sys.sleep(.2)
         incProgress(amount=.1, message="Preparing data...")
         dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        load(paste0(dirPath, "/tmp.comparing.RData"))
+        load(paste0(dirPath, "/synteny.comparing.RData"))
 
         cluster_species_A <- input$cluster_species_A
         cluster_species_B <- input$cluster_species_B
@@ -2543,7 +4551,7 @@ observeEvent(input$cluster_go, {
         incProgress(amount=.8, message="Plotting")
 
         plotSize <- reactiveValues(
-            value=600
+            value=500
         )
         observeEvent(input[["svg_spacing_add_cluster"]], {
             plotSize$value <- plotSize$value + 50
@@ -2618,7 +4626,8 @@ observeEvent(input$cluster_go, {
                         content=lapply(PARs_list, function(choice) {
                             HTML(paste0("<div style='color: green;'>", choice, "</div>"))
                         })
-                    )
+                    ),
+                    selected=PARs_list[1]
                 )
             }
         })
@@ -2644,20 +4653,44 @@ observeEvent(input$cluster_go, {
                             each_PAR <- identified_cluster_list[[i]]
 
                             if( PAR_id == input$pars_list ){
-                                plot_zoom_in_data <- list(
-                                    "plot_id"="ParZoomIn",
-                                    "par_id"=PAR_id,
-                                    "segmented_chr"=each_PAR$cluster_chr,
-                                    "segmented_anchorpoints"=each_PAR$cluster_anchorpoints,
-                                    "query_chr_labels"=query_chr_lables,
-                                    "subject_chr_labels"=subject_chr_labels,
-                                    "query_sp"=querySpecies,
-                                    "subject_sp"=subjectSpecies,
-                                    "size"=plotSize$value
-                                )
-                                session$sendCustomMessage("Cluster_Zoom_In_Plotting", plot_zoom_in_data)
+                                if( input$par_plot_type == "Dot" ){
+                                    plot_zoom_in_data <- list(
+                                        "plot_id"="ParZoomIn",
+                                        "par_id"=PAR_id,
+                                        "segmented_chr"=each_PAR$cluster_chr,
+                                        "segmented_anchorpoints"=each_PAR$cluster_anchorpoints,
+                                        "query_chr_labels"=query_chr_lables,
+                                        "subject_chr_labels"=subject_chr_labels,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "size"=plotSize$value
+                                    )
+                                    session$sendCustomMessage("Cluster_Zoom_In_Plotting", plot_zoom_in_data)
+                                }else{
+                                    # print(each_PAR$cluster_anchorpoints)
+                                    # print(each_PAR$cluster_chr)
+                                    plot_zoom_in_data <- list(
+                                        "plot_id"="ParZoomIn",
+                                        "par_id"=PAR_id,
+                                        "segmented_chr"=each_PAR$cluster_chr,
+                                        "segmented_anchorpoints"=each_PAR$cluster_anchorpoints,
+                                        "query_chr_labels"=query_chr_lables,
+                                        "subject_chr_labels"=subject_chr_labels,
+                                        "query_sp"=querySpecies,
+                                        "subject_sp"=subjectSpecies,
+                                        "size"=plotSize$value
+                                    )
+                                    session$sendCustomMessage("Cluster_Zoom_In_Link_Plotting", plot_zoom_in_data)
+                                }
                             }
                         }
+                    }
+                    else{
+                        shinyalert(
+                            "Oops!",
+                            "No Putative Ancestral Regions found. Change the parameter and try again",
+                            type="error"
+                        )
                     }
                 })
             })

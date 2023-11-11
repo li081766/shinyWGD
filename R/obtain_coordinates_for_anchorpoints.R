@@ -79,41 +79,50 @@ obtain_coordiantes_for_anchorpoints <- function(anchorpoints, species1, gff_file
     final_df <- merged_y
 
     speciesX <- speciesY <- NULL
-    if( !is.null(gff_file2) ){
-        final_df <- final_df %>% filter(speciesX != speciesY)
-        final_table <- data.frame(matrix(ncol=ncol(final_df), nrow=nrow(final_df)))
-        for( i in 1:nrow(final_df) ){
-            each_row <- final_df[i, ]
-            if( each_row$speciesX != species1 ){
-                tmp <- each_row[9:13]
-                each_row[9:13] <- each_row[14:18]
-                each_row[14:18] <- tmp
-
-                tmp2 <- each_row$geneX
-                each_row$geneX <- each_row$geneY
-                each_row$geneY <- tmp2
-
-                tmp3 <- each_row$coordX
-                each_row$coordX <- each_row$coordY
-                each_row$coordY <- tmp3
-            }
-            final_table[i,] <- each_row
-        }
-        colnames(final_table) <- c("id", "multiplicon", "basecluster",
-                                   "geneX",  "geneY",  "coordX", "coordY",
-                                   "is_real_anchorpoint",
-                                   "listX", "startX", "endX", "strandX", "speciesX",
-                                   "listY", "startY", "endY", "strandY", "speciesY")
-        write.table(final_table,
-                    file=out_file,
-                    sep="\t",
-                    row.names=FALSE,
-                    quote=FALSE)
-    }else{
-        write.table(final_df,
-                    file=out_file,
-                    sep="\t",
-                    row.names=FALSE,
-                    quote=FALSE)
-    }
+    # if( !is.null(gff_file2) ){
+    #     final_df <- final_df %>% filter(speciesX != speciesY)
+    #     final_table <- data.frame(matrix(ncol=ncol(final_df), nrow=nrow(final_df)))
+    #     for( i in 1:nrow(final_df) ){
+    #         each_row <- final_df[i, ]
+    #         if( each_row$speciesX != species1 ){
+    #             tmp <- each_row[9:13]
+    #             each_row[9:13] <- each_row[14:18]
+    #             each_row[14:18] <- tmp
+    #
+    #             tmp2 <- each_row$geneX
+    #             each_row$geneX <- each_row$geneY
+    #             each_row$geneY <- tmp2
+    #
+    #             tmp3 <- each_row$coordX
+    #             each_row$coordX <- each_row$coordY
+    #             each_row$coordY <- tmp3
+    #         }
+    #         final_table[i,] <- each_row
+    #     }
+    #     colnames(final_table) <- c("id", "multiplicon", "basecluster",
+    #                                "geneX",  "geneY",  "coordX", "coordY",
+    #                                "is_real_anchorpoint",
+    #                                "listX", "startX", "endX", "strandX", "speciesX",
+    #                                "listY", "startY", "endY", "strandY", "speciesY")
+    #     write.table(final_table,
+    #                 file=out_file,
+    #                 sep="\t",
+    #                 row.names=FALSE,
+    #                 quote=FALSE)
+    # }else{
+    #     write.table(
+    #         final_df,
+    #         file=out_file,
+    #         sep="\t",
+    #         row.names=FALSE,
+    #         quote=FALSE
+    #     )
+    # }
+    write.table(
+        final_df,
+        file=out_file,
+        sep="\t",
+        row.names=FALSE,
+        quote=FALSE
+    )
 }
