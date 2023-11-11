@@ -4227,7 +4227,7 @@ observeEvent(input$confirm_clustering_go, {
                                                                 min=0,
                                                                 max=30,
                                                                 step=1,
-                                                                value=20
+                                                                value=5
                                                             )
                                                         )
                                                     ),

@@ -13,7 +13,7 @@ function ClusterSyntenyPlotting(InputData) {
     var treeByRow = InputData.tree_byrow;
     var rCutoff = InputData.r_cutoff;
 
-    console.log("rCutoff", rCutoff);
+    // console.log("rCutoff", rCutoff);
     // console.log("treeByCol", treeByCol);
     // console.log("treeByRow", treeByRow);
 
@@ -588,14 +588,14 @@ function ClusterZoomInPlotting(InputData) {
     var subjectSpecies = InputData.subject_sp;
     var plotSize = InputData.size;
 
-    console.log("plotId", plotId);
+    /* console.log("plotId", plotId);
     console.log("parId", parId);
     console.log("segmentedChrInfo", segmentedChrInfo);
     console.log("segmentedAnchorpointsInfo", segmentedAnchorpointsInfo);
     console.log("queryChrLabels", queryChrLabels);
     console.log("subjectChrLabels", subjectChrLabels);
     console.log("querySpecies", querySpecies);
-    console.log("subjectSpecies", subjectSpecies);
+    console.log("subjectSpecies", subjectSpecies); */
 
     var querySpeciesTmp = querySpecies.replace(" ", "_");
     var queryChrInfo = segmentedChrInfo
@@ -965,14 +965,14 @@ function ClusterZoomInLinkPlotting(InputData) {
     var subjectSpecies = InputData.subject_sp;
     var plotSize = InputData.size;
 
-    console.log("plotId", plotId);
+/*     console.log("plotId", plotId);
     console.log("parId", parId);
     console.log("segmentedChrInfo", segmentedChrInfo);
     console.log("segmentedAnchorpointsInfo", segmentedAnchorpointsInfo);
     console.log("queryChrLabels", queryChrLabels);
     console.log("subjectChrLabels", subjectChrLabels);
     console.log("querySpecies", querySpecies);
-    console.log("subjectSpecies", subjectSpecies);
+    console.log("subjectSpecies", subjectSpecies); */
 
     var querySpeciesTmp = querySpecies.replace(" ", "_");
     var queryChrInfo = segmentedChrInfo
@@ -1032,8 +1032,8 @@ function ClusterZoomInLinkPlotting(InputData) {
     var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
     var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
 
-    console.log("queryWidth", queryWidth);
-    console.log("subjectWidth", subjectWidth);
+    // console.log("queryWidth", queryWidth);
+    // console.log("subjectWidth", subjectWidth);
 
     if (queryWidth > subjectWidth) {
         var maxLen = queryWidth;
@@ -1069,9 +1069,9 @@ function ClusterZoomInLinkPlotting(InputData) {
         var middlePoint = (width - leftPadding - rightPadding) / 2;
         var queryStartX = middlePoint - ChrScaler(queryWidth) / 2 + leftPadding;
         var subjectStartX = middlePoint - ChrScaler(subjectWidth) / 2 + leftPadding;
-        console.log("middlePoint", middlePoint);
+/*         console.log("middlePoint", middlePoint);
         console.log("queryStartX", queryStartX);
-        console.log("subjectStartX", subjectStartX);
+        console.log("subjectStartX", subjectStartX); */
 
         d3.select("#" + plotId)
             .select("svg").remove();
@@ -1095,7 +1095,7 @@ function ClusterZoomInLinkPlotting(InputData) {
             .text(querySpecies.replace(/(\w)\w+\s(\w+)/, "$1. $2"))
             .style("fill", "#68AC57");
 
-        console.log("queryChrInfo", queryChrInfo);
+        // console.log("queryChrInfo", queryChrInfo);
 
         svg.append("g")
             .attr("class", "queryChrLabel")

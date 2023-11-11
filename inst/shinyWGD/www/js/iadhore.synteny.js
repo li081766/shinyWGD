@@ -35,7 +35,7 @@ script.onload = function () {
         console.log("queryChrInfo", queryChrInfo);
         console.log("subjectChrInfo", subjectChrInfo); */
 
-        queryChrInfo = queryChrInfo.sort(function (a, b) {
+        /* queryChrInfo = queryChrInfo.sort(function (a, b) {
             return b.len - a.len;
         });
 
@@ -45,7 +45,7 @@ script.onload = function () {
 
         segmentInfo.sort(function (a, b) {
             return (b.endX - b.startX) - (a.endY - a.startY);
-        });
+        }); */
 
         const query_chr_colors = [
             "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
@@ -54,7 +54,7 @@ script.onload = function () {
         const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
 
         // draw a parallel syntenic plot
-        d3.select("#SyntenicBlock_" + plotId).select("svg").remove();
+        d3.select("#" + plotId).select("svg").remove();
 
         var segsRibbonsId = "segsRibbons_" + plotId;
         // console.log(segsRibbonsId);
@@ -95,7 +95,7 @@ script.onload = function () {
         // console.log("innerPaddingQuery", innerPaddingQuery);
 
         var middlePoint = (width - leftPadding - rightPadding) / 2;
-        const svg = d3.select("#SyntenicBlock_" + plotId)
+        const svg = d3.select("#" + plotId)
             .append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -357,6 +357,11 @@ script.onload = function () {
                     .attr("opacity", 0.6);
             });
 
+        var isAnchorPair = InputData.anchor_pair;
+        if (typeof isAnchorPair !== "undefined") {
+            segmentInfo = segmentInfo.concat(swapXYValues(segmentInfo));
+        }
+
         // prepare segments data
         segmentInfo.forEach((d) => {
             let queryChr = queryChrInfo.find(e => e.seqchr === d.listX);
@@ -410,6 +415,13 @@ script.onload = function () {
                 }
             })
             .attr("opacity", 0.6)
+            .attr("stroke", (d) => {
+                const seqchr = d.listX;
+                const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                return matchingObj ? query_chr_colorScale(matchingObj.idx) : "gray";
+            })
+            .attr("stroke-width", 0.79)
+            .attr("stroke-opacity", 0.4)
             .attr("data-tippy-content", d => {
                 return "<b><font color='#FFE153'>Query:</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
                     "<font color='red'><b>&#8595</b></font><br>" +
@@ -469,8 +481,415 @@ script.onload = function () {
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         querySpecies = querySpecies.replace(" ", "_");
         subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("Synteny_download_" + plotId,
-            "SyntenicBlock_" + plotId,
+        downloadSVG("download_" + plotId,
+            plotId,
+            querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
+        // downloadSVGwithForeign("dotView_download", "dotView");
+    }
+
+    Shiny.addCustomMessageHandler("Parallel_Number_Plotting", ParallelNumPlotting);
+    function ParallelNumPlotting(InputData) {
+        var plotId = InputData.plot_id;
+        var anchorpointInfo = convertShinyData(InputData.anchorpoints);
+        var queryChrInfo = convertShinyData(InputData.query_chr_nums);
+        var subjectChrInfo = convertShinyData(InputData.subject_chr_nums);
+        var width = InputData.width;
+        var height = InputData.height;
+        var querySpecies = InputData.query_sp;
+        var subjectSpecies = InputData.subject_sp;
+        var scaleRatio = width / 800;
+
+        const query_chr_colors = [
+            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
+        ];
+        const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
+
+        // draw a parallel syntenic plot
+        d3.select("#" + plotId).select("svg").remove();
+
+        var segsRibbonsId = "segsRibbons_" + plotId;
+
+        let topPadding = 50;
+        let bottomPadding = 20;
+        let leftPadding = 10;
+        let rightPadding = 50;
+        let chrRectHeight = 10;
+        var tooltipDelay = 500;
+
+        if (queryChrInfo === subjectChrInfo) {
+            var innerPaddingSubject = 10;
+            var innerPaddingQuery = 10;
+        } else {
+            var queryChrNumSum = d3.sum(queryChrInfo.map(e => e.gene_num));
+            var subjectChrNumSum = d3.sum(subjectChrInfo.map(e => e.gene_num));
+            if (queryChrNumSum * 0.8 > subjectChrNumSum) {
+                var innerPaddingSubject = 10 * queryChrNumSum / subjectChrNumSum * 0.8;
+                var innerPaddingQuery = 10;
+                var maxChrLen = queryChrNumSum * 0.8;
+            } else if (subjectChrNumSum * 0.8 > queryChrNumSum) {
+                var innerPaddingQuery = 10 * subjectChrNumSum / queryChrNumSum * 0.8;
+                var innerPaddingSubject = 10;
+                var maxChrLen = subjectChrNumSum * 0.8;
+            } else {
+                var innerPaddingSubject = 10;
+                var innerPaddingQuery = 10;
+                var maxChrLen = queryChrNumSum;
+            }
+        }
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+        const svg = d3.select("#" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const innerScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([
+                0,
+                width - leftPadding - rightPadding
+            ]);
+
+        function calc_accumulate_len_t(inputChrInfo, maxChrLen, innerPadding_xScale, innerPadding) {
+            let acc_len = 0;
+            let total_chr_num = d3.sum(inputChrInfo.map(e => e.gene_num));
+            let ratio = innerPadding_xScale.invert(innerPadding);
+            inputChrInfo.forEach((e, i) => {
+                e.idx = i;
+                e.accumulate_start = acc_len + 1;
+                e.accumulate_end = e.accumulate_start + e.gene_num - 1;
+                acc_len = e.accumulate_end + maxChrLen * ratio;
+            });
+            return inputChrInfo;
+        }
+
+        // calculate accumulate chromosome length
+        queryChrInfo = calc_accumulate_len_t(queryChrInfo, maxChrLen, innerScale, innerPaddingQuery);
+        subjectChrInfo = calc_accumulate_len_t(subjectChrInfo, maxChrLen, innerScale, innerPaddingSubject);
+
+        // plot query chromosomes
+        const queryGroup = svg.append("g").attr("class", "queryChrs");
+        const subjectGroup = svg.append("g").attr("class", "subjectChrs");
+
+        // choose the sp with larger width to make the scaler
+        var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
+        var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
+        if (queryWidth >= subjectWidth) {
+            var scaleData = queryChrInfo;
+        } else {
+            var scaleData = subjectChrInfo;
+        }
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                scaleData[0].accumulate_start,
+                scaleData[scaleData.length - 1].accumulate_end
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+        if (queryWidth > subjectWidth) {
+            var startX = middlePoint - ChrScaler(subjectWidth) / 2;
+        } else if (queryWidth < subjectWidth) {
+            var startX = middlePoint - ChrScaler(queryWidth) / 2;
+        } else {
+            var startX = 0;
+        }
+
+        queryGroup.append("text")
+            .text(querySpecies)
+            .attr("id", "queryMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", topPadding - 10)
+            .attr("font-weight", "bold")
+            .attr("font-size", 14 * scaleRatio + "px")
+            .attr("font-style", "italic")
+            .style("fill", "#68AC57");
+
+        queryGroup.selectAll("text")
+            .attr("class", "queryChrLabel")
+            .filter(":not(#queryMainLabel)")
+            .data(queryChrInfo)
+            .join("text")
+            .text((d) => d.seqchr)
+            .attr("text-anchor", "left")
+            .attr("transform", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return "rotate(-30 " + Number(30 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (topPadding + 30) + ")";
+                } else {
+                    return "rotate(-30 " + (Number(startX) + 30 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (topPadding + 30) + ")";
+                }
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
+            })
+            .attr("y", function () {
+                return Number(d3.select("#queryMainLabel").attr("y")) + Number(d3.select(this).node().getBBox().height) + 10;
+            })
+            .attr("font-size", 12 * scaleRatio + "px");
+
+        const query_chr_colorScale = d3.scaleOrdinal()
+            .domain(queryChrInfo.map((d) => d.idx))
+            .range(query_chr_colors);
+
+        queryGroup
+            .selectAll("rect")
+            .data(queryChrInfo)
+            .join("rect")
+            .attr("class", "queryChrShape")
+            .attr("id", (d) => "queryChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_start);
+                } else {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 1)
+            .attr("fill", (d) => query_chr_colorScale(d.idx))
+            .attr("ry", 3)
+            .on("mouseover", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonEnterTime = new Date().getTime();
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    //d3.selectAll(".from_" + plotId + "_" + selector_chrID)
+                    .filter(".from_" + plotId + "_" + selector_chrID)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50);
+
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.from_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .attr("opacity", 0);
+            })
+            .on("mouseout", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.selectAll(".from_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .duration(50);
+                }
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.from_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .duration(50)
+                    .attr("opacity", 0.6);
+            });
+
+        subjectGroup.append("text")
+            .text(subjectSpecies)
+            .attr("id", "subjectMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", height - bottomPadding + 15)
+            .attr("font-weight", "bold")
+            .attr("font-size", 14 * scaleRatio + "px")
+            .attr("font-style", "italic")
+            // .attr("font-family", "times")
+            .style("fill", "#8E549E");
+
+        subjectGroup.selectAll("text")
+            .filter(":not(#subjectMainLabel)")
+            .data(subjectChrInfo)
+            .join("text")
+            .text((d) => d.seqchr)
+            .attr("text-anchor", "start")
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
+            })
+            .attr("y", height - bottomPadding - 25)
+            .attr("transform", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return "rotate(30 " + Number(startX + 5 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (height - bottomPadding - 30) + ")";
+                } else {
+                    return "rotate(30 " + Number(5 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (height - bottomPadding - 30) + ")";
+                }
+            })
+            .attr("font-size", 12 * scaleRatio + "px")
+            .attr("class", "queryChrLabel");
+
+        const subject_chr_colorScale = d3.scaleOrdinal()
+            .domain(subjectChrInfo.map((d) => d.idx))
+            .range(subject_chr_colors);
+
+        subjectGroup
+            .selectAll("rect")
+            .data(subjectChrInfo)
+            .join("rect")
+            .attr("class", "subjectChrShape")
+            .attr("id", (d) => "subjectChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                } else {
+                    return ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 1)
+            .attr("fill", (d) => subject_chr_colorScale(d.idx))
+            .attr("ry", 3)
+            .on("mouseover", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonEnterTime = new Date().getTime();
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(".to_" + plotId + "_" + selector_chrID)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50);
+
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .attr("opacity", 0);
+            })
+            .on("mouseout", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.selectAll(".to_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .duration(50)
+                }
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .duration(50)
+                    .attr("opacity", 0.6);
+            });
+
+        if (querySpecies === subjectSpecies) {
+            anchorpointInfo = anchorpointInfo.concat(swapXYValues(anchorpointInfo));
+        }
+        // prepare segments data
+        anchorpointInfo.forEach((d) => {
+            let queryChr = queryChrInfo.find(e => e.seqchr === d.listX);
+            let subjectChr = subjectChrInfo.find(e => e.seqchr === d.listY);
+            let queryAccumulateStart = queryChr.accumulate_start + d.coordX + 1;
+            let queryAccumulateEnd = queryChr.accumulate_start + d.coordX + 2;
+            let subjectAccumulateStart = subjectChr.accumulate_start + d.coordY + 1;
+            let subjectAccumulateEnd = subjectChr.accumulate_start + d.coordY + 2;
+            if (queryWidth >= subjectWidth) {
+                var queryX = ChrScaler(queryAccumulateStart);
+                var queryX1 = ChrScaler(queryAccumulateEnd);
+                var subjectX = startX + ChrScaler(subjectAccumulateStart);
+                var subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
+            } else {
+                var queryX = startX + ChrScaler(queryAccumulateStart);
+                var queryX1 = startX + ChrScaler(queryAccumulateEnd);
+                var subjectX = ChrScaler(subjectAccumulateStart);
+                var subjectX1 = ChrScaler(subjectAccumulateEnd);
+            }
+            d.ribbonPosition = {
+                source: {
+                    x: queryX,
+                    x1: queryX1,
+                    y: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight,
+                    y1: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight
+                },
+                target: {
+                    x: subjectX,
+                    x1: subjectX1,
+                    y: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight,
+                    y1: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight
+                }
+            };
+        })
+
+        svg.append("g")
+            .attr("class", segsRibbonsId)
+            .selectAll("path")
+            .data(anchorpointInfo)
+            .join("path")
+            .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+            .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+            .attr("fill", (d) => {
+                const seqchr = d.listX;
+                const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                if (matchingObj) {
+                    return query_chr_colorScale(matchingObj.idx);
+                } else {
+                    return "gray";
+                }
+            })
+            .attr("opacity", 0.6)
+            .attr("stroke", (d) => {
+                const seqchr = d.listX;
+                const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                return matchingObj ? query_chr_colorScale(matchingObj.idx) : "gray";
+            })
+            .attr("stroke-width", 0.79)
+            .attr("stroke-opacity", 0.4)
+            .attr("data-tippy-content", d => {
+                return "<b><font color='#FFE153'>Query:</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
+                    "<font color='red'><b>&#8595</b></font><br>" +
+                    "<b><font color='#4DFFFF'>Subject:</font></b> " + d.firstY + " &#8594 " + d.lastY;
+            })
+            .on("mouseover", function () {
+                ribbonEnterTime = new Date().getTime();
+                d3.select(this)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .style("fill", "red");
+            })
+            .on("mouseout", function () {
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.select(this)
+                        .transition()
+                        .duration(50)
+                        .style("fill", (d) => {
+                            const seqchr = d.listX;
+                            const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                            if (matchingObj) {
+                                return query_chr_colorScale(matchingObj.idx);
+                            } else {
+                                return "gray";
+                            }
+                        })
+                }
+            })
+
+        tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
+        downloadSVG("download_" + plotId,
+            plotId,
             querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
         // downloadSVGwithForeign("dotView_download", "dotView");
     }
@@ -481,16 +900,16 @@ script.onload = function () {
         var segmentInfo = convertShinyData(InputData.segs);
         var chrLenInfo = convertShinyData(InputData.chr_lens);
         var chrOrder = convertShinyData(InputData.chr_order);
-        var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
+        // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
         var spOrder = InputData.sp_order;
         var width = InputData.width;
         var height = InputData.height;
 
-        /*         console.log("plotID", plotId);
-                console.log("segmentInfo", segmentInfo);
+        var overlapCutOff = 0.1;
+
+        /*         console.log("segmentInfo", segmentInfo);
                 console.log("chrLenInfo", chrLenInfo);
                 console.log("chrOrder", chrOrder);
-                console.log("overlapCutOff", overlapCutOff);
                 console.log("spOrder", spOrder); */
 
         const query_chr_colors = [
@@ -524,7 +943,7 @@ script.onload = function () {
         function calc_accumulate_len(inputChrInfo, chrOrder, innerPadding_xScale, innerPadding) {
             chrOrder.forEach(d => {
                 chrList = d.chrOrder.split(',');
-                var chrOrderLenData = inputChrInfo.filter(a => chrList.includes(a.seqchr) && a.sp === d.species.replace(/\_/, " "));
+                var chrOrderLenData = inputChrInfo.filter(a => chrList.includes(a.seqchr) && a.sp === d.species); // .replace(/\_/, " "));
                 var chrSortedLenData = chrOrderLenData.sort((a, b) => {
                     return chrList.indexOf(a.seqchr) - chrList.indexOf(b.seqchr);
                 });
@@ -572,6 +991,8 @@ script.onload = function () {
             d.idx = i;
         });
 
+        // console.log("accumulateLenInfo", accumulateLenInfo);
+
         const svg = d3.select("#parallel_plot_multiple_species")
             .append("svg")
             .attr("width", width)
@@ -599,7 +1020,9 @@ script.onload = function () {
             .join("text")
             .attr("class", "myText")
             .text(function (d) {
-                return d.species.replace(/\_/, " ");
+                var tmpLabel = d.species.replace("_", " ");
+                tmpLabel = tmpLabel.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                return tmpLabel;
             })
             .attr("x", function (d) {
                 return d.startX + leftPadding * 3 - 4;
@@ -610,7 +1033,6 @@ script.onload = function () {
             .attr("font-weight", "bold")
             .attr("font-size", "14px")
             .attr("font-style", "italic")
-            // .attr("font-family", "times")
             .attr("text-anchor", "end")
             .style("fill", (d) => speciesColorScale(d.species))
             .on('click', function (e, d) {
@@ -702,7 +1124,7 @@ script.onload = function () {
                         .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
                         .transition()
                         .duration(50)
-                        .attr("opacity", 0.51);
+                        .attr("opacity", 0.69);
                 });
             rects.exit().remove();
         });
@@ -710,22 +1132,38 @@ script.onload = function () {
         const chrLabel = svg.append("g")
             .attr("class", "chrLabel")
 
-        function getCommonPart(inAarry) {
-            let commonPrefix = "";
-            for (let i = 0; i < inAarry[0].length; i++) {
-                const char = inAarry[0][i];
-                for (let j = 1; j < inAarry.length; j++) {
-                    if (inAarry[j][i] !== char) {
-                        commonPrefix = inAarry[0].substring(0, i);
-                        break;
+        function getCommonPart(inArray) {
+            if (inArray.length > 1) {
+                const minLength = Math.min(...inArray.map(str => str.length));
+                const minLenStrings = inArray.filter(str => str.length === minLength);
+
+                if (minLenStrings.length > 1) {
+                    let commonPrefix = "";
+
+                    for (let i = 0; i < minLength; i++) {
+                        const char = minLenStrings[0][i];
+
+                        for (let j = 1; j < minLenStrings.length; j++) {
+                            if (minLenStrings[j][i] !== char) {
+                                if (j === minLenStrings.length - 1) {
+                                    commonPrefix = minLenStrings[0].substring(0, i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (commonPrefix !== "") {
+                            break;
+                        }
                     }
-                }
-                if (commonPrefix !== "") {
-                    break;
+
+                    return commonPrefix;
+                } else {
+                    const singleString = minLenStrings[0];
+                    const match = singleString.match(/^[^a-zA-Z_.]+(\d*)$/);
+                    return match ? match[1] : singleString;
                 }
             }
-            commonPrefix = inAarry[0].substring(0, commonPrefix.length);
-            return commonPrefix;
         }
 
         accumulateLenInfo.forEach((d, i) => {
@@ -734,6 +1172,8 @@ script.onload = function () {
                 return e.seqchr;
             });
             var commonPart = getCommonPart(seqchrArray);
+            /* console.log("seqchrArray", seqchrArray);
+            console.log("commonPart", commonPart); */
             const lables = chrGroup.selectAll(".chrLabel")
                 .data(d.accumulateLen);
             var labelAarry = lables.enter()
@@ -751,13 +1191,16 @@ script.onload = function () {
                         label = label.replace(/^0+/, "");
                         return label;
                     } else {
-                        var label = e.seqchr.replace(commonPart, "");
-                        label = label.replace(/^0+/, "");
+                        if (typeof commonPart !== 'undefined') {
+                            var label = e.seqchr.replace(commonPart, "").replace(/^0+/, "");;
+                        } else {
+                            var labelTmp = e.seqchr.match(/\d*$/);
+                            label = labelTmp[0].replace(/^0+/, "");
+                        }
                         return label;
                     }
                 })
                 .attr("font-size", "12px")
-                // .attr("font-family", "calibri")
                 .attr("fill", "#FFF7FB")
                 .attr("text-anchor", "middle");
         });
@@ -805,21 +1248,16 @@ script.onload = function () {
             .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
             .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
             .attr("fill", "#BEBEBE")
-            .attr("opacity", 0.51)
+            .attr("opacity", 0.69)
+            .attr("stroke", "#BEBEBE")
+/*             .attr("stroke-width", 1.28)
+            .attr("stroke-opacity", 0.69) */
             /* .attr("data-tippy-content", d => {
                 return "<b><font color='#FFE153'>" + d.listX + ":</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
                     "<font color='red'><b>&#8595</b></font><br>" +
                     "<b><font color='#4DFFFF'>" + d.listY + ":</font></b> " + d.firstY + " &#8594 " + d.lastY;
             }) */
             .on("mouseover", function (e, d) {
-                ribbonEnterTime = new Date().getTime();
-                d3.select(this)
-                    .transition()
-                    .delay(tooltipDelay)
-                    .duration(50)
-                    .attr("fill", "red")
-                    .attr("opacity", 0.51);
-
                 d3.selectAll("path")
                     .transition()
                     .delay(tooltipDelay)
@@ -864,7 +1302,7 @@ script.onload = function () {
                     })
                     .attr("opacity", function (otherPathData) {
                         if (otherPathData === d) {
-                            return 0.51;
+                            return 0.91;
                         } else if (
                             (otherPathData.listX === d.listX &&
                                 ((otherPathData.StartX > d.startX && otherPathData.startX < d.endX && otherPathData.endX > d.endX &&
@@ -895,41 +1333,262 @@ script.onload = function () {
                                     d.startX < otherPathData.startY && d.endX > otherPathData.endY ||
                                     d.startX > otherPathData.startY && d.endX < otherPathData.endY))
                         ) {
-                            return 0.51;
+                            return 0.91;
                         } else {
-                            return 0;
+                            return 0.1;
                         }
                     });
             })
             .on("mouseout", function (e, d) {
-                ribbonOutTime = new Date().getTime();
-                if (ribbonOutTime - ribbonEnterTime <= 5000) {
-                    d3.select(this)
-                        .transition()
-                        .duration(50)
-                        .delay(tooltipDelay)
-                        .attr("fill", "#BEBEBE");
-                }
+                d3.selectAll(".segsRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .attr("fill", "#BEBEBE")
+                    .attr("opacity", 0.69);
             })
-            .on("click", function (e, d) {
-                if (popUpMenu.style('visibility') == 'visible') {
+        .on("click", function (e, d) {
+            if (popUpMenu.style('visibility') == 'visible') {
+                popUpMenu.style('visibility', 'hidden');
+                popUpMenu.style('opacity', 1);
+            } else {
+                popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                    "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                    "<p><div id='color-options'></div>");
+
+                d3.select('#close-btn').on('click', closePopUp);
+                function closePopUp() {
                     popUpMenu.style('visibility', 'hidden');
                     popUpMenu.style('opacity', 1);
+                };
+
+                var selectedPath = d3.select(this.parentNode).selectAll("path");
+                var testPath = d3.select("this");
+                var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                var colorOptions = d3.select('#color-options')
+                    .selectAll('div')
+                    .data(colors)
+                    .enter()
+                    .append('div')
+                    .style('cursor', 'pointer')
+                    .style('background-color', function (d) { return d; })
+                    .style('width', '20px')
+                    .style('height', '20px')
+                    .style('margin-right', '5px')
+                    .style('display', 'inline-block')
+                    .on('click', function () {
+                        var color = d3.select(this).style('background-color');
+                        selectedPath.each(function (pathData) {
+                            if (pathData === d ||
+                                (pathData.listX === d.listX &&
+                                    ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
+                                        (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
+                                            (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        d.startX < pathData.startX && d.endX > pathData.endX ||
+                                        d.startX > pathData.startX && d.endX < pathData.endX)) ||
+                                (pathData.listX === d.listY &&
+                                    ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
+                                        (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                        (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
+                                            (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                        d.startY < pathData.startX && d.endY > pathData.endX ||
+                                        d.startY > pathData.startX && d.endY < pathData.endX)) ||
+                                (pathData.listY === d.listY &&
+                                    ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
+                                        (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                        (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
+                                            (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                        d.startY < pathData.startY && d.endY > pathData.endY ||
+                                        d.startY > pathData.startY && d.endY < pathData.endY)) ||
+                                (pathData.listY === d.listX &&
+                                    ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
+                                        (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                        (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
+                                            (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        d.startX < pathData.startY && d.endX > pathData.endY ||
+                                        d.startX > pathData.startY && d.endX < pathData.endY))
+                            ) {
+                                d3.select(this).raise().style('fill', color).attr("opacity", 0.95);
+                            }
+                        });
+                    });
+
+                var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                popUpMenu.style('left', (mouseX + 10) + 'px')
+                    .style('top', (mouseY - 10) + 'px')
+                    .style('visibility', 'visible')
+                    .style('opacity', 0.9);
+            }
+        });
+
+        downloadSVG("parallel_download_multiple",
+            "parallel_plot_multiple_species",
+            "Multiple_Species_Alignment.Parallel.svg");
+        // downloadSVGwithForeign("dotView_download", "dotView");
+    }
+
+    Shiny.addCustomMessageHandler("Parallel_Multiple_Gene_Num_Plotting", parallelMultipleGeneNumPlotting);
+    function parallelMultipleGeneNumPlotting(InputData) {
+        var plotId = InputData.plot_id;
+        var segmentInfo = convertShinyData(InputData.segs);
+        var chrNumInfo = convertShinyData(InputData.chr_nums);
+        var chrOrder = convertShinyData(InputData.chr_order);
+        // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
+        var spOrder = InputData.sp_order;
+        var width = InputData.width;
+        var height = InputData.height;
+
+        var overlapCutOff = 0.1;
+
+        /*         console.log("segmentInfo", segmentInfo);
+                console.log("chrNumInfo", chrNumInfo);
+                console.log("chrOrder", chrOrder);
+                console.log("spOrder", spOrder); */
+
+        const query_chr_colors = [
+            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
+        const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+
+        // draw a parallel syntenic plot
+        d3.select("#parallel_plot_multiple_species").select("svg").remove();
+
+        // define syntenic plot dimension
+        // let width = 850;
+        var heightOriginal = 150 * (spOrder.length - 1);
+        var heightRatio = height / heightOriginal;
+        let topPadding = 20;
+        let bottomPadding = 20;
+        let leftPadding = 150;
+        let rightPadding = 50;
+        let innerPadding = 10;
+        let chrRectHeight = 15;
+        var tooltipDelay = 100;
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+        const innerScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([
+                0,
+                width - leftPadding - rightPadding
+            ]);
+
+        function calc_accumulate_len(inputChrInfo, chrOrder, innerPadding_xScale, innerPadding) {
+            chrOrder.forEach(d => {
+                chrList = d.chrOrder.split(',');
+                var chrOrderLenData = inputChrInfo.filter(a => chrList.includes(a.seqchr) && a.sp === d.species); // .replace(/\_/, " "));
+                var chrSortedLenData = chrOrderLenData.sort((a, b) => {
+                    return chrList.indexOf(a.seqchr) - chrList.indexOf(b.seqchr);
+                });
+                let acc_len = 0;
+                // let total_chr_len = d3.sum(chrSortedLenData.map(e => e.gene_num));
+                // let ratio = innerPadding_xScale.invert(innerPadding);
+                chrSortedLenData.forEach((e, i) => {
+                    e.idx = i;
+                    e.accumulate_start = acc_len;
+                    e.accumulate_end = e.accumulate_start + e.gene_num;
+                    acc_len = e.accumulate_end + 50; // total_chr_len * ratio;
+                });
+                d.accumulateLen = chrSortedLenData;
+            });
+            return chrOrder;
+        }
+        // calculate accumulate chromosome length
+        var accumulateLenInfo = calc_accumulate_len(chrNumInfo, chrOrder, innerScale, innerPadding);
+        var maxChrLen = 0;
+        accumulateLenInfo.forEach(d => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            maxChrLen = Math.max(maxChrLen, maxLen);
+        })
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([1, maxChrLen])
+            .range([
+                0,
+                width - rightPadding - leftPadding
+            ]);
+
+        // decide the start point for each species
+        accumulateLenInfo.forEach((d, i) => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            if (maxLen === maxChrLen) {
+                d.startX = 0;
+            } else {
+                d.startX = middlePoint - ChrScaler(maxLen) / 2;
+            }
+            d.idx = i;
+            d.endX = ChrScaler(maxLen) + d.startX + leftPadding;
+        });
+
+        // console.log("accumulateLenInfo", accumulateLenInfo);
+
+        const svg = d3.select("#parallel_plot_multiple_species")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        d3.select('.pop-up-menu').remove();
+        var popUpMenu = d3.select('body').append('div')
+            .classed('pop-up-menu', true)
+            .style('position', 'absolute')
+            .style('top', 0)
+            .style('left', 0)
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', '1px solid black')
+            .style('padding', '5px');
+
+        const speciesColorScale = d3.scaleOrdinal()
+            .domain(accumulateLenInfo.map((d) => d.species))
+            .range(subject_chr_colors);
+
+        const speciesGroup = svg.append("g").attr("class", "species");
+        // add species name
+        speciesGroup.selectAll("text")
+            .data(accumulateLenInfo)
+            .join("text")
+            .attr("class", "myText")
+            .text(function (d) {
+                var tmpLabel = d.species.replace("_", " ");
+                tmpLabel = tmpLabel.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                return tmpLabel;
+            })
+            .attr("x", function (d) {
+                return d.startX + leftPadding - 4;
+            })
+            .attr("y", function (d, i) {
+                return i * 90 * heightRatio + 10 + topPadding;
+            })
+            .attr("font-weight", "bold")
+            .attr("font-size", "14px")
+            .attr("font-style", "italic")
+            .attr("text-anchor", "end")
+            .style("fill", (d) => speciesColorScale(d.species))
+            .on('click', function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
+                    popUpMenu.style('visibility', 'hidden');
                 } else {
-                    popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
-                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                    var name = d.species.replace(/\_/, " ");
+                    popUpMenu.html("<p>Set a Color for <i><b>" + name +
+                        "</i></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
                         "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
-                        "<p><div id='color-options'></div>");
+                        "<div id='color-options'></div>");
 
                     d3.select('#close-btn').on('click', closePopUp);
                     function closePopUp() {
                         popUpMenu.style('visibility', 'hidden');
-                        popUpMenu.style('opacity', 1);
                     };
 
-                    var selectedPath = d3.select(this.parentNode).selectAll("path");
-                    var testPath = d3.select("this");
-                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080', '#FFC0CB', '#008080'];
+                    var textElement = d3.select(this)._groups[0][0];
                     var colorOptions = d3.select('#color-options')
                         .selectAll('div')
                         .data(colors)
@@ -943,40 +1602,8 @@ script.onload = function () {
                         .style('display', 'inline-block')
                         .on('click', function () {
                             var color = d3.select(this).style('background-color');
-                            selectedPath.each(function (pathData) {
-                                if (pathData === d ||
-                                    (pathData.listX === d.listX &&
-                                        ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
-                                            (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                            (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
-                                                (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                            d.startX < pathData.startX && d.endX > pathData.endX ||
-                                            d.startX > pathData.startX && d.endX < pathData.endX)) ||
-                                    (pathData.listX === d.listY &&
-                                        ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
-                                            (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                            (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
-                                                (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                            d.startY < pathData.startX && d.endY > pathData.endX ||
-                                            d.startY > pathData.startX && d.endY < pathData.endX)) ||
-                                    (pathData.listY === d.listY &&
-                                        ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
-                                            (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                            (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
-                                                (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                            d.startY < pathData.startY && d.endY > pathData.endY ||
-                                            d.startY > pathData.startY && d.endY < pathData.endY)) ||
-                                    (pathData.listY === d.listX &&
-                                        ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
-                                            (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
-                                            (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
-                                                (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                            d.startX < pathData.startY && d.endX > pathData.endY ||
-                                            d.startX > pathData.startY && d.endX < pathData.endY))
-                                ) {
-                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.9);
-                                }
-                            });
+                            d3.select(textElement).style('fill', color);
+                            // closePopUp();
                         });
 
                     var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
@@ -984,14 +1611,361 @@ script.onload = function () {
                     popUpMenu.style('left', (mouseX + 10) + 'px')
                         .style('top', (mouseY - 10) + 'px')
                         .style('visibility', 'visible')
-                        .style('opacity', 0.9);
                 }
             });
 
-        downloadSVG("parallel_download_last",
+        const chrGroup = svg.append("g")
+            .attr("class", "chrRect");
+
+        accumulateLenInfo.forEach((d, i) => {
+            const rects = chrGroup.selectAll(".chrRect")
+                .data(d.accumulateLen);
+
+            var spColor = speciesColorScale(d.species);
+            rects.enter()
+                .append("rect")
+                .merge(rects)
+                .attr("x", (e) => leftPadding + Number(d.startX) + ChrScaler(e.accumulate_start))
+                .attr("y", i * 90 * heightRatio - 1 + topPadding)
+                .attr("width", (e) => ChrScaler(e.accumulate_end - e.accumulate_start))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 1)
+                .attr("fill", spColor)
+                .attr("ry", 3)
+                .attr("data-tippy-content", (e) => "chrId: " + e.seqchr)
+                .on("mouseover", (e, z) => {
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    // ribbonEnterTime = new Date().getTime();
+                    d3.selectAll(".from_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50)
+                    d3.select(".segsRibbons")
+                        .selectAll("path")
+                        .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50)
+                        .attr("opacity", 0);
+                })
+                .on("mouseout", (e, z) => {
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    // ribbonOutTime = new Date().getTime();
+                    // if (ribbonOutTime - ribbonEnterTime <= 1000) {
+                    d3.selectAll(".to_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .duration(50);
+                    // }
+                    d3.select(".segsRibbons")
+                        .selectAll("path")
+                        .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                        .transition()
+                        .duration(50)
+                        .attr("opacity", 0.69);
+                });
+            rects.exit().remove();
+        });
+
+        const chrLabel = svg.append("g")
+            .attr("class", "chrLabel")
+
+        function getCommonPart(inArray) {
+            if (inArray.length > 1) {
+                const minLength = Math.min(...inArray.map(str => str.length));
+                const minLenStrings = inArray.filter(str => str.length === minLength);
+
+                if (minLenStrings.length > 1) {
+                    let commonPrefix = "";
+
+                    for (let i = 0; i < minLength; i++) {
+                        const char = minLenStrings[0][i];
+
+                        for (let j = 1; j < minLenStrings.length; j++) {
+                            if (minLenStrings[j][i] !== char) {
+                                if (j === minLenStrings.length - 1) {
+                                    commonPrefix = minLenStrings[0].substring(0, i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (commonPrefix !== "") {
+                            break;
+                        }
+                    }
+
+                    return commonPrefix;
+                } else {
+                    const singleString = minLenStrings[0];
+                    const match = singleString.match(/^[^a-zA-Z_.]+(\d*)$/);
+                    return match ? match[1] : singleString;
+                }
+            }
+        }
+
+        accumulateLenInfo.forEach((d, i) => {
+            var seqchrArray = d.accumulateLen.map(function (e) {
+                return e.seqchr;
+            });
+            var commonPart = getCommonPart(seqchrArray);
+            const lables = chrGroup.selectAll(".chrLabel")
+                .data(d.accumulateLen);
+            var labelAarry = lables.enter()
+                .append("text")
+                .merge(lables)
+                .attr("x", function (e) {
+                    return Number(d.startX) + leftPadding +
+                        d3.mean([ChrScaler(e.accumulate_end), ChrScaler(e.accumulate_start)])
+                })
+                .attr("y", i * 90 * heightRatio + chrRectHeight / 2 + 3 + topPadding)
+                .text(function (e) {
+                    if (e.seqchr.includes("_")) {
+                        var parts = e.seqchr.split("_");
+                        var label = parts[parts.length - 1].replace(/^chr/i, "");
+                        label = label.replace(/^0+/, "");
+                        return label;
+                    } else {
+                        if (typeof commonPart !== 'undefined') {
+                            var label = e.seqchr.replace(commonPart, "").replace(/^0+/, "");;
+                        } else {
+                            var labelTmp = e.seqchr.match(/\d*$/);
+                            label = labelTmp[0].replace(/^0+/, "");
+                        }
+                        return label;
+                    }
+                })
+                .attr("font-size", "12px")
+                .attr("fill", "#FFF7FB")
+                .attr("text-anchor", "middle");
+        });
+
+        // console.log(segmentInfo);
+        segmentInfo.forEach((d) => {
+            let queryChrLen = accumulateLenInfo.find(e => e.species === d.genomeX);
+            let queryChr = queryChrLen.accumulateLen.find(e => e.seqchr === d.listX);
+            let queryAccumulateStart = leftPadding + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start) + ChrScaler(d.coordStartX - 1);
+            let queryAccumulateEnd = leftPadding + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start) + ChrScaler(d.coordEndX - 1);
+
+            let subjectChrLen = accumulateLenInfo.find(e => e.species === d.genomeY);
+            let subjectChr = subjectChrLen.accumulateLen.find(e => e.seqchr === d.listY);
+            let subjectAccumulateStart = leftPadding + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start) + ChrScaler(d.coordStartY - 1);
+            let subjectAccumulateEnd = leftPadding + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start) + ChrScaler(d.coordEndY - 1);
+
+            if (queryChrLen.idx > subjectChrLen.idx) {
+                var queryY = queryChrLen.idx * 90 * heightRatio - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+            } else {
+                var queryY = queryChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio - 1 + topPadding;
+            }
+
+            d.ribbonPosition = {
+                source: {
+                    x: queryAccumulateStart,
+                    x1: queryAccumulateEnd,
+                    y: queryY,
+                    y1: queryY
+                },
+                target: {
+                    x: subjectAccumulateStart,
+                    x1: subjectAccumulateEnd,
+                    y: subjectY,
+                    y1: subjectY
+                }
+            }
+        })
+        // console.log("segmentInfo", segmentInfo);
+
+        svg.append("g")
+            .attr("class", "segsRibbons")
+            .selectAll("path")
+            .data(segmentInfo)
+            .join("path")
+            .attr("d", function (d) {
+                if (d.ribbonPosition) {
+                    return createLinkPolygonPath(d.ribbonPosition);
+                }
+            })
+            .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+            .attr("fill", "#BEBEBE")
+            .attr("opacity", 0.69)
+/*             .attr("stroke", "#BEBEBE")
+            .attr("stroke-width", 1.28)
+            .attr("stroke-opacity", 0.69) */
+            /* .attr("data-tippy-content", d => {
+                return "<b><font color='#FFE153'>" + d.listX + ":</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
+                    "<font color='red'><b>&#8595</b></font><br>" +
+                    "<b><font color='#4DFFFF'>" + d.listY + ":</font></b> " + d.firstY + " &#8594 " + d.lastY;
+            }) */
+            .on("mouseover", function (e, d) {
+                d3.selectAll(".segsRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .attr("fill", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return "red";
+                        }else if (
+                            (otherPathData.listX === d.listX &&
+                                ((otherPathData.StartX > d.startX && otherPathData.startX < d.endX && otherPathData.endX > d.endX &&
+                                    (d.endX - otherPathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    (otherPathData.startX < d.starX && otherPathData.endX > d.startX && otherPathData.endX < d.endX &&
+                                        (otherPathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    d.startX < otherPathData.startX && d.endX > otherPathData.endX ||
+                                    d.startX > otherPathData.startX && d.endX < otherPathData.endX)) ||
+                            (otherPathData.listX === d.listY &&
+                                ((otherPathData.StartX > d.startY && otherPathData.startX < d.endY && otherPathData.endX > d.startY &&
+                                    (d.endY - otherPathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                    (otherPathData.startX < d.starY && otherPathData.endX > d.startY && otherPathData.endX < d.endY &&
+                                        (otherPathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                    d.startY < otherPathData.startX && d.endY > otherPathData.endX ||
+                                    d.startY > otherPathData.startX && d.endY < otherPathData.endX)) ||
+                            (otherPathData.listY === d.listY &&
+                                ((otherPathData.StartY > d.startY && otherPathData.startY < d.endY && otherPathData.endY > d.endY &&
+                                    (d.endY - otherPathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                    (otherPathData.startY < d.starY && otherPathData.endY > d.startY && otherPathData.endY < d.endY &&
+                                        (otherPathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                    d.startY < otherPathData.startY && d.endY > otherPathData.endY ||
+                                    d.startY > otherPathData.startY && d.endY < otherPathData.endY)) ||
+                            (otherPathData.listY === d.listX &&
+                                ((otherPathData.StartY > d.startX && otherPathData.startY < d.endX && otherPathData.endY > d.startX &&
+                                    (d.endX - otherPathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                    (otherPathData.startY < d.startX && otherPathData.endY > d.startX && otherPathData.endY < d.endX &&
+                                        (otherPathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    d.startX < otherPathData.startY && d.endX > otherPathData.endY ||
+                                    d.startX > otherPathData.startY && d.endX < otherPathData.endY))
+                        ) {
+                            return "blue";
+                        } else {
+                            return "#BEBEBE"
+                        }
+                    })
+                    .attr("opacity", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return 0.91;
+                        } else if (
+                            (otherPathData.listX === d.listX &&
+                                ((otherPathData.StartX > d.startX && otherPathData.startX < d.endX && otherPathData.endX > d.endX &&
+                                    (d.endX - otherPathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    (otherPathData.startX < d.starX && otherPathData.endX > d.startX && otherPathData.endX < d.endX &&
+                                        (otherPathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    d.startX < otherPathData.startX && d.endX > otherPathData.endX ||
+                                    d.startX > otherPathData.startX && d.endX < otherPathData.endX)) ||
+                            (otherPathData.listX === d.listY &&
+                                ((otherPathData.StartX > d.startY && otherPathData.startX < d.endY && otherPathData.endX > d.startY &&
+                                    (d.endY - otherPathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                    (otherPathData.startX < d.starY && otherPathData.endX > d.startY && otherPathData.endX < d.endY &&
+                                        (otherPathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                    d.startY < otherPathData.startX && d.endY > otherPathData.endX ||
+                                    d.startY > otherPathData.startX && d.endY < otherPathData.endX)) ||
+                            (otherPathData.listY === d.listY &&
+                                ((otherPathData.StartY > d.startY && otherPathData.startY < d.endY && otherPathData.endY > d.endY &&
+                                    (d.endY - otherPathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                    (otherPathData.startY < d.starY && otherPathData.endY > d.startY && otherPathData.endY < d.endY &&
+                                        (otherPathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                    d.startY < otherPathData.startY && d.endY > otherPathData.endY ||
+                                    d.startY > otherPathData.startY && d.endY < otherPathData.endY)) ||
+                            (otherPathData.listY === d.listX &&
+                                ((otherPathData.StartY > d.startX && otherPathData.startY < d.endX && otherPathData.endY > d.startX &&
+                                    (d.endX - otherPathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                    (otherPathData.startY < d.startX && otherPathData.endY > d.startX && otherPathData.endY < d.endX &&
+                                        (otherPathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                    d.startX < otherPathData.startY && d.endX > otherPathData.endY ||
+                                    d.startX > otherPathData.startY && d.endX < otherPathData.endY))
+                        ) {
+                            return 0.91;
+                        } else {
+                            return 0.1;
+                        }
+                    });
+            })
+            .on("mouseout", function (e, d) {
+                d3.selectAll(".segsRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .attr("fill", "#BEBEBE")
+                    .attr("opacity", 0.69);
+            })
+        .on("click", function (e, d) {
+            if (popUpMenu.style('visibility') == 'visible') {
+                popUpMenu.style('visibility', 'hidden');
+                popUpMenu.style('opacity', 1);
+            } else {
+                popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                    "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                    "<p><div id='color-options'></div>");
+
+                d3.select('#close-btn').on('click', closePopUp);
+                function closePopUp() {
+                    popUpMenu.style('visibility', 'hidden');
+                    popUpMenu.style('opacity', 1);
+                };
+
+                var selectedPath = d3.select(this.parentNode).selectAll("path");
+                var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                var colorOptions = d3.select('#color-options')
+                    .selectAll('div')
+                    .data(colors)
+                    .enter()
+                    .append('div')
+                    .style('cursor', 'pointer')
+                    .style('background-color', function (d) { return d; })
+                    .style('width', '20px')
+                    .style('height', '20px')
+                    .style('margin-right', '5px')
+                    .style('display', 'inline-block')
+                    .on('click', function () {
+                        var color = d3.select(this).style('background-color');
+                        selectedPath.each(function (pathData) {
+                            if (pathData === d ||
+                                (pathData.listX === d.listX &&
+                                    ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
+                                        (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
+                                            (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        d.startX < pathData.startX && d.endX > pathData.endX ||
+                                        d.startX > pathData.startX && d.endX < pathData.endX)) ||
+                                (pathData.listX === d.listY &&
+                                    ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
+                                        (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                        (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
+                                            (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                        d.startY < pathData.startX && d.endY > pathData.endX ||
+                                        d.startY > pathData.startX && d.endY < pathData.endX)) ||
+                                (pathData.listY === d.listY &&
+                                    ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
+                                        (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                        (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
+                                            (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                        d.startY < pathData.startY && d.endY > pathData.endY ||
+                                        d.startY > pathData.startY && d.endY < pathData.endY)) ||
+                                (pathData.listY === d.listX &&
+                                    ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
+                                        (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                        (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
+                                            (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                        d.startX < pathData.startY && d.endX > pathData.endY ||
+                                        d.startX > pathData.startY && d.endX < pathData.endY))
+                            ) {
+                                d3.select(this).raise().style('fill', color).attr("opacity", 0.91);
+                            }
+                        });
+                    });
+
+                var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                popUpMenu.style('left', (mouseX + 10) + 'px')
+                    .style('top', (mouseY - 10) + 'px')
+                    .style('visibility', 'visible')
+                    .style('opacity', 0.9);
+            }
+        });
+
+        downloadSVG("parallel_download_multiple",
             "parallel_plot_multiple_species",
             "Multiple_Species_Alignment.Parallel.svg");
-        // downloadSVGwithForeign("dotView_download", "dotView");
     }
 
     Shiny.addCustomMessageHandler("Dot_Num_Plotting_paranome", DotNumPlotting_paranome)
@@ -1019,13 +1993,13 @@ script.onload = function () {
                 console.log("subjectSpecies", subjectSpecies); */
 
         // sort the chromosome position based on the gene number
-        queryChrInfo = queryChrInfo.sort(function (a, b) {
+        /* queryChrInfo = queryChrInfo.sort(function (a, b) {
             return b.num - a.num;
         });
 
         subjectChrInfo = subjectChrInfo.sort(function (a, b) {
             return b.num - a.num;
-        });
+        }); */
 
         // define plot dimension
         let topPadding = 150 * scaleRatio;
@@ -1115,10 +2089,10 @@ script.onload = function () {
             .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
 
         // remove old svgs
-        d3.select("#dotView_" + plotId)
+        d3.select("#" + plotId)
             .select("svg").remove();
         // create svg viewBox
-        const svg = d3.select("#dotView_" + plotId)
+        const svg = d3.select("#" + plotId)
             .append("svg")
             .attr("width", width)
             .attr("height", height)
@@ -1560,8 +2534,8 @@ script.onload = function () {
         tippy(".multipliconsT line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
 
         querySpecies = querySpecies.replace(" ", "_");
-        downloadSVG("Dot_download_" + plotId,
-            "dotView_" + plotId,
+        downloadSVG("download_" + plotId,
+            plotId,
             querySpecies + ".self.dot_plot.svg");
         /*     var viewBoxWidth = width;
             var viewBoxHeight = (height + 100) * xyscale;
@@ -1711,9 +2685,9 @@ script.onload = function () {
             .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
 
         // remove old svgs
-        d3.select("#dotView_" + plotId)
+        d3.select("#" + plotId)
             .select("svg").remove();
-        const svg = d3.select("#dotView_" + plotId)
+        const svg = d3.select("#" + plotId)
             .append("svg")
             .attr("width", width)
             .attr("height", height);
@@ -1921,7 +2895,6 @@ script.onload = function () {
             .attr("font-size", "14px")
             .attr("font-weight", "bold")
             .attr("font-style", "italic")
-            // .attr("font-family", "times")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -1984,7 +2957,6 @@ script.onload = function () {
             .attr("transform", `translate(${ leftPadding - 5 }, 0)`)
             .call(yAxisQueryDepth)
             .attr("font-size", "10px");
-        // .attr("font-family", "calibri");
 
         svg.append("g")
             .append("text")
@@ -1992,7 +2964,6 @@ script.onload = function () {
             .attr("x", leftPadding - 32)
             .attr("text-anchor", "middle")
             .attr("font-size", "12px")
-            // .attr("font-family", "times")
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
@@ -2167,8 +3138,8 @@ script.onload = function () {
 
         querySpecies = querySpecies.replace(" ", "_");
         subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("Dot_download_" + plotId,
-            "dotView_" + plotId,
+        downloadSVG("download_" + plotId,
+            plotId,
             querySpecies + "_vs_" + subjectSpecies + ".dot_plot.svg");
 
         // Convert the SVG to PNG
@@ -2235,8 +3206,2863 @@ script.onload = function () {
         Shiny.onInputChange("foundItemsMessage_" + plotId, message);
     }
 
+    Shiny.addCustomMessageHandler("Remove_previous_plot", removePreviousPlots);
+    function removePreviousPlots(InputData) {
+        var plotId = InputData.svg_id;
+        d3.select("#" + plotId).select("svg").remove();
+    }
+
     Shiny.addCustomMessageHandler("microSynPlotting", microSynPlotting);
     function microSynPlotting(InputData) {
+        var plotId = InputData.plot_id;
+        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+        var multipliconInfo = convertShinyData(InputData.multiplicons);
+        var chrGeneInfo = convertShinyData(InputData.genes);
+        var chrInfo = convertShinyData(InputData.chrs);
+        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+        var querySpecies = InputData.query_sp;
+        var subjectSpecies = InputData.subject_sp;
+        var targeGene = InputData.targe_gene;
+        var width = InputData.width;
+        var height = InputData.height;
+        var heightScale = InputData.heightScale;
+
+        var svgHeightRatio = 1 + heightScale / 500;
+
+        var colorGene = InputData.color_gene;
+
+        var linkAll = InputData.link_all;
+
+        /* console.log("plotId", plotId);
+        console.log("anchorPointInfo", anchorPointInfo);
+        console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+        console.log("multipliconInfo", multipliconInfo);
+        console.log("chrGeneInfo", chrGeneInfo);
+        console.log("chrInfo", chrInfo);
+        console.log("querySpecies", querySpecies);
+        console.log("subjectSpecies", subjectSpecies);
+        console.log("targeGene", targeGene);
+        console.log("width", width);
+        console.log("height", height); */
+
+        // define syntenic plot dimension
+        let topPadding = 50;
+        let bottomPadding = 50;
+        let leftPadding = 10;
+        let rightPadding = 100;
+        let chrRectHeight = 4;
+        let innerPadding = 20;
+        var tooltipDelay = 500;
+
+        d3.select("#microSyntenicBlock_" + plotId)
+            .select("svg").remove();
+        const svg = d3.select("#microSyntenicBlock_" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height * svgHeightRatio);
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+
+        let maxChrLen = -Infinity;
+
+        chrInfo.forEach(item => {
+            const diff = item.max - item.min;
+            maxChrLen = Math.max(maxChrLen, diff);
+        });
+
+        chrInfo.sort((a, b) => a.order - b.order);
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                0,
+                maxChrLen
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+
+        // Define the number of groups
+        const numGroups = Math.max(...anchorPointGroupInfo.map(item => item.group));
+
+        // console.log("numGroups", numGroups);
+
+        // Generate a color palette with the length equal to numGroups
+        const colorPalette = generateRandomColors(numGroups, 10393910);
+
+        const geneColorScale = d3.scaleOrdinal()
+            .domain([1, numGroups])
+            .range(colorPalette);
+
+        const query_chr_colors = [
+            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
+        ];
+        const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
+
+        if (querySpecies === subjectSpecies) {
+            svg.append("text")
+                .text(querySpecies)
+                .attr("id", "microSynteyMainLabel")
+                .attr("x", 5 + leftPadding)
+                .attr("y", (topPadding - 20) * svgHeightRatio)
+                .attr("font-weight", "bold")
+                .attr("font-size", "14px")
+                .attr("font-style", "italic")
+                .style("fill", "#68AC57");
+        }
+
+        const querySpeciesLabelLength = querySpecies.toString().length;
+        const querySpeciesTitlePadding = querySpeciesLabelLength * 4;
+
+        var multipliconId = chrInfo[0].searched_multiplicon;
+
+        svg.append("text")
+            .text("Multiplicon:" + multipliconId)
+            .attr("class", "multipliconId")
+            .attr("id", "M-" + multipliconId)
+            .attr("x", querySpeciesTitlePadding + 120 + leftPadding)
+            .attr("y", (topPadding - 10) * svgHeightRatio)
+            .attr("font-weight", "bold")
+            .attr("font-size", "13px")
+            .style("fill", "#4A4AFF");
+
+        var yStartPos = Number(d3.select("#M-" + multipliconId).attr("y")) + 30;
+
+        chrInfo.forEach((eachChr, i) => {
+            const microPlot = svg.append("g")
+                .attr("class", "microSynteny")
+                .attr("transform", `translate(0, 10)`);
+            /* console.log("microPlot", microPlot);
+            console.log("eachChr:", eachChr); */
+
+            var tmpStartX = middlePoint - ChrScaler(eachChr.max - eachChr.min) / 2;
+            eachChr.tmpStartX = tmpStartX;
+
+            var tmpStartY = (yStartPos + 100 * i) * svgHeightRatio;
+            eachChr.tmpStartY = tmpStartY;
+
+            /* console.log("tmpStartX", tmpStartX);
+            console.log("tmpStartY", tmpStartY); */
+
+            const chrRectPlot = microPlot.selectAll(".chrRect")
+                .data([eachChr]);
+
+            chrRectPlot.enter()
+                .append("text")
+                .attr("class", "chrLabel")
+                .merge(chrRectPlot)
+                .text((d) => d.list)
+                .attr("id", function (d) {
+                    return "chr-" + d.list;
+                })
+                .attr("text-anchor", "start")
+                .attr("x", function (d) {
+                    return leftPadding + ChrScaler(d.max - d.min) + 15 + tmpStartX;
+                })
+                .attr("y", tmpStartY + 15)
+                .attr("font-size", "12px");
+
+            chrRectPlot.enter()
+                .append("rect")
+                .attr("class", "chrShape")
+                .merge(chrRectPlot)
+                .attr("id", (d) => "chr_" + d.list)
+                .attr("x", leftPadding + tmpStartX)
+                .attr("y", tmpStartY + 8)
+                .attr("width", (d) => ChrScaler(d.max - d.min))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 0.6)
+                // .attr("fill", (d) => queryChrColorScale(d.listX))
+                .attr("fill", "#9D9D9D")
+                .attr("ry", 3);
+
+            // Add position labels and connecting lines
+            const positionLabels = microPlot.selectAll(".posLabel")
+                .data([eachChr]);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return numFormatter(d.min / 1000000);
+                })
+                .attr("x", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return leftPadding - 5 + tmpStartX;
+                    } else {
+                        return leftPadding + 5 + tmpStartX;
+                    }
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return "end";
+                    } else {
+                        return "start";
+                    }
+                })
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return numFormatter((d.max) / 1000000) + " Mb";
+                })
+                .attr("x", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return ChrScaler(d.max - d.min) + 5 + leftPadding + tmpStartX;
+                    } else {
+                        return ChrScaler(d.max - d.min) - 5 + leftPadding + tmpStartX;
+                    }
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return "start";
+                    } else {
+                        return "end";
+                    }
+                })
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function (d) {
+                    return ChrScaler(d.max - d.min) + leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function (d) {
+                    return ChrScaler(d.max - d.min) + leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            var matchedGeneInfo = chrGeneInfo.filter(gene => gene.seqchr === eachChr.list);
+
+            matchedGeneInfo.forEach(d => {
+                d.posX1 = ChrScaler(d.start) + leftPadding + tmpStartX;
+                d.posX2 = ChrScaler(d.end) + leftPadding + tmpStartX;
+            })
+
+            // console.log("matchedGeneInfo", matchedGeneInfo);
+
+            if (colorGene === 1) {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            return "group_" + tmpGroup.group;
+                        }
+                    })
+                    // .attr("id", (d) => "group_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.posX1;
+                        const y = tmpStartY + 5;
+                        const width = d.posX2 - d.posX1;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            if (width > 10) {
+                                return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                            }
+                        } else {
+                            if (width > 10) {
+                                return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                            }
+                        }
+                    })
+                    .attr("fill", d => {
+                        if (d.remapped === -1) {
+                            var targeGene = d.tandem_representative;
+                        } else {
+                            var targeGene = d.gene;
+                        }
+
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === targeGene || m.geneY === targeGene);
+                        if (tmpGroup) {
+                            return geneColorScale(tmpGroup.group);
+                        } else {
+                            return "white";
+                        }
+                    })
+                    .attr('stroke', d => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            if (d.remapped === -1) {
+                                return "white";
+                            } else {
+                                return geneColorScale(tmpGroup.group);
+                            }
+                        } else {
+                            return "#001115";
+                        }
+                    })
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        if (d.remapped === -1) {
+                            var tmpLabel = "Yes";
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
+                                // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                                // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                                // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b><br>" +
+                                "Is tandem: <font color='#9AFF02'><b>" + tmpLabel + "</font></b><br>" +
+                                "Remaped gene: <font color='#9AFF02'><b>" + d.tandem_representative + "</font></b>";
+                        } else {
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>"; //</b><br>" +
+                            // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                            // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                            // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
+                        }
+
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1);
+
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") !== groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 0.1);
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8);
+                        }
+                    });
+            } else {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => "gene_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.posX1;
+                        const y = tmpStartY + 5;
+                        const width = d.posX2 - d.posX1;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            if (width > 10) {
+                                return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                            }
+                        } else {
+                            if (width > 10) {
+                                return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                            }
+                        }
+                    })
+                    .attr("fill", "white")
+                    .attr('stroke', "#001115")
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>"; // </b><br>" +
+                        // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                        // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                        // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1)
+                                .attr("fill", "#001115");
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8)
+                                .attr("fill", "white");
+                        }
+                    });
+            }
+            tippy(".geneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        });
+
+        // plot the links
+        const uniqueGroupInfo = [...new Set(anchorPointGroupInfo.map(item => item.group))];
+
+        uniqueGroupInfo.forEach(group => {
+            // For example, you can filter anchorPointGroupInfo based on the current group:
+            const groupItems = anchorPointGroupInfo.filter(item => item.group === group);
+            // console.log("Items in this group:", groupItems);
+            // console.log("The length of this group: ", groupItems.length);
+            if (groupItems.length === 1) {
+                const correspondingItemsSet = new Set();
+                groupItems.forEach(groupItem => {
+                    const correspondingItemX = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneX || item.geneY === groupItem.geneX)
+                    );
+                    const correspondingItemY = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneY || item.geneY === groupItem.geneY)
+                    );
+
+                    if (correspondingItemX) {
+                        correspondingItemsSet.add(correspondingItemX);
+                    }
+                    if (correspondingItemY) {
+                        correspondingItemsSet.add(correspondingItemY);
+                    }
+                });
+
+                var tmpAnchorPointInfo = Array.from(correspondingItemsSet);
+
+                if (linkAll === 0) {
+                    tmpAnchorPointInfo = tmpAnchorPointInfo.filter(d => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (tmpAnchorPointInfo.length > 0) {
+                    tmpAnchorPointInfo.forEach((d) => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(d.startX - tmpChr1.min) + leftPadding;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(d.endX - tmpChr1.min) + leftPadding;
+
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(d.startY - tmpChr2.min) + leftPadding;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(d.endY - tmpChr2.min) + leftPadding;
+
+
+                        d.ribbonPosition = {
+                            source: {
+                                x: queryX,
+                                x1: queryX1,
+                                y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                                y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                            },
+                            target: {
+                                x: subjectX,
+                                x1: subjectX1,
+                                y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                                y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                            }
+                        };
+                    })
+
+                    svg.insert("g", ":first-child")
+                        .selectAll("path")
+                        .data(tmpAnchorPointInfo)
+                        .join("path")
+                        .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+                        // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                        .attr("class", "achorPointRibbons")
+                        .attr("fill", "#C0C0C0")
+                        .attr("opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke-width", 0.86)
+                        .attr("stroke-opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke", "#C0C0C0")
+                        .attr("data-tippy-content", d => {
+                            return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
+                                "<font color='red'><b>&#8595</b></font><br>" +
+                                "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
+                                "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
+                        })
+                        .lower();
+                }
+            } else {
+                const uniqueGeneXValues = [...new Set(groupItems.map(item => item.geneX))];
+                const uniqueGeneYValues = [...new Set(groupItems.map(item => item.geneY))];
+
+                // Filter matchedGeneInfo to get the corresponding info
+                const allGeneInfo = chrGeneInfo.filter(item =>
+                    uniqueGeneXValues.includes(item.gene) || uniqueGeneYValues.includes(item.gene)
+                );
+
+                allGeneInfo.forEach(info => {
+                    const chrInfoItem = chrInfo.find(item => item.list === info.seqchr);
+                    if (chrInfoItem) {
+                        info.order = chrInfoItem.order;
+                    }
+                });
+
+                // Sort correspondingInfo based on the new order property
+                allGeneInfo.sort((a, b) => a.order - b.order);
+                // console.log("Corresponding Info from matchedGeneInfo:", allGeneInfo);
+
+                for (let i = 0; i < allGeneInfo.length - 1; i++) {
+                    const firstValue = allGeneInfo[i];
+                    const secondValue = allGeneInfo[i + 1];
+
+                    var tmpChr1 = chrInfo.find(item => item.list === firstValue.seqchr);
+                    var tmpChr2 = chrInfo.find(item => item.list === secondValue.seqchr);
+
+                    var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.start) + leftPadding;
+                    var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.end) + leftPadding;
+
+                    var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.start) + leftPadding;
+                    var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.end) + leftPadding;
+
+                    const ribbonPosition = {
+                        source: {
+                            x: queryX,
+                            x1: queryX1,
+                            y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                            y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                        },
+                        target: {
+                            x: subjectX,
+                            x1: subjectX1,
+                            y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                            y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                        }
+                    };
+
+                    if (linkAll === 0) {
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            continue;
+                        } else {
+                            svg.insert("g", ":first-child")
+                                .selectAll("path")
+                                .data([ribbonPosition])
+                                .join("path")
+                                .attr("d", d => createLinkPolygonPath(d))
+                                // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                                .attr("class", "achorPointRibbons")
+                                .attr("fill", "#C0C0C0")
+                                .attr("opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke-width", 0.86)
+                                .attr("stroke-opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke", "#C0C0C0")
+                                .attr("data-tippy-content", d => {
+                                    return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                        "<font color='red'><b>&#8595</b></font><br>" +
+                                        "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                                })
+                                .lower();
+                        }
+                    } else {
+                        svg.insert("g", ":first-child")
+                            .selectAll("path")
+                            .data([ribbonPosition])
+                            .join("path")
+                            .attr("d", d => createLinkPolygonPath(d))
+                            // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                            .attr("class", "achorPointRibbons")
+                            .attr("fill", "#C0C0C0")
+                            .attr("opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke-width", 0.86)
+                            .attr("stroke-opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke", "#C0C0C0")
+                            .attr("data-tippy-content", d => {
+                                return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                    "<font color='red'><b>&#8595</b></font><br>" +
+                                    "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                            })
+                            .lower();
+                    }
+                }
+
+            }
+        });
+        tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
+        downloadSVGs("download_microSyntenicBlock_" + plotId,
+            "microSyntenicBlock_" + plotId,
+            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+    }
+
+    Shiny.addCustomMessageHandler("microSynInterPlotting", microSynInterPlotting);
+    function microSynInterPlotting(InputData) {
+        var plotId = InputData.plot_id;
+        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+        var multipliconInfo = convertShinyData(InputData.multiplicons);
+        var chrGeneInfo = convertShinyData(InputData.genes);
+        var chrInfo = convertShinyData(InputData.chrs);
+        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+        var querySpecies = InputData.query_sp;
+        var subjectSpecies = InputData.subject_sp;
+        var targeGene = InputData.targe_gene;
+        var width = InputData.width;
+        var height = InputData.height;
+        var heightScale = InputData.heightScale;
+
+        var svgHeightRatio = 1 + heightScale / 500;
+
+        var colorGene = InputData.color_gene;
+
+        var linkAll = InputData.link_all;
+        /* 
+                console.log("plotId", plotId);
+                console.log("anchorPointInfo", anchorPointInfo);
+                console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+                console.log("multipliconInfo", multipliconInfo);
+                console.log("chrGeneInfo", chrGeneInfo);
+                console.log("chrInfo", chrInfo);
+                console.log("querySpecies", querySpecies);
+                console.log("subjectSpecies", subjectSpecies);
+                console.log("targeGene", targeGene);
+                console.log("width", width);
+                console.log("height", height); */
+
+        // define syntenic plot dimension
+        let topPadding = 50;
+        let leftPadding = 10;
+        let rightPadding = 200;
+        let chrRectHeight = 4;
+        var tooltipDelay = 500;
+
+        d3.select("#microSyntenicBlock_" + plotId)
+            .select("svg").remove();
+        const svg = d3.select("#microSyntenicBlock_" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height * svgHeightRatio);
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+
+        let maxChrLen = -Infinity;
+
+        chrInfo.forEach(item => {
+            const diff = item.max - item.min;
+            maxChrLen = Math.max(maxChrLen, diff);
+        });
+
+        chrInfo.sort((a, b) => a.order - b.order);
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                0,
+                maxChrLen
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+
+        // Define the number of groups
+        const numGroups = Math.max(...anchorPointGroupInfo.map(item => item.group));
+
+        // console.log("numGroups", numGroups);
+
+        // Generate a color palette with the length equal to numGroups
+        const colorPalette = generateRandomColors(numGroups, 10393910);
+
+        const geneColorScale = d3.scaleOrdinal()
+            .domain([1, numGroups])
+            .range(colorPalette);
+
+        const querySpeciesLabelLength = querySpecies.toString().length;
+        const querySpeciesTitlePadding = querySpeciesLabelLength * 4;
+
+        var multipliconId = chrInfo[0].searched_multiplicon;
+
+        svg.append("text")
+            .text("Multiplicon:" + multipliconId)
+            .attr("class", "multipliconId")
+            .attr("id", "M-" + multipliconId)
+            .attr("x", querySpeciesTitlePadding + 120 + leftPadding)
+            .attr("y", (topPadding - 10) * svgHeightRatio)
+            .attr("font-weight", "bold")
+            .attr("font-size", "13px")
+            .style("fill", "#4A4AFF");
+
+        var yStartPos = Number(d3.select("#M-" + multipliconId).attr("y")) + 30;
+
+        chrInfo.forEach((eachChr, i) => {
+            const microPlot = svg.append("g")
+                .attr("class", "microSynteny")
+                .attr("transform", `translate(0, 10)`);
+            /* console.log("microPlot", microPlot);
+            console.log("eachChr:", eachChr); */
+
+            var tmpStartX = middlePoint - ChrScaler(eachChr.max - eachChr.min) / 2;
+            eachChr.tmpStartX = tmpStartX;
+
+            var tmpStartY = (yStartPos + 100 * i) * svgHeightRatio;
+            eachChr.tmpStartY = tmpStartY;
+
+            /* console.log("tmpStartX", tmpStartX);
+            console.log("tmpStartY", tmpStartY); */
+
+            const chrRectPlot = microPlot.selectAll(".chrRect")
+                .data([eachChr]);
+
+            chrRectPlot.enter()
+                .append("text")
+                .attr("class", "chrLabel")
+                .merge(chrRectPlot)
+                .attr("x", function (d) {
+                    return leftPadding + ChrScaler(d.max - d.min) + 15 + tmpStartX;
+                })
+                .attr("y", tmpStartY + 15)
+                .attr("font-size", "12px")
+                .style("fill", function (d) {
+                    return (d.genome.replace("_", " ") === querySpecies) ? "#68AC57" : "#8E549E";
+                })
+                .attr("text-anchor", "start")
+                .append("tspan")
+                .html(function (d) {
+                    return "<tspan style='font-style: italic;'>" + d.genome.replace(/(\w)\w+_(\w+)/, "$1. $2") + "</tspan>: " + d.list;
+                    /* return "<tspan style='font-style: italic;'>" + d.genome.replace(/(\w)\w+_(\w+)/, "$1. $2") + "</tspan>"
+                        + "<tspan dy='1.2em' text-anchor='middle'>" + d.list + "</tspan>"; */
+                });
+
+            chrRectPlot.enter()
+                .append("rect")
+                .attr("class", "chrShape")
+                .merge(chrRectPlot)
+                .attr("id", (d) => "chr_" + d.list)
+                .attr("x", leftPadding + tmpStartX)
+                .attr("y", tmpStartY + 8)
+                .attr("width", (d) => ChrScaler(d.max - d.min))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 0.6)
+                // .attr("fill", (d) => queryChrColorScale(d.listX))
+                .attr("fill", "#9D9D9D")
+                .attr("ry", 3);
+
+            // Add position labels and connecting lines
+            const positionLabels = microPlot.selectAll(".posLabel")
+                .data([eachChr]);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return numFormatter(d.min / 1000000);
+                })
+                .attr("x", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return leftPadding - 5 + tmpStartX;
+                    } else {
+                        return leftPadding + 5 + tmpStartX;
+                    }
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return "end";
+                    } else {
+                        return "start";
+                    }
+                })
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return numFormatter((d.max) / 1000000) + " Mb";
+                })
+                .attr("x", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return ChrScaler(d.max - d.min) + 5 + leftPadding + tmpStartX;
+                    } else {
+                        return ChrScaler(d.max - d.min) - 5 + leftPadding + tmpStartX;
+                    }
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", function (d) {
+                    if (ChrScaler(d.max - d.min) < 60) {
+                        return "start";
+                    } else {
+                        return "end";
+                    }
+                })
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function (d) {
+                    return ChrScaler(d.max - d.min) + leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function (d) {
+                    return ChrScaler(d.max - d.min) + leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            var matchedGeneInfo = chrGeneInfo.filter(gene => gene.seqchr === eachChr.list);
+
+            matchedGeneInfo.forEach(d => {
+                d.posX1 = ChrScaler(d.start) + leftPadding + tmpStartX;
+                d.posX2 = ChrScaler(d.end) + leftPadding + tmpStartX;
+            })
+
+            // console.log("matchedGeneInfo", matchedGeneInfo);
+
+            if (colorGene === 1) {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            return "group_" + tmpGroup.group;
+                        }
+                    })
+                    // .attr("id", (d) => "group_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.posX1;
+                        const y = tmpStartY + 5;
+                        const width = d.posX2 - d.posX1;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            if (width > 10) {
+                                return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                            }
+                        } else {
+                            if (width > 10) {
+                                return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                            }
+                        }
+                    })
+                    .attr("fill", d => {
+                        if (d.remapped === -1) {
+                            var targeGene = d.tandem_representative;
+                        } else {
+                            var targeGene = d.gene;
+                        }
+
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === targeGene || m.geneY === targeGene);
+                        if (tmpGroup) {
+                            return geneColorScale(tmpGroup.group);
+                        } else {
+                            return "white";
+                        }
+                    })
+                    .attr('stroke', d => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            if (d.remapped === -1) {
+                                return "white";
+                            } else {
+                                return geneColorScale(tmpGroup.group);
+                            }
+                        } else {
+                            return "#001115";
+                        }
+                    })
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        if (d.remapped === -1) {
+                            var tmpLabel = "Yes";
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
+                                // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                                // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                                // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b><br>" +
+                                "Is tandem: <font color='#9AFF02'><b>" + tmpLabel + "</font></b><br>" +
+                                "Remaped gene: <font color='#9AFF02'><b>" + d.tandem_representative + "</font></b>";
+                        } else {
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>"; //</b><br>" +
+                            // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                            // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                            // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
+                        }
+
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1);
+
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") !== groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 0.1);
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8);
+                        }
+                    });
+            } else {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => "gene_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.posX1;
+                        const y = tmpStartY + 5;
+                        const width = d.posX2 - d.posX1;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            if (width > 10) {
+                                return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                            }
+                        } else {
+                            if (width > 10) {
+                                return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                            } else {
+                                return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                            }
+                        }
+                    })
+                    .attr("fill", "white")
+                    .attr('stroke', "#001115")
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>"; // </b><br>" +
+                        // "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                        // "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                        // "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1)
+                                .attr("fill", "#001115");
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8)
+                                .attr("fill", "white");
+                        }
+                    });
+            }
+            tippy(".geneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        });
+
+        // plot the links
+        const uniqueGroupInfo = [...new Set(anchorPointGroupInfo.map(item => item.group))];
+
+        uniqueGroupInfo.forEach(group => {
+            // For example, you can filter anchorPointGroupInfo based on the current group:
+            const groupItems = anchorPointGroupInfo.filter(item => item.group === group);
+            // console.log("Items in this group:", groupItems);
+            // console.log("The length of this group: ", groupItems.length);
+            if (groupItems.length === 1) {
+                const correspondingItemsSet = new Set();
+                groupItems.forEach(groupItem => {
+                    const correspondingItemX = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneX || item.geneY === groupItem.geneX)
+                    );
+                    const correspondingItemY = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneY || item.geneY === groupItem.geneY)
+                    );
+
+                    if (correspondingItemX) {
+                        correspondingItemsSet.add(correspondingItemX);
+                    }
+                    if (correspondingItemY) {
+                        correspondingItemsSet.add(correspondingItemY);
+                    }
+                });
+
+                var tmpAnchorPointInfo = Array.from(correspondingItemsSet);
+
+                if (linkAll === 0) {
+                    tmpAnchorPointInfo = tmpAnchorPointInfo.filter(d => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (tmpAnchorPointInfo.length > 0) {
+                    tmpAnchorPointInfo.forEach((d) => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(d.startX - tmpChr1.min) + leftPadding;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(d.endX - tmpChr1.min) + leftPadding;
+
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(d.startY - tmpChr2.min) + leftPadding;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(d.endY - tmpChr2.min) + leftPadding;
+
+                        /* console.log("each Achor pair", d);
+                        console.log("queryX", queryX);
+                        console.log("queryX1", queryX1);
+                        console.log("subjectX", subjectX);
+                        console.log("subjectX1", subjectX1);
+                        console.log("ChrScaler(tmpChr1.max - tmpChr1.min) + leftPadding + tmpChr1.tmpStartX",
+                            ChrScaler(tmpChr1.max - tmpChr1.min) + leftPadding + tmpChr1.tmpStartX);
+                        console.log("ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX",
+                            ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX); */
+
+                        if (subjectX > ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX ||
+                            subjectX1 > ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX) {
+                            return true;
+                        }
+
+                        d.ribbonPosition = {
+                            source: {
+                                x: queryX,
+                                x1: queryX1,
+                                y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                                y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                            },
+                            target: {
+                                x: subjectX,
+                                x1: subjectX1,
+                                y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                                y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                            }
+                        };
+                    })
+
+                    svg.insert("g", ":first-child")
+                        .selectAll("path")
+                        .data(tmpAnchorPointInfo)
+                        .join("path")
+                        .attr("d", function (d) {
+                            if (d.ribbonPosition) {
+                                return createLinkPolygonPath(d.ribbonPosition);
+                            }
+                        })
+                        // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                        .attr("class", "achorPointRibbons")
+                        .attr("fill", "#C0C0C0")
+                        .attr("opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke-width", 0.86)
+                        .attr("stroke-opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke", "#C0C0C0")
+                        .attr("data-tippy-content", d => {
+                            return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
+                                "<font color='red'><b>&#8595</b></font><br>" +
+                                "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
+                                "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
+                        })
+                        .lower();
+                }
+            } else {
+                const uniqueGeneXValues = [...new Set(groupItems.map(item => item.geneX))];
+                const uniqueGeneYValues = [...new Set(groupItems.map(item => item.geneY))];
+
+                // Filter matchedGeneInfo to get the corresponding info
+                const allGeneInfo = chrGeneInfo.filter(item =>
+                    uniqueGeneXValues.includes(item.gene) || uniqueGeneYValues.includes(item.gene)
+                );
+
+                allGeneInfo.forEach(info => {
+                    const chrInfoItem = chrInfo.find(item => item.list === info.seqchr);
+                    if (chrInfoItem) {
+                        info.order = chrInfoItem.order;
+                    }
+                });
+
+                // Sort correspondingInfo based on the new order property
+                allGeneInfo.sort((a, b) => a.order - b.order);
+                // console.log("Corresponding Info from matchedGeneInfo:", allGeneInfo);
+
+                for (let i = 0; i < allGeneInfo.length - 1; i++) {
+                    const firstValue = allGeneInfo[i];
+                    const secondValue = allGeneInfo[i + 1];
+
+                    var tmpChr1 = chrInfo.find(item => item.list === firstValue.seqchr);
+                    var tmpChr2 = chrInfo.find(item => item.list === secondValue.seqchr);
+
+                    var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.start) + leftPadding;
+                    var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.end) + leftPadding;
+
+                    var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.start) + leftPadding;
+                    var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.end) + leftPadding;
+
+                    const ribbonPosition = {
+                        source: {
+                            x: queryX,
+                            x1: queryX1,
+                            y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                            y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                        },
+                        target: {
+                            x: subjectX,
+                            x1: subjectX1,
+                            y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                            y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                        }
+                    };
+
+                    if (linkAll === 0) {
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            continue;
+                        } else {
+                            svg.insert("g", ":first-child")
+                                .selectAll("path")
+                                .data([ribbonPosition])
+                                .join("path")
+                                .attr("d", d => createLinkPolygonPath(d))
+                                // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                                .attr("class", "achorPointRibbons")
+                                .attr("fill", "#C0C0C0")
+                                .attr("opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke-width", 0.86)
+                                .attr("stroke-opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke", "#C0C0C0")
+                                .attr("data-tippy-content", d => {
+                                    return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                        "<font color='red'><b>&#8595</b></font><br>" +
+                                        "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                                })
+                                .lower();
+                        }
+                    } else {
+                        svg.insert("g", ":first-child")
+                            .selectAll("path")
+                            .data([ribbonPosition])
+                            .join("path")
+                            .attr("d", d => createLinkPolygonPath(d))
+                            // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                            .attr("class", "achorPointRibbons")
+                            .attr("fill", "#C0C0C0")
+                            .attr("opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke-width", 0.86)
+                            .attr("stroke-opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke", "#C0C0C0")
+                            .attr("data-tippy-content", d => {
+                                return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                    "<font color='red'><b>&#8595</b></font><br>" +
+                                    "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                            })
+                            .lower();
+                    }
+                }
+
+            }
+        });
+        tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
+        downloadSVGs("download_microSyntenicBlock_" + plotId,
+            "microSyntenicBlock_" + plotId,
+            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+    }
+
+    Shiny.addCustomMessageHandler("microSynPlottingGeneNumber", microSynPlottingGeneNumber);
+    function microSynPlottingGeneNumber(InputData) {
+        var plotId = InputData.plot_id;
+        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+        var multipliconInfo = convertShinyData(InputData.multiplicons);
+        var chrGeneInfo = convertShinyData(InputData.genes);
+        var chrInfo = convertShinyData(InputData.chrs);
+        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+        var querySpecies = InputData.query_sp;
+        var subjectSpecies = InputData.subject_sp;
+        var targeGene = InputData.targe_gene;
+        var width = InputData.width;
+        var height = InputData.height;
+        var heightScale = InputData.heightScale;
+
+        var svgHeightRatio = 1 + heightScale / 500;
+
+        var colorGene = InputData.color_gene;
+
+        var linkAll = InputData.link_all;
+
+        /* console.log("plotId", plotId);
+        console.log("anchorPointInfo", anchorPointInfo);
+        console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+        console.log("multipliconInfo", multipliconInfo);
+        console.log("chrGeneInfo", chrGeneInfo);
+        console.log("chrInfo", chrInfo);
+        console.log("querySpecies", querySpecies);
+        console.log("subjectSpecies", subjectSpecies);
+        console.log("targeGene", targeGene);
+        console.log("width", width);
+        console.log("height", height); */
+
+        // define syntenic plot dimension
+        let topPadding = 50;
+        let bottomPadding = 50;
+        let leftPadding = 10;
+        let rightPadding = 100;
+        let chrRectHeight = 4;
+        let innerPadding = 20;
+        var tooltipDelay = 500;
+
+        d3.select("#microSyntenicBlock_" + plotId)
+            .select("svg").remove();
+        const svg = d3.select("#microSyntenicBlock_" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height * svgHeightRatio);
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+
+        let maxChrLen = -Infinity;
+
+        chrInfo.forEach(item => {
+            const diff = item.max - item.min;
+            maxChrLen = Math.max(maxChrLen, diff);
+        });
+
+        chrInfo.sort((a, b) => a.order - b.order);
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                0,
+                maxChrLen + 2
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+
+        // Define the number of groups
+        const numGroups = Math.max(...anchorPointGroupInfo.map(item => item.group));
+
+        // console.log("numGroups", numGroups);
+
+        // Generate a color palette with the length equal to numGroups
+        const colorPalette = generateRandomColors(numGroups, 10393910);
+
+        const geneColorScale = d3.scaleOrdinal()
+            .domain([1, numGroups])
+            .range(colorPalette);
+
+        if (querySpecies === subjectSpecies) {
+            svg.append("text")
+                .text(querySpecies)
+                .attr("id", "microSynteyMainLabel")
+                .attr("x", 5 + leftPadding)
+                .attr("y", (topPadding - 20) * svgHeightRatio)
+                .attr("font-weight", "bold")
+                .attr("font-size", "14px")
+                .attr("font-style", "italic")
+                .style("fill", "#68AC57");
+        }
+
+        const querySpeciesLabelLength = querySpecies.toString().length;
+        const querySpeciesTitlePadding = querySpeciesLabelLength * 4;
+
+        var multipliconId = chrInfo[0].searched_multiplicon;
+
+        svg.append("text")
+            .text("Multiplicon:" + multipliconId)
+            .attr("class", "multipliconId")
+            .attr("id", "M-" + multipliconId)
+            .attr("x", querySpeciesTitlePadding + 120 + leftPadding)
+            .attr("y", (topPadding - 10) * svgHeightRatio)
+            .attr("font-weight", "bold")
+            .attr("font-size", "13px")
+            .style("fill", "#4A4AFF");
+
+        var yStartPos = Number(d3.select("#M-" + multipliconId).attr("y")) + 30;
+
+        var ploygonScale = ChrScaler(1) / 30;
+        if (ploygonScale > 0.7) {
+            ploygonScale = 1;
+        } else {
+            ploygonScale = ChrScaler(1) / 60;
+        }
+        /* console.log("ploygonScale", ploygonScale);
+        console.log("each gene", ChrScaler(1)); */
+
+        chrInfo.forEach((eachChr, i) => {
+            const microPlot = svg.append("g")
+                .attr("class", "microSynteny")
+                .attr("transform", `translate(0, 10)`);
+            /* console.log("microPlot", microPlot);
+            console.log("eachChr:", eachChr); */
+
+            var tmpStartX = middlePoint - ChrScaler(eachChr.max - eachChr.min) / 2;
+            eachChr.tmpStartX = tmpStartX;
+
+            var tmpStartY = (yStartPos + 100 * i) * svgHeightRatio;
+            eachChr.tmpStartY = tmpStartY;
+
+            /* console.log("tmpStartX", tmpStartX);
+            console.log("tmpStartY", tmpStartY); */
+
+            const chrRectPlot = microPlot.selectAll(".chrRect")
+                .data([eachChr]);
+
+            chrRectPlot.enter()
+                .append("text")
+                .attr("class", "chrLabel")
+                .merge(chrRectPlot)
+                .text((d) => d.list)
+                .attr("id", function (d) {
+                    return "chr-" + d.list;
+                })
+                .attr("text-anchor", "start")
+                .attr("x", function (d) {
+                    return leftPadding + ChrScaler(d.max - d.min + 1) + 15 + tmpStartX;
+                })
+                .attr("y", tmpStartY + 15)
+                .attr("font-size", "12px");
+
+            chrRectPlot.enter()
+                .append("rect")
+                .attr("class", "chrShape")
+                .merge(chrRectPlot)
+                .attr("id", (d) => "chr_" + d.list)
+                .attr("x", leftPadding + tmpStartX)
+                .attr("y", tmpStartY + 8)
+                .attr("width", (d) => ChrScaler(d.max - d.min + 1))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 0.6)
+                // .attr("fill", (d) => queryChrColorScale(d.listX))
+                .attr("fill", "#9D9D9D")
+                .attr("ry", 3);
+
+            // Add position labels and connecting lines
+            const positionLabels = microPlot.selectAll(".posLabel")
+                .data([eachChr]);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return d.min;
+                })
+                .attr("x", function () {
+                    return leftPadding + 5 + tmpStartX;
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", "start")
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return d.max;
+                })
+                .attr("x", function (d) {
+                    return ChrScaler(d.max - d.min + 1) - 5 + leftPadding + tmpStartX;
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", "end")
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function (d) {
+                    return ChrScaler(d.max - d.min + 1) + leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function (d) {
+                    return ChrScaler(d.max - d.min + 1) + leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            var matchedGeneInfo = chrGeneInfo.filter(gene => gene.seqchr === eachChr.list);
+
+            matchedGeneInfo.forEach(d => {
+                d.pos = ChrScaler(d.coordinate - eachChr.min) + leftPadding + tmpStartX;
+            })
+
+            /* console.log("matchedGeneInfo", matchedGeneInfo);
+            console.log("matched gene", matchedGeneInfo.length); */
+
+            if (colorGene === 1) {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            return "group_" + tmpGroup.group;
+                        }
+                    })
+                    .attr("points", (d) => {
+                        const x = d.pos;
+                        const y = tmpStartY + 5;
+                        const width = 15;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 5 } ${ x + 10 * ploygonScale },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 10 } ${ x + 5 * ploygonScale },${ y + 10 }`;
+                        }
+                    })
+                    .attr("fill", d => {
+                        if (d.remapped === -1) {
+                            var targeGene = d.tandem_representative;
+                        } else {
+                            var targeGene = d.gene;
+                        }
+
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === targeGene || m.geneY === targeGene);
+                        if (tmpGroup) {
+                            return geneColorScale(tmpGroup.group);
+                        } else {
+                            return "white";
+                        }
+                    })
+                    .attr('stroke', d => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            if (d.remapped === -1) {
+                                return "white";
+                            } else {
+                                return geneColorScale(tmpGroup.group);
+                            }
+                        } else {
+                            return "#001115";
+                        }
+                    })
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        if (d.remapped === -1) {
+                            var tmpLabel = "Yes";
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
+                                "Is tandem: <font color='#9AFF02'><b>" + tmpLabel + "</font></b><br>" +
+                                "Remaped gene: <font color='#9AFF02'><b>" + d.tandem_representative + "</font></b>";
+                        } else {
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>";
+                        }
+
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1);
+
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") !== groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 0.1);
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8);
+                        }
+                    });
+            } else {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => "gene_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.pos;
+                        const y = tmpStartY + 5;
+                        const width = 15;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        /* if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 5 },${ y + 10 }`;
+                        } */
+                        if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 5 } ${ x + 10 * ploygonScale },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 10 } ${ x + 5 * ploygonScale },${ y + 10 }`;
+                        }
+                    })
+                    .attr("fill", "white")
+                    .attr('stroke', "#001115")
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>";
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1)
+                                .attr("fill", "#001115");
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8)
+                                .attr("fill", "white");
+                        }
+                    });
+            }
+            tippy(".geneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        });
+
+        // plot the links
+
+        var linkWidth;;
+        if (ChrScaler(1) > 20) {
+            linkWidth = 10;
+        } else {
+            linkWidth = ChrScaler(1) / 10;
+        }
+        // console.log("linkWidth", linkWidth);
+
+        const uniqueGroupInfo = [...new Set(anchorPointGroupInfo.map(item => item.group))];
+
+        uniqueGroupInfo.forEach(group => {
+            // For example, you can filter anchorPointGroupInfo based on the current group:
+            const groupItems = anchorPointGroupInfo.filter(item => item.group === group);
+            // console.log("Items in this group:", groupItems);
+            // console.log("The length of this group: ", groupItems.length);
+            if (groupItems.length === 1) {
+                const correspondingItemsSet = new Set();
+                groupItems.forEach(groupItem => {
+                    const correspondingItemX = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneX || item.geneY === groupItem.geneX)
+                    );
+                    const correspondingItemY = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneY || item.geneY === groupItem.geneY)
+                    );
+
+                    if (correspondingItemX) {
+                        correspondingItemsSet.add(correspondingItemX);
+                    }
+                    if (correspondingItemY) {
+                        correspondingItemsSet.add(correspondingItemY);
+                    }
+                });
+
+                var tmpAnchorPointInfo = Array.from(correspondingItemsSet);
+
+                if (linkAll === 0) {
+                    tmpAnchorPointInfo = tmpAnchorPointInfo.filter(d => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (tmpAnchorPointInfo.length > 0) {
+                    tmpAnchorPointInfo.forEach((d) => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        var acturalPosX = chrGeneInfo.filter(gene => gene.gene === d.geneX);
+                        if (d.strandX === "+") {
+                            var queryX = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding;
+                            var queryX1 = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + linkWidth;
+                        } else {
+                            var queryX = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + 5 * ploygonScale;
+                            var queryX1 = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + linkWidth + 5 * ploygonScale;
+                        }
+
+                        var acturalPosY = chrGeneInfo.filter(gene => gene.gene === d.geneY);
+                        if (d.strandY === "+") {
+                            var subjectX = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding;
+                            var subjectX1 = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + linkWidth;
+                        } else {
+                            var subjectX = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + 5 * ploygonScale;
+                            var subjectX1 = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + linkWidth + 5 * ploygonScale;
+                        }
+
+                        d.ribbonPosition = {
+                            source: {
+                                x: queryX,
+                                x1: queryX1,
+                                y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                                y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                            },
+                            target: {
+                                x: subjectX,
+                                x1: subjectX1,
+                                y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                                y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                            }
+                        };
+                    })
+
+                    svg.insert("g", ":first-child")
+                        .selectAll("path")
+                        .data(tmpAnchorPointInfo)
+                        .join("path")
+                        .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+                        // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                        .attr("class", "achorPointRibbons")
+                        .attr("fill", "#C0C0C0")
+                        .attr("opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke-width", 0.86)
+                        .attr("stroke-opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke", "#C0C0C0")
+                        .attr("data-tippy-content", d => {
+                            return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
+                                "<font color='red'><b>&#8595</b></font><br>" +
+                                "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
+                                "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
+                        })
+                        .lower();
+                }
+            } else {
+                const uniqueGeneXValues = [...new Set(groupItems.map(item => item.geneX))];
+                const uniqueGeneYValues = [...new Set(groupItems.map(item => item.geneY))];
+
+                // Filter matchedGeneInfo to get the corresponding info
+                const allGeneInfo = chrGeneInfo.filter(item =>
+                    uniqueGeneXValues.includes(item.gene) || uniqueGeneYValues.includes(item.gene)
+                );
+
+                allGeneInfo.forEach(info => {
+                    const chrInfoItem = chrInfo.find(item => item.list === info.seqchr);
+                    if (chrInfoItem) {
+                        info.order = chrInfoItem.order;
+                    }
+                });
+
+                // Sort correspondingInfo based on the new order property
+                allGeneInfo.sort((a, b) => a.order - b.order);
+                // console.log("Corresponding Info from matchedGeneInfo:", allGeneInfo);
+
+                for (let i = 0; i < allGeneInfo.length - 1; i++) {
+                    const firstValue = allGeneInfo[i];
+                    const secondValue = allGeneInfo[i + 1];
+
+                    var tmpChr1 = chrInfo.find(item => item.list === firstValue.seqchr);
+                    var tmpChr2 = chrInfo.find(item => item.list === secondValue.seqchr);
+
+                    if (firstValue.strand === "+") {
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + linkWidth;
+                    } else {
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + 5;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + linkWidth + 5;
+                    }
+
+                    if (secondValue.strand === "+") {
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + linkWidth;
+                    } else {
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + 5;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + linkWidth + 5;
+                    }
+
+                    const ribbonPosition = {
+                        source: {
+                            x: queryX,
+                            x1: queryX1,
+                            y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                            y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                        },
+                        target: {
+                            x: subjectX,
+                            x1: subjectX1,
+                            y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                            y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                        }
+                    };
+
+                    if (linkAll === 0) {
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            continue;
+                        } else {
+                            svg.insert("g", ":first-child")
+                                .selectAll("path")
+                                .data([ribbonPosition])
+                                .join("path")
+                                .attr("d", d => createLinkPolygonPath(d))
+                                .attr("class", "achorPointRibbons")
+                                .attr("fill", "#C0C0C0")
+                                .attr("opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke-width", 0.86)
+                                .attr("stroke-opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke", "#C0C0C0")
+                                .attr("data-tippy-content", d => {
+                                    return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                        "<font color='red'><b>&#8595</b></font><br>" +
+                                        "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                                })
+                                .lower();
+                        }
+                    } else {
+                        svg.insert("g", ":first-child")
+                            .selectAll("path")
+                            .data([ribbonPosition])
+                            .join("path")
+                            .attr("d", d => createLinkPolygonPath(d))
+                            .attr("class", "achorPointRibbons")
+                            .attr("fill", "#C0C0C0")
+                            .attr("opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke-width", 0.86)
+                            .attr("stroke-opacity", function () {
+                                if (tmpChr2.order - tmpChr1.order > 1) {
+                                    return 0.4;
+                                } else {
+                                    return 0.7;
+                                }
+                            })
+                            .attr("stroke", "#C0C0C0")
+                            .attr("data-tippy-content", d => {
+                                return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                    "<font color='red'><b>&#8595</b></font><br>" +
+                                    "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                            })
+                            .lower();
+                    }
+                }
+            }
+        });
+        tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
+        downloadSVGs("download_microSyntenicBlock_" + plotId,
+            "microSyntenicBlock_" + plotId,
+            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+    }
+
+    Shiny.addCustomMessageHandler("microSynInterPlottingGeneNumber", microSynInterPlottingGeneNumber);
+    function microSynInterPlottingGeneNumber(InputData) {
+        var plotId = InputData.plot_id;
+        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+        var multipliconInfo = convertShinyData(InputData.multiplicons);
+        var chrGeneInfo = convertShinyData(InputData.genes);
+        var chrInfo = convertShinyData(InputData.chrs);
+        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+        var querySpecies = InputData.query_sp;
+        var subjectSpecies = InputData.subject_sp;
+        var targeGene = InputData.targe_gene;
+        var width = InputData.width;
+        var height = InputData.height;
+        var heightScale = InputData.heightScale;
+
+        var svgHeightRatio = 1 + heightScale / 500;
+
+        var colorGene = InputData.color_gene;
+
+        var linkAll = InputData.link_all;
+
+        /*         console.log("plotId", plotId);
+                console.log("anchorPointInfo", anchorPointInfo);
+                console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+                console.log("multipliconInfo", multipliconInfo);
+                console.log("chrGeneInfo", chrGeneInfo);
+                console.log("chrInfo", chrInfo);
+                console.log("querySpecies", querySpecies);
+                console.log("subjectSpecies", subjectSpecies);
+                console.log("targeGene", targeGene);
+                console.log("width", width);
+                console.log("height", height); */
+
+        // define syntenic plot dimension
+        let topPadding = 50;
+        let leftPadding = 10;
+        let rightPadding = 150;
+        let chrRectHeight = 4;
+        var tooltipDelay = 500;
+
+        d3.select("#microSyntenicBlock_" + plotId)
+            .select("svg").remove();
+        const svg = d3.select("#microSyntenicBlock_" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height * svgHeightRatio);
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+
+        let maxChrLen = -Infinity;
+
+        chrInfo.forEach(item => {
+            const diff = item.max - item.min;
+            maxChrLen = Math.max(maxChrLen, diff);
+        });
+
+        chrInfo.sort((a, b) => a.order - b.order);
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                0,
+                maxChrLen + 2
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+
+        // Define the number of groups
+        const numGroups = Math.max(...anchorPointGroupInfo.map(item => item.group));
+
+        // console.log("numGroups", numGroups);
+
+        // Generate a color palette with the length equal to numGroups
+        const colorPalette = generateRandomColors(numGroups, 10393910);
+
+        const geneColorScale = d3.scaleOrdinal()
+            .domain([1, numGroups])
+            .range(colorPalette);
+
+        const querySpeciesLabelLength = querySpecies.toString().length;
+        const querySpeciesTitlePadding = querySpeciesLabelLength * 4;
+
+        var multipliconId = chrInfo[0].searched_multiplicon;
+
+        svg.append("text")
+            .text("Multiplicon:" + multipliconId)
+            .attr("class", "multipliconId")
+            .attr("id", "M-" + multipliconId)
+            .attr("x", querySpeciesTitlePadding + 120 + leftPadding)
+            .attr("y", (topPadding - 10) * svgHeightRatio)
+            .attr("font-weight", "bold")
+            .attr("font-size", "13px")
+            .style("fill", "#4A4AFF");
+
+        var yStartPos = Number(d3.select("#M-" + multipliconId).attr("y")) + 30;
+
+        var ploygonScale = ChrScaler(1) / 30;
+        if (ploygonScale > 0.7) {
+            ploygonScale = 1;
+        } else {
+            ploygonScale = ChrScaler(1) / 60;
+        }
+        /* console.log("ploygonScale", ploygonScale);
+        console.log("each gene", ChrScaler(1));
+ */
+        chrInfo.forEach((eachChr, i) => {
+            const microPlot = svg.append("g")
+                .attr("class", "microSynteny")
+                .attr("transform", `translate(0, 10)`);
+            /* console.log("microPlot", microPlot);
+            console.log("eachChr:", eachChr); */
+
+            var tmpStartX = middlePoint - ChrScaler(eachChr.max - eachChr.min) / 2;
+            eachChr.tmpStartX = tmpStartX;
+
+            var tmpStartY = (yStartPos + 100 * i) * svgHeightRatio;
+            eachChr.tmpStartY = tmpStartY;
+
+            /* console.log("tmpStartX", tmpStartX);
+            console.log("tmpStartY", tmpStartY); */
+
+            const chrRectPlot = microPlot.selectAll(".chrRect")
+                .data([eachChr]);
+
+            chrRectPlot.enter()
+                .append("text")
+                .attr("class", "chrLabel")
+                .merge(chrRectPlot)
+                .attr("id", function (d) {
+                    return "chr-" + d.list;
+                })
+                .attr("text-anchor", "start")
+                .style("fill", function (d) {
+                    return (d.genome.replace("_", " ") === querySpecies) ? "#68AC57" : "#8E549E";
+                })
+                .attr("x", function (d) {
+                    return leftPadding + ChrScaler(d.max - d.min + 1) + 15 + tmpStartX;
+                })
+                .attr("y", tmpStartY + 15)
+                .attr("font-size", "12px")
+                .append("tspan")
+                .html(function (d) {
+                    return "<tspan style='font-style: italic;'>" + d.genome.replace(/(\w)\w+_(\w+)/, "$1. $2") + "</tspan>: " + d.list;
+                });
+
+            chrRectPlot.enter()
+                .append("rect")
+                .attr("class", "chrShape")
+                .merge(chrRectPlot)
+                .attr("id", (d) => "chr_" + d.list)
+                .attr("x", leftPadding + tmpStartX)
+                .attr("y", tmpStartY + 8)
+                .attr("width", (d) => ChrScaler(d.max - d.min + 1))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 0.6)
+                // .attr("fill", (d) => queryChrColorScale(d.listX))
+                .attr("fill", "#9D9D9D")
+                .attr("ry", 3);
+
+            // Add position labels and connecting lines
+            const positionLabels = microPlot.selectAll(".posLabel")
+                .data([eachChr]);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return d.min;
+                })
+                .attr("x", function () {
+                    return leftPadding + 5 + tmpStartX;
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", "start")
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("text")
+                .attr("class", "posLabel")
+                .merge(positionLabels)
+                .text(function (d) {
+                    return d.max;
+                })
+                .attr("x", function (d) {
+                    return ChrScaler(d.max - d.min + 1) - 5 + leftPadding + tmpStartX;
+                })
+                .attr("y", tmpStartY - 3)
+                .attr("text-anchor", "end")
+                .attr("font-size", "10px")
+                .attr('fill', 'blue')
+                .attr('opacity', 0.5);
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function () {
+                    return leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            positionLabels.enter()
+                .append("line")
+                .attr("class", "posLabelLine")
+                .merge(positionLabels)
+                .attr("x1", function (d) {
+                    return ChrScaler(d.max - d.min + 1) + leftPadding + tmpStartX;
+                })
+                .attr("y1", tmpStartY + 10)
+                .attr("x2", function (d) {
+                    return ChrScaler(d.max - d.min + 1) + leftPadding + tmpStartX;
+                })
+                .attr("y2", tmpStartY - 12)
+                .attr("stroke-width", 0.86)
+                .attr("stroke-opacity", 0.5)
+                .attr("stroke", "blue");
+
+            var matchedGeneInfo = chrGeneInfo.filter(gene => gene.seqchr === eachChr.list);
+
+            matchedGeneInfo.forEach(d => {
+                d.pos = ChrScaler(d.coordinate - eachChr.min) + leftPadding + tmpStartX;
+            })
+
+            /* console.log("matchedGeneInfo", matchedGeneInfo);
+            console.log("matched gene", matchedGeneInfo.length); */
+
+            if (colorGene === 1) {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            return "group_" + tmpGroup.group;
+                        }
+                    })
+                    .attr("points", (d) => {
+                        const x = d.pos;
+                        const y = tmpStartY + 5;
+                        const width = 15;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 5 } ${ x + 10 * ploygonScale },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 10 } ${ x + 5 * ploygonScale },${ y + 10 }`;
+                        }
+                    })
+                    .attr("fill", d => {
+                        if (d.remapped === -1) {
+                            var targeGene = d.tandem_representative;
+                        } else {
+                            var targeGene = d.gene;
+                        }
+
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === targeGene || m.geneY === targeGene);
+                        if (tmpGroup) {
+                            return geneColorScale(tmpGroup.group);
+                        } else {
+                            return "white";
+                        }
+                    })
+                    .attr('stroke', d => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            if (d.remapped === -1) {
+                                return "white";
+                            } else {
+                                return geneColorScale(tmpGroup.group);
+                            }
+                        } else {
+                            return "#001115";
+                        }
+                    })
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        if (d.remapped === -1) {
+                            var tmpLabel = "Yes";
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
+                                "Is tandem: <font color='#9AFF02'><b>" + tmpLabel + "</font></b><br>" +
+                                "Remaped gene: <font color='#9AFF02'><b>" + d.tandem_representative + "</font></b>";
+                        } else {
+                            return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>";
+                        }
+
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1);
+
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") !== groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 0.1);
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8);
+                        }
+                    });
+            } else {
+                microPlot.selectAll(".geneShape")
+                    .data(matchedGeneInfo)
+                    .join("polygon")
+                    .attr("class", "geneShape")
+                    .attr("id", (d) => "gene_" + d.gene)
+                    .attr("points", (d) => {
+                        const x = d.pos;
+                        const y = tmpStartY + 5;
+                        const width = 15;
+
+                        // Point out the targetGene                                
+                        if (d.gene === targeGene) {
+                            svg.append("line")
+                                .attr("class", "targe-gene")
+                                .attr('x1', x + width / 2)
+                                .attr('y1', y + 15)
+                                .attr('x2', x + width / 2)
+                                .attr('y2', y + 40)
+                                .attr('stroke', '#006400')
+                                .attr('opacity', '0.8')
+                                .attr('stroke-width', "1.8")
+                                .attr("stroke-dasharray", "5 3")
+                                .lower();
+
+                            svg.append("text")
+                                .attr('x', x + width / 2)
+                                .attr('y', y + 55)
+                                .text(targeGene)
+                                .attr('fill', '#006400')
+                                .attr("font-size", "9px")
+                                .attr('text-anchor', 'middle')
+                                .lower();
+                        }
+
+                        /* if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 5 },${ y + 10 }`;
+                        } */
+                        if (d.strand === "+") {
+                            return `${ x },${ y } ${ x + 10 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 5 } ${ x + 10 * ploygonScale },${ y + 10 } ${ x },${ y + 10 }`;
+                        } else {
+                            return `${ x },${ y + 5 } ${ x + 5 * ploygonScale },${ y } ${ x + width * ploygonScale },${ y } ${ x + width * ploygonScale },${ y + 10 } ${ x + 5 * ploygonScale },${ y + 10 }`;
+                        }
+                    })
+                    .attr("fill", "white")
+                    .attr('stroke', "#001115")
+                    .attr('stroke-width', "0.8")
+                    .attr("opacity", 0.8)
+                    .attr("data-tippy-content", d => {
+                        return "Gene: <font color='#FFE153'><b>" + d.gene + "</font>";
+                    })
+                    .on("mouseover", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            var groupId = "group_" + tmpGroup.group;
+                            d3.selectAll(".geneShape")
+                                .filter(function () {
+                                    return d3.select(this).attr("id") === groupId;
+                                })
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50)
+                                .attr("opacity", 1)
+                                .attr("fill", "#001115");
+                        }
+                    })
+                    .on("mouseout", (e, d) => {
+                        var tmpGroup = anchorPointGroupInfo.find(m => m.geneX === d.gene || m.geneY === d.gene);
+                        if (tmpGroup) {
+                            d3.selectAll(".geneShape")
+                                .transition()
+                                .duration(50)
+                                .attr("opacity", 0.8)
+                                .attr("fill", "white");
+                        }
+                    });
+            }
+            tippy(".geneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        });
+
+        // plot the links
+
+        var linkWidth;;
+        if (ChrScaler(1) > 20) {
+            linkWidth = 10;
+        } else {
+            linkWidth = ChrScaler(1) / 10;
+        }
+
+        const uniqueGroupInfo = [...new Set(anchorPointGroupInfo.map(item => item.group))];
+
+        uniqueGroupInfo.forEach(group => {
+            // For example, you can filter anchorPointGroupInfo based on the current group:
+            const groupItems = anchorPointGroupInfo.filter(item => item.group === group);
+            // console.log("Items in this group:", groupItems);
+            // console.log("The length of this group: ", groupItems.length);
+            if (groupItems.length === 1) {
+                const correspondingItemsSet = new Set();
+                groupItems.forEach(groupItem => {
+                    const correspondingItemX = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneX || item.geneY === groupItem.geneX)
+                    );
+                    const correspondingItemY = anchorPointInfo.find(item =>
+                        (item.geneX === groupItem.geneY || item.geneY === groupItem.geneY)
+                    );
+
+                    if (correspondingItemX) {
+                        correspondingItemsSet.add(correspondingItemX);
+                    }
+                    if (correspondingItemY) {
+                        correspondingItemsSet.add(correspondingItemY);
+                    }
+                });
+
+                var tmpAnchorPointInfo = Array.from(correspondingItemsSet);
+
+                if (linkAll === 0) {
+                    tmpAnchorPointInfo = tmpAnchorPointInfo.filter(d => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            return false;
+                        }
+                        return true;
+                    });
+                }
+
+                if (tmpAnchorPointInfo.length > 0) {
+                    tmpAnchorPointInfo.forEach((d) => {
+                        var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                        var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+
+                        var acturalPosX = chrGeneInfo.filter(gene => gene.gene === d.geneX);
+                        if (d.strandX === "+") {
+                            var queryX = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding;
+                            var queryX1 = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + linkWidth;
+                        } else {
+                            var queryX = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + 5 * ploygonScale;
+                            var queryX1 = tmpChr1.tmpStartX + ChrScaler(acturalPosX[0].coordinate - tmpChr1.min) + leftPadding + linkWidth + 5 * ploygonScale;
+                        }
+
+                        var acturalPosY = chrGeneInfo.filter(gene => gene.gene === d.geneY);
+                        if (d.strandY === "+") {
+                            var subjectX = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding;
+                            var subjectX1 = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + linkWidth;
+                        } else {
+                            var subjectX = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + 5 * ploygonScale;
+                            var subjectX1 = tmpChr2.tmpStartX + ChrScaler(acturalPosY[0].coordinate - tmpChr2.min) + leftPadding + linkWidth + 5 * ploygonScale;
+                        }
+
+                        if (subjectX > ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX ||
+                            subjectX1 > ChrScaler(tmpChr2.max - tmpChr2.min) + leftPadding + tmpChr2.tmpStartX) {
+                            return true;
+                        }
+
+                        d.ribbonPosition = {
+                            source: {
+                                x: queryX,
+                                x1: queryX1,
+                                y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                                y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                            },
+                            target: {
+                                x: subjectX,
+                                x1: subjectX1,
+                                y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                                y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                            }
+                        };
+                    })
+
+                    svg.insert("g", ":first-child")
+                        .selectAll("path")
+                        .data(tmpAnchorPointInfo)
+                        .join("path")
+                        .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+                        // .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+                        .attr("class", "achorPointRibbons")
+                        .attr("fill", "#C0C0C0")
+                        .attr("opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke-width", 0.86)
+                        .attr("stroke-opacity", function (d) {
+                            var tmpChr1 = chrInfo.find(item => item.list === d.listX);
+                            var tmpChr2 = chrInfo.find(item => item.list === d.listY);
+                            if (tmpChr2.order - tmpChr1.order > 1) {
+                                return 0.4;
+                            } else {
+                                return 0.7;
+                            }
+                        })
+                        .attr("stroke", "#C0C0C0")
+                        .attr("data-tippy-content", d => {
+                            return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
+                                "<font color='red'><b>&#8595</b></font><br>" +
+                                "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
+                                "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
+                        })
+                        .lower();
+                }
+            } else {
+                const uniqueGeneXValues = [...new Set(groupItems.map(item => item.geneX))];
+                const uniqueGeneYValues = [...new Set(groupItems.map(item => item.geneY))];
+
+                // Filter matchedGeneInfo to get the corresponding info
+                const allGeneInfo = chrGeneInfo.filter(item =>
+                    uniqueGeneXValues.includes(item.gene) || uniqueGeneYValues.includes(item.gene)
+                );
+
+                allGeneInfo.forEach(info => {
+                    const chrInfoItem = chrInfo.find(item => item.list === info.seqchr);
+                    if (chrInfoItem) {
+                        info.order = chrInfoItem.order;
+                    }
+                });
+
+                // Sort correspondingInfo based on the new order property
+                allGeneInfo.sort((a, b) => a.order - b.order);
+                // console.log("Corresponding Info from matchedGeneInfo:", allGeneInfo);
+
+                for (let i = 0; i < allGeneInfo.length - 1; i++) {
+                    const firstValue = allGeneInfo[i];
+                    const secondValue = allGeneInfo[i + 1];
+
+                    var tmpChr1 = chrInfo.find(item => item.list === firstValue.seqchr);
+                    var tmpChr2 = chrInfo.find(item => item.list === secondValue.seqchr);
+
+                    if (firstValue.strand === "+") {
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + linkWidth;
+                    } else {
+                        var queryX = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + 5;
+                        var queryX1 = tmpChr1.tmpStartX + ChrScaler(firstValue.coordinate - tmpChr1.min) + leftPadding + linkWidth + 5;
+                    }
+
+                    if (secondValue.strand === "+") {
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + linkWidth;
+                    } else {
+                        var subjectX = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + 5;
+                        var subjectX1 = tmpChr2.tmpStartX + ChrScaler(secondValue.coordinate - tmpChr2.min) + leftPadding + linkWidth + 5;
+                    }
+
+                    const ribbonPosition = {
+                        source: {
+                            x: queryX,
+                            x1: queryX1,
+                            y: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8,
+                            y1: tmpChr1.tmpStartY + chrRectHeight / 2 + 16 + 8
+                        },
+                        target: {
+                            x: subjectX,
+                            x1: subjectX1,
+                            y: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4,
+                            y1: tmpChr2.tmpStartY + chrRectHeight / 2 + 16 - 4
+                        }
+                    };
+
+                    if (linkAll === 0) {
+                        if (tmpChr2.order - tmpChr1.order > 1) {
+                            continue;
+                        } else {
+                            if (ribbonPosition) {
+                                svg.insert("g", ":first-child")
+                                    .selectAll("path")
+                                    .data([ribbonPosition])
+                                    .join("path")
+                                    .attr("d", d => createLinkPolygonPath(d))
+                                    .attr("class", "achorPointRibbons")
+                                    .attr("fill", "#C0C0C0")
+                                    .attr("opacity", function () {
+                                        if (tmpChr2.order - tmpChr1.order > 1) {
+                                            return 0.4;
+                                        } else {
+                                            return 0.7;
+                                        }
+                                    })
+                                    .attr("stroke-width", 0.86)
+                                    .attr("stroke-opacity", function () {
+                                        if (tmpChr2.order - tmpChr1.order > 1) {
+                                            return 0.4;
+                                        } else {
+                                            return 0.7;
+                                        }
+                                    })
+                                    .attr("stroke", "#C0C0C0")
+                                    .attr("data-tippy-content", d => {
+                                        return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                            "<font color='red'><b>&#8595</b></font><br>" +
+                                            "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                                    })
+                                    .lower();
+                            }
+                        }
+                    } else {
+                        if (ribbonPosition) {
+                            svg.insert("g", ":first-child")
+                                .selectAll("path")
+                                .data([ribbonPosition])
+                                .join("path")
+                                .attr("d", d => createLinkPolygonPath(d))
+                                .attr("class", "achorPointRibbons")
+                                .attr("fill", "#C0C0C0")
+                                .attr("opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke-width", 0.86)
+                                .attr("stroke-opacity", function () {
+                                    if (tmpChr2.order - tmpChr1.order > 1) {
+                                        return 0.4;
+                                    } else {
+                                        return 0.7;
+                                    }
+                                })
+                                .attr("stroke", "#C0C0C0")
+                                .attr("data-tippy-content", d => {
+                                    return "Query: <b><font color='#FFE153'>" + firstValue.gene + "</font></b><br>" +
+                                        "<font color='red'><b>&#8595</b></font><br>" +
+                                        "Subject: <b><font color='#4DFFFF'>" + secondValue.gene + "</font></b><br>";
+                                })
+                                .lower();
+                        }
+                    }
+                }
+            }
+        });
+        tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+
+        querySpecies = querySpecies.replace(" ", "_");
+        subjectSpecies = subjectSpecies.replace(" ", "_");
+        downloadSVGs("download_microSyntenicBlock_" + plotId,
+            "microSyntenicBlock_" + plotId,
+            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+    }
+
+    // Shiny.addCustomMessageHandler("microSynPlottingOld", microSynPlottingOld);
+    function microSynPlottingOld(InputData) {
         var plotId = InputData.plot_id;
         var anchorPointInfo = convertShinyData(InputData.anchorpoints);
         var queryChrInfo = convertShinyData(InputData.query_chr_info);
@@ -2965,8 +6791,8 @@ script.onload = function () {
 
         querySpecies = querySpecies.replace(" ", "_");
         subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("microSyn_download_" + plotId,
-            "microSyntenicBlock_" + plotId,
+        downloadSVGs("download_" + plotId,
+            plotId,
             querySpecies + "_vs_" + subjectSpecies + ".microSyn");
     }
 
@@ -2984,8 +6810,8 @@ script.onload = function () {
         var treeByCol = InputData.tree_bycol;
         var treeByRow = InputData.tree_byrow;
 
-        console.log("treeByCol", treeByCol);
-        console.log("treeByRow", treeByRow);
+        /* console.log("treeByCol", treeByCol);
+        console.log("treeByRow", treeByRow); */
 
         // console.log("parInfo", parInfo);
 
@@ -3429,7 +7255,7 @@ script.onload = function () {
 
         // Add the clustering tree
         colTreeJson = parseTree(treeByCol);
-        console.log("colTreeJson", colTreeJson);
+        // console.log("colTreeJson", colTreeJson);
 
         var treeColJsonCopy = JSON.parse(JSON.stringify(colTreeJson));
 
@@ -3819,6 +7645,19 @@ function convertShinyData(inObj) {
     return outArray;
 }
 
+// Generate a set of color from an array and a seed
+function generateRandomColors(count, seed) {
+    const colors = new Set();
+    const rng = new Math.seedrandom(seed);
+
+    while (colors.size < count) {
+        const color = "#" + Math.floor(rng() * 16777215).toString(16);
+        colors.add(color);
+    }
+
+    return Array.from(colors);
+}
+
 // calculate accumulate length for parallel chr plot
 function calc_accumulate_len(inputChrInfo, innerPadding_xScale, innerPadding) {
     let acc_len = 0;
@@ -3977,6 +7816,27 @@ function downloadSVGs(downloadButtonID, svgDivID, svgOutFile) {
 
             downloadNextSVG();
         });
+}
+
+function swapXYValues(data) {
+    var swappedData = data.map((item) => ({
+        ...item,
+        listX: item.listY,
+        listY: item.listX,
+        geneX: item.geneY,
+        geneY: item.geneX,
+        coordX: item.coordY,
+        coordY: item.coordX,
+        startX: item.startY,
+        startY: item.startX,
+        endX: item.endY,
+        endY: item.endX,
+        speciesX: item.speciesY,
+        speciesY: item.speciesX,
+        strandX: item.strandY,
+        strandY: item.strandX,
+    }));
+    return swappedData;
 }
 
 function arraysOfObjectsAreEqual(arr1, arr2) {
