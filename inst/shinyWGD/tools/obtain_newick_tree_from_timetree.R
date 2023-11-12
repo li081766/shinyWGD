@@ -20,15 +20,15 @@ get_taxon_id <- function(name_t){
     response_content <- content(response, as="text")
     json <- fromJSON(response_content)
     taxon_id <- json$taxon_id
-    if( is.null(taxon_id) ){
-        # only try genus if the scientific name is not available
-        name <- strsplit(name_t, " ")[[1]][1]
-        endpoint <- paste0(base_url, "/taxon/", name)
-        response <- GET(endpoint)
-        response_content <- content(response, as="text")
-        json <- fromJSON(response_content)
-        taxon_id <- json$taxon_id
-    }
+    # if( is.null(taxon_id) ){
+    #     # only try genus if the scientific name is not available
+    #     name <- strsplit(name_t, " ")[[1]][1]
+    #     endpoint <- paste0(base_url, "/taxon/", name)
+    #     response <- GET(endpoint)
+    #     response_content <- content(response, as="text")
+    #     json <- fromJSON(response_content)
+    #     taxon_id <- json$taxon_id
+    # }
     return(taxon_id)
 }
 
@@ -59,7 +59,13 @@ for( i in 1:length(taxon_names) ){
             taxon_id2 <- get_taxon_id(taxon_names[j])
 
             if( is.null(taxon_id1) | is.null(taxon_id2) ){
-                stop("Some species are not in the Timetree Database")
+                if( is.null(taxon_id1) ){
+                    stop(paste(taxon_names[i], "is not in the Timetree Database"))
+                }
+                if( is.null(taxon_id2) ){
+                    stop(paste(taxon_names[j], "is not in the Timetree Database"))
+                }
+                #stop()
             }
 
             endpoint <- paste0(base_url, "/pairwise/", taxon_id1, "/", taxon_id2)

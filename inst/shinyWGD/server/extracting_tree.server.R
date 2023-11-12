@@ -93,12 +93,17 @@ observeEvent(input$extract_tree_go, {
             )
             Sys.sleep(1)
 
-            system(
-                paste(
-                    "Rscript tools/obtain_newick_tree_from_timetree.R ",
-                    "-i", species_name_file,
-                    "-p", prefix
-                )
+            tryCatch(
+                withCallingHandlers(
+                    extract_tree(species_name_file, prefix)
+                ),
+                error=function(e) {
+                    shinyalert(
+                        "Oops!",
+                        paste0(e$message, ". Fail to extract tree from Timetree.org. Please try other ways!"),
+                        type="error"
+                    )
+                }
             )
 
             incProgress(amount=.7, message="Drawing tree...")
@@ -268,13 +273,14 @@ observeEvent(input$extract_tree_go, {
                         session$sendCustomMessage("timeTreeOrgPlot", species_tree_data)
                     }
                 })
-            }else{
-                shinyalert(
-                    "Oops",
-                    "Fail to extract tree from Timetree.org. Please try other ways!",
-                    type="error"
-                )
             }
+            # else{
+            #     shinyalert(
+            #         "Oops",
+            #         "Fail to extract tree from Timetree.org. Please try other ways!",
+            #         type="error"
+            #     )
+            # }
             updateProgress("extract_progress_container_js", 100, "Extracting tree")
             incProgress(amount=1)
             Sys.sleep(1)
