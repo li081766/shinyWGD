@@ -1062,7 +1062,7 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                     .attr("stroke-width", "2.45px")
             }
         })
-        .on('click', function (d) {
+/*         .on('click', function (d) {
             if (popUpMenu.style('visibility') == 'visible') {
                 popUpMenu.style('visibility', 'hidden');
             } else {
@@ -1103,11 +1103,6 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                         .text(symbolText)
                         .attr('x', function () {
                             return (yscale(distanceToRoot) - yscale(timeInput.value));
-                            /* var maxLength = getMaxNodeLength(ksTreeNodes);
-                            var yScaleNew = d3.scale.linear()
-                                .domain([0, maxLength])
-                                .range([0, w]);
-                            return yScaleNew(maxLength - timeInput.value / 100); */
                         })
                         .attr('y', Number(yValue) - 12)
                         .style('font-size', '18px')
@@ -1144,7 +1139,7 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                     .style('top', (Number(yValue) + 40) + 'px')
                     .style('visibility', 'visible');
             }
-        });
+        }); */
 
     // Move the created paths to the bottom of the SVG
     vis.selectAll("path.ks-link").each(function () {
@@ -1172,8 +1167,8 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                     return node.name === speciesName;
                 });
 
-                if (item.peak < branch.rootDist) {
-                    var peak = item.peak;
+                if (item.peak / 2 < branch.rootDist) {
+                    var peak = item.peak / 2;
                     var color = item.color;
                     var peakX = yscale(branch.rootDist) - yscale(peak);
                     var peakY = branch.x;
@@ -1209,8 +1204,8 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                     var ciRange = item.confidence_interval;
 
                     var [min, max] = ciRange.split('-').map(Number);
-                    var rectX = yscale(branch.rootDist) - yscale(max);
-                    var rectWidth = yscale(max) - yscale(min);
+                    var rectX = yscale(branch.rootDist) - yscale(max / 2);
+                    var rectWidth = yscale(max / 2) - yscale(min / 2);
 
                     // Create a rectangle element
                     vis.append("rect")

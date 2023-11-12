@@ -22,7 +22,7 @@ Joint_Tree_ui <- tabPanel(
             h3(icon(
                 name=NULL,
                 style="
-                    background: url('../../../images/ksTreeIcon.svg');
+                    background: url('images/ksTreeIcon.svg');
                     background-size: contain;
                     background-position: center;
                     background-repeat: no-repeat;
@@ -165,12 +165,12 @@ Joint_Tree_ui <- tabPanel(
                             icon("compress", class="rotate-45"),
                             title="Compress horizontal spacing"
                         ),
-                        actionButton(
-                            "reset",
-                            "",
-                            icon("sync"),
-                            title="Restore spacing"
-                        ),
+                        # actionButton(
+                        #     "reset",
+                        #     "",
+                        #     icon("sync"),
+                        #     title="Restore spacing"
+                        # ),
                         downloadButton_custom(
                             "jointTreePlotDownload",
                             status="secondary",
