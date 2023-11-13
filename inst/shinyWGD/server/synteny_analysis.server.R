@@ -472,7 +472,7 @@ observeEvent(input$clustering_button, {
 
 observeEvent(input$confirm_intra_comparing_go, {
     if( isTruthy(input$iadhore_intra_species_list) && input$iadhore_intra_species_list != "" ){
-        # shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
+        shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
         shinyjs::runjs("$('#confirm_intra_comparing_go').css('background-color', 'green');")
         updateActionButton(
             session,
@@ -935,6 +935,8 @@ observeEvent(input$synplot_go_intra, {
     dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
     if( length(dirPath) > 0 ){
         if( !is.null(input$synteny_query_chr_intra) && input$iadhore_intra_species_list != "" ){
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
             load(paste0(dirPath, "/synteny.comparing.RData"))
             intra_list <- input$iadhore_intra_species_list
             intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
@@ -1235,6 +1237,7 @@ observeEvent(input[["searchButton_intra"]], {
     dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
     if( length(dirPath) > 0 ){
         if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             withProgress(message='Searching Gene in progress', value=0, {
                 Sys.sleep(.8)
                 incProgress(amount=.2, message="Preparing Data...")
@@ -1603,6 +1606,8 @@ observeEvent(input[["plotMicro_intra"]], {
     if( length(dirPath) > 0 ){
         if( isTruthy(input$multiplicon_choose_intra) && !is.null(input$multiplicon_choose_intra) ){
             if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
+                shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)
                     load(paste0(dirPath, "/synteny.comparing.RData"))
@@ -1973,7 +1978,7 @@ observeEvent(input[["plotMicro_intra"]], {
 
 observeEvent(input$confirm_inter_comparing_go, {
     if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
-        # shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
+        shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
         shinyjs::runjs("$('#confirm_inter_comparing_go').css('background-color', 'green');")
         updateActionButton(
             session,
@@ -2479,6 +2484,7 @@ observeEvent(input$synplot_go_inter, {
     dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
     if( length(dirPath) > 0 ){
         if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             load(paste0(dirPath, "/synteny.comparing.RData"))
 
             tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
@@ -2789,6 +2795,7 @@ observeEvent(input[["searchButton_inter"]], {
     dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
     if( length(dirPath) > 0 ){
         if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             load(paste0(dirPath, "/synteny.comparing.RData"))
 
             tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
@@ -3154,6 +3161,7 @@ observeEvent(input[["plotMicro_inter"]], {
     if( length(dirPath) > 0 ){
         if( isTruthy(input$multiplicon_choose_inter) && !is.null(input$multiplicon_choose_inter) ){
             if( isTruthy(input$gene_inter) && input$gene_inter != "" ){
+                shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)
                     load(paste0(dirPath, "/synteny.comparing.RData"))
@@ -3544,6 +3552,7 @@ observeEvent(input$confirm_multi_comparing_go, {
             )
         }
         else{
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             shinyjs::runjs("$('#confirm_multi_comparing_go').css('background-color', 'green');")
             updateActionButton(
                 session,
@@ -3843,6 +3852,8 @@ observeEvent(input$synplot_multiple_go, {
             )
         }
         else{
+            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
             dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
             load(paste0(dirPath, "/synteny.comparing.RData"))
             multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
@@ -4153,6 +4164,8 @@ observeEvent(input$synplot_multiple_go, {
 
 observeEvent(input$confirm_clustering_go, {
     if( isTruthy(input$cluster_species_A) && isTruthy(input$cluster_species_B) ){
+        shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
         shinyjs::runjs("$('#confirm_clustering_go').css('background-color', 'green');")
         updateActionButton(
             session,
@@ -4438,6 +4451,8 @@ observeEvent(input$confirm_clustering_go, {
 observeEvent(input$cluster_go, {
     withProgress(message='Clustering Analysis in progress...', value=0, {
         Sys.sleep(.2)
+        shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
         incProgress(amount=.1, message="Preparing data...")
         dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
         load(paste0(dirPath, "/synteny.comparing.RData"))
