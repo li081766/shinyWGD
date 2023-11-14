@@ -10,8 +10,8 @@ output$whaleDataUploadPanel <- renderUI({
                 hr(class="setting"),
                 HTML("Uploading the Analysis Directory:</br>"),
                 fluidRow(
-                    column(5, shinyDirButton("analysisDir", "Select a Folder", "Upload")),
-                    column(7, uiOutput("selectedWhaleDirName"))
+                    column(12, shinyDirButton("analysisDir", "Select a Folder", "Upload")),
+                    column(12, uiOutput("selectedWhaleDirName"))
                 )
             ),
             column(
@@ -35,14 +35,15 @@ output$whaleDataUploadPanel <- renderUI({
                     "go_extracting_tree",
                     HTML(
                         paste0(
+                            "<i class='fas fa-tree' style='color: #5151A2;'>&nbsp;</i>",
                             "<font color='#5151A2'>",
-                            "<i><b>Extracting Tree</b></i></font>"
+                            "<i><b>Tree Extraction</b></i></font>"
                         )
                     )
                 ),
                 h6(
                     HTML(
-                        "function of shinyWGD to obtain a tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a>."
+                        "module of shinyWGD to obtain a tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a>."
                     )
                 )
             )
@@ -78,7 +79,14 @@ observe({
         output$selectedWhaleDirName <- renderUI({
             column(
                 12,
-                HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+                div(
+                    style="background-color: #FAF0E6;
+                           margin-top: 5px;
+                           padding: 10px 10px 1px 10px;
+                           border-radius: 10px;
+                           text-align: center;",
+                    HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+                )
             )
         })
         orthoFinderOutputDir <- paste0(analysisDir, "/OrthoFinder_wd/", "orthofinderOutputDir")
