@@ -1,5 +1,5 @@
 Extracting_Tree_ui <- tabPanel(
-    "Extracting Tree",
+    "Tree Extraction",
     value='extracting_tree',
     fluidRow(
         column(
