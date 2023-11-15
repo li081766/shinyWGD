@@ -286,5 +286,5 @@ observeEvent(input$back_datapreparation_4, {
     updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
 })
 observeEvent(input$back_datapreparation_5, {
-    updateTabsetPanel(inputId="shinywgd", selected="whale_preparation")
+    updateTabsetPanel(inputId="shinywgd", selected="data_preparation")
 })

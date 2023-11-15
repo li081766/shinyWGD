@@ -66,7 +66,7 @@ writeLines(
     cmd_con
 )
 writeLines("folder=$(find ./orthofinderOutputDir -maxdepth 1 -type d -name \"Results_*\" -printf '%f')", cmd_con)
-wirteLines("cd ds_tree_wd", cmd_con)
+writeLines("cd ds_tree_wd", cmd_con)
 writeLines(
     paste0(
         "sh ",
@@ -82,16 +82,16 @@ writeLines(
     ),
     cmd_con
 )
-wirteLines("cd ..", cmd_con)
+writeLines("cd ..", cmd_con)
 writeLines("rm -r orthofinderOutputDir/$folder/Comparative_Genomics_Statistics/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Gene_Duplication_Events/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Gene_Trees/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Orthologues/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Phylogenetically_Misplaced_Genes/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Phylogenetic_Hierarchical_Orthogroups/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Putative_Xenologs/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Resolved_Gene_Trees/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/Species_Tree/", cmd_con)
-wirteLines("rm -r orthofinderOutputDir/$folder/WorkingDirectory/", cmd_con)
-wirteLines("tar czf orthofinderOutputDir/$folder/Orthogroup_Sequences.tar.gz orthofinderOutputDir/$folder/Orthogroup_Sequences/ && rm -r orthofinderOutputDir/$folder/Orthogroup_Sequences", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Gene_Duplication_Events/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Gene_Trees/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Orthologues/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Phylogenetically_Misplaced_Genes/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Phylogenetic_Hierarchical_Orthogroups/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Putative_Xenologs/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Resolved_Gene_Trees/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/Species_Tree/", cmd_con)
+writeLines("rm -r orthofinderOutputDir/$folder/WorkingDirectory/", cmd_con)
+writeLines("tar czf orthofinderOutputDir/$folder/Orthogroup_Sequences.tar.gz orthofinderOutputDir/$folder/Orthogroup_Sequences/ && rm -r orthofinderOutputDir/$folder/Orthogroup_Sequences", cmd_con)
 close(cmd_con)
