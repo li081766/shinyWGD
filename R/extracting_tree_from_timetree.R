@@ -7,16 +7,15 @@
 #'
 #' @return A timetree object representing the estimated divergence times between species.
 #'
-#' @import httr jsonlite phangorn
+#' @import httr jsonlite
 #'
 #' @export
 #'
-#' @seealso \code{\link{httr}}, \code{\link{jsonlite}}, \code{\link{phangorn}}
+#' @seealso \code{\link{httr}}, \code{\link{jsonlite}}
 extract_tree <- function(input_file, prefix){
     suppressPackageStartupMessages({
         library(httr)
         library(jsonlite)
-        library(phangorn)
     })
     base_url <- "https://timetree.org/api"
 
