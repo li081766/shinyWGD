@@ -470,56 +470,6 @@ observeEvent(get_species_from_file(), {
     )
 })
 
-# observeEvent(input$extract_tree_go, {
-#     analysis_dir <- paste0(tempdir(), "/Analysis_", Sys.Date())
-#     if( !file.exists(analysis_dir) ){
-#         dir.create(paste0(tempdir(), "/Analysis_", Sys.Date()))
-#     }
-#     species_names_file <- paste0(analysis_dir, "/species_names_list.xls")
-#     from_file <- get_species_from_file()
-#     from_input <- get_species_from_input()
-#
-#     if( length(from_file) > 0 | length(from_input[nzchar(from_input)]) > 0 ){
-#         if( length(from_file) > 0 ){
-#             writeLines(get_species_from_file(), species_names_file)
-#         }else{
-#             writeLines(get_species_from_input(), species_names_file)
-#         }
-#         species_name_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/species_names_list.xls")
-#         timetree_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/timetree.newick")
-#         newick_tree_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/species_tree.newick")
-#         withProgress(message='Extracting in progress', value=0, {
-#             system(
-#                 paste(
-#                     "Rscript tools/obtain_newick_tree_from_timetree.R ",
-#                     species_name_file,
-#                     timetree_file,
-#                     newick_tree_file
-#                 )
-#             )
-#             if( file.exists(newick_tree_file) ){
-#                 output$TimetreeNewick <- renderText({
-#                     CommandText <- readChar(newick_tree_file, file.info(newick_tree_file)$size)
-#                 })
-#             }else{
-#                 shinyalert(
-#                     "Oops",
-#                     "Fail to extract tree from Timetree.org. Please try other ways!",
-#                     type="error"
-#                 )
-#             }
-#             incProgress(amount=1)
-#         })
-#     }
-#     else{
-#         shinyalert(
-#             "Oops",
-#             "Please upload data first, then switch on this",
-#             type="error"
-#         )
-#     }
-# })
-
 observeEvent(input$upload_data_file, {
     unlink(paste0(tempdir(), "/Analysis_", Sys.Date()), recursive=T)
     dir.create(paste0(tempdir(), "/Analysis_", Sys.Date()))

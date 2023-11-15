@@ -15,7 +15,9 @@ This page gives users a brief introduction to this software. Please go to the <f
 - ##### <font color="#6650C9"><i class="fa-solid fa-home"></i> Home</font>
 - ##### <font color="#6650C9"><i aria-label="terminal icon" class="fa fa-terminal fa-fw fa-fade" role="presentation"></i>Scripts</font>
   - <font color="orange"><i aria-label="microscope icon" class="fa fa-microscope fa-fw fa-fade" role="presentation"></i> Data Preparation</font>
+  - <font color="orange"><img src="images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Whale Preparation</font>
   - <font color="orange"><i aria-label="code icon" class="fa fa-code fa-fw fa-fade" role="presentation"></i> Codes</font>
+  - <font color="orange"><i aria-label="tree icon" class="fa fa-tree fa-fw fa-fade" role="presentation"></i> Tree Extraction</font>
 - ##### <font color="#6650C9"><i class="fa-solid fa-pencil" role="presentation"></i> Analysis</font>
   - <font color="orange"><img src="images/ksIcon.svg" alt="Icon" width="20" height="20"> Age Distribution Analysis</font>
   - <font color="orange"><img src="images/syntenyIcon.svg" alt="Icon" width="20" height="20"> Synteny Analysis</font>
@@ -61,3 +63,5 @@ This page gives users a brief introduction to this software. Please go to the <f
   - `{tools}`
   - `{seqinr}`
   - `{DT}`
+  - `{ape}`
+  - `{igraph}`
