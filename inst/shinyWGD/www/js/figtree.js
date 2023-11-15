@@ -837,14 +837,14 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
             .attr("font-size", "14px")
             .text("MRCA"); */
 
-    vis.selectAll('g.ks-root-node')
+/*     vis.selectAll('g.ks-root-node')
         .append('line')
         .attr('stroke', '#aaa')
         .attr('stroke-width', 2.45)
         .attr('x1', 0)
         .attr('y1', 0)
         .attr('x2', -10)
-        .attr('y2', 0)
+        .attr('y2', 0) */
 
     if (ori === 'right') {
         d3.select('.ks-leaf-pop-up-menu').remove();
@@ -1043,6 +1043,7 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
         .attr("fill", "none")
         .attr("stroke", "#aaa")
         .attr("stroke-width", "2.45px")
+        .attr("stroke-dasharray", d => (d.source.y === 0) ? "6 8" : "none")
         .on("mouseover", function () {
             ribbonEnterTime = new Date().getTime();
             d3.select(this)
