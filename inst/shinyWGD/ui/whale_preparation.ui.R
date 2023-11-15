@@ -50,6 +50,11 @@ Whale_Preparation_ui <- tabPanel(
                             HTML(".rotate-135 {
                                     transform: rotate(135deg);
                                 }"),
+                            HTML(
+                                ".rotate+45 {
+                                    transform: rotate(-45deg);
+                                }"
+                            ),
                             HTML(".rotate-45{
                                     transform: rotate(45deg);
                                 }")
@@ -64,7 +69,11 @@ Whale_Preparation_ui <- tabPanel(
                         actionButton(
                             "svg_vertical_spacing_sub_species",
                             "",
-                            icon("compress", class="rotate-135"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-135"
+                            ),
                             title="Compress vertical spacing",
                             style="border-color: #fff;"
                         ),
@@ -78,7 +87,11 @@ Whale_Preparation_ui <- tabPanel(
                         actionButton(
                             "svg_horizontal_spacing_sub_species",
                             "",
-                            icon("compress", class="rotate-45"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-45"
+                            ),
                             title="Compress horizontal spacing",
                             style="border-color: #fff; "
                         ),

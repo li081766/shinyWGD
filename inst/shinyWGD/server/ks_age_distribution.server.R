@@ -723,7 +723,11 @@ observeEvent(input$confirm_paralog_ks_go, {
                                         actionButton(
                                             "ks_svg_vertical_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-135"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-135"
+                                            ),
                                             title="Compress vertical spacing"
                                         ),
                                         actionButton(
@@ -735,7 +739,11 @@ observeEvent(input$confirm_paralog_ks_go, {
                                         actionButton(
                                             "ks_svg_horizontal_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-45"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-45"
+                                            ),
                                             title="Compress horizontal spacing"
                                         ),
                                         downloadButton_custom(
@@ -1439,7 +1447,11 @@ observeEvent(input$confirm_ortholog_ks_go, {
                                         actionButton(
                                             "ks_svg_vertical_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-135"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-135"
+                                            ),
                                             title="Compress vertical spacing"
                                         ),
                                         actionButton(
@@ -1451,7 +1463,11 @@ observeEvent(input$confirm_ortholog_ks_go, {
                                         actionButton(
                                             "ks_svg_horizontal_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-45"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-45"
+                                            ),
                                             title="Compress horizontal spacing"
                                         ),
                                         downloadButton_custom(
@@ -1729,7 +1745,11 @@ observeEvent(input$confirm_rate_correction_go, {
                                         actionButton(
                                             "ks_svg_vertical_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-135"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-135"
+                                            ),
                                             title="Compress vertical spacing"
                                         ),
                                         actionButton(
@@ -1741,7 +1761,11 @@ observeEvent(input$confirm_rate_correction_go, {
                                         actionButton(
                                             "ks_svg_horizontal_spacing_sub",
                                             "",
-                                            icon("compress", class="rotate-45"),
+                                            icon(
+                                                "down-left-and-up-right-to-center",
+                                                verify_fa=FALSE,
+                                                class="rotate-45"
+                                            ),
                                             title="Compress horizontal spacing"
                                         ),
                                         downloadButton_custom(

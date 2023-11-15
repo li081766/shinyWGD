@@ -150,7 +150,11 @@ Joint_Tree_ui <- tabPanel(
                         actionButton(
                             "svg_vertical_spacing_sub",
                             "",
-                            icon("compress", class="rotate-135"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-135"
+                            ),
                             title="Compress vertical spacing"
                         ),
                         actionButton(
@@ -162,7 +166,11 @@ Joint_Tree_ui <- tabPanel(
                         actionButton(
                             "svg_horizontal_spacing_sub",
                             "",
-                            icon("compress", class="rotate-45"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-45"
+                            ),
                             title="Compress horizontal spacing"
                         ),
                         # actionButton(
@@ -194,11 +202,10 @@ Joint_Tree_ui <- tabPanel(
             )
         )
     ),
-    #icon=icon("chart-line")
     icon=icon(
         name=NULL,
         style="
-            background: url('../../images/ksTreeIcon.svg');
+            background: url('images/ksTreeIcon.svg');
             background-size: contain;
             background-position: center;
             background-repeat: no-repeat;

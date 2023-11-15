@@ -17,11 +17,11 @@ Tree_Reconciliation_ui <- tabPanel(
                     display: inline-block;
                     vertical-align: middle;
                 "
-                ), 
+                ),
                 HTML("Gene Tree – Species Tree Reconciliation Analysis")
             ),
             style="padding-bottom: 5px;
-                   padding-top: 5px; 
+                   padding-top: 5px;
                    padding-left: 30px;",
         ),
         column(
@@ -29,7 +29,7 @@ Tree_Reconciliation_ui <- tabPanel(
             width=3,
             div(class="boxLike",
                 style="background-color: #FAF9F6;
-                       margin: 5px 5px 5px 5px; 
+                       margin: 5px 5px 5px 5px;
                        padding: 5px 10px 10px 10px;",
                 column(
                     12,
@@ -72,7 +72,7 @@ Tree_Reconciliation_ui <- tabPanel(
             # ),
             div(class="boxLike",
                 style="background-color: #FBFEEC;
-                       margin: 5px 5px 5px 5px; 
+                       margin: 5px 5px 5px 5px;
                        padding: 5px 10px 10px 10px;",
                 column(
                     12,
@@ -97,43 +97,51 @@ Tree_Reconciliation_ui <- tabPanel(
                                 }")
                         ),
                         actionButton(
-                            "svg_vertical_spacing_add_species", 
+                            "svg_vertical_spacing_add_species",
                             "",
                             icon("arrows-alt-v"),
                             title="Expand vertical spacing",
                             style="border-color: #fff;"
                         ),
                         actionButton(
-                            "svg_vertical_spacing_sub_species", 
+                            "svg_vertical_spacing_sub_species",
                             "",
-                            icon("compress", class="rotate-135"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-135"
+                            ),
                             title="Compress vertical spacing",
                             style="border-color: #fff;"
                         ),
                         actionButton(
-                            "svg_horizontal_spacing_add_species", 
+                            "svg_horizontal_spacing_add_species",
                             "",
                             icon("arrows-alt-h"),
                             title="Expand horizontal spacing",
                             style="border-color: #fff;"
                         ),
                         actionButton(
-                            "svg_horizontal_spacing_sub_species", 
+                            "svg_horizontal_spacing_sub_species",
                             "",
-                            icon("compress", class="rotate-45"),
+                            icon(
+                                "down-left-and-up-right-to-center",
+                                verify_fa=FALSE,
+                                class="rotate-45"
+                            ),
                             title="Compress horizontal spacing",
                             style="border-color: #fff; "
                         ),
                         actionButton(
-                            "update_output", 
+                            "update_output",
                             "",
                             icon("sync"),
                             title="Update plot",
                             style="color: #fff;
-                                   background-color: #019858; 
+                                   background-color: #019858;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 200px; 
+                                   margin: 5px 5px 5px 200px;
                                    animation: glowing 5000ms infinite;"
                         ),
                         downloadButton_custom(
@@ -143,10 +151,10 @@ Tree_Reconciliation_ui <- tabPanel(
                             label=HTML(""),
                             title="Download svg figure",
                             style="color: #fff;
-                                   background-color: #019858; 
+                                   background-color: #019858;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px; 
+                                   margin: 5px 5px 5px 5px;
                                    animation: glowingD 5000ms infinite;"
                         )
                     ),
