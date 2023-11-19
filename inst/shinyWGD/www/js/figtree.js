@@ -1290,7 +1290,6 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
         .attr("dy", -3)
         .attr("text-anchor", "middle")
         .attr("font-size", "10px")
-        .attr("font-family", "calibri")
         .attr('fill', 'blue')
         .attr('opacity', 0.3)
         .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
@@ -1402,7 +1401,6 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
             }
         })
         .attr("font-size", "14px")
-        .attr("font-family", "calibri")
         .attr('fill', 'black')
         .text(function (d) {
             var name = d.name.replace(/_/g, ' ');
@@ -2035,13 +2033,12 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
     vis.selectAll("text.rule")
         .data(yscale.ticks(11))
         .enter().append("svg:text")
-        .attr("class", "rule") // Add a unique class
+        .attr("class", "rule") 
         .attr("x", yscale)
         .attr("y", h + 15)
         .attr("dy", -3)
         .attr("text-anchor", "middle")
         .attr("font-size", "10px")
-        .attr("font-family", "calibri")
         .attr('fill', 'blue')
         .attr('opacity', 0.3)
         .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
@@ -2154,7 +2151,6 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
             }
         })
         .attr("font-size", "14px")
-        .attr("font-family", "calibri")
         .attr('fill', 'black')
         .text(function (d) {
             var name = d.name.replace(/_/g, ' ');
@@ -2936,7 +2932,6 @@ function drawGeologicTimeBar(maxLength, vis, yscale, h, ori) {
         .attr("text-anchor", "middle")
         .attr("font-size", "9px")
         .attr("font-weight", "bold")
-        .attr("font-family", "calibri")
         .attr('fill', function (d) {
             if (d.start == 0) {
                 return '#a6cee3';
