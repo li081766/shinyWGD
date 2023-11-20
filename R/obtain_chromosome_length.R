@@ -11,7 +11,6 @@
 #'
 #' @return A list containing two data frames: len_df for chromosome lengths and num_df for mRNA counts.
 #'
-#' @export
 obtain_chromosome_length <- function(species_info_file){
     actual_path <- dirname(species_info_file)
 
@@ -80,7 +79,6 @@ obtain_chromosome_length <- function(species_info_file){
 #'
 #' @return A list containing two data frames: len_df for chromosome lengths and num_df for mRNA counts.
 #'
-#' @export
 obtain_chromosome_length_filter <- function(species_info_df){
 
     df <- species_info_df

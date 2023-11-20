@@ -21,8 +21,6 @@
 #'
 #' @return A data frame summarizing the counts of ortholog genes for each chromosome.
 #'
-#' @export
-#'
 #' @examples
 #' # Example usage:
 #' # Create a sample atomic.df data frame

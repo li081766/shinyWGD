@@ -1,7 +1,5 @@
 #' ksv class
 #'
-#' @export
-#'
 #' @examples
 #' x <- c(0.1, 0.3, 0.8, 1,1, 0.8, 0.9)
 #' is.ksv(x)
@@ -24,7 +22,6 @@ is.ksv <- function(x) {
 #' @param to Ending point for mode search. Default is 5.
 #'
 #' @return The mode (peak) of the distribution.
-#' @export
 #'
 #' @examples
 #' x <- c(1.1, 1.1, 1.2, 1.4, 1.8, 0.9, 0.8, 0.7)
@@ -55,7 +52,7 @@ modeFinder <- function(x, bw = 0.1, from = 0, to = 5) {
 #' @importFrom stats quantile
 #'
 #' @return A list containing computed relative rates and their confidence intervals.
-#' @export
+#'
 relativeRate <- function(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax, low = 0.025, up = 0.975, bs = 1000) {
     ksv2out_1 <- read.table(ksv2out_1_file, sep="\t", header=T)
     ksv2out_1 <- ksv2out_1[ksv2out_1$Ks <= KsMax, ]

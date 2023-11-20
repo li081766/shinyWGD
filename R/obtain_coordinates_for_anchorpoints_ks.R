@@ -17,7 +17,6 @@
 #'
 #' @return NULL (output files are generated with the specified information).
 #'
-#' @export
 obtain_coordiantes_for_anchorpoints_ks <- function(
         anchorpoints,
         anchorpoints_ks,

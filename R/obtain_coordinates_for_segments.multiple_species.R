@@ -15,7 +15,6 @@
 #'
 #' @return A dataframe with coordinates for segments within multiple synteny blocks.
 #'
-#' @export
 obtain_coordinates_for_segments_multiple <- function(
         seg_df,
         gff_df,

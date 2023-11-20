@@ -20,7 +20,6 @@
 #'
 #' @return NULL (output files are generated with the specified information).
 #'
-#' @export
 get_segments <- function(
         genes_file,
         anchors_ks_file,
@@ -218,7 +217,6 @@ get_segments <- function(
 #'
 #' @return NULL (output files are generated with the specified information).
 #'
-#' @export
 cluster_synteny <- function(
         segmented_file,
         segmented_anchorpoints_file,
@@ -323,7 +321,6 @@ cluster_synteny <- function(
 #'
 #' @return The -log10 of the p-value.
 #'
-#' @export
 #'
 #' @examples
 #' # Example usage:
@@ -354,7 +351,6 @@ CalHomoConcentration <- function(m, n, q, k) {
 #'
 #' @return A list containing information about identified clusters and their p-values.
 #'
-#' @export
 analysisEachCluster <- function(
         segmented_file,
         segmented_anchorpoints_file,
@@ -466,8 +462,6 @@ analysisEachCluster <- function(
 #'
 #' @return The computed P-value.
 #'
-#' @export
-#'
 #' @examples
 #' # Example usage:
 #' p_value <- CalPvalue(m=100, n=10000, q=5, k=250)
@@ -481,8 +475,8 @@ CalPvalue <- function(m, n, q, k) {
 #' Extract clusters based on specified scaffolds
 #'
 #' This function extracts clusters based on the specified scaffolds for both query and subject species.
-# It filters the data frames containing segment information and atomic anchorpoints to retain only the relevant clusters.
-#
+#' It filters the data frames containing segment information and atomic anchorpoints to retain only the relevant clusters.
+#'
 #' @param segs.df A data frame containing segment information.
 #' @param atomic.df A data frame containing atomic anchorpoints.
 #' @param scaf.bycol A character vector specifying scaffolds for the query species.
@@ -490,7 +484,6 @@ CalPvalue <- function(m, n, q, k) {
 #'
 #' @return A list containing two data frames: "segs" for segment information and "atomic" for atomic anchorpoints.
 #'
-#' @export
 extractCluster <- function(
         segs.df,
         atomic.df,

@@ -19,7 +19,6 @@
 #'
 #' @return None. The function saves the results to the specified out_file.
 #'
-#' @export
 obtain_coordiantes_for_anchorpoints <- function(anchorpoints, species1, gff_file1, out_file, species2=NULL, gff_file2=NULL){
     gff_df <- suppressMessages(
         vroom(

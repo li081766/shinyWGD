@@ -1,9 +1,9 @@
 Package: shinyWGD
 Type: Package
 Title: Shiny Application for Whole Genome Duplication Analysis
-Version: 1.0.1
+Version: 1.0.5
 Authors@R: 
-    person("Jia", "Li", email = "jiali@psb.vib-ugent.be", role = c("cre", "aut"))
+    person("Jia", "Li", email = "li081766@gmail.com", role = c("cre", "aut"))
 Maintainer: Jia Li <jiali@psb.vib-ugent.be>
 Description: shinyWGD is a comprehensive Shiny-R package that simplifies 
     and streamlines the analysis of Whole Genome Duplication (WGD) events. 

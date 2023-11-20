@@ -26,8 +26,6 @@
 #'
 #' @return A list containing the significance results for gradient and curvature.
 #'
-#' @export
-#'
 SignifFeatureRegion <- function(n, d, gcounts, gridsize, dest, bandwidth, signifLevel, range.x, grad=TRUE, curv=TRUE, neg.curv.only=TRUE)
 {
   h <- bandwidth
@@ -435,7 +433,6 @@ SignifFeatureRegion <- function(n, d, gcounts, gridsize, dest, bandwidth, signif
 #'
 #' @return A list of bandwidth ranges for each dimension of the input data.
 #'
-#' @export
 dfltBWrange <- function(x,tau) {
   d <- ncol(x)
   if (d==1) x <- as.matrix(x)
@@ -482,7 +479,6 @@ dfltBWrange <- function(x,tau) {
 #'
 #' @return A list containing the binned counts and the range of values for each dimension.
 #'
-#' @export
 dfltCounts <- function(x,gridsize=rep(64,NCOL(x)),h=rep(0,NCOL(x)), supp=3.7, range.x, w)
 {
   x <- as.matrix(x)
@@ -542,7 +538,6 @@ dfltCounts <- function(x,gridsize=rep(64,NCOL(x)),h=rep(0,NCOL(x)), supp=3.7, ra
 #'
 #' @return A list containing the estimated density or derivative, and optionally, standard errors.
 #'
-#' @export
 drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
 {
   d <- length(drv)
@@ -686,7 +681,6 @@ drvkde <- function(x,drv,bandwidth,gridsize,range.x,binned=FALSE,se=TRUE, w)
 #'
 #' @return A vector representing the result of the symmetric convolution.
 #'
-#' @export
 symconv.ks <- function (rr,ss,skewflag)
 {
   L <- length(rr) - 1
@@ -716,7 +710,6 @@ symconv.ks <- function (rr,ss,skewflag)
 #'
 #' @return A matrix representing the result of the symmetric 2D convolution.
 #'
-#' @export
 symconv2D.ks <- function(rr, ss, skewflag=rep(1,2))
 {
   L <- dim(rr)-1
@@ -758,7 +751,6 @@ symconv2D.ks <- function(rr, ss, skewflag=rep(1,2))
 #'
 #' @return A 3D array representing the result of the symmetric 3D convolution.
 #'
-#' @export
 symconv3D.ks <- function(rr, ss, skewflag=rep(1,3))
 {
   L <- dim(rr) - 1
@@ -808,7 +800,6 @@ symconv3D.ks <- function(rr, ss, skewflag=rep(1,3))
 #'
 #' @return A 4D array representing the result of the symmetric 4D convolution.
 #'
-#' @export
 symconv4D.ks <- function(rr, ss, skewflag=rep(1,4) , fftflag=rep(TRUE,2))
 {
   L <- dim(rr) - 1

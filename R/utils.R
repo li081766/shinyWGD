@@ -6,8 +6,6 @@
 #'
 #' @return A logical value indicating whether the object is not NULL.
 #'
-#' @export
-#'
 #' @examples
 #' is.not.null(5)
 #' is.not.null(NULL)
@@ -30,7 +28,6 @@ is.not.null <- function(x) {
 #'
 #' @return An HTML tag to allow users to download the object.
 #'
-#' @export
 downloadButton_custom <- function(
         outputId,
         label="Download",
@@ -59,7 +56,6 @@ downloadButton_custom <- function(
 #'
 #' @return A data frame containing the data from the uploaded file.
 #'
-#' @export
 read_data_file <- function(uploadfile){
     dataframe <- read.table(
         uploadfile$datapath,
@@ -85,29 +81,16 @@ read_data_file <- function(uploadfile){
 #'
 #' @return The path to the prepared GFF file for analysis.
 #'
-#' @export
-check_gff_input <- function(gff_input_name, gff_input_path){
-    checked_gff <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", gff_input_name, ".gff")
+check_gff_input <- function(gff_input_name, gff_input_path, working_wd){
+    checked_gff <- paste0(working_wd, "/", gff_input_name, ".gff")
     if( str_detect(gff_input_path$name, ".(gff|gff3)$") ){
-        link_gff_cmd <- paste0("ln -sf ", gff_input_path$datapath, " ", checked_gff)
+        link_gff_cmd <- paste0("cat ", gff_input_path$datapath, " grep -v '#' ", checked_gff)
         system(link_gff_cmd)
     }
     else if( str_detect(gff_input_path$name, regex(".(gff.gz|gff3.gz|gz)$")) ){
-        gzip_gff_cmd <- paste0("gunzip -c ", gff_input_path$datapath, " > ", checked_gff)
+        gzip_gff_cmd <- paste0("gunzip -c ", gff_input_path$datapath, " | grep -v '#' > ", checked_gff)
         system(gzip_gff_cmd)
     }
-    # else if( str_detect(gff_input_path$name, ".gtf$") ){
-    #     convertGTF_cmd <- paste0("gffread --keep-genes ", gff_input_path$datapath, " > ", checked_gff)
-    #     system(convertGTF_cmd)
-    # }
-    # else if( str_detect(gff_input_path$name, regex(".gtf.gz$")) ){
-    #     gunzipped_gtf <- file_temp(ext=".gtf")
-    #     gunzip_gtf_cmd <- paste0("gunzip -c ", gff_input_path$datapath, " > ", gunzipped_gtf)
-    #     system(gunzip_gtf_cmd)
-    #     convertGTF_cmd <- paste0("gffread --keep-genes ", gunzipped_gtf, " > ", checked_gff)
-    #     system(convertGTF_cmd)
-    #     system(paste0("rm ", gunzipped_gtf))
-    # }
     else{
         shinyalert(
             "Oops!",
@@ -132,29 +115,16 @@ check_gff_input <- function(gff_input_name, gff_input_path){
 #'
 #' @return A string containing the processed GFF file's path.
 #'
-#' @export
-check_gff_from_file <- function(gff_input_name, gff_input_path){
-    checked_gff <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", gff_input_name, ".gff")
+check_gff_from_file <- function(gff_input_name, gff_input_path, working_wd){
+    checked_gff <- paste0(working_wd, "/", gff_input_name, ".gff")
     if( str_detect(gff_input_path, ".(gff|gff3)$") ){
-        link_gff_cmd <- paste0("ln -sf ", gff_input_path, " ", checked_gff)
+        link_gff_cmd <- paste0("cat ", gff_input_path, " | grep -v '#' > ", checked_gff)
         system(link_gff_cmd)
     }
     else if( str_detect(gff_input_path, regex(".(gff.gz|gff3.gz|gz)$")) ){
-        gzip_gff_cmd <- paste0("gunzip -c ", gff_input_path, " > ", checked_gff)
+        gzip_gff_cmd <- paste0("gunzip -c ", gff_input_path, " | grep -v '#' > ", checked_gff)
         system(gzip_gff_cmd)
     }
-    # else if( str_detect(gff_input_path, ".gtf$") ){
-    #     convertGTF_cmd <- paste0("gffread --keep-genes ", gff_input_path, " > ", checked_gff)
-    #     system(convertGTF_cmd)
-    # }
-    # else if( str_detect(gff_input_path, regex(".gtf.gz$")) ){
-    #     gunzipped_gtf <- file_temp(ext=".gtf")
-    #     gunzip_gtf_cmd <- paste0("gunzip -c ", gff_input_path, " > ", gunzipped_gtf)
-    #     system(gunzip_gtf_cmd)
-    #     convertGTF_cmd <- paste0("gffread --keep-genes ", gunzipped_gtf, " > ", checked_gff)
-    #     system(convertGTF_cmd)
-    #     system(paste0("rm ", gunzipped_gtf))
-    # }
     else{
         shinyalert(
             "Oops!",
@@ -174,10 +144,15 @@ check_gff_from_file <- function(gff_input_name, gff_input_path){
 #'
 #' @return TRUE if the file is in FASTA format with cds sequences, FALSE otherwise.
 #'
-#' @export
-#'
 is_fasta_cds <- function(file_path) {
-    lines <- readLines(file_path, n=2, warn=FALSE)
+    if( endsWith(file_path, ".gz") ){
+        con <- gzfile(file_path, "rt")
+    } else {
+        con <- file(file_path, "rt")
+    }
+
+    lines <- readLines(con, n=2, warn=FALSE)
+    close(con)
 
     if( length(lines) < 2 ){
         return(FALSE)
@@ -206,7 +181,6 @@ is_fasta_cds <- function(file_path) {
 #'
 #' @return Returns the first part of the input string.
 #'
-#' @export
 extract_first_part <- function(name) {
     parts <- unlist(strsplit(name, "\t"))
     return(parts[1])
@@ -220,8 +194,6 @@ extract_first_part <- function(name) {
 #' @param sequence A nucleotide sequence as a character string.
 #'
 #' @return A character string or NULL.
-#'
-#' @export
 #'
 #' @examples
 #' sequence <- "ATGTAACTAGTGAAGTAGCTAACATAG"
@@ -263,9 +235,8 @@ remove_inner_stop_codon_sequence <- function(sequence) {
 #'
 #' @return A string containing the processed proteome file's path.
 #'
-#' @export
-check_proteome_input <- function(proteome_name, proteome_input){
-    proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
+check_proteome_input <- function(proteome_name, proteome_input, working_wd){
+    proteome_file <- paste0(working_wd, "/", proteome_name, ext=".fa")
     if( !is_fasta_cds(proteome_input$datapath) ){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
@@ -279,7 +250,7 @@ check_proteome_input <- function(proteome_name, proteome_input){
 
     sequences <- read.fasta(proteome_input$datapath)
 
-    if( grepl("\\|", names(sequences)) ){
+    if( any(grepl("\\|", names(sequences))) ){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
@@ -309,7 +280,7 @@ check_proteome_input <- function(proteome_name, proteome_input){
     )
 
     # Get the Log Info
-    log_file <- paste0(dirname(proteome_file), "/Sequence_processing.log")
+    log_file <- paste0(working_wd, "/Sequence_processing.log")
     if( file.exists(log_file) ){
         logInfo <- file(log_file, open="a")
     }else{
@@ -348,12 +319,11 @@ check_proteome_input <- function(proteome_name, proteome_input){
 #'
 #' @return A string containing the processed proteome file's path.
 #'
-#' @export
-check_proteome_from_file <- function(proteome_name, proteome_input){
-    tmp_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".tmp.fa")
-    proteome_file <- paste0(tempdir(), "/Analysis_", Sys.Date(), "/", proteome_name, ext=".fa")
+check_proteome_from_file <- function(proteome_name, proteome_input, working_wd){
+    tmp_file <- paste0(working_wd, "/", proteome_name, ext=".tmp.fa")
+    proteome_file <- paste0(working_wd, "/", proteome_name, ext=".fa")
 
-    if (!is_fasta_cds(proteome_input)) {
+    if( !is_fasta_cds(proteome_input) ){
         proteome_name <- gsub("[0-9]", "", proteome_name)
         proteome_name <- gsub("_", " ", proteome_name)
         shinyalert(
@@ -393,7 +363,7 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
     )
 
     # Get the Log Info
-    log_file <- paste0(dirname(proteome_file), "/Sequence_processing.log")
+    log_file <- paste0(working_wd, "/Sequence_processing.log")
     if( file.exists(log_file) ){
         logInfo <- file(log_file, open="a")
     }else{
@@ -421,23 +391,22 @@ check_proteome_from_file <- function(proteome_name, proteome_input){
 #' This function checks the existence of files specified in a data table.
 #'
 #' @param data_table A data table with file paths in columns V2 and V3.
+#' @param working_wd A path of the working directory
 #'
 #' @return This function has no return value. It prints messages to the console.
 #'
-#' @export
-#'
 #' @examples
-#' data_table <- read.table(text = "V1 V2 V3
+#' data_table <- read.table(text="V1 V2 V3
 #'         'Apostasia fujianica'    '../Apostasia1.fa'    '../Apostasia1.gff'
 #'         'Apostasia shenzhenica'    '../Apostasia2.fa'    '../Apostasia2.gff'
-#'         'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header = TRUE)
+#'         'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header=TRUE)
 #'
 #' checkFileExistence(data_table)
-checkFileExistence <- function(data_table){
+checkFileExistence <- function(data_table, working_wd){
     for( i in 1:nrow(data_table) ){
         file1 <- as.character(data_table[i, "V2"])
 
-        if( !file.exists(file1) ){
+        if( !file.exists(paste0(working_wd, "/", file1)) ){
             shinyalert(
                 "Oops!",
                 paste0(
@@ -453,7 +422,7 @@ checkFileExistence <- function(data_table){
 
         if( !is.na(data_table[i, "V3"]) ){
             file2 <- as.character(data_table[i, "V3"])
-            if( !file.exists(file2) ){
+            if( !file.exists(paste0(working_wd, "/", file2)) ){
                 shinyalert(
                     "Oops!",
                     paste0(
@@ -478,11 +447,9 @@ checkFileExistence <- function(data_table){
 #' @param ksrates_conf_file The path to the Ksrates configuration file.
 #' @param species_info_file The path to the species information file.
 #'
-#' @export
 create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_info_file){
     latin_names_temp <- c()
     fasta_filenames_temp <- c()
-    # gff_filenames_temp <- c()
 
     collinearity <- "yes"
     workdirname <- dirname(dirname(ksrates_conf_file))
@@ -494,15 +461,12 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
     shiny::withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:input$number_of_study_species ){
             latin_name <- paste0("latin_name_", i)
-            latin_name <- gsub("_", " ", latin_name)
-
             shiny::incProgress(
                 amount=0.8/input$number_of_study_species,
-                message=paste0("Dealing with ", latin_name, " ...")
+                message=paste0("Dealing with ", input[[latin_name]], " ...")
             )
             Sys.sleep(.1)
 
-            proteome <- paste0("proteome_", i)
             latin_name_temp <- trimws(input[[latin_name]])
             latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
             informal_name_temp <- paste0(latin_name_list[1], i)
@@ -511,14 +475,15 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
 
             proteome_temp <- check_proteome_input(
                 informal_name_temp,
-                input[[proteome]]
+                input[[proteome]],
+                workdirname
             )
             if( is.null(proteome_temp) ){
                 close(SpeciesInfoConf)
                 return(NULL)
             }
             latin_names_temp <- c(latin_names_temp, paste0(informal_name_temp, ": ", latin_name_temp))
-            fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ", informal_name_temp, ".fa"))
+            fasta_filenames_temp <- c(fasta_filenames_temp, paste0(informal_name_temp, ": ../", informal_name_temp, ".fa"))
 
             gff <- paste0("gff_", i)
             if( input$select_focal_species == latin_name_temp ){
@@ -530,7 +495,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
                         type="info"
                     )
                 }else{
-                    focal_species_gff_filenames_temp <- paste0(informal_name_temp, ".gff")
+                    focal_species_gff_filenames_temp <- paste0("../", informal_name_temp, ".gff")
                 }
             }
             if( input$select_focal_species == latin_name_temp ){
@@ -539,7 +504,8 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
             if( is.not.null(input[[gff]]) ){
                 gff_temp <- check_gff_input(
                     informal_name_temp,
-                    input[[gff]]
+                    input[[gff]],
+                    workdirname
                 )
                 cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
             }
@@ -594,8 +560,14 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
 #' @param ksrates_conf_file The path to the Ksrates configuration file to be generated.
 #' @param species_info_file The path to the species information file.
 #'
-#' @export
-create_ksrates_configure_file_based_on_table <- function(data_table, focal_species, newick_tree_file, ksrates_conf_file, species_info_file){
+create_ksrates_configure_file_based_on_table <- function(
+        data_table,
+        focal_species,
+        newick_tree_file,
+        ksrates_conf_file,
+        species_info_file,
+        working_wd
+    ){
     if( ncol(data_table) < 2 ){
         shinyalert(
             "Oops!",
@@ -617,7 +589,6 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
 
     SpeciesInfoConf <- file(species_info_file, open="w")
 
-
     shiny::withProgress(message='Processing fasta files in progress', value=0, {
         for( i in 1:nrow(data_table) ){
             latin_name <- data_table[i, 1]
@@ -629,7 +600,7 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
             )
             Sys.sleep(.1)
 
-            proteome <- data_table[i, 2]
+            proteome <- paste0(working_wd, "/original_data/", data_table[i, 2])
             latin_name_temp <- trimws(latin_name)
             latin_name_list <- strsplit(latin_name_temp, split=' ')[[1]]
             informal_name_temp <- paste0(latin_name_list[1], i)
@@ -640,7 +611,8 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
             newick_tree <- gsub(latin_name, informal_name_temp, newick_tree)
             proteome_temp <- check_proteome_from_file(
                 informal_name_temp,
-                proteome
+                proteome,
+                workdirname
             )
             if( is.null(proteome_temp) ){
                 close(SpeciesInfoConf)
@@ -651,7 +623,8 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
             if( !is.na(data_table[i, 3]) ){
                 gff_temp <- check_gff_from_file(
                     informal_name_temp,
-                    data_table[i, 3]
+                    paste0(working_wd, "/original_data/", data_table[i, 3]),
+                    workdirname
                 )
                 gff_species <- c(gff_species, informal_name_temp)
                 cat(paste0(latin_name_temp, "\t", proteome_temp, "\t", gff_temp), file=SpeciesInfoConf, append=TRUE, sep="\n")
@@ -709,7 +682,6 @@ create_ksrates_configure_file_based_on_table <- function(data_table, focal_speci
 #'
 #' @param ksrates_expert_parameter_file The file is used to store the ksrates expert parameter
 #'
-#' @export
 create_ksrates_expert_parameter_file <- function(ksrates_expert_parameter_file){
     expert_parameter <- file(ksrates_expert_parameter_file, open="w")
     cat(paste0("logging_level=info"), append=TRUE, file=expert_parameter, sep="\n")
@@ -734,7 +706,6 @@ create_ksrates_expert_parameter_file <- function(ksrates_expert_parameter_file){
 #' @param cmd_file The path to the main Ksrates command file to be generated.
 #' @param focal_species The name of the focal species.
 #'
-#' @export
 create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, focal_species){
     cmd <- file(cmd_file, open="w")
     # wgd_cmd <- file(wgd_cmd_file, open="w")
@@ -746,7 +717,7 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
     cat("#SBATCH -c 1", file=cmd, append=TRUE, sep="\n")
     cat("#SBATCH --mem 4G", file=cmd, append=TRUE, sep="\n")
     cat(paste0("#SBATCH -o ", basename(cmd_file), ".o%j"), file=cmd, append=TRUE, sep="\n")
-    cat(paste0("#SBATCH -o ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n")
+    cat(paste0("#SBATCH -e ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n")
     cat("", file=cmd, append=TRUE, sep="\n")
 
     cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
@@ -789,7 +760,6 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
     cat(paste0("ksrates plot-tree ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-analyses ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     close(cmd)
-    # close(wgd_cmd)
 }
 
 #' Create Ksrates Command Files from Shiny Input
@@ -798,7 +768,6 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
 #' @param ksratesconf The path to the Ksrates configuration file.
 #' @param cmd_file The path to the main Ksrates command file to be generated.
 #'
-#' @export
 create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     cmd <- file(cmd_file, open="w")
     # Add Sbatch commond line
@@ -807,8 +776,10 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     cat("#SBATCH -c 1", file=cmd, append=TRUE, sep="\n")
     cat("#SBATCH --mem 4G", file=cmd, append=TRUE, sep="\n")
     cat(paste0("#SBATCH -o ", basename(cmd_file), ".o%j"), file=cmd, append=TRUE, sep="\n")
-    cat(paste0("#SBATCH -o ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n\n")
+    cat(paste0("#SBATCH -e ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n\n")
+    cat("", file=cmd, append=TRUE, sep="\n")
 
+    cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     informal_name_list <- paste0("seq_", 1:input$number_of_study_species)
@@ -857,7 +828,6 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
 #'
 #' @return A data frame with "latin_name" and "informal_name" columns.
 #'
-#' @export
 map_informal_name_to_latin_name <- function(sp_gff_info_xls){
     df <- read.table(
         sp_gff_info_xls,
@@ -885,7 +855,6 @@ map_informal_name_to_latin_name <- function(sp_gff_info_xls){
 #'
 #' @return A modified input string with informal names replaced by Latin names.
 #'
-#' @export
 replace_informal_name_to_latin_name <- function(names_df, input){
     if( grepl("_", input) ){
         species_list <- strsplit(input, "_")

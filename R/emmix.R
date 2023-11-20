@@ -10,7 +10,7 @@
 #' @importFrom stats var
 #'
 #' @return A list, i.e., the original output of mclust::emV
-#' @export
+#'
 run_emmix_kmeas <- function(v, k.centers=2, k.nstart=500) {
   if (v$log == FALSE) {
     warning("Better to use the log-normal distribution")
@@ -65,8 +65,6 @@ run_emmix_kmeas <- function(v, k.centers=2, k.nstart=500) {
 #'
 #' @return A data frame with seven variables.
 #'
-#' @export
-#'
 #' @examples
 #' ksv <- c(0.1, 0.3, 0.12, 0.34, 0.45, 0.32, 0.33)
 #' mix_logNormal_Ks <- function(ksv)
@@ -112,7 +110,7 @@ mix_logNormal_Ks <- function(ksv, G=1:5, k.nstart=500, maxK=5) {
 #'   The default is G=1:3.
 #'
 #' @return A data frame with seven variables.
-#' @export
+#'
 parse_EMMIX <- function(emmix.out, G=1:3) {
   final_df <- parse_one_EMMIX(emmix.out, ncomponent=G[1])
   for (i in G[2:length(G)]) {
@@ -129,7 +127,7 @@ parse_EMMIX <- function(emmix.out, G=1:3) {
 #' @param ncomponent Number of components to read from the file.
 #'
 #' @return A data frame with seven variables.
-#' @export
+#'
 parse_one_EMMIX <- function(emmix.out, ncomponent=3) {
   fh <- file(emmix.out, "r")
   comp <- 0

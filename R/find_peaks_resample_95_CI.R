@@ -7,7 +7,6 @@
 #'
 #' @return A numeric vector containing the indices of the identified peaks in the input vector `x`.
 #'
-#' @export
 #'
 #' @examples
 #' # Generate some example data
@@ -50,7 +49,6 @@ find_peaks <- function (x, m=3){
 #' @importFrom stats predict
 #'
 #' @return A numeric vector containing the identified peaks in the Ks distribution.
-#' @export
 #'
 #' @examples
 #' # Generate a vector of Ks values (replace with your data)
@@ -99,8 +97,6 @@ PeaksInKsDistributionValues <- function(ks, binWidth=0.1, maxK=5,
 #'
 #' @return A numeric vector containing the binned Ks distribution.
 #'
-#' @export
-#'
 #' @examples
 #' # Load or obtain raw Ks values (replace with your data)
 #' raw_ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
@@ -134,8 +130,6 @@ generateKsDistribution <- function(ksraw, speciesName=NULL, maxK=5) {
 #'
 #' @return A numeric vector containing a resampled Ks distribution.
 #'
-#' @export
-#'
 #' @examples
 #' # Load or obtain a Ks distribution (replace with your data)
 #' ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
@@ -167,8 +161,6 @@ resampleKsDistribution <- function(ks, maxK=5) {
 #' @param to A numeric value indicating the upper bound for peak estimation.
 #'
 #' @return A numeric vector containing bootstrapped peak estimates.
-#'
-#' @export
 #'
 #' @examples
 #' # Load or obtain a Ks distribution (replace with your data)

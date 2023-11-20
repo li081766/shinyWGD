@@ -17,7 +17,6 @@
 #'
 #' @return None. The function saves the results to the specified outfile and anchorpointout_file.
 #'
-#' @export
 obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_file, species1, ks_file, outfile, anchorpointout_file, species2=NULL){
     multiplicons <- suppressMessages(
         vroom(

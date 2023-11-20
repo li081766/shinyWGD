@@ -13,7 +13,7 @@
 #'   * `raw_df`: raw data
 #'   * `filters`: filters that applied to the raw data
 #'
-#' @export
+#'
 read.wgd_ksd <- function(file, include_outliers=FALSE,
                          min_ks=0, min_aln_len=0,
                          min_idn=0, min_cov=0) {
@@ -61,7 +61,6 @@ read.wgd_ksd <- function(file, include_outliers=FALSE,
 #' @return
 #' Returns TRUE if the object is of class "ksv"; otherwise, returns FALSE.
 #'
-#' @export
 is.ksv <- function(x) {
   # if (class(x) == "ksv") {
   if (inherits(x, "ksv")) {
@@ -84,7 +83,6 @@ is.ksv <- function(x) {
 #'   - `bin_width`: The width of each bin used for KDE calculation.
 #'   - `maxK`: The maximum Ks value for the distribution.
 #'
-#' @export
 generate_ksd <- function(ks_df, bin_width=0.01, maxK=5) {
 
     full_df <- ks_df

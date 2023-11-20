@@ -16,7 +16,6 @@
 #'
 #' @return NULL (the results are saved in the output file).
 #'
-#' @export
 obtain_coordiantes_for_segments <- function(seg_file, sp1, gff_file1, out_file, sp2=NULL, gff_file2=NULL){
     # library(vroom)
     # library(dplyr)

@@ -18,8 +18,6 @@
 #'
 #' @return A list containing two data frames: "bar" for Ks distribution and "density" for density data.
 #'
-#' @export
-#'
 calculateKsDistribution4wgd_multiple <- function(
         files_list, binWidth=0.1, maxK=5,
         plot.mode="weighted",

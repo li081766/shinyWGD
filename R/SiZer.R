@@ -10,7 +10,6 @@
 #' @importFrom stats na.omit
 #'
 #' @return A list containing SiZer results, including the SiZer curve, the SiZer map, and the bandwidth.
-#' @export
 #'
 #' @examples
 #' ks_value_tmp <- c(81.3724, 77.5539, 76.6121, 3.5945, 3.3308, -1, 15.4158, 2.7786, 1.8054)

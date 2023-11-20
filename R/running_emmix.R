@@ -6,7 +6,6 @@
 #'
 #' @return A data frame containing clustering and modeling results.
 #'
-#' @export
 ks_mclust_v2 <- function(input_data) {
     # suppressMessages(
     #     library(mclust)

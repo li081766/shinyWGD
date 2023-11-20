@@ -9,7 +9,6 @@
 #'
 #' @return A list containing depth data frames, including "query_depth" and "subject_depth" if subject chromosomes are specified, or "depth" if not.
 #'
-#' @export
 computing_depth <- function(anchorpoint_ks_file,
                             multiplicon_id,
                             selected_query_chr,
@@ -71,7 +70,6 @@ computing_depth <- function(anchorpoint_ks_file,
 #' @param selected_query_chr The list of selected query chromosomes.
 #'
 #' @return A list containing the depth dataframe.
-#' @export
 computing_depth_paranome <- function(
         anchorpoint_ks_file,
         multiplicon_id,
