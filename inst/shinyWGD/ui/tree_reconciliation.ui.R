@@ -150,12 +150,12 @@ Tree_Reconciliation_ui <- tabPanel(
                             icon=icon("download"),
                             label=HTML(""),
                             title="Download svg figure",
+                            class="my-download-button-class",
                             style="color: #fff;
-                                   background-color: #019858;
+                                   background-color: #6B8E23;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;
-                                   animation: glowingD 5000ms infinite;"
+                                   margin: 5px 5px 5px 5px;"
                         )
                     ),
                     column(
