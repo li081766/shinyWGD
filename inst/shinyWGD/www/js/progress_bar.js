@@ -11,7 +11,6 @@ function progressBarData(inputData) {
     $("#" + container).empty().append(progressBar);
 }
 
-
 function createProgressBar() {
     var progressBar = $("<div>")
         .addClass("progress")
@@ -51,7 +50,7 @@ Shiny.addCustomMessageHandler("UpdateProgressBar", function (message) {
 
 
 Shiny.addCustomMessageHandler("Progress_Bar_Update", showPopup);
-function showPopup() {
+function showPopup(message) {
     var modal = $("<div>")
         .addClass("modal")
         .appendTo("body");

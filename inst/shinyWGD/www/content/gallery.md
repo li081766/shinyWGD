@@ -28,8 +28,8 @@
 ##### Index:
 - [<font color="orange"><i>K</i><sub>s</sub> Age Distribution</font>](#ks-plot)
   - [Paralog <i>K</i><sub>s</sub> age distribution](#paralog-ks)
-    - [*Single spcies*](#paralog-ks-one-species)
-    - [*Multiple species*](#paralog-ks-multiple-species)
+    - [*Without GMM modeling*](#paralog-ks-without-gmm-modeling)
+    - [*With GMM modeling*](#paralog-ks-with-gmm-modeling)
   - [Ortholog <i>K</i><sub>s</sub> age distribution](#ortholog-ks)
   - [Substitution rate correctiong](#rate-correction)
     - [*With paralogous species*](#rate-with-paralog)
@@ -64,13 +64,13 @@
   <a name="paralog-ks"></a>
   ##### Paralog <i>K</i><sub>s</sub> age distribution
 
-  <a name="paralog-ks-one-species"></a>
-  ###### *Single species*
-  <img src="../images/Paralogous_One_Species_Ks-01.jpg">
+  <a name="paralog-ks-without-gmm-modeling"></a>
+  ###### *Without GMM modeling*
+  <img src="../images/Paralogous_Ks.Elaeis2.ks.png">
 
-  <a name="paralog-ks-multiple-species"></a>
-  ###### *Multiple species*
-  <img src="../images/Paralogous_Multiple_Species_Ks-01.jpg">
+  <a name="paralog-ks-with-gmm-modeling"></a>
+  ###### *With GMM modeling*
+  <img src="../images/Paralogous_Ks.Elaeis2.ks_with_GMM.png">
 
   ---
   <a name="ortholog-ks"></a>
@@ -105,8 +105,12 @@
 
   <a name="intra-comparing-micro"></a>
   ###### *Micro-synteny plot*
-  <img src="../images/microSyn_one_species.svg">
+  
+  *In true chromosomal length scale*
+  <img src="../images/one_species.microSyn.Multiplicon_5.true_length.svg">
 
+  *In gene number scale*
+  <img src="../images/one_species.Multiplicon_5.gene_number.svg">
   ---
   <a name="inter-comparing"></a>
   ##### Inter-comparing alignment
@@ -139,6 +143,7 @@
   <a name="PAR-zoom-in"></a>
   ###### *PAR zoom-in plot*
   <img src="../images/PAR.cluster.svg" width="50%">
+  <img src="../images/Vitis_vinifera_vs_Oryza_sativa.PAR_1.cluster.link.svg" width="80%">
 
   ---
   <a name="tree-building"></a>
