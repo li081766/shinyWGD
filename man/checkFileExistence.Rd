@@ -4,10 +4,12 @@
 \alias{checkFileExistence}
 \title{Check File Existence in a Data Table}
 \usage{
-checkFileExistence(data_table)
+checkFileExistence(data_table, working_wd)
 }
 \arguments{
 \item{data_table}{A data table with file paths in columns V2 and V3.}
+
+\item{working_wd}{A path of the working directory}
 }
 \value{
 This function has no return value. It prints messages to the console.
@@ -16,10 +18,10 @@ This function has no return value. It prints messages to the console.
 This function checks the existence of files specified in a data table.
 }
 \examples{
-data_table <- read.table(text = "V1 V2 V3
+data_table <- read.table(text="V1 V2 V3
         'Apostasia fujianica'    '../Apostasia1.fa'    '../Apostasia1.gff'
         'Apostasia shenzhenica'    '../Apostasia2.fa'    '../Apostasia2.gff'
-        'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header = TRUE)
+        'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header=TRUE)
 
 checkFileExistence(data_table)
 }

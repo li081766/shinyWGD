@@ -9,7 +9,8 @@ create_ksrates_configure_file_based_on_table(
   focal_species,
   newick_tree_file,
   ksrates_conf_file,
-  species_info_file
+  species_info_file,
+  working_wd
 )
 }
 \arguments{

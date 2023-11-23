@@ -12,7 +12,7 @@
 #' @export
 #'
 #' @seealso \code{\link{httr}}, \code{\link{jsonlite}}
-extract_tree <- function(input_file, prefix){
+TimeTreeFecher <- function(input_file, prefix){
     suppressPackageStartupMessages({
         library(httr)
         library(jsonlite)

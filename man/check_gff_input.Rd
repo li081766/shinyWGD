@@ -4,7 +4,7 @@
 \alias{check_gff_input}
 \title{Check and Prepare GFF/GTF Input File}
 \usage{
-check_gff_input(gff_input_name, gff_input_path)
+check_gff_input(gff_input_name, gff_input_path, working_wd)
 }
 \arguments{
 \item{gff_input_name}{A descriptive name for the GFF/GTF file.}

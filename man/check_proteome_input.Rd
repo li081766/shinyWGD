@@ -4,7 +4,7 @@
 \alias{check_proteome_input}
 \title{Check and Process Proteome Input File}
 \usage{
-check_proteome_input(proteome_name, proteome_input)
+check_proteome_input(proteome_name, proteome_input, working_wd)
 }
 \arguments{
 \item{proteome_name}{The informal name of the proteome input file.}

@@ -47,7 +47,7 @@ writeLines(
         "#SBATCH -c 4",
         "#SBATCH --mem 8G",
         paste0("#SBATCH -o ", basename(cmd_file), ".o%j"),
-        paste0("#SBATCH -o ", basename(cmd_file), ".e%j"),
+        paste0("#SBATCH -e ", basename(cmd_file), ".e%j"),
         ""
     ),
     cmd_con

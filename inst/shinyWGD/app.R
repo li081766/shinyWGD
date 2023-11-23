@@ -37,7 +37,6 @@ options(shiny.maxRequestSize=5000*1024^2)
 ### load ui pages
 source(file="ui/introduction.ui.R", local=T, encoding="UTF-8")
 source(file="ui/data_preparation.ui.R", local=T, encoding="UTF-8")
-source(file="ui/codes_checking.ui.R", local=T, encoding="UTF-8")
 source(file="ui/whale_preparation.ui.R", local=T, encoding="UTF-8")
 source(file="ui/extracting_tree.ui.R", local=T, encoding="UTF-8")
 source(file="ui/ks_age_distribution.ui.R", local=T, encoding="UTF-8")
@@ -85,7 +84,7 @@ ui <- tagList(
             icon=icon("terminal"),
             Data_preparation_ui,
             Whale_Preparation_ui,
-            Codes_checking_ui,
+            # Codes_checking_ui,
             Extracting_Tree_ui,
         ),
         navbarMenu(
@@ -99,7 +98,19 @@ ui <- tagList(
         Gallery_ui,
         Help_ui
     ),
-
+    tags$head(
+        tags$style(HTML("
+            .my-start-button-class:hover {
+                background-color: #2E8B57 !important;
+            }
+            .my-confirm-button-class:hover {
+                background-color: #808080 !important;
+            }
+            .my-download-button-class:hover {
+                background-color: #556B2F !important;
+            }
+        "))
+    ),
     # add website for lab and UGent
     tags$a(href="https://www.vandepeerlab.org/", id="mylink1", target="_blank", rel="noopener",
            tags$img(
@@ -111,12 +122,18 @@ ui <- tagList(
     tags$head(
         tags$style(HTML("
             #mylink1 {
-            position: absolute;
-            top: 30px;
-            right: 110px;
-            z-index: 9999;
-            }"
-        ))
+                position: absolute;
+                top: 30px;
+                right: 110px;
+                z-index: 1;
+            }
+            .modal {
+                z-index: 1050 !important;
+            }
+            .modal-backdrop {
+                z-index: 1040 !important;
+            }
+        "))
     ),
     tags$a(href="https://www.ugent.be/en", id="mylink2", target="_blank", rel="noopener",
            tags$img(
@@ -128,13 +145,24 @@ ui <- tagList(
     tags$head(
         tags$style(HTML("
             #mylink2 {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 9999;
-            }"
-        ))
+                position: absolute;
+                top: 10px;
+                right: 10px;
+                z-index: 1;
+            }
+            .modal {
+                z-index: 1050 !important;
+            }
+            .modal-backdrop {
+                z-index: 1040 !important;
+            }
+        "))
     ),
+    tags$script(HTML(
+            'function openTab(tabClass) {
+        Shiny.setInputValue("openTab", tabClass);
+      }'
+    ))
 )
 
 server <- function(input, output, session){
@@ -154,7 +182,6 @@ server <- function(input, output, session){
 
     source(file="server/introduction.server.R", local=T, encoding="UTF-8")
     source(file="server/data_preparation.server.R", local=T, encoding="UTF-8")
-    source(file="server/codes_checking.server.R", local=T, encoding="UTF-8")
     source(file="server/whale_preparation.server.R", local=T, encoding="UTF-8")
     source(file="server/extracting_tree.server.R", local=T, encoding="UTF-8")
     source(file="server/ks_age_distribution.server.R", local=T, encoding="UTF-8")

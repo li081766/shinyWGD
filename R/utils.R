@@ -720,7 +720,7 @@ create_ksrates_cmd_from_table <- function(data_table, ksratesconf, cmd_file, foc
     cat(paste0("#SBATCH -e ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n")
     cat("", file=cmd, append=TRUE, sep="\n")
 
-    cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
+    cat("module load ksrates/x86_64/1.1.3", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     for( i in 1:nrow(data_table) ){
@@ -779,7 +779,7 @@ create_ksrates_cmd <- function(input, ksratesconf, cmd_file){
     cat(paste0("#SBATCH -e ", basename(cmd_file), ".e%j"), file=cmd, append=TRUE, sep="\n\n")
     cat("", file=cmd, append=TRUE, sep="\n")
 
-    cat("module load ksrate", file=cmd, append=TRUE, sep="\n")
+    cat("module load ksrates/x86_64/1.1.3", file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates init ", ksratesconf), file=cmd, append=TRUE, sep="\n")
     cat(paste0("ksrates paralogs-ks ", ksratesconf, " --n-threads 1"), file=cmd, append=TRUE, sep="\n")
     informal_name_list <- paste0("seq_", 1:input$number_of_study_species)

@@ -20,4 +20,5 @@ A list containing two data frames: "segs" for segment information and "atomic" f
 }
 \description{
 This function extracts clusters based on the specified scaffolds for both query and subject species.
+It filters the data frames containing segment information and atomic anchorpoints to retain only the relevant clusters.
 }

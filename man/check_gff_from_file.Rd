@@ -4,7 +4,7 @@
 \alias{check_gff_from_file}
 \title{Check and Process GFF Input File from a Specific Path}
 \usage{
-check_gff_from_file(gff_input_name, gff_input_path)
+check_gff_from_file(gff_input_name, gff_input_path, working_wd)
 }
 \arguments{
 \item{gff_input_name}{The informal name of the GFF input file.}

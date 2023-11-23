@@ -4,7 +4,7 @@
 \alias{check_proteome_from_file}
 \title{Check and Process Proteome Input File From a Special Path}
 \usage{
-check_proteome_from_file(proteome_name, proteome_input)
+check_proteome_from_file(proteome_name, proteome_input, working_wd)
 }
 \arguments{
 \item{proteome_name}{The informal name of the proteome input file.}
