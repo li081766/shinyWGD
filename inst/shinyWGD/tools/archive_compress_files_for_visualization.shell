@@ -1,0 +1,13 @@
+# For Ks Age Distribution Analysis
+tar czf Ks_Data_for_Visualization.tar.gz Species.info.xls tree.newick ksrates_wd/paralog_distributions/wgd_*/*ks*tsv ksrates_wd/ortholog_distributions/wgd_*/*ks.tsv
+
+# For Collinear Analysis
+ls *gff | sed 's/\.gff$//' | while read i; do mv $i.gff $i.original.gff; done 
+ls *.original.gff | sed 's/\.original\.gff$//' | while read i; do awk -F'\t' '$3=="mRNA"' $i.original.gff >$i.gff; done
+mkdir tmp
+mv *.original.gff tmp
+tar czf Collinear_Data_for_Visualization.tar.gz Species.info.xls *gff i-ADHoRe_wd/i-adhore.*/genes.txt i-ADHoRe_wd/i-adhore.*/multiplicons.txt i-ADHoRe_wd/i-adhore.*/anchorpoints.txt i-ADHoRe_wd/i-adhore.*/segments.txt i-ADHoRe_wd/i-adhore.*/list_elements.txt i-ADHoRe_wd/i-adhore.*/anchorpoints.ks.txt
+rm *gff 
+mv tmp/*gff .
+ls *gff | sed 's/\.original\.gff$//' | while read i; do mv $i.original.gff $i.gff; done
+rm -r tmp
