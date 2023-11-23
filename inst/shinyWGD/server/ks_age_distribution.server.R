@@ -1,29 +1,176 @@
-shinyDirChoose(input, "dir", roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"))
+observeEvent(input$ks_data_example, {
+    showModal(
+        modalDialog(
+            title=HTML("The description of the demo data used in the <b><i>K</i><sub>s</sub> Age Distribution Analysis</b>"),
+            size="xl",
+            uiOutput("ks_data_example_panel")
+        )
+    )
 
-observe({
-    analysisDir <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    if( length(analysisDir) > 0 ){
-        dirName <- basename(analysisDir)
-        output$selectedKsDirName <- renderUI({
-            column(
-                12,
-                div(
-                    style="background-color: #FAF0E6;
-                           margin-top: 5px;
-                           padding: 10px 10px 1px 10px;
-                           border-radius: 10px;
-                           text-align: center;",
-                    HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+    output$ks_data_example_panel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    HTML(
+                        paste0(
+                            "<p>In the demo data, we selected four species: <i>Elaeis guineensis</i>, <i>Oryza sativa</i>, <i>Asparagus officinalis</i>, and <i>Vitis vinifera</i>, to generate the data.</p>",
+                            "<p>First, we followed the preparation steps in the Data Preparation Page of the <b>shinyWGD</b> server to create the script for the corresponding package, <b>ksrates</b>. ",
+                            "We then submitted the job to the PSB computing server to obtain the output.</p>",
+                            "<p>After obtaining the output, the <b><i>K</i><sub>s</sub>Dist</b> module reads the data and continues the analysis. ",
+                            "Users can choose the type and combinations of the data to study the <b>intra-</b> and <b>inter-species</b> <i>K</i><sub>s</sub> age distribution. ",
+                            "Additionally, users have the option to use the <b>rate correction</b> module to adjust the substitution rate among species.</p>",
+                            "<p>To download the demo data, <a href='https://github.com/li081766/shinyWGD_Demo_Data/blob/main/4sp_Ks_Data_for_Visualization.tar.gz' target='_blank'>click here</a>.</p>",
+                            "<p><br></br></p>"
+                        )
+                    ),
+                    h5(
+                        HTML(
+                            "<hr><p><b><font color='#BDB76B'>For true data</font></b>"
+                        )
+                    ),
+                    HTML(
+                        "<p>Users should upload the zipped-file, named as <b><i>Ks_Data_for_Visualization.tar.gz</i></b> in the <b>Analysis-*</b> folder created by <b>shinyWGD</b>, to start the <b><i>K</i><sub>s</sub>Dist Analysis</b>.</p>"
+                    )
                 )
             )
-        })
+        )
+    })
+})
+
+example_data_dir <- file.path(getwd(), "demo_data")
+ks_example_dir <- file.path(example_data_dir, "Example_Ks_Visualization")
+
+if( !dir.exists(ks_example_dir) ){
+    if( !dir.exists(example_data_dir) ){
+        dir.create(example_data_dir)
+    }
+    dir.create(ks_example_dir)
+    downloadAndExtractData <- function() {
+        download.file(
+            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Ks_Data_for_Visualization.tar.gz",
+            destfile=file.path(getwd(), "data.zip"),
+            mode="wb"
+        )
+
+        system(
+            paste(
+                "tar xzf",
+                shQuote(file.path(getwd(), "data.zip")),
+                "-C",
+                shQuote(ks_example_dir)
+            )
+        )
+
+        file.remove(file.path(getwd(), "data.zip"))
+    }
+
+    downloadAndExtractData()
+}
+
+buttonClicked <- reactiveVal(NULL)
+ks_analysis_dir_Val <- reactiveVal(ks_example_dir)
+
+observeEvent(input$Ks_data_zip_file, {
+    buttonClicked("fileInput")
+
+    base_dir <- tempdir()
+    timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+    ksAnalysisDir <- file.path(base_dir, paste0("Ks_data_", gsub("[ :\\-]", "_", timestamp)))
+    dir.create(ksAnalysisDir)
+    system(
+        paste(
+            "tar xzf",
+            input$Ks_data_zip_file$datapath,
+            "-C",
+            ksAnalysisDir
+        )
+    )
+    ks_analysis_dir_Val(ksAnalysisDir)
+})
+
+observeEvent(input$ks_data_example, {
+    buttonClicked("actionButton")
+    ks_analysis_dir_Val(ks_example_dir)
+})
+
+observe({
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+        if( length(ksAnalysisDir) > 0 ){
+            dirName <- basename(ksAnalysisDir)
+            output$selectedKsDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("<b>Example:<br><font color='#EE82EE'><i>K</i><sub>s</sub> Age Distribution Analysis</font></b>"))
+                    )
+                )
+            })
+        }
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+        if( length(ksAnalysisDir) > 0 ){
+            dirName <- basename(ksAnalysisDir)
+            output$selectedKsDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+                    )
+                )
+            })
+        }
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+        if( length(ksAnalysisDir) > 0 ){
+            dirName <- basename(ksAnalysisDir)
+            output$selectedKsDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'><i>K</i><sub>s</sub> Age Distribution Analysis</font></b>"))
+                    )
+                )
+            })
+        }
     }
 })
 
 output$ksanalysisPanel <- renderUI({
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-    species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
         newick_tree_file <- paste0(dirname(species_info_file), "/tree.newick")
@@ -42,10 +189,12 @@ output$ksanalysisPanel <- renderUI({
             colnames(species_tree_df) <- c("Species", "id", "pId")
             species_tree_df <- species_tree_df[-nrow(species_tree_df), ]
         }else{
-            species_tree_df <- data.frame(Species=character(),
-                                          id=integer(),
-                                          pId=integer(),
-                                          stringsAsFactors=FALSE)
+            species_tree_df <- data.frame(
+                Species=character(),
+                id=integer(),
+                pId=integer(),
+                stringsAsFactors=FALSE
+            )
         }
     }
     if( any(grepl("ortholog_distributions", ksfiles)) | any(grepl("paralog_distributions", ksfiles)) ){
@@ -108,6 +257,8 @@ output$ksanalysisPanel <- renderUI({
                                         actionButton(
                                             inputId="confirm_paralog_ks_go",
                                             "Confirm analysis",
+                                            title="Confirm the selection",
+                                            class="my-confirm-button-class",
                                             status="secondary",
                                             style="color: #fff;
                                                    background-color: #C0C0C0;
@@ -175,6 +326,8 @@ output$ksanalysisPanel <- renderUI({
                                         actionButton(
                                             inputId="confirm_ortholog_ks_go",
                                             "Confirm analysis",
+                                            title="Confirm the selection",
+                                            class="my-confirm-button-class",
                                             status="secondary",
                                             style="color: #fff;
                                                    background-color: #C0C0C0;
@@ -214,12 +367,6 @@ output$ksanalysisPanel <- renderUI({
                                             title='Please select species below'
                                         ),
                                         choices=character(0)
-                                        # choices=unlist(species_list),
-                                        # choicesOpt=list(
-                                        #     content=lapply(unlist(species_list), function(choice) {
-                                        #         paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
-                                        #     })
-                                        # )
                                     ),
                                     pickerInput(
                                         inputId="select_outgroup_species",
@@ -270,8 +417,9 @@ output$ksanalysisPanel <- renderUI({
                                         actionButton(
                                             inputId="confirm_rate_correction_go",
                                             "Confirm analysis",
+                                            title="Confirm the selection",
+                                            class="my-confirm-button-class",
                                             status="secondary",
-                                            onclick="Shiny.setInputValue('confirmButtonClicked', true);",
                                             style="color: #fff;
                                                    background-color: #C0C0C0;
                                                    border-color: #fff;
@@ -281,11 +429,6 @@ output$ksanalysisPanel <- renderUI({
                                 )
                             )
                         )
-                    ),
-                    column(
-                        12,
-                        # hr(class="setting"),
-                        # uiOutput("ksanalysissettingPanel")
                     )
                 )
             )
@@ -294,51 +437,86 @@ output$ksanalysisPanel <- renderUI({
 })
 
 observeEvent(input$ortholog_ks_files_list_A, {
-    if( !is.null(input$dir) ){
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-        names_df <- map_informal_name_to_latin_name(species_info_file[1])
-        paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
-        species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
-            replace_informal_name_to_latin_name(names_df, x)
-        })
-        selected_species <- input$ortholog_ks_files_list_A
-        remaining_species <- setdiff(unlist(species_list), selected_species)
-        updatePickerInput(
-            session,
-            "ortholog_ks_files_list_B",
-            choices=remaining_species,
-            choicesOpt=list(
-                content=lapply(remaining_species, function(choice) {
-                    paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
-                })
-            )
-        )
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
     }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    names_df <- map_informal_name_to_latin_name(species_info_file[1])
+    paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
+    species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
+        replace_informal_name_to_latin_name(names_df, x)
+    })
+    selected_species <- input$ortholog_ks_files_list_A
+    remaining_species <- setdiff(unlist(species_list), selected_species)
+    updatePickerInput(
+        session,
+        "ortholog_ks_files_list_B",
+        choices=remaining_species,
+        choicesOpt=list(
+            content=lapply(remaining_species, function(choice) {
+                paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
+            })
+        )
+    )
 })
 
 observeEvent(input$rate_correct_button, {
-    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display = "block";')
-    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="block";')
+    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="none";')
 })
 
 observeEvent(input$paralogous_ks_button, {
-    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display = "block";')
-    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="block";')
+    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="none";')
 })
 
 observeEvent(input$orthologous_ks_button, {
-    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display = "block";')
-    #shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.transition = "height 0.5s ease-in-out";')
-    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="block";')
+    #shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.transition="height 0.5s ease-in-out";')
+    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="none";')
 })
 
 observe({
-       if( !is.null(input$dir) ){
+    observeEvent(input$treeOrderList, {
+        num_rows <- length(input$treeOrderList) / 3
+        num_cols <- 3
+        species_tree_df <- matrix(
+            input$treeOrderList,
+            nrow=num_rows,
+            ncol=num_cols,
+            byrow=TRUE
+        )
+
+        species_tree_df <- species_tree_df[-nrow(species_tree_df), ]
+        species_remaining <- sort(species_tree_df[, 1])
+
+        updatePickerInput(
+            session,
+            "select_ref_species",
+            choices=species_remaining,
+            choicesOpt=list(
+                content=lapply(species_remaining, function(choice) {
+                    choice <- gsub("_", " ", choice)
+                    paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                })
+            )
+        )
+    })
+})
+
+observe({
+    if( isTruthy(input$select_ref_species) && input$select_ref_species != "" ){
         observeEvent(input$treeOrderList, {
             num_rows <- length(input$treeOrderList) / 3
             num_cols <- 3
@@ -349,89 +527,57 @@ observe({
                 byrow=TRUE
             )
 
-            species_tree_df <- species_tree_df[-nrow(species_tree_df), ]
-            species_remaining <- sort(species_tree_df[, 1])
+            species_tree_df <- as.data.frame(species_tree_df)
+            colnames(species_tree_df) <- c("Species", "id", "pId")
+            species_tree_df$id <- as.numeric(species_tree_df$id)
+            species_tree_df$pId <- as.numeric(species_tree_df$pId)
 
+            under_score <- grepl("_", species_tree_df[1, 1])
+
+            if( under_score ){
+                bait_id <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "id"]
+                bait_pId <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "pId"]
+            }else{
+                bait_id <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "id"]
+                bait_pId <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "pId"]
+            }
+
+            filtered_df <- species_tree_df[species_tree_df$id > bait_id, ]
+            if( filtered_df[1, "pId"] == bait_pId ){
+                filtered_df <- filtered_df[-1, ]
+            }
             updatePickerInput(
                 session,
-                "select_ref_species",
-                choices=species_remaining,
+                "select_outgroup_species",
+                choices=filtered_df$Species,
                 choicesOpt=list(
-                    content=lapply(species_remaining, function(choice) {
+                    content=lapply(filtered_df$Species, function(choice) {
                         choice <- gsub("_", " ", choice)
-                        paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                        paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
                     })
                 )
             )
-        })
-    }
-})
 
-observe({
-    if( isTruthy(input$select_ref_species) && input$select_ref_species != "" ){
-        if( !is.null(input$dir) ){
-            observeEvent(input$treeOrderList, {
-                num_rows <- length(input$treeOrderList) / 3
-                num_cols <- 3
-                species_tree_df <- matrix(
-                    input$treeOrderList,
-                    nrow=num_rows,
-                    ncol=num_cols,
-                    byrow=TRUE
-                )
-
-                species_tree_df <- as.data.frame(species_tree_df)
-                colnames(species_tree_df) <- c("Species", "id", "pId")
-                species_tree_df$id <- as.numeric(species_tree_df$id)
-                species_tree_df$pId <- as.numeric(species_tree_df$pId)
-
-                under_score <- grepl("_", species_tree_df[1, 1])
-
-                if( under_score ){
-                    bait_id <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "id"]
-                    bait_pId <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "pId"]
-                }else{
-                    bait_id <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "id"]
-                    bait_pId <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "pId"]
-                }
-
-                filtered_df <- species_tree_df[species_tree_df$id > bait_id, ]
-                if( filtered_df[1, "pId"] == bait_pId ){
-                    filtered_df <- filtered_df[-1, ]
+            observeEvent(input$select_outgroup_species, {
+                outgroup_id <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "id"]
+                outgroup_pId <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "pId"]
+                filtered_study_df <- species_tree_df[(species_tree_df$id < outgroup_id) & (species_tree_df$Species != input$select_ref_species), ]
+                if( nrow(filtered_study_df) > 0 && filtered_study_df[nrow(filtered_study_df), "pId"] == outgroup_pId ){
+                    filtered_study_df <- filtered_study_df[-nrow(filtered_study_df), ]
                 }
                 updatePickerInput(
                     session,
-                    "select_outgroup_species",
-                    choices=filtered_df$Species,
+                    "select_study_species",
+                    choices=sort(filtered_study_df$Species),
                     choicesOpt=list(
-                        content=lapply(filtered_df$Species, function(choice) {
+                        content=lapply(sort(filtered_study_df$Species), function(choice) {
                             choice <- gsub("_", " ", choice)
-                            paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
+                            paste0("<div style='color: #998ec3; font-style: italic;'>", choice, "</div>")
                         })
                     )
                 )
-
-                observeEvent(input$select_outgroup_species, {
-                    outgroup_id <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "id"]
-                    outgroup_pId <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "pId"]
-                    filtered_study_df <- species_tree_df[(species_tree_df$id < outgroup_id) & (species_tree_df$Species != input$select_ref_species), ]
-                    if( nrow(filtered_study_df) > 0 && filtered_study_df[nrow(filtered_study_df), "pId"] == outgroup_pId ){
-                        filtered_study_df <- filtered_study_df[-nrow(filtered_study_df), ]
-                    }
-                    updatePickerInput(
-                        session,
-                        "select_study_species",
-                        choices=sort(filtered_study_df$Species),
-                        choicesOpt=list(
-                            content=lapply(sort(filtered_study_df$Species), function(choice) {
-                                choice <- gsub("_", " ", choice)
-                                paste0("<div style='color: #998ec3; font-style: italic;'>", choice, "</div>")
-                            })
-                        )
-                    )
-                })
             })
-        }
+        })
     }
 })
 
@@ -451,18 +597,26 @@ observeEvent(input$confirm_paralog_ks_go, {
 
     shinyjs::runjs(setTimeoutFunction)
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
         paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
         # infer the peaks of paralog ks
-        ksPeaksFile <- paste0(dirPath, "/ksrates_wd/ksPeaks.xls")
+        ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
         species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
@@ -484,7 +638,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                     column(
                         4,
                         div(
-                            #style="display: flex; align-items: center; margin-bottom: -20px;",
                             style="background-color: #F8F8FF;
                                    padding: 10px 10px 1px 10px;
                                    border-radius: 10px;",
@@ -493,7 +646,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 label=HTML("<font color='orange'>Peaks in</font>:"),
                                 choices=c("Paranome", "Anchored pairs"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -502,7 +654,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                     column(
                         4,
                         div(
-                            #style="display: flex; align-items: center; margin-bottom: -20px;",
                             style="background-color: #F8F8FF;
                                    padding: 10px 10px 1px 10px;
                                    border-radius: 10px;",
@@ -511,7 +662,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 label=HTML("<font color='orange'>GMM modelling</font>:"),
                                 choices=c("Paranome", "Anchored pairs"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -523,13 +673,11 @@ observeEvent(input$confirm_paralog_ks_go, {
                             style="background-color: #F8F8FF;
                                    padding: 10px 10px 1px 10px;
                                    border-radius: 10px;",
-                            #HTML("<b><font color='orange'>Sizer modelling</b></font>:"),
                             prettyRadioButtons(
                                 inputId="sizer_choice",
                                 label=HTML("<font color='orange'>Sizer modelling</font>:"),
                                 choices=c("Paranome", "Anchored pairs"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -551,7 +699,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 label=HTML("<font color='orange'>Peaks in</font>:"),
                                 choices=c("Paranome"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -568,7 +715,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 label=HTML("<font color='orange'>GMM modelling</font>:"),
                                 choices=c("Paranome"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -585,7 +731,6 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 label=HTML("<font color='orange'>Sizer modelling</font>:"),
                                 choices=c("Paranome"),
                                 icon=icon("check"),
-                                #bigger=TRUE,
                                 status="info",
                                 animation="jelly"
                             )
@@ -625,13 +770,13 @@ observeEvent(input$confirm_paralog_ks_go, {
                                     HTML("Start<br><b>paralog <i>K</i><sub>s</sub></b></br>analysis"),
                                     icon=icon("play"),
                                     status="secondary",
-                                    title="click to start",
+                                    title="Click to start",
+                                    class="my-start-button-class",
                                     style="color: #fff;
                                            background-color: #27ae60;
                                            border-color: #fff;
                                            padding: 5px 14px 5px 14px;
-                                           margin: 5px 5px 5px 5px;
-                                           animation: glowing 5300ms infinite;"
+                                           margin: 5px 5px 5px 5px;"
                                 )
                             )
                         ),
@@ -710,7 +855,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                                             HTML(".rotate-135 {
                                                 transform: rotate(135deg);
                                             }"),
-                                                    HTML(".rotate-45{
+                                            HTML(".rotate-45{
                                                 transform: rotate(45deg);
                                             }")
                                         ),
@@ -752,11 +897,11 @@ observeEvent(input$confirm_paralog_ks_go, {
                                             status="secondary",
                                             icon=icon("download"),
                                             label=".svg",
+                                            class="my-download-button-class",
                                             style="color: #fff;
-                                                  background-color: #019858;
+                                                  background-color: #6B8E23;
                                                   border-color: #fff;
-                                                  padding: 5px 5px 5px 5px;
-                                                  animation: glowingD 5000ms infinite;"
+                                                  padding: 5px 5px 5px 5px;"
                                         )
                                     )
                                 )
@@ -878,13 +1023,21 @@ observeEvent(input$confirm_paralog_ks_go, {
 observeEvent(input$paralog_ks_plot_go, {
     #shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
     withProgress(message='Analyzing in progress', value=0, {
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        if( is.null(buttonClicked()) ){
+            ksAnalysisDir <- ks_example_dir
+        }
+        else if( buttonClicked() == "fileInput" ){
+            ksAnalysisDir <- ks_analysis_dir_Val()
+        }
+        else if( buttonClicked() == "actionButton" ){
+            ksAnalysisDir <- ks_example_dir
+        }
+
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         if( file.exists(species_info_file[1]) ){
             paralog_species <- input$paralog_ks_files_list
-            dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-            ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-            species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+            ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+            species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
             ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
             paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
@@ -899,7 +1052,7 @@ observeEvent(input$paralog_ks_plot_go, {
                 path=paralog_ksfiles)
 
             # infer the peaks of paralog ks
-            ksPeaksFile <- paste0(dirPath, "/ksrates_wd/ksPeaks.xls")
+            ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
             if( !(file.exists(ksPeaksFile)) ){
                 selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
                 withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
@@ -1103,12 +1256,12 @@ observeEvent(input$paralog_ks_plot_go, {
                                                 status="secondary",
                                                 icon=icon("download"),
                                                 label=".csv",
+                                                class="my-download-button-class",
                                                 style="color: #fff;
-                                                          background-color: #019858;
-                                                          border-color: #fff;
-                                                          padding: 5px 14px 5px 14px;
-                                                          margin: 5px 5px 5px 5px;
-                                                          animation: glowingD 5000ms infinite;"
+                                                      background-color: #6B8E23;
+                                                      border-color: #fff;
+                                                      padding: 5px 14px 5px 14px;
+                                                      margin: 5px 5px 5px 5px;"
                                             )
                                         )
                                     )
@@ -1200,7 +1353,7 @@ observeEvent(input$paralog_ks_plot_go, {
                     round(gmm_BIC_df[i, "BIC"], 3),
                     "</b>"
                 )
-            }, simplify = "list")
+            }, simplify="list")
 
             updatePickerInput(
                 session,
@@ -1338,18 +1491,26 @@ observeEvent(input$confirm_ortholog_ks_go, {
 
     shinyjs::runjs(setTimeoutFunction)
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
         paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
         # infer the peaks of paralog ks
-        ksPeaksFile <- paste0(dirPath, "/ksrates_wd/ksPeaks.xls")
+        ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
         species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
@@ -1405,19 +1566,19 @@ observeEvent(input$confirm_ortholog_ks_go, {
                                         )
                                     ),
                                     column(
-                                        2,
+                                        3,
                                         actionButton(
                                             inputId="ortholog_ks_plot_go",
                                             HTML("Start<br><b>ortholog <i>K</i><sub>s</sub></b></br>analysis"),
                                             icon=icon("play"),
                                             status="secondary",
-                                            title="click to start",
+                                            class="my-start-button-class",
+                                            title="Click to start",
                                             style="color: #fff;
                                                    background-color: #27ae60;
                                                    border-color: #fff;
                                                    padding: 5px 14px 5px 14px;
-                                                   margin: 5px 5px 5px 5px;
-                                                   animation: glowing 5300ms infinite;"
+                                                   margin: 5px 5px 5px 5px;"
                                         )
                                     )
                                 )
@@ -1475,12 +1636,12 @@ observeEvent(input$confirm_ortholog_ks_go, {
                                             title="Download the Plot",
                                             status="secondary",
                                             icon=icon("download"),
+                                            class="my-download-button-class",
                                             label=".svg",
                                             style="color: #fff;
-                                                  background-color: #019858;
+                                                  background-color: #6B8E23;
                                                   border-color: #fff;
-                                                  padding: 5px 5px 5px 5px;
-                                                  animation: glowingD 5000ms infinite;"
+                                                  padding: 5px 5px 5px 5px;"
                                         )
                                     )
                                 )
@@ -1561,13 +1722,21 @@ observeEvent(input$ortholog_ks_plot_go, {
     #shinyjs::runjs('document.getElementById("Wgd_plot_ortholog").innerHTML="";')
     withProgress(message='Analyzing in progress', value=0, {
         # session$sendCustomMessage("Progress_Bar_Update", "")
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        if( is.null(buttonClicked()) ){
+            ksAnalysisDir <- ks_example_dir
+        }
+        else if( buttonClicked() == "fileInput" ){
+            ksAnalysisDir <- ks_analysis_dir_Val()
+        }
+        else if( buttonClicked() == "actionButton" ){
+            ksAnalysisDir <- ks_example_dir
+        }
+
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         if( file.exists(species_info_file[1]) ){
             paralog_species <- input$paralog_ks_files_list
-            dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-            ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-            species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+            ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+            species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
             ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
             paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
@@ -1654,14 +1823,21 @@ observeEvent(input$confirm_rate_correction_go, {
 
     shinyjs::runjs(setTimeoutFunction)
 
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
         paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
@@ -1698,13 +1874,13 @@ observeEvent(input$confirm_rate_correction_go, {
                                 HTML("Start <b>rate correction</b> analysis"),
                                 icon=icon("play"),
                                 status="secondary",
-                                title="click to start",
+                                title="Click to start",
+                                class="my-start-button-class",
                                 style="color: #fff;
                                    background-color: #27ae60;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;
-                                   animation: glowing 5300ms infinite;"
+                                   margin: 5px 5px 5px 5px;"
                             )
                         )
                     ),
@@ -1773,12 +1949,12 @@ observeEvent(input$confirm_rate_correction_go, {
                                             title="Download the Plot",
                                             status="secondary",
                                             icon=icon("download"),
+                                            class="my-download-button-class",
                                             label=".svg",
                                             style="color: #fff;
-                                                  background-color: #019858;
+                                                  background-color: #6B8E23;
                                                   border-color: #fff;
-                                                  padding: 5px 5px 5px 5px;
-                                                  animation: glowingD 5000ms infinite;"
+                                                  padding: 5px 5px 5px 5px;"
                                         )
                                     )
                                 )
@@ -1997,12 +2173,6 @@ observeEvent(input$confirm_rate_correction_go, {
 })
 
 observeEvent(input$rate_plot_go, {
-    # shinyjs::runjs('
-    #   var element = document.getElementById("Wgd_plot_rate");
-    #   if (element !== null) {
-    #     element.innerHTML = "";
-    #   }
-    # ')
     shinyjs::runjs("$('#confirm_rate_correction_go').css('background-color', 'green');")
     updateActionButton(
         session,
@@ -2010,13 +2180,21 @@ observeEvent(input$rate_plot_go, {
         icon=icon("check")
     )
 
-    dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-    species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
         paralog_species <- input$paralog_ks_files_list
-        dirPath <- parseDirPath(roots=c(computer="/Users/jiali/Desktop/Projects/ShinyWGD/example/data"), input$dir)
-        ksfiles <- list.files(path=dirPath, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=dirPath, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
+        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
         paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 

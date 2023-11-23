@@ -1,22 +1,8 @@
 Joint_Tree_ui <- tabPanel(
-    HTML("Tree Building"),
+    "VizWGD",
     value="jointTree",
     fluidRow(
         column(
-            tags$head(
-                tags$style(HTML(
-                    "@keyframes glowing {
-                     0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                     50% { background-color: #73BF00; box-shadow: 0 0 20px #43b0d1; }
-                     100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                     }
-                    @keyframes glowingD {
-                     0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                     50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
-                     100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                     }"
-                ))
-            ),
             id="jointTreeTitle",
             width=12,
             h3(icon(
@@ -32,7 +18,7 @@ Joint_Tree_ui <- tabPanel(
                     vertical-align: middle;
                 "
                 ),
-                HTML("Tree Building")
+                "VizWGD: WGD Events Visualization in Tree"
             ),
             style="padding-bottom: 5px;
                    padding-top: 5px;
@@ -45,20 +31,70 @@ Joint_Tree_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h5(icon("upload"), HTML("Uploading <font color='green'><i>K</i><sub>s</sub> Tree</font>")),
                 hr(class="setting"),
-                column(
-                    12,
-                    fileInput(
-                        inputId="uploadKsTree",
-                        label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Tree</b></font> File:"),
-                        accept=c(".newick", ".tre", ".tree")
+                fluidRow(
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                inputId="uploadKsTree",
+                                label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Tree</b></font> File:"),
+                                width="80%",
+                                accept=c(".newick", ".tre", ".tree")
+                            ),
+                            actionButton(
+                                inputId="ks_tree_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                title="Click to see the example of Ks Unit Tree file",
+                                class="my-start-button-class",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 53%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
                     )
                 ),
-                column(
-                    12,
-                    fileInput(
-                        inputId="uploadKsPeakTable",
-                        label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Peak</b></font> File (Optional):"),
-                        accept=c(".csv", ".txt", ".xls")
+                fluidRow(
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                inputId="uploadKsPeakTable",
+                                label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Peak</b></font> File (Optional):"),
+                                width="80%",
+                                accept=c(".csv", ".txt", ".xls")
+                            ),
+                            actionButton(
+                                inputId="ks_peaks_example",
+                                "",
+                                icon=icon("question"),
+                                title="Click to see the example of Ks Peak file",
+                                status="secondary",
+                                class="my-start-button-class",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 53%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
                     )
                 )
             ),
@@ -66,62 +102,73 @@ Joint_Tree_ui <- tabPanel(
                 style="background-color: #FBFEEC;",
                 h5(icon("upload"), HTML("Uploading <font color='orange'><i>MCMCTREE</i></font>")),
                 hr(class="setting"),
-                column(
-                    12,
-                    fileInput(
-                        inputId="uploadTimeTree",
-                        label=HTML("<font color='orange'><b><i>MCMCTREE</i> Tree</b></font> File:"),
-                        accept=c(".nexus", ".tre", ".tree")
+                fluidRow(
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                inputId="uploadTimeTree",
+                                label=HTML("<font color='orange'><b><i>MCMCTree</i> Tree</b></font> File:"),
+                                width="80%",
+                                accept=c(".nexus", ".tre", ".tree")
+                            ),
+                            actionButton(
+                                inputId="MCMC_tree_example",
+                                "",
+                                icon=icon("question"),
+                                title="Click to see the example of MCMCTree Tree file",
+                                class="my-start-button-class",
+                                status="secondary",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 53%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
                     )
                 ),
-                column(
-                    12,
-                    fileInput(
-                        inputId="uploadTimeTable",
-                        label=HTML("<font color='orange'><b>WGDs Time </b></font> File (Optional):"),
-                        accept=c(".csv", ".txt", ".xls")
+                fluidRow(
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                inputId="uploadTimeTable",
+                                label=HTML("<font color='orange'><b>WGDs Time </b></font> File (Optional):"),
+                                width="80%",
+                                accept=c(".csv", ".txt", ".xls")
+                            ),
+                            actionButton(
+                                inputId="wgd_time_table_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                title="Click to see the example of WGD time file",
+                                class="my-start-button-class",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 53%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
                     )
                 )
-            ),
-            # div(class="boxLike",
-            #     style="background-color: #F0FFF0;
-            #         border: 0px solid grey; ",
-            #     fluidRow(
-            #         # column(
-            #         #     6,
-            #         #     #h5(icon("pencil-alt"), HTML("Construct Tree")),
-            #         #     actionButton(
-            #         #         inputId="jointTreeGo",
-            #         #         "Construct Tree",
-            #         #         #width="200px",
-            #         #         icon=icon("pencil-alt"),
-            #         #         status="secondary",
-            #         #         style="color: #fff;
-            #         #            background-color: #27ae60;
-            #         #            border-color: #fff;
-            #         #            padding: 5px 14px 5px 14px;
-            #         #            margin: 5px 5px 5px 5px;
-            #         #            animation: glowing 5000ms infinite; "
-            #         #     )
-            #         # ),
-            #         column(
-            #             6,
-            #             #h5(icon("download"), HTML("Download")),
-            #             downloadButton_custom(
-            #                 "jointTreePlotDownload",
-            #                 status="secondary",
-            #                 icon=icon("download"),
-            #                 label=HTML("Save Tree SVG"),
-            #                 style="color: #fff;
-            #                   background-color: #019858;
-            #                   border-color: #fff;
-            #                   padding: 5px 14px 5px 14px;
-            #                   margin: 5px 5px 5px 5px;
-            #                   animation: glowingD 5000ms infinite;"
-            #             )
-            #         )
-            #     )
-            # )
+            )
         ),
         column(
             id="TreePanel",
@@ -173,23 +220,18 @@ Joint_Tree_ui <- tabPanel(
                             ),
                             title="Compress horizontal spacing"
                         ),
-                        # actionButton(
-                        #     "reset",
-                        #     "",
-                        #     icon("sync"),
-                        #     title="Restore spacing"
-                        # ),
                         downloadButton_custom(
                             "jointTreePlotDownload",
                             status="secondary",
                             icon=icon("download"),
+                            title="Download the plot",
+                            class="my-donwload-button-class",
                             label=HTML(""),
                             style="color: #fff;
-                              background-color: #019858;
-                              border-color: #fff;
-                              padding: 5px 14px 5px 14px;
-                              margin: 5px 5px 5px 5px;
-                              animation: glowingD 5000ms infinite;"
+                                  background-color: #6B8E23;
+                                  border-color: #fff;
+                                  padding: 5px 14px 5px 14px;
+                                  margin: 5px 5px 5px 5px;"
                         )
                     ),
                     column(

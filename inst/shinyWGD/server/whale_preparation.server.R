@@ -17,11 +17,38 @@ output$whaleDataUploadPanel <- renderUI({
             column(
                 12,
                 hr(class="setting"),
-                fileInput(
-                    inputId="uploadSpeciesTimeTree",
-                    label=HTML("<font color='green'><b>Species Time Tree</b></font> in <font color='red'><b><i>Newick</b></i></font> format:")
-                ),
-
+                fluidRow(
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                inputId="uploadSpeciesTimeTree",
+                                label=HTML("<font color='green'><b>Species Time Tree</b></font> in <font color='red'><b><i>Newick</b></i></font>:"),
+                                width="80%"
+                            ),
+                            actionButton(
+                                inputId="newick_time_file_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                class="my-start-button-class",
+                                title="Click to see the example of the Newick Time Tree File",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 53%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
+                    )
+                )
             ),
             column(
                 12,
@@ -49,6 +76,42 @@ output$whaleDataUploadPanel <- renderUI({
             )
         )
     )
+})
+
+observeEvent(input$newick_time_file_example, {
+    showModal(
+        modalDialog(
+            title=HTML("The example of the <font color='green'><b>Newick Time Tree</b></font> file"),
+            size="xl",
+            uiOutput("newick_time_file_example_panel")
+        )
+    )
+
+    output$newick_time_file_example_panel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    verbatimTextOutput("newickTimeTreeExample"),
+                    HTML(
+                        paste0(
+                            "<font color='green'><i aria-label='warning icon' class='fa fa-warning fa-fw' role='presentation'></i></font> The time scale on the tree is in units of <b>millions of years ago</b>.<br>",
+                            "see more <a href='https://en.wikipedia.org/wiki/Newick_format#:~:text=In%20mathematics%2C%20Newick%20tree%20format,Maddison%2C%20Christopher%20Meacham%2C%20F.' target='_blank'>click here</a>."
+                        )
+                    )
+                )
+            )
+        )
+    })
+
+    output$newickTimeTreeExample <- renderText({
+        "(Vitis_vinifera:1.5961,(Asparagus_officinalis:1.2025,(Elaeis_guineensis:1.1256,Oryza_sativa:1.1256):0.0769):0.03936);"
+    })
 })
 
 observeEvent(input$go_extracting_tree, {
@@ -142,9 +205,9 @@ observe({
         speciesTree <- readLines(textConnection(readChar(speciesTreeFile, file.info(speciesTreeFile)$size)))
         closeAllConnections()
 
-        species_tree_data[["speciesTree"]] <- speciesTree
+        species_tree_data[["speciesTree"]] <- speciesTree[1]
 
-        species_tree_data[["height"]] <- heightSpacing$value
+        species_tree_data[["height"]] <- heightSpacing$value[1]
         session$sendCustomMessage("speciesTreePlot", species_tree_data)
     }
 })
@@ -231,6 +294,8 @@ observe({
                                             width="40px",
                                             icon=icon("check"),
                                             status="secondary",
+                                            title="Confirm the choice",
+                                            class="my-start-button-class",
                                             style="color: #fff;
                                                    background-color: #C0C0C0;
                                                    border-color: #fff;
@@ -243,33 +308,19 @@ observe({
                             column(
                                 12,
                                 hr(class="setting"),
-                                tags$head(
-                                    tags$style(HTML(
-                                        "@keyframes glowing {
-                                                 0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                                 50% { background-color: #73BF00; box-shadow: 0 0 20px #43b0d1; }
-                                                 100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                                 }
-                                                @keyframes glowingD {
-                                                 0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                                 50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
-                                                 100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                                 }"
-                                        )
-                                    )
-                                ),
                                 div(class="float-left",
                                     actionButton(
                                         inputId="whale_configure_go",
                                         HTML("Create <b><i>Whale</i></b> Codes"),
                                         icon=icon("play"),
+                                        title="Start the confirguration process",
                                         status="secondary",
+                                        class="my-start-button-class",
                                         style="color: #fff;
                                                background-color: #019858;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 5px 5px 5px 5px;
-                                               animation: glowing 5300ms infinite;"
+                                               margin: 5px 5px 5px 5px;"
                                     )
                                 ),
                                 div(class="float-left",

@@ -21,30 +21,44 @@ output$ObtainTreeFromTimeTreeSettingDisplay <- renderUI({
                     "If you don’t ensure the evolutionary relationships among the studied species, click the button below to obtain a tree from <a href=\"http://www.timetree.org/\">TimeTree.org</a>."
                 )
             ),
-            tags$head(
-                tags$style(HTML(
-                    "@keyframes glowing {
-                         0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                         50% { background-color: #73BF00; box-shadow: 0 0 20px #43b0d1; }
-                         100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                         }
-                    @keyframes glowingD {
-                         0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                         50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
-                         100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                         }"
-                ))
-            ),
             column(
                 12,
-                fileInput(
-                    'upload_species_name_list_file',
-                    HTML("<br>Each row of this file contains a <font color='orange'>Species <b><i>Latin Name</i></b></font>.</br><br>Upload Species List File:"),
-                    multiple=FALSE,
-                    width="100%",
-                    accept=c(
-                        ".txt",
-                        ".xls"
+                HTML("<br>Each row of this file contains a <font color='orange'>Species <b><i>Latin Name</i></b></font>.</br><br>"),
+            ),
+            fluidRow(
+                column(
+                    12,
+                    div(
+                        style="padding-left: 20px;
+                               position: relative;",
+                        fileInput(
+                            'upload_species_name_list_file',
+                            "Upload Species List File:",
+                            multiple=FALSE,
+                            width="80%",
+                            accept=c(
+                                ".txt",
+                                ".xls"
+                            )
+                        ),
+                        actionButton(
+                            inputId="species_name_example",
+                            "",
+                            icon=icon("question"),
+                            title="Click to see the example of species name file",
+                            status="secondary",
+                            class="my-start-button-class",
+                            style="color: #fff;
+                                   background-color: #87CEEB;
+                                   border-color: #fff;
+                                   position: absolute;
+                                   top: 53%;
+                                   left: 90%;
+                                   margin-top: -15px;
+                                   margin-left: -15px;
+                                   padding: 5px 14px 5px 10px;
+                                   width: 30px; height: 30px; border-radius: 50%;"
+                        )
                     )
                 )
             ),
@@ -56,13 +70,14 @@ output$ObtainTreeFromTimeTreeSettingDisplay <- renderUI({
                     "Extract Tree",
                     width="100%",
                     icon=icon("tree"),
+                    title="Click to start the process",
                     status="secondary",
+                    class="my-start-button-class",
                     style="color: #fff;
-                          background-color: #019858;
+                          background-color: #27ae60;
                           border-color: #fff;
                           padding: 5px 14px 5px 14px;
-                          margin-bottom: 20px;
-                          animation: glowing 5300ms infinite;"
+                          margin-bottom: 20px;"
                 ),
                 div(
                     id="extract_progress_container_js"
@@ -71,6 +86,51 @@ output$ObtainTreeFromTimeTreeSettingDisplay <- renderUI({
         )
     )
 })
+
+observeEvent(input$species_name_example, {
+    species_name_file <- "www/content/species_name_example.xls"
+    showModal(
+        modalDialog(
+            title="The example file",
+            size="xl",
+            uiOutput("speceisNameExamplePanel")
+        )
+    )
+
+    output$speceisNameExampleTxt <- renderText({
+        command_info <- readChar(
+            species_name_file,
+            file.info(species_name_file)$size
+        )
+    })
+
+    output$speceisNameExamplePanel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    h5(
+                        HTML(
+                            paste0(
+                                "Each row of this file contains a <font color='orange'>Species <b><i>Latin Name</i></b></font>"
+                            )
+                        )
+                    ),
+                    verbatimTextOutput(
+                        "speceisNameExampleTxt",
+                        placeholder=TRUE
+                    )
+                )
+            )
+        )
+    })
+})
+
 
 output$timeTreeOrgPlot <- renderUI({
     div(class="boxLike",
@@ -119,12 +179,12 @@ output$timeTreeOrgPlot <- renderUI({
                         status="secondary",
                         icon=icon("download"),
                         label=".nwk",
+                        class="my-download-button-class",
                         style="color: #fff;
-                               background-color: #019858;
+                               background-color: #6B8E23;
                                border-color: #fff;
                                padding: 5px 14px 5px 14px;
-                               margin: 5px 5px 5px 5px;
-                               animation: glowingD 5000ms infinite;"
+                               margin: 5px 5px 5px 5px;"
                     ),
                     downloadButton_custom(
                         "download_nexus_tree",
@@ -132,12 +192,12 @@ output$timeTreeOrgPlot <- renderUI({
                         status="secondary",
                         icon=icon("download"),
                         label=".nexus",
+                        class="my-download-button-class",
                         style="color: #fff;
-                               background-color: #019858;
+                               background-color: #6B8E23;
                                border-color: #fff;
                                padding: 5px 14px 5px 14px;
-                               margin: 5px 5px 5px 5px;
-                               animation: glowingD 5000ms infinite;"
+                               margin: 5px 5px 5px 5px;"
                     )
                 )
             ),
@@ -187,6 +247,7 @@ observeEvent(input$extract_tree_go, {
             )
 
             species_data <- readLines(species_name_file)
+            species_data <- str_trim(species_data, side="right")
             latin_name_pattern <- "^[A-Z][a-z]+ [a-z]+$"
             invalid_rows <- which(!grepl(latin_name_pattern, species_data))
             if( length(invalid_rows) == 0 ){
@@ -200,7 +261,7 @@ observeEvent(input$extract_tree_go, {
 
                 tryCatch(
                     withCallingHandlers(
-                        species_info_df <- extract_tree(species_name_file, prefix)
+                        species_info_df <- TimeTreeFecher(species_name_file, prefix)
                     ),
                     error=function(e) {
                         shinyalert(

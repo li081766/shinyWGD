@@ -1,5 +1,5 @@
 Synteny_Analysis_ui <- tabPanel(
-    "Synteny Analysis",
+    "Collinear",
     value="synteny_analysis",
     fluidRow(
         column(
@@ -17,7 +17,7 @@ Synteny_Analysis_ui <- tabPanel(
                     display: inline-block;
                     vertical-align: middle;"
                 ),
-                "Synteny Analysis"
+                "Collinear Analysis"
             ),
             style="padding-bottom: 5px;
                    padding-top: 5px;
@@ -30,23 +30,45 @@ Synteny_Analysis_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("Upload <font color='green'><b><i>shinyWGD</i></b></font> Output Folder")),
-                fluidRow(
-                    class="justify-content-left",
-                    style="padding-bottom: 5px;
-                           padding-top: 5px",
-                    column(
-                        12,
-                        h6(icon("folder"), "Select Output Folder")
-                    )
-                ),
+                h5(HTML("<font color='green'><b><i>shinyWGD</i> Collinear Analysis</b></font> Data")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 15px;
                            padding-top: 5px",
                     column(
                         12,
-                        shinyDirButton("iadhoredir", "Select a Folder", "Upload"),
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                'collinear_data_zip_file',
+                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                multiple=FALSE,
+                                accept=c(
+                                    ".zip",
+                                    ".gz"
+                                ),
+                                width="80%"
+                            ),
+                            actionButton(
+                                inputId="collinear_data_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                class="my-start-button-class",
+                                title="Click to use the example data to demo run the Collinear Analysis",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 63%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
                     ),
                     column(
                         12,
@@ -68,15 +90,10 @@ Synteny_Analysis_ui <- tabPanel(
                 column(
                     12,
                     uiOutput("iadhore_output"),
-                ),
-                # column(
-                #     12,
-                #     uiOutput("iadhore_multiple_species_output")
-                # )
+                )
             )
         )
     ),
-    #icon=icon("water")
     icon=icon(
         name=NULL,
         style="

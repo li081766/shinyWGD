@@ -1,5 +1,5 @@
 Ks_Age_Distribution_ui <- tabPanel(
-    HTML("<i>K</i><sub>s</sub> Age Distribution Analysis"),
+    HTML("<i>K</i><sub>s</sub>Dist"),
     value="ks_analysis",
     fluidRow(
         column(
@@ -18,7 +18,7 @@ Ks_Age_Distribution_ui <- tabPanel(
                     vertical-align: middle;
                 "
                 ),
-                HTML("<i>K</i><sub>s</sub> Age Distribution Analysis"),
+                HTML("<i>K</i><sub>s</sub>Dist: <i>K</i><sub>s</sub> Age Distribution Analysis"),
             ),
             style="padding-bottom: 5px;
                    padding-top: 5px;
@@ -31,23 +31,51 @@ Ks_Age_Distribution_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("Upload <font color='green'><b><i>shinyWGD</i></b></font> Output Folder")),
-                fluidRow(
-                    class="justify-content-left",
-                    style="padding-bottom: 5px;
-                           padding-top: 5px",
-                    column(
-                        12,
-                        h6(icon("folder"), "Select Output Folder")
-                    )
-                ),
+                h5(HTML("<font color='green'><i>shinyWGD</i> <b><i>K</i><sub>s</sub> Analysis</font></b> Data")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 15px;
                            padding-top: 5px",
                     column(
                         12,
-                        shinyDirButton("dir", "Select a Folder", "Upload"),
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            # shinyDirButton("dir", "Select a Folder", "Upload"),
+                            fileInput(
+                                'Ks_data_zip_file',
+                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                multiple=FALSE,
+                                accept=c(
+                                    ".zip",
+                                    ".gz"
+                                ),
+                                width="80%"
+                            ),
+                            actionButton(
+                                inputId="ks_data_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                class="my-start-button-class",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 63%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to use the example data to demo run the Ks Age Distribution Analysis",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                )
+                        )
                     ),
                     column(
                         12,
@@ -86,21 +114,4 @@ Ks_Age_Distribution_ui <- tabPanel(
             vertical-align: middle;
         "
     )
-    #icon=icon("chart-line")
 )
-
-
-# fluidRow(
-#     class="justify-content-left",
-#     style="padding-bottom: 5px;
-#            padding-top: 5px",
-#     column(
-#         12,
-#         radioButtons(
-#             "analysis_mode_option",
-#             label="Select the Mode",
-#             choices=c("WGD Inference", "Synteny Analysis"),
-#             selected="WGD Inference"
-#         )
-#     )
-# )

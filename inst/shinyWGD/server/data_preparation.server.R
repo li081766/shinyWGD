@@ -102,7 +102,9 @@ output$UploadDisplay <- renderUI({
                         inputId="fasta_file_example",
                         "",
                         icon=icon("question"),
+                        title="Click to see the example of the CDS Fasta File",
                         status="secondary",
+                        class="my-start-button-class",
                         style="text-align: left;
                                color: #fff;
                                background-color: #87CEEB;
@@ -110,13 +112,7 @@ output$UploadDisplay <- renderUI({
                                padding: 5px 14px 5px 10px;
                                margin: 33px 5px 5px -15px;
                                width: 30px; height: 30px; border-radius: 50%;"
-                    ) %>%
-                        bs_embed_tooltip(
-                            title="Click to see the example of the CDS Fasta File",
-                            placement="right",
-                            trigger="hover",
-                            options=list(container="body")
-                        )
+                    )
                 ),
                 column(
                     3,
@@ -142,7 +138,9 @@ output$UploadDisplay <- renderUI({
                         inputId="gff_file_example",
                         "",
                         icon=icon("question"),
+                        title="Click to see the example of the Annotation GFF File",
                         status="secondary",
+                        class="my-start-button-class",
                         style="text-align: left;
                                color: #fff;
                                background-color: #87CEEB;
@@ -150,14 +148,8 @@ output$UploadDisplay <- renderUI({
                                padding: 5px 14px 5px 10px;
                                margin: 33px 5px 5px -15px;
                                width: 30px; height: 30px; border-radius: 50%;"
-                    ) %>%
-                        bs_embed_tooltip(
-                            title="Click to see the example of the Annotation GFF File",
-                            placement="right",
-                            trigger="hover",
-                            options=list(container="body")
-                        )
-                ),
+                    )
+                )
             )
         }else{
             ui_parts[[i]] <- fluidRow(
@@ -337,19 +329,15 @@ output$WgdksratesSettingDisplay <- renderUI({
                                 inputId="wgd_go",
                                 HTML("Create <b><i>wgd</i></b> Codes"),
                                 icon=icon("screwdriver-wrench"),
+                                title="Click to create wgd codes",
                                 status="secondary",
+                                class="my-start-button-class",
                                 style="color: #fff;
                                        background-color: #27ae60;
                                        border-color: #fff;
                                        padding: 5px 14px 5px 14px;
                                        margin: 5px 5px 5px 5px; "
-                            ) %>%
-                                bs_embed_tooltip(
-                                    title="Click to create wgd codes",
-                                    placement="right",
-                                    trigger="hover",
-                                    options=list(container="body")
-                                ),
+                            ),
                             div(
                                 id="wgd_progress_container_js"
                             )
@@ -422,21 +410,17 @@ output$WgdksratesSettingDisplay <- renderUI({
                             inputId="newick_file_example",
                             "",
                             icon=icon("question"),
+                            title="Click to see the example of the Newick Tree File",
                             status="secondary",
+                            class="my-start-button-class",
                             style="text-align: left;
-                           color: #fff;
-                           background-color: #87CEEB;
-                           border-color: #fff;
-                           padding: 5px 14px 5px 10px;
-                           margin: 33px 5px 5px -15px;
-                           width: 30px; height: 30px; border-radius: 50%;"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to see the example of the Newick Tree File",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            )
+                                   color: #fff;
+                                   background-color: #87CEEB;
+                                   border-color: #fff;
+                                   padding: 5px 14px 5px 10px;
+                                   margin: 33px 5px 5px -15px;
+                                   width: 30px; height: 30px; border-radius: 50%;"
+                        )
                     ),
                     column(
                         12,
@@ -452,20 +436,15 @@ output$WgdksratesSettingDisplay <- renderUI({
                             HTML("Create <b><i>ksrates</b></i> Codes"),
                             width="230px",
                             icon=icon("screwdriver-wrench"),
+                            title="Click to create ksrates codes",
                             status="secondary",
+                            class="my-start-button-class",
                             style="color: #fff;
                                    background-color: #27ae60;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;
-                                   animation: glowing 5300ms infinite; "
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to create ksrates codes",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            ),
+                                   margin: 5px 5px 5px 5px;"
+                        ),
                         div(
                             id="ksrates_progress_container_js"
                         )
@@ -502,20 +481,15 @@ output$WgdksratesSettingDisplay <- renderUI({
                                 HTML("Create <b><i>i-ADHoRe</b></i> Codes"),
                                 width="245px",
                                 icon=icon("screwdriver-wrench"),
+                                title="Click to create i-ADHoRe codes",
                                 status="secondary",
+                                class="my-start-button-class",
                                 style="color: #fff;
                                        background-color: #27ae60;
                                        border-color: #fff;
                                        padding: 5px 14px 5px 14px;
-                                       margin: 5px 5px 5px 5px;
-                                       animation: glowing 5300ms infinite; "
-                            ) %>%
-                                bs_embed_tooltip(
-                                    title="Click to create i-ADHoRe codes",
-                                    placement="right",
-                                    trigger="hover",
-                                    options=list(container="body")
-                                ),
+                                       margin: 5px 5px 5px 5px;"
+                            ),
                             div(
                                 id="iadhore_progress_container_js"
                             )
@@ -555,20 +529,15 @@ output$WgdksratesSettingDisplay <- renderUI({
                                     HTML("Create <i><b>OrthoFinder</b></i> Codes"),
                                     width="265px",
                                     icon=icon("screwdriver-wrench"),
+                                    title="Click to create OrthoFinder codes",
                                     status="secondary",
+                                    class="my-start-button-class",
                                     style="color: #fff;
                                            background-color: #27ae60;
                                            border-color: #fff;
                                            padding: 5px 14px 5px 14px;
-                                           margin: 5px 5px 5px 5px;
-                                           animation: glowing 5300ms infinite; "
-                                ) %>%
-                                    bs_embed_tooltip(
-                                        title="Click to create OrthoFinder codes",
-                                        placement="right",
-                                        trigger="hover",
-                                        options=list(container="body")
-                                    ),
+                                           margin: 5px 5px 5px 5px;"
+                                ),
                                 div(
                                     id="orthofinder_progress_container_js"
                                 )
@@ -681,21 +650,17 @@ output$WgdKsratesIadhoreScriptRun <- renderUI({
                     inputId="wgd_run_server",
                     HTML("Run <b><i>wgd</i></b>"),
                     icon=icon("play"),
+                    title="Click to submit the job to the computing server",
                     width="180px",
                     status="secondary",
+                    class="my-start-button-class",
                     style="text-align: left;
                            color: #fff;
                            background-color: #27ae60;
                            border-color: #fff;
                            padding: 5px 14px 5px 14px;
                            margin: 5px 5px 5px 5px; "
-                ) %>%
-                    bs_embed_tooltip(
-                        title="Click to submit the job to the computing server",
-                        placement="right",
-                        trigger="hover",
-                        options=list(container="body")
-                    )
+                )
             )
         )
     }
@@ -712,20 +677,16 @@ output$WgdKsratesIadhoreScriptRun <- renderUI({
                             HTML("Run <b><i>ksrates</b></i>"),
                             width="180px",
                             icon=icon("play"),
+                            title="Click to submit the job to the computing server",
                             status="secondary",
+                            class="my-start-button-class",
                             style="text-align: left;
                                    color: #fff;
                                    background-color: #27ae60;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
                                    margin: 5px 5px 5px 5px; "
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to submit the job to the computing server",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            )
+                        )
                     )
                 ),
                 fluidRow(
@@ -735,21 +696,17 @@ output$WgdKsratesIadhoreScriptRun <- renderUI({
                             inputId="iadhore_run_server",
                             HTML("Run <b><i>i-ADHoRe</b></i>"),
                             icon=icon("play"),
+                            title="Click to submit the job to the computing server",
                             width="180px",
                             status="secondary",
+                            class="my-start-button-class",
                             style="text-align: left;
                                    color: #fff;
                                    background-color: #27ae60;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
                                    margin: 5px 5px 5px 5px;"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to submit the job to the computing server",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            )
+                        )
                     )
                 ),
                 if( input$number_of_study_species > 2 ){
@@ -762,21 +719,17 @@ output$WgdKsratesIadhoreScriptRun <- renderUI({
                                     inputId="orthofinder_run_server",
                                     HTML("Run <i><b>OrthoFinder</b></i>"),
                                     icon=icon("play"),
+                                    title="Click to submit the job to the computing server",
                                     width="180px",
                                     status="secondary",
+                                    class="my-start-button-class",
                                     style="text-align: left;
                                            color: #fff;
                                            background-color: #27ae60;
                                            border-color: #fff;
                                            padding: 5px 14px 5px 14px;
                                            margin: 5px 5px 5px 5px; "
-                                ) %>%
-                                    bs_embed_tooltip(
-                                        title="Click to submit the job to the computing server",
-                                        placement="right",
-                                        trigger="hover",
-                                        options=list(container="body")
-                                    )
+                                )
                             )
                         )
                     )
@@ -791,22 +744,19 @@ output$WgdKsratesIadhoreDataDownload <- renderUI({
         column(
             12,
             div(class="float-left",
-                downloadButton(
+                downloadButton_custom(
                     outputId="wgd_ksrates_data_download",
                     label="Download Analysis Data",
                     icon=icon("download"),
+                    title="Click to download the analysis data",
                     status="secondary",
-                    style="background-color: #5151A2;
-                           padding: 5px 10px 5px 10px;
-                           margin: 5px 5px 5px 5px;
-                           animation: glowingD 5000ms infinite; "
-                ) %>%
-                    bs_embed_tooltip(
-                        title="Click to download the analysis data",
-                        placement="right",
-                        trigger="hover",
-                        options=list(container="body")
-                    )
+                    class="my-download-button-class",
+                    style="color: #fff;
+                           background-color: #6B8E23;
+                           border-color: #fff;
+                           padding: 5px 14px 5px 14px;
+                           margin: 5px 5px 5px 5px;"
+                )
             ),
             # div(class="float-right",
             #     downloadButton(
@@ -837,24 +787,100 @@ observeEvent(input$switchTab, {
     }
 })
 
-# for server
-# base_dir <- "/www/bioinformatics01_rw/ShinyWGD"
-# timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-# working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+data_preparation_dir_Val <- reactiveVal(NULL)
+original_data_wd_Val <- reactiveVal(NULL)
 
-base_dir <- tempdir()
-timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+observe({
+    if(
+        isTruthy(input$upload_data_file) ||
+        isTruthy(input$selected_data_files) ||
+        isTruthy(input$proteome_1)
+    ){
+        base_dir <- tempdir()
+        timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+        working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
 
-while( dir.exists(working_wd) ){
-    Sys.sleep(1)
-    timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-    working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
-}
+        while( dir.exists(working_wd) ){
+            Sys.sleep(1)
+            timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+            working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+        }
 
-dir.create(working_wd)
-original_data_wd <- file.path(working_wd, "original_data")
-dir.create(original_data_wd)
+        dir.create(working_wd)
+        original_data_wd <- file.path(working_wd, "original_data")
+        dir.create(original_data_wd)
+
+        data_preparation_dir_Val(working_wd)
+        original_data_wd_Val(original_data_wd)
+
+        observeEvent(input$upload_data_file, {
+            working_wd <- data_preparation_dir_Val()
+            original_data_wd <- original_data_wd_Val()
+            print(working_wd)
+            print(original_data_wd)
+            if( !is.null(input$upload_data_file) && !is.null(working_wd) ){
+                shinyalert(
+                    "Success",
+                    "You use a file file to upload the data. See more details in Help page",
+                    type="success"
+                )
+                data_table <- read_data_file(input$upload_data_file)
+                ncols <- ncol(data_table)
+                nrows <- nrow(data_table)
+
+                if( input$number_of_study_species != nrows ){
+                    shinyalert(
+                        "Oops!",
+                        paste0("The species number in the file (", nrows, " species) is not equal to the number you chose (", input$number_of_study_species, " species). Please set the right species number to analyze!"),
+                        type="error",
+                    )
+                }else{
+                    system(
+                        paste0(
+                            "cp ",
+                            input$upload_data_file$datapath,
+                            " ",
+                            original_data_wd,
+                            "/data.original.xls"
+                        )
+                    )
+                }
+            }
+        })
+
+        observeEvent(input$selected_data_files, {
+            working_wd <- data_preparation_dir_Val()
+            original_data_wd <- original_data_wd_Val()
+            if( isTruthy(input$selected_data_files) ){
+                for( i in 1:nrow(input$selected_data_files) ){
+                    system(
+                        paste0(
+                            "cp ",
+                            input$selected_data_files[i, "datapath"],
+                            " ",
+                            original_data_wd,
+                            "/",
+                            input$selected_data_files[i, "name"]
+                        )
+                    )
+                }
+
+                # check file existence
+                withProgress(message='Checking the path of input files', value=0, {
+                    original_data_df <- read.table(
+                        paste0(original_data_wd, "/data.original.xls"),
+                        sep="\t",
+                        header=FALSE,
+                        fill=T,
+                        na.strings=""
+                    )
+                    checkFileExistence(original_data_df, original_data_wd)
+                    incProgress(amount=1)
+                })
+            }
+        })
+    }
+})
 
 # update the focal species panel
 get_species_from_input <- reactive({
@@ -901,68 +927,9 @@ observeEvent(get_species_from_file(), {
     )
 })
 
-observeEvent(input$upload_data_file, {
-    if( !is.null(input$upload_data_file) ){
-        shinyalert(
-            "Success",
-            "You use a file file to upload the data. See more details in Help page",
-            type="success"
-        )
-        data_table <- read_data_file(input$upload_data_file)
-        ncols <- ncol(data_table)
-        nrows <- nrow(data_table)
-
-        if( input$number_of_study_species != nrows ){
-            shinyalert(
-                "Oops!",
-                paste0("The species number in the file (", nrows, " species) is not equal to the number you chose (", input$number_of_study_species, " species). Please set the right species number to analyze!"),
-                type="error",
-            )
-        }else{
-            system(
-                paste0(
-                    "cp ",
-                    input$upload_data_file$datapath,
-                    " ",
-                    original_data_wd,
-                    "/data.original.xls"
-                )
-            )
-        }
-    }
-})
-
-observeEvent(input$selected_data_files,{
-    if( isTruthy(input$selected_data_files) ){
-        for( i in 1:nrow(input$selected_data_files) ){
-            system(
-                paste0(
-                    "cp ",
-                    input$selected_data_files[i, "datapath"],
-                    " ",
-                    original_data_wd,
-                    "/",
-                    input$selected_data_files[i, "name"]
-                )
-            )
-        }
-
-        # check file existence
-        withProgress(message='Checking the path of input files', value=0, {
-            original_data_df <- read.table(
-                paste0(original_data_wd, "/data.original.xls"),
-                sep="\t",
-                header=FALSE,
-                fill=T,
-                na.strings=""
-            )
-            checkFileExistence(original_data_df, original_data_wd)
-            incProgress(amount=1)
-        })
-    }
-})
-
 observeEvent(input$wgd_go, {
+    working_wd <- data_preparation_dir_Val()
+    original_data_wd <- original_data_wd_Val()
     if( is.null(input$upload_data_file) ){
         if( is.null(input[[paste0("proteome_", 1)]]) ){
             shinyalert(
@@ -1018,7 +985,7 @@ observeEvent(input$wgd_go, {
                         "#SBATCH -c 4",
                         "#SBATCH --mem 8G",
                         paste0("#SBATCH -o ", basename(wgd_cmd_sh_file), ".o%j"),
-                        paste0("#SBATCH -o ", basename(wgd_cmd_sh_file), ".e%j"),
+                        paste0("#SBATCH -e ", basename(wgd_cmd_sh_file), ".e%j"),
                         ""
                     ),
                     wgd_cmd_con
@@ -1265,6 +1232,8 @@ observeEvent(input$wgd_go, {
 })
 
 observeEvent(input$ksrates_go, {
+    working_wd <- data_preparation_dir_Val()
+    original_data_wd <- original_data_wd_Val()
     if( is.null(input$select_focal_species) ){
         shinyalert(
             "Oops!",
@@ -1476,6 +1445,8 @@ observeEvent(input$ksrates_go, {
 })
 
 observeEvent(input$iadhore_go, {
+    working_wd <- data_preparation_dir_Val()
+    original_data_wd <- original_data_wd_Val()
     species_info <- paste0(working_wd, "/Species.info.xls")
     if( is.null(input$upload_data_file) & is.null(input[[paste0("gff_", 1)]]) ){
         shinyalert(
@@ -1605,6 +1576,8 @@ observeEvent(input$iadhore_go, {
 })
 
 observeEvent(input$orthofinder_go, {
+    working_wd <- data_preparation_dir_Val()
+    original_data_wd <- original_data_wd_Val()
     species_info <- paste0(working_wd, "/Species.info.xls")
     if( file.exists(species_info) ){
         progress_data <- list(
@@ -1696,6 +1669,7 @@ observeEvent(input$orthofinder_go, {
 })
 
 observeEvent(input$go_codes_wgd, {
+    working_wd <- data_preparation_dir_Val()
     wgdcommmandFile <- paste0(working_wd, "/wgd_wd/run_wgd.sh")
     if( file.exists(wgdcommmandFile) ){
         showModal(
@@ -1712,10 +1686,10 @@ observeEvent(input$go_codes_wgd, {
             type="error"
         )
     }
-
 })
 
 observeEvent(input$go_codes_ksrates, {
+    working_wd <- data_preparation_dir_Val()
     ksratescommadFile <- paste0(working_wd, "/ksrates_wd/run_ksrates.sh")
     if( !file.exists(ksratescommadFile) ){
         shinyalert(
@@ -1736,6 +1710,7 @@ observeEvent(input$go_codes_ksrates, {
 })
 
 observeEvent(input$go_codes_iadhore, {
+    working_wd <- data_preparation_dir_Val()
     iadhorecommandFile <- paste0(working_wd, "/i-ADHoRe_wd/run_diamond_iadhore.sh")
     if( !file.exists(iadhorecommandFile) ){
         shinyalert(
@@ -1756,6 +1731,7 @@ observeEvent(input$go_codes_iadhore, {
 })
 
 observeEvent(input$go_codes_orthofinder, {
+    working_wd <- data_preparation_dir_Val()
     orthofinderCommandFile <- paste0(working_wd, "/OrthoFinder_wd/run_orthofinder.sh")
     if( !file.exists(orthofinderCommandFile) ){
         shinyalert(
@@ -1778,9 +1754,15 @@ observeEvent(input$go_codes_orthofinder, {
 # Create analysis data to download
 output$wgd_ksrates_data_download <- downloadHandler(
     filename=function(){
+        working_wd <- data_preparation_dir_Val()
         paste0(basename(working_wd), ".tgz")
     },
     content=function(file){
+        working_wd <- data_preparation_dir_Val()
+        original_data_wd <- original_data_wd_Val()
+        if( !is.null(original_data_wd) ){
+            unlink(original_data_wd)
+        }
         ksratescommadFile <- paste0(working_wd, "/ksrates_wd/run_ksrates.sh")
         wgdcommmandFile <- paste0(working_wd, "/wgd_wd/run_wgd.sh")
         if( !file.exists(wgdcommmandFile) & !file.exists(ksratescommadFile) ){
@@ -1827,9 +1809,9 @@ output$wgd_ksrates_data_download <- downloadHandler(
                 run_dir <- getwd()
                 setwd(dirname(working_wd))
                 system(
-                    paste0(
-                        "tar czf ", file,
-                        " --dereference ",
+                    paste(
+                        "tar czf",
+                        file,
                         basename(working_wd)
                     )
                 )

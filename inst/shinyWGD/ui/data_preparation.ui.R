@@ -73,6 +73,8 @@ Data_preparation_ui <- tabPanel(
                             "",
                             icon=icon("question"),
                             status="secondary",
+                            class="my-start-button-class",
+                            title="Click to see the example of the Tab-Separated File",
                             style="text-align: left;
                                    color: #fff;
                                    background-color: #87CEEB;
@@ -80,13 +82,7 @@ Data_preparation_ui <- tabPanel(
                                    padding: 5px 14px 5px 10px;
                                    margin: 33px 5px 5px -15px;
                                    width: 30px; height: 30px; border-radius: 50%;"
-                        ) %>%
-                            bs_embed_tooltip(
-                                title="Click to see the example of the Tab-Separated File",
-                                placement="right",
-                                trigger="hover",
-                                options=list(container="body")
-                            )
+                        )
                     ),
                     column(
                         6,

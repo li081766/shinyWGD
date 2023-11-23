@@ -1,324 +1,268 @@
-shinyDirChoose(input, "iadhoredir", roots=c(computer="/"))
-observe({
-    analysisDir <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(analysisDir) > 0 ){
-        dirName <- basename(analysisDir)
-        output$selectedSyntenyDirName <- renderUI({
-            column(
-                12,
-                div(
-                    style="background-color: #FAF0E6;
-                           margin-top: 5px;
-                           padding: 10px 10px 1px 10px;
-                           border-radius: 10px;
-                           text-align: center;",
-                    HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+observeEvent(input$collinear_data_example, {
+    showModal(
+        modalDialog(
+            title=HTML("The description of the demo data used in the <b>Collinear Analysis</b>"),
+            size="xl",
+            uiOutput("collinear_data_example_panel")
+        )
+    )
+
+    output$collinear_data_example_panel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    HTML(
+                        paste0(
+                            "<p>In the demo data, we selected four species: <i>Elaeis guineensis</i>, <i>Oryza sativa</i>, <i>Asparagus officinalis</i>, and <i>Vitis vinifera</i>, as also used in <b><i>K</i><sub>s</sub>Dist</b> module, to generate the data.</p>",
+                            "<p>First, we followed the preparation steps in the Data Preparation Page of the <b>shinyWGD</b> server to create the script for the corresponding package, <b>i-ADHoRe</b>. ",
+                            "We then submitted the job to the PSB computing server to obtain the output.</p>",
+                            "<p>After obtaining the output, the <b>Collinear Analysis</b> module reads the data and continues the analysis. ",
+                            "Users can choose the type and combinations of the data to study the <b>intra-</b> and <b>inter-species</b> collinear relationships. ",
+                            "Additionally, users have the option to use the <b>multiple-spcies alignment</b> module to find the collinear blocks across several species.</p>",
+                            "<p>To download the demo data, <a href='https://github.com/li081766/shinyWGD_Demo_Data/blob/main/4sp_Collinear_Data_for_Visualization.tar.gz' target='_blank'>click here</a>.</p>",
+                            "<p><br></br></p>"
+                        )
+                    ),
+                    h5(
+                        HTML(
+                            "<hr><p><b><font color='#BDB76B'>For true data</font></b>"
+                        )
+                    ),
+                    HTML(
+                        "<p>Users should upload the zipped-file, named as <b><i>Collinear_Data_for_Visualization.tar.gz</i></b> in the <b>Analysis-*</b> folder created by <b>shinyWGD</b>, to start the <b>Collinear Analysis</b>.</p>"
+                    )
                 )
             )
-        })
+        )
+    })
+})
+
+example_data_dir <- file.path(getwd(), "demo_data")
+collinear_example_dir <- file.path(example_data_dir, "Example_Collinear_Visualization")
+
+if( !dir.exists(collinear_example_dir) ){
+    if( !dir.exists(example_data_dir) ){
+        dir.create(example_data_dir)
+    }
+    dir.create(collinear_example_dir)
+    downloadAndExtractData <- function() {
+        download.file(
+            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Collinear_Data_for_Visualization.tar.gz",
+            destfile=file.path(getwd(), "collinear.data.zip"),
+            mode="wb"
+        )
+
+        system(
+            paste(
+                "tar xzf",
+                shQuote(file.path(getwd(), "collinear.data.zip")),
+                "-C",
+                shQuote(collinear_example_dir)
+            )
+        )
+
+        file.remove(file.path(getwd(), "collinear.data.zip"))
+    }
+
+    downloadAndExtractData()
+}
+
+buttonCollinearClicked <- reactiveVal(NULL)
+collinear_analysis_dir_Val <- reactiveVal(collinear_example_dir)
+
+observeEvent(input$collinear_data_zip_file, {
+    buttonCollinearClicked("fileInput")
+
+    base_dir <- tempdir()
+    timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+    collinearAnalysisDir <- file.path(base_dir, paste0("Collinear_data_", gsub("[ :\\-]", "_", timestamp)))
+    dir.create(collinearAnalysisDir)
+    system(
+        paste(
+            "tar xzf",
+            input$collinear_data_zip_file$datapath,
+            "-C",
+            collinearAnalysisDir
+        )
+    )
+    collinear_analysis_dir_Val(collinearAnalysisDir)
+})
+
+observeEvent(input$collinear_data_example, {
+    buttonCollinearClicked("actionButton")
+    collinear_analysis_dir_Val(collinear_example_dir)
+})
+
+observe({
+    if( is.null(buttonCollinearClicked()) ){
+        collinearAnalysisDir <- collinear_example_dir
+        if( length(collinearAnalysisDir) > 0 ){
+            dirName <- basename(collinearAnalysisDir)
+            output$selectedSyntenyDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("<b>Example:<br><font color='#EE82EE'>Collinear Analysis</font></b>"))
+                    )
+                )
+            })
+        }
+    }
+    else if( buttonCollinearClicked() == "fileInput" ){
+        collinearAnalysisDir <- collinear_analysis_dir_Val()
+        if( length(collinearAnalysisDir) > 0 ){
+            dirName <- basename(collinearAnalysisDir)
+            output$selectedSyntenyDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>", dirName, "</font></b>"))
+                    )
+                )
+            })
+        }
+    }
+    else if( buttonCollinearClicked() == "actionButton" ){
+        collinearAnalysisDir <- collinear_example_dir
+        if( length(collinearAnalysisDir) > 0 ){
+            dirName <- basename(collinearAnalysisDir)
+            output$selectedSyntenyDirName <- renderUI({
+                column(
+                    12,
+                    div(
+                        style="background-color: #FAF0E6;
+                               margin-top: 5px;
+                               padding: 10px 10px 1px 10px;
+                               border-radius: 10px;
+                               text-align: center;",
+                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>Collinear Analysis</font></b>"))
+                    )
+                )
+            })
+        }
     }
 })
 
 observe({
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
-        iadhorefiles <- list.files(path=dirPath, pattern="multiplicons.txt", full.names=TRUE, recursive=TRUE)
-        multipleSpeciesIadhoreFile <- iadhorefiles[grepl("Multiple_Species", iadhorefiles)]
-        iadhorefiles <- iadhorefiles[!(grepl("paralog_distributions", iadhorefiles))]
-        iadhorefiles <- iadhorefiles[!(grepl("Multiple_Species", iadhorefiles))]
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
 
-        if( length(iadhorefiles) > 0 ){
-            split_paths <- strsplit(iadhorefiles, split="/")
-            comparing_list <- lapply(split_paths, function(x){
-                x[length(x)-1]
-            })
-            comparing_list <- gsub("i-adhore.", "", comparing_list)
-            intra_list <- list()
-            inter_list <- list()
-            lapply(seq_along(comparing_list), function(i){
-                sp_list_tmp <- unique(strsplit(comparing_list[i], split="_vs_")[[1]])
-                if( length(sp_list_tmp) == 1 ){
-                    intra_list <<- append(intra_list, sp_list_tmp[1])
-                }else{
-                    inter_list <<- append(inter_list, comparing_list[i])
-                }
-            })
+    iadhorefiles <- list.files(path=collinearAnalysisDir, pattern="multiplicons.txt", full.names=TRUE, recursive=TRUE)
+    multipleSpeciesIadhoreFile <- iadhorefiles[grepl("Multiple_Species", iadhorefiles)]
+    iadhorefiles <- iadhorefiles[!(grepl("paralog_distributions", iadhorefiles))]
+    iadhorefiles <- iadhorefiles[!(grepl("Multiple_Species", iadhorefiles))]
 
-            inter_list <- unlist(inter_list)
-            intra_list <- unlist(intra_list)
+    if( length(iadhorefiles) > 0 ){
+        split_paths <- strsplit(iadhorefiles, split="/")
+        comparing_list <- lapply(split_paths, function(x){
+            x[length(x)-1]
+        })
+        comparing_list <- gsub("i-adhore.", "", comparing_list)
+        intra_list <- list()
+        inter_list <- list()
+        lapply(seq_along(comparing_list), function(i){
+            sp_list_tmp <- unique(strsplit(comparing_list[i], split="_vs_")[[1]])
+            if( length(sp_list_tmp) == 1 ){
+                intra_list <<- append(intra_list, sp_list_tmp[1])
+            }else{
+                inter_list <<- append(inter_list, comparing_list[i])
+            }
+        })
 
-            path_df <- data.frame(
-                comparing_ID=character(),
-                comparing_Type=character(),
-                comparing_Path=character()
+        inter_list <- unlist(inter_list)
+        intra_list <- unlist(intra_list)
+
+        path_df <- data.frame(
+            comparing_ID=character(),
+            comparing_Type=character(),
+            comparing_Path=character()
+        )
+        for( i in intra_list ){
+            tmp_path_i <- iadhorefiles[grepl(paste0(i, "_vs_", i), iadhorefiles)]
+            path_df <- rbind(
+                path_df,
+                data.frame(
+                    comparing_ID=i,
+                    comparing_Type="Intra",
+                    comparing_Path=tmp_path_i
+                )
             )
-            for( i in intra_list ){
-                tmp_path_i <- iadhorefiles[grepl(paste0(i, "_vs_", i), iadhorefiles)]
-                path_df <- rbind(
-                    path_df,
-                    data.frame(
-                        comparing_ID=i,
-                        comparing_Type="Intra",
-                        comparing_Path=tmp_path_i
-                    )
+        }
+        for( i in inter_list ){
+            tmp_path_i <- iadhorefiles[grepl(i, iadhorefiles)]
+            path_df <- rbind(
+                path_df,
+                data.frame(
+                    comparing_ID=i,
+                    comparing_Type="Inter",
+                    comparing_Path=tmp_path_i
                 )
-            }
-            for( i in inter_list ){
-                tmp_path_i <- iadhorefiles[grepl(i, iadhorefiles)]
-                path_df <- rbind(
-                    path_df,
-                    data.frame(
-                        comparing_ID=i,
-                        comparing_Type="Inter",
-                        comparing_Path=tmp_path_i
-                    )
-                )
-            }
+            )
+        }
 
-            output$iadhoreAnalysisPanel <- renderUI({
-                div(class="boxLike",
-                    style="background-color: #FBFEEC;
-                               padding-bottom: 10px;
-                               padding-top: 10px",
-                    fluidRow(
-                        div(
-                            style="padding-right: 5px;
-                                   padding-left: 5px;",
-                            h5(icon("cog"), HTML("<font color='#bb5e00'>Synteny Analysis</font>")),
-                            column(
-                                12,
-                                uiOutput("iadhoreSettingPanel")
-                            ),
-                            hr(class="setting"),
-                            h5(icon("cog"), HTML("<font color='#bb5e00'>Clustering Analysis</font>")),
-                            column(
-                                12,
-                                uiOutput("clusteringSettingPanel")
-                            ),
-                            # column(
-                            #     12,
-                            #     hr(class="setting"),
-                            #     actionButton(
-                            #         inputId="iadhore_config_go",
-                            #         "Configure Analysis",
-                            #         width="200px",
-                            #         icon=icon("cog"),
-                            #         status="secondary",
-                            #         style="color: #fff;
-                            #                background-color: #27ae60;
-                            #                border-color: #fff;
-                            #                padding: 5px 14px 5px 14px;
-                            #                margin: 5px 5px 5px 5px;
-                            #                animation: glowing 5300ms infinite;"
-                            #     )
-                            # )
+        output$iadhoreAnalysisPanel <- renderUI({
+            div(class="boxLike",
+                style="background-color: #FBFEEC;
+                           padding-bottom: 10px;
+                           padding-top: 10px",
+                fluidRow(
+                    div(
+                        style="padding-right: 5px;
+                               padding-left: 5px;",
+                        h5(icon("cog"), HTML("<font color='#bb5e00'>Synteny Analysis</font>")),
+                        column(
+                            12,
+                            uiOutput("iadhoreSettingPanel")
+                        ),
+                        hr(class="setting"),
+                        h5(icon("cog"), HTML("<font color='#bb5e00'>Clustering Analysis</font>")),
+                        column(
+                            12,
+                            uiOutput("clusteringSettingPanel")
                         )
                     )
                 )
-            })
+            )
+        })
 
-            # Add multiple species to the path_df
-            if( length(multipleSpeciesIadhoreFile) > 0 ){
-                path_df <- rbind(
-                    path_df,
-                    data.frame(
-                        comparing_ID="Multiple",
-                        comparing_Type="Multiple",
-                        comparing_Path=multipleSpeciesIadhoreFile[1]
-                    )
+        # Add multiple species to the path_df
+        if( length(multipleSpeciesIadhoreFile) > 0 ){
+            path_df <- rbind(
+                path_df,
+                data.frame(
+                    comparing_ID="Multiple",
+                    comparing_Type="Multiple",
+                    comparing_Path=multipleSpeciesIadhoreFile[1]
                 )
-            }
+            )
+        }
 
-            if( is.not.null(intra_list) && is.not.null(inter_list) ){
-                output$iadhoreSettingPanel <- renderUI({
-                    output <- tagList(
-                        fluidRow(
-                            # style="padding-right: 5px;
-                            #        padding-left: 5px;",
-                            column(
-                                width=12,
-                                div(
-                                    style="padding-bottom: 10px;",
-                                    bsButton(
-                                        inputId="iadhore_intra_species_list_button",
-                                        label=HTML("<font color='white'><b>&nbsp;Intra-species comparing: &nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
-                                        icon=icon("list"),
-                                        style="success"
-                                    ) %>%
-                                        bs_embed_tooltip(
-                                            title="Click to choose species",
-                                            placement="right",
-                                            trigger="hover",
-                                            options=list(container="body")
-                                        ) %>%
-                                        bs_attach_collapse("iadhore_intra_species_list_collapse"),
-                                    bs_collapse(
-                                        id="iadhore_intra_species_list_collapse",
-                                        content=tags$div(
-                                            class="well",
-                                            pickerInput(
-                                                inputId="iadhore_intra_species_list",
-                                                label=HTML("<b><font color='#38B0E4'>Species:</font></b>"),
-                                                options=list(title='Please select species below'),
-                                                choices=intra_list,
-                                                choicesOpt=list(
-                                                    content=lapply(intra_list, function(choice) {
-                                                        species <- gsub("_", " ", choice)
-                                                        HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                                    })
-                                                ),
-                                                multiple=FALSE
-
-                                            ),
-                                            div(
-                                                class="d-flex justify-content-end",
-                                                actionButton(
-                                                    inputId="confirm_intra_comparing_go",
-                                                    "Confirm analysis",
-                                                    status="secondary",
-                                                    style="color: #fff; background-color: #C0C0C0; border-color: #fff; margin: 22px 0px 0px 0px; "
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            ),
-                            column(
-                                width=12,
-                                div(
-                                    style="padding-bottom: 10px;",
-                                    bsButton(
-                                        inputId="iadhore_inter_species_list_button",
-                                        label=HTML("<font color='white'><b>&nbsp;Inter-species comparing:&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
-                                        icon=icon("list"),
-                                        style="success"
-                                    ) %>%
-                                        bs_embed_tooltip(
-                                            title="Click to choose species",
-                                            placement="right",
-                                            trigger="hover",
-                                            options=list(container="body")
-                                        ) %>%
-                                        bs_attach_collapse("iadhore_inter_species_list_collapse"),
-                                    bs_collapse(
-                                        id="iadhore_inter_species_list_collapse",
-                                        content=tags$div(
-                                            class="well",
-                                            pickerInput(
-                                                inputId="inter_list_A",
-                                                label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
-                                                options=list(
-                                                    title='Please select species below'
-                                                ),
-                                                choices=intra_list,
-                                                choicesOpt=list(
-                                                    content=lapply(intra_list, function(choice) {
-                                                        species <- gsub("_", " ", choice)
-                                                        HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                                    })
-                                                ),
-                                                multiple=FALSE
-                                            ),
-                                            pickerInput(
-                                                inputId="inter_list_B",
-                                                label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
-                                                options=list(
-                                                    title='Please select species below',
-                                                    `selected-text-format`="count > 1",
-                                                    `actions-box`=TRUE
-                                                ),
-                                                choices=intra_list,
-                                                choicesOpt=list(
-                                                    content=lapply(intra_list, function(choice) {
-                                                        species <- gsub("_", " ", choice)
-                                                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                                                    })
-                                                ),
-                                                multiple=FALSE
-                                            ),
-                                            div(
-                                                class="d-flex justify-content-end",
-                                                actionButton(
-                                                    inputId="confirm_inter_comparing_go",
-                                                    "Confirm analysis",
-                                                    status="secondary",
-                                                    style="color: #fff;
-                                                           background-color: #C0C0C0;
-                                                           border-color: #fff;
-                                                           margin: 22px 0px 0px 0px; "
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            ),
-                            if( length(multipleSpeciesIadhoreFile) > 0 ){
-                                column(
-                                    width=12,
-                                    div(
-                                        style="padding-bottom: 10px;",
-                                        bsButton(
-                                            inputId="iadhore_multiple_species_list_button",
-                                            label=HTML("<font color='white'><b>&nbsp;Multiple species comparing: &nbsp;&#x25BC;</b></font>"),
-                                            icon=icon("list"),
-                                            style="success",
-                                            #size="small"
-                                        ) %>%
-                                            bs_embed_tooltip(
-                                                title="Click to choose species",
-                                                placement="right",
-                                                trigger="hover",
-                                                options=list(container="body")
-                                            ) %>%
-                                            bs_attach_collapse("iadhore_multiple_species_list_collapse"),
-                                        bs_collapse(
-                                            id="iadhore_multiple_species_list_collapse",
-                                            content=tags$div(
-                                                class="well",
-                                                style="background-color: #F5FFE8;",
-                                                prettyCheckboxGroup(
-                                                    inputId="iadhore_multiple_species_list",
-                                                    label=HTML("Choose <b><i><font color='#E46A1B'>at least Three</font></b></i> Species:"),
-                                                    choiceValues=intra_list,
-                                                    choiceNames=lapply(intra_list, function(choice) {
-                                                        HTML(paste0("<div style='color: #727EFA; font-style: italic;'>", gsub("_", " ", choice), "</div>"))
-                                                    }),
-                                                    icon=icon("check"),
-                                                    shape="round",
-                                                    status="success",
-                                                    fill=TRUE,
-                                                    animation="jelly"
-                                                ),
-                                                div(
-                                                    class="d-flex justify-content-end",
-                                                    actionButton(
-                                                        inputId="confirm_multi_comparing_go",
-                                                        "Confirm analysis",
-                                                        status="secondary",
-                                                        style="color: #fff;
-                                                           background-color: #C0C0C0;
-                                                           border-color: #fff;
-                                                           margin: 22px 0px 0px 0px; "
-                                                    )
-                                                )
-                                            )
-                                        )
-                                    )
-                                )
-                            }
-                        )
-                    )
-                })
-                output$clusteringSettingPanel <- renderUI({
+        if( is.not.null(intra_list) && is.not.null(inter_list) ){
+            output$iadhoreSettingPanel <- renderUI({
+                output <- tagList(
                     fluidRow(
-                        #style="padding-right: 10px; padding-left: 10px",
                         column(
                             width=12,
                             div(
                                 style="padding-bottom: 10px;",
                                 bsButton(
-                                    inputId="clustering_button",
-                                    label=HTML("<font color='white'><b>&nbsp;Clustering analysis setting:&nbsp;&#x25BC;&nbsp;&nbsp;</b></font>"),
+                                    inputId="iadhore_intra_species_list_button",
+                                    label=HTML("<font color='white'><b>&nbsp;Intra-species comparing: &nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
                                     icon=icon("list"),
                                     style="success"
                                 ) %>%
@@ -328,13 +272,62 @@ observe({
                                         trigger="hover",
                                         options=list(container="body")
                                     ) %>%
-                                    bs_attach_collapse("clustering_files_collapse"),
+                                    bs_attach_collapse("iadhore_intra_species_list_collapse"),
                                 bs_collapse(
-                                    id="clustering_files_collapse",
+                                    id="iadhore_intra_species_list_collapse",
                                     content=tags$div(
                                         class="well",
                                         pickerInput(
-                                            inputId="cluster_species_A",
+                                            inputId="iadhore_intra_species_list",
+                                            label=HTML("<b><font color='#38B0E4'>Species:</font></b>"),
+                                            options=list(title='Please select species below'),
+                                            choices=intra_list,
+                                            choicesOpt=list(
+                                                content=lapply(intra_list, function(choice) {
+                                                    species <- gsub("_", " ", choice)
+                                                    HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                                })
+                                            ),
+                                            multiple=FALSE
+                                        ),
+                                        div(
+                                            class="d-flex justify-content-end",
+                                            actionButton(
+                                                inputId="confirm_intra_comparing_go",
+                                                label="Confirm analysis",
+                                                class="my-confirm-button-class",
+                                                status="secondary",
+                                                title="Click to confirm",
+                                                style="color: #fff; background-color: #C0C0C0; border-color: #fff; margin: 22px 0px 0px 0px; "
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        column(
+                            width=12,
+                            div(
+                                style="padding-bottom: 10px;",
+                                bsButton(
+                                    inputId="iadhore_inter_species_list_button",
+                                    label=HTML("<font color='white'><b>&nbsp;Inter-species comparing:&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                    icon=icon("list"),
+                                    style="success"
+                                ) %>%
+                                    bs_embed_tooltip(
+                                        title="Click to choose species",
+                                        placement="right",
+                                        trigger="hover",
+                                        options=list(container="body")
+                                    ) %>%
+                                    bs_attach_collapse("iadhore_inter_species_list_collapse"),
+                                bs_collapse(
+                                    id="iadhore_inter_species_list_collapse",
+                                    content=tags$div(
+                                        class="well",
+                                        pickerInput(
+                                            inputId="inter_list_A",
                                             label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
                                             options=list(
                                                 title='Please select species below'
@@ -349,7 +342,7 @@ observe({
                                             multiple=FALSE
                                         ),
                                         pickerInput(
-                                            inputId="cluster_species_B",
+                                            inputId="inter_list_B",
                                             label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
                                             options=list(
                                                 title='Please select species below',
@@ -368,9 +361,11 @@ observe({
                                         div(
                                             class="d-flex justify-content-end",
                                             actionButton(
-                                                inputId="confirm_clustering_go",
+                                                inputId="confirm_inter_comparing_go",
                                                 "Confirm analysis",
                                                 status="secondary",
+                                                class="my-confirm-button-class",
+                                                title="Click to confirm",
                                                 style="color: #fff;
                                                        background-color: #C0C0C0;
                                                        border-color: #fff;
@@ -380,94 +375,231 @@ observe({
                                     )
                                 )
                             )
+                        ),
+                        if( length(multipleSpeciesIadhoreFile) > 0 ){
+                            column(
+                                width=12,
+                                div(
+                                    style="padding-bottom: 10px;",
+                                    bsButton(
+                                        inputId="iadhore_multiple_species_list_button",
+                                        label=HTML("<font color='white'><b>&nbsp;Multiple species comparing: &nbsp;&#x25BC;</b></font>"),
+                                        icon=icon("list"),
+                                        style="success",
+                                    ) %>%
+                                        bs_embed_tooltip(
+                                            title="Click to choose species",
+                                            placement="right",
+                                            trigger="hover",
+                                            options=list(container="body")
+                                        ) %>%
+                                        bs_attach_collapse("iadhore_multiple_species_list_collapse"),
+                                    bs_collapse(
+                                        id="iadhore_multiple_species_list_collapse",
+                                        content=tags$div(
+                                            class="well",
+                                            style="background-color: #F5FFE8;",
+                                            prettyCheckboxGroup(
+                                                inputId="iadhore_multiple_species_list",
+                                                label=HTML("Choose <b><i><font color='#E46A1B'>at least Three</font></b></i> Species:"),
+                                                choiceValues=intra_list,
+                                                choiceNames=lapply(intra_list, function(choice) {
+                                                    HTML(paste0("<div style='color: #727EFA; font-style: italic;'>", gsub("_", " ", choice), "</div>"))
+                                                }),
+                                                icon=icon("check"),
+                                                shape="round",
+                                                status="success",
+                                                fill=TRUE,
+                                                animation="jelly"
+                                            ),
+                                            div(
+                                                class="d-flex justify-content-end",
+                                                actionButton(
+                                                    inputId="confirm_multi_comparing_go",
+                                                    "Confirm analysis",
+                                                    status="secondary",
+                                                    class="my-confirm-button-class",
+                                                    title="Click to confirm",
+                                                    style="color: #fff;
+                                                           background-color: #C0C0C0;
+                                                           border-color: #fff;
+                                                           margin: 22px 0px 0px 0px; "
+                                                )
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        }
+                    )
+                )
+            })
+            output$clusteringSettingPanel <- renderUI({
+                fluidRow(
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="clustering_button",
+                                label=HTML("<font color='white'><b>&nbsp;Clustering analysis setting:&nbsp;&#x25BC;&nbsp;&nbsp;</b></font>"),
+                                icon=icon("list"),
+                                style="success"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to choose species",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse("clustering_files_collapse"),
+                            bs_collapse(
+                                id="clustering_files_collapse",
+                                content=tags$div(
+                                    class="well",
+                                    pickerInput(
+                                        inputId="cluster_species_A",
+                                        label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
+                                        options=list(
+                                            title='Please select species below'
+                                        ),
+                                        choices=intra_list,
+                                        choicesOpt=list(
+                                            content=lapply(intra_list, function(choice) {
+                                                species <- gsub("_", " ", choice)
+                                                HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                            })
+                                        ),
+                                        multiple=FALSE
+                                    ),
+                                    pickerInput(
+                                        inputId="cluster_species_B",
+                                        label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
+                                        options=list(
+                                            title='Please select species below',
+                                            `selected-text-format`="count > 1",
+                                            `actions-box`=TRUE
+                                        ),
+                                        choices=intra_list,
+                                        choicesOpt=list(
+                                            content=lapply(intra_list, function(choice) {
+                                                species <- gsub("_", " ", choice)
+                                                HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                                            })
+                                        ),
+                                        multiple=FALSE
+                                    ),
+                                    div(
+                                        class="d-flex justify-content-end",
+                                        actionButton(
+                                            inputId="confirm_clustering_go",
+                                            "Confirm analysis",
+                                            status="secondary",
+                                            class="my-confirm-button-class",
+                                            title="Confirm to click",
+                                            style="color: #fff;
+                                                   background-color: #C0C0C0;
+                                                   border-color: #fff;
+                                                   margin: 22px 0px 0px 0px; "
+                                        )
+                                    )
+                                )
+                            )
                         )
                     )
-                })
-            }
-            rds_file <- paste0(dirPath, "/synteny.comparing.RData")
-            if( !file.exists(rds_file) ){
-                if( nrow(path_df) > 0 ){
-                    save(path_df, file=rds_file)
-                }
+                )
+            })
+        }
+        rds_file <- paste0(collinearAnalysisDir, "/synteny.comparing.RData")
+        if( !file.exists(rds_file) ){
+            if( nrow(path_df) > 0 ){
+                save(path_df, file=rds_file)
             }
         }
-        else{
-            shinyalert(
-                "Oops!",
-                "No i-ADHoRe output file found. Please provide the correct path...",
-                type="error",
+        # path_df <- path_df
+        # path_df$comparing_Path <- gsub(
+        #     "/Users/jiali/Desktop/Projects/ShinyWGD/packing/ShinyWGD/inst/shinyWGD/demo_data/Example_Collinear_Visualization/i-ADHoRe_wd/",
+        #     "/www/bioinformatics01_rw/ShinyWGD/Example_4Sp/Example_Collinear_Visualization/i-ADHoRe_wd/",
+        #     path_df$comparing_Path
+        # )
+        # save(path_df, file=paste0(collinearAnalysisDir, "/synteny.comparing.server.RData"))
+    }
+    else{
+        shinyalert(
+            "Oops!",
+            "No i-ADHoRe output file found. Please provide the correct path...",
+            type="error",
+        )
+    }
+
+})
+
+observe({
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+
+    rds_file <- paste0(collinearAnalysisDir, "/synteny.comparing.RData")
+    if( file.exists(rds_file) ){
+        load(rds_file)
+        intra_list <- path_df[path_df$comparing_Type == "Intra", ]$comparing_ID
+        if( isTruthy(input$inter_list_A) ){
+            list_A_species <- input$inter_list_A
+            remaining_species <- setdiff(intra_list, list_A_species)
+            updatePickerInput(
+                session,
+                "inter_list_B",
+                choices=remaining_species,
+                choicesOpt=list(
+                    content=lapply(remaining_species, function(choice) {
+                        species <- gsub("_", " ", choice)
+                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                    })
+                )
+            )
+        }
+        if( isTruthy(input$cluster_species_A) ){
+            list_A_species <- input$cluster_species_A
+            remaining_species <- setdiff(intra_list, list_A_species)
+            updatePickerInput(
+                session,
+                "cluster_species_B",
+                choices=remaining_species,
+                choicesOpt=list(
+                    content=lapply(remaining_species, function(choice) {
+                        species <- gsub("_", " ", choice)
+                        HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                    })
+                )
             )
         }
     }
 })
 
-observe({
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
-        rds_file <- paste0(dirPath, "/synteny.comparing.RData")
-        if( file.exists(rds_file) ){
-            load(rds_file)
-            intra_list <- path_df[path_df$comparing_Type == "Intra", ]$comparing_ID
-            if( isTruthy(input$inter_list_A) ){
-                list_A_species <- input$inter_list_A
-                remaining_species <- setdiff(intra_list, list_A_species)
-                updatePickerInput(
-                    session,
-                    "inter_list_B",
-                    choices=remaining_species,
-                    choicesOpt=list(
-                        content=lapply(remaining_species, function(choice) {
-                            species <- gsub("_", " ", choice)
-                            HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                        })
-                    )
-                )
-            }
-            if( isTruthy(input$cluster_species_A) ){
-                list_A_species <- input$cluster_species_A
-                remaining_species <- setdiff(intra_list, list_A_species)
-                updatePickerInput(
-                    session,
-                    "cluster_species_B",
-                    choices=remaining_species,
-                    choicesOpt=list(
-                        content=lapply(remaining_species, function(choice) {
-                            species <- gsub("_", " ", choice)
-                            HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                        })
-                    )
-                )
-            }
-        }
-    }
-})
-
 observeEvent(input$iadhore_intra_species_list_button, {
-    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "block";')
-    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display="block";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display="none";')
 })
 
 observeEvent(input$iadhore_inter_species_list_button, {
-    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "block";')
-    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display="block";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display="none";')
 })
 
 observeEvent(input$iadhore_multiple_species_list_button, {
-    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "block";')
-    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "none";')
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display="block";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display="none";')
 })
 
 observeEvent(input$clustering_button, {
-    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display = "none";')
-    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display = "block";')
+    shinyjs::runjs('document.getElementById("iadhore_intra_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_inter_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("iadhore_multiple_species_list_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("clustering_files_collapse").style.display="block";')
 })
 
 observeEvent(input$confirm_intra_comparing_go, {
@@ -490,8 +622,9 @@ observeEvent(input$confirm_intra_comparing_go, {
             Sys.sleep(.2)
             incProgress(amount=.3, message="Configuring...")
 
-            dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            collinearAnalysisDir <- collinear_analysis_dir_Val()
+
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
             color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
                             "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
@@ -507,10 +640,10 @@ observeEvent(input$confirm_intra_comparing_go, {
                 div(
                     class="boxLike",
                     style="padding-right: 50px;
-                               padding-left: 50px;
-                               padding-top: 10px;
-                               padding-bottom: 10px;
-                               background-color: white",
+                           padding-left: 50px;
+                           padding-top: 10px;
+                           padding-bottom: 10px;
+                           background-color: white",
                     fluidRow(
                         column(
                             width=12,
@@ -624,12 +757,12 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                             "Draw Syntenty Plot",
                                                             icon=icon("pencil-alt"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #009393;
                                                                    border-color: #fff;
                                                                    padding: 5px 10px 5px 10px;
-                                                                   margin: 50px 5px 5px 35px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                   margin: 50px 5px 5px 35px;"
                                                         )
                                                     )
                                                 ),
@@ -655,7 +788,10 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                         actionButton(
                                                             "svg_spacing_sub_dot_intra",
                                                             "",
-                                                            icon("compress"),
+                                                            icon(
+                                                                "down-left-and-up-right-to-center",
+                                                                verify_fa=FALSE,
+                                                            ),
                                                             title="Compress spacing"
                                                         ),
                                                         downloadButton_custom(
@@ -664,12 +800,12 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                             status="secondary",
                                                             icon=icon("download"),
                                                             label=HTML(""),
+                                                            class="my-download-button-class",
                                                             style="color: #fff;
-                                                                   background-color: #019858;
+                                                                   background-color: #6B8E23;
                                                                    border-color: #fff;
                                                                    padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                   margin: 5px 5px 5px 5px;"
                                                         )
                                                     ),
                                                     column(
@@ -730,34 +866,15 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                                 status="secondary",
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
+                                                                class="my-download-button-class",
                                                                 style="color: #fff;
-                                                                   background-color: #019858;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                       background-color: #6B8E23;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;"
                                                             )
                                                         )
                                                     ),
-                                                    # column(
-                                                    #     4,
-                                                    #     div(
-                                                    #         style="/*margin-bottom: 10px;*/
-                                                    #                border-radius: 10px;
-                                                    #                padding: 5px 10px 0px 10px;
-                                                    #                background-color: #FFF5EE;",
-                                                    #         prettyRadioButtons(
-                                                    #             inputId="scale_data_intra",
-                                                    #             label=HTML("<font color='orange'>Data used</font>:"),
-                                                    #             choices=c("Anchor points", "Segments"),
-                                                    #             selected="Anchor points",
-                                                    #             icon=icon("check"),
-                                                    #             inline=TRUE,
-                                                    #             status="info",
-                                                    #             animation="jelly"
-                                                    #         )
-                                                    #     )
-                                                    # ),
                                                     column(
                                                         4,
                                                         div(
@@ -808,6 +925,7 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                             width="40px",
                                                             icon=icon("search"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #8080C0;
                                                                    border-color: #fff;
@@ -840,7 +958,7 @@ observeEvent(input$confirm_intra_comparing_go, {
         })
 
         observe({
-            if( length(dirPath) > 0 && !is.null(input$chr_num_cutoff) ){
+            if( length(collinearAnalysisDir) > 0 && !is.null(input$chr_num_cutoff) ){
                 intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
                 intra_species_dir <- dirname(intra_selected_df$comparing_Path)
                 genesFile <- paste0(intra_species_dir, "/genes.txt")
@@ -893,7 +1011,7 @@ observeEvent(input$confirm_intra_comparing_go, {
                     updatePickerInput(
                         session,
                         "synteny_query_chr_intra",
-                        choices=querys,
+                        choices=gtools::mixedsort(querys),
                         choicesOpt=list(
                             content=lapply(gtools::mixedsort(querys), function(choice) {
                                 HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
@@ -919,10 +1037,10 @@ observeEvent(input$confirm_intra_comparing_go, {
 })
 
 observe({
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$iadhore_intra_species_list) && input$iadhore_intra_species_list != "" ){
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
             intra_list <- input$iadhore_intra_species_list
             intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
             intra_species_dir <- dirname(intra_selected_df$comparing_Path)
@@ -940,12 +1058,20 @@ observe({
 })
 
 observeEvent(input$synplot_go_intra, {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( !is.null(input$synteny_query_chr_intra) && input$iadhore_intra_species_list != "" ){
             shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            output$foundItemsMessage_intra <- renderUI({
+                HTML("")
+            })
+
+            output$multiplicon_mirco_intra_plot <- renderUI({
+                HTML("")
+            })
+
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
             intra_list <- input$iadhore_intra_species_list
             intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
             intra_species_dir <- dirname(intra_selected_df$comparing_Path)
@@ -1114,117 +1240,51 @@ observeEvent(input$synplot_go_intra, {
                 subject_chr_len_df <- query_chr_len_df
 
                 observe({
-                    # if( input$scale_data_intra == "Segments" ){
-                    #     if( !file.exists(segs_pos_file) ){
-                    #         obtain_coordiantes_for_segments(
-                    #             seg_file=segmentsfile,
-                    #             gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                    #             out_file=segs_pos_file
-                    #         )
-                    #     }
-                    #     segs_data <- suppressMessages(
-                    #         vroom(
-                    #             segs_pos_file,
-                    #             delim="\t"
-                    #         )
-                    #     )
-                    #     selected_segs_data <- segs_data %>%
-                    #         filter(listX %in% query_selected_chr_list) %>%
-                    #         filter(listY %in% query_selected_chr_list) %>%
-                    #         filter(multiplicon %in% selected_multiplicons_Id)
-                    #
-                    #     widthSpacingRainbow <- reactiveValues(
-                    #         value=800
-                    #     )
-                    #     heightSpacingRainbow <- reactiveValues(
-                    #         value=300
-                    #     )
-                    #     observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
-                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
-                    #     })
-                    #     observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
-                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                    #     })
-                    #     observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
-                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
-                    #     })
-                    #     observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
-                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
-                    #     })
-                    #     if( input$scale_link_intra == "True length" ){
-                    #         plot_parallel_data <- list(
-                    #             "plot_id"="SyntenicBlock_intra",
-                    #             "segs"=selected_segs_data,
-                    #             "query_sp"=querySpecies,
-                    #             "query_chr_lens"=query_chr_len_df,
-                    #             "subject_sp"=subjectSpecies,
-                    #             "subject_chr_lens"=subject_chr_len_df,
-                    #             "width"=widthSpacingRainbow$value,
-                    #             "height"=heightSpacingRainbow$value
-                    #         )
-                    #         session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                    #     }
-                    #     else{
-                    #         plot_parallel_data <- list(
-                    #             "plot_id"="SyntenicBlock_intra",
-                    #             "anchorpoints"=selected_anchorpoints,
-                    #             "query_sp"=querySpecies,
-                    #             "query_chr_nums"=query_chr_num_df,
-                    #             "subject_sp"=subjectSpecies,
-                    #             "subject_chr_nums"=query_chr_num_df,
-                    #             "width"=widthSpacingRainbow$value,
-                    #             "height"=heightSpacingRainbow$value
-                    #         )
-                    #         session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
-                    #     }
-                    # }
-                    # else{
-                        widthSpacingRainbow <- reactiveValues(
-                            value=800
+                    widthSpacingRainbow <- reactiveValues(
+                        value=800
+                    )
+                    heightSpacingRainbow <- reactiveValues(
+                        value=300
+                    )
+                    observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
+                        heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
+                    })
+                    observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
+                        heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                    })
+                    observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
+                        widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
+                    })
+                    observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
+                        widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
+                    })
+                    if( input$scale_link_intra == "True length" ){
+                        plot_parallel_data <- list(
+                            "plot_id"="SyntenicBlock_intra",
+                            "segs"=selected_anchorpoints,
+                            "query_sp"=querySpecies,
+                            "query_chr_lens"=query_chr_len_df,
+                            "subject_sp"=subjectSpecies,
+                            "subject_chr_lens"=subject_chr_len_df,
+                            "width"=widthSpacingRainbow$value,
+                            "height"=heightSpacingRainbow$value,
+                            "anchor_pair"="anchor_pair"
                         )
-                        heightSpacingRainbow <- reactiveValues(
-                            value=300
+                        session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                    }
+                    else{
+                        plot_parallel_data <- list(
+                            "plot_id"="SyntenicBlock_intra",
+                            "anchorpoints"=selected_anchorpoints,
+                            "query_sp"=querySpecies,
+                            "query_chr_nums"=query_chr_num_df,
+                            "subject_sp"=subjectSpecies,
+                            "subject_chr_nums"=query_chr_num_df,
+                            "width"=widthSpacingRainbow$value,
+                            "height"=heightSpacingRainbow$value
                         )
-                        observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
-                            heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
-                        })
-                        observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
-                            heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                        })
-                        observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
-                            widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
-                        })
-                        observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
-                            widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
-                        })
-                        if( input$scale_link_intra == "True length" ){
-                            plot_parallel_data <- list(
-                                "plot_id"="SyntenicBlock_intra",
-                                "segs"=selected_anchorpoints,
-                                "query_sp"=querySpecies,
-                                "query_chr_lens"=query_chr_len_df,
-                                "subject_sp"=subjectSpecies,
-                                "subject_chr_lens"=subject_chr_len_df,
-                                "width"=widthSpacingRainbow$value,
-                                "height"=heightSpacingRainbow$value,
-                                "anchor_pair"="anchor_pair"
-                            )
-                            session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                        }
-                        else{
-                            plot_parallel_data <- list(
-                                "plot_id"="SyntenicBlock_intra",
-                                "anchorpoints"=selected_anchorpoints,
-                                "query_sp"=querySpecies,
-                                "query_chr_nums"=query_chr_num_df,
-                                "subject_sp"=subjectSpecies,
-                                "subject_chr_nums"=query_chr_num_df,
-                                "width"=widthSpacingRainbow$value,
-                                "height"=heightSpacingRainbow$value
-                            )
-                            session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
-                        }
-                    # }
+                        session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
+                    }
                 })
 
                 Sys.sleep(.3)
@@ -1242,15 +1302,15 @@ observeEvent(input$synplot_go_intra, {
 })
 
 observeEvent(input[["searchButton_intra"]], {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
             shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             withProgress(message='Searching Gene in progress', value=0, {
                 Sys.sleep(.8)
                 incProgress(amount=.2, message="Preparing Data...")
 
-                load(paste0(dirPath, "/synteny.comparing.RData"))
+                load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
                 intra_list <- input$iadhore_intra_species_list
                 intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
                 intra_species_dir <- dirname(intra_selected_df$comparing_Path)
@@ -1341,44 +1401,36 @@ observeEvent(input[["searchButton_intra"]], {
                     uiId <- "foundItemsMessage_intra"
                     output[[uiId]] <- renderUI({
                         if( length(searched_multiplicon_list) > 0 ){
-                            # updatePickerInput(
-                            #     session,
-                            #     "multiplicon_plot_intra",
-                            #     choices=searched_multiplicon_list,
-                            #     choicesOpt=list(
-                            #         content=lapply(searched_multiplicon_list, function(choice) {
-                            #             HTML(paste0("<div style='color: orange; font-style: italic;'>Multiplicon: ", choice, "</div>"))
-                            #         })
-                            #     ),
-                            # )
                             fluidRow(
                                 column(
                                     8,
                                     div(
                                         style="border: 1px solid #ccc;
-                                           padding: 2px;
-                                           margin-top: 35px;
-                                           margin-left: -40px;
-                                           border-radius: 10px;
-                                           background-color: white;
-                                           font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
+                                               padding: 2px;
+                                               margin-top: 35px;
+                                               margin-left: -40px;
+                                               border-radius: 10px;
+                                               background-color: white;
+                                               font-family: Times New Roman, Times, serif; white-space: pre-wrap;",
 
                                         if( length(searched_multiplicon_list) == 1 ){
                                             HTML(
-                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
-                                                      nrow(searched_anchor_points),
-                                                      " Anchor Point is in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
-                                                      searched_multiplicon_list[1],
-                                                      "</span>)"
+                                                paste(
+                                                    "<span style='color: #FF79BC; font-weight: bold;'>",
+                                                    nrow(searched_anchor_points),
+                                                    " Anchor Point is in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                    searched_multiplicon_list[1],
+                                                    "</span>)"
                                                 )
                                             )
                                         }else{
                                             HTML(
-                                                paste("<span style='color: #FF79BC; font-weight: bold;'>",
-                                                      nrow(searched_anchor_points),
-                                                      " Anchor Points are in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
-                                                      paste(searched_multiplicon_list, collapse=", "),
-                                                      "</span>)"
+                                                paste(
+                                                    "<span style='color: #FF79BC; font-weight: bold;'>",
+                                                    nrow(searched_anchor_points),
+                                                    " Anchor Points are in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>",
+                                                    paste(searched_multiplicon_list, collapse=", "),
+                                                    "</span>)"
                                                 )
                                             )
                                         }
@@ -1391,12 +1443,12 @@ observeEvent(input[["searchButton_intra"]], {
                                         "Draw Plot",
                                         icon=icon("pencil-alt"),
                                         status="secondary",
+                                        class="my-start-button-class",
                                         style="color: #fff;
                                                background-color: #8080C0;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 32px 5px 5px 5px;
-                                               animation: glowing 5000ms infinite; "
+                                               margin: 32px 5px 5px 5px;"
                                     )
                                 )
                             )
@@ -1476,23 +1528,6 @@ observeEvent(input[["searchButton_intra"]], {
                                         )
                                     )
                                 ),
-                                # column(
-                                #     3,
-                                #     div(
-                                #         style="margin-bottom: 10px;
-                                #                border-radius: 10px;
-                                #                padding: 10px 10px 0px 10px;
-                                #                background-color: #FFF5EE;",
-                                #         sliderInput(
-                                #             inputId="level_intra",
-                                #             label=HTML("Set <font color='orange'>maximum level of multiplicon:</font>"),
-                                #             min=2,
-                                #             max=10,
-                                #             step=1,
-                                #             value=5
-                                #         )
-                                #     )
-                                # ),
                                 column(
                                     2,
                                     div(
@@ -1561,12 +1596,12 @@ observeEvent(input[["searchButton_intra"]], {
                                         status="secondary",
                                         icon=icon("download"),
                                         label=HTML(""),
+                                        class="my-download-button-class",
                                         style="color: #fff;
-                                               background-color: #019858;
+                                               background-color: #6B8E23;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 5px 5px 5px 5px;
-                                               animation: glowingD 5000ms infinite;"
+                                               margin: 5px 5px 5px 5px;"
                                     )
                                 ),
                                 column(
@@ -1618,15 +1653,15 @@ observeEvent(input[["searchButton_intra"]], {
 })
 
 observeEvent(input[["plotMicro_intra"]], {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$multiplicon_choose_intra) && !is.null(input$multiplicon_choose_intra) ){
             if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
                 shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)
-                    load(paste0(dirPath, "/synteny.comparing.RData"))
+                    load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
                     intra_list <- input$iadhore_intra_species_list
                     intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
                     intra_species_dir <- dirname(intra_selected_df$comparing_Path)
@@ -1690,7 +1725,8 @@ observeEvent(input[["plotMicro_intra"]], {
                         vroom(
                             anchorpointout_file,
                             col_names=TRUE,
-                            delim="\t")
+                            delim="\t"
+                        )
                     )
 
                     searchGene <- input[["gene_intra"]]
@@ -1710,7 +1746,6 @@ observeEvent(input[["plotMicro_intra"]], {
                             )
                         }
                         else{
-                            # print(searchGene)
                             query_selected_chr_list <- unique(c(searched_anchor_points_df$listX, searched_anchor_points_df$listY))
                             subject_selected_chr_list <- query_selected_chr_list
 
@@ -2008,8 +2043,9 @@ observeEvent(input$confirm_inter_comparing_go, {
 
         shinyjs::runjs(setTimeoutFunction)
 
-        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        load(paste0(dirPath, "/synteny.comparing.RData"))
+        collinearAnalysisDir <- collinear_analysis_dir_Val()
+
+        load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
         tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
         tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
@@ -2091,7 +2127,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                                 max=500,
                                                                 step=50,
                                                                 value=100
-                                                            ),
+                                                            )
                                                         )
                                                     ),
                                                     column(
@@ -2159,31 +2195,17 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                     ),
                                                     column(
                                                         3,
-                                                        tags$head(
-                                                            tags$style(HTML(
-                                                                "@keyframes glowing {
-                                                                     0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                                                     50% { background-color: #64A600; box-shadow: 0 0 20px #43b0d1; }
-                                                                     100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
-                                                                     }
-                                                                @keyframes glowingD {
-                                                                     0% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                                                     50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
-                                                                     100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
-                                                                     }"
-                                                            ))
-                                                        ),
                                                         actionButton(
                                                             inputId="synplot_go_inter",
                                                             "Draw Syntenty Plot",
                                                             icon=icon("pencil-alt"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #009393;
                                                                    border-color: #fff;
                                                                    padding: 5px 10px 5px 10px;
-                                                                   margin: 50px 5px 5px 35px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                   margin: 50px 5px 5px 35px;"
                                                         )
                                                     )
                                                 ),
@@ -2209,21 +2231,25 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                         actionButton(
                                                             "svg_spacing_sub_dot_inter",
                                                             "",
-                                                            icon("compress"),
+                                                            icon(
+                                                                "down-left-and-up-right-to-center",
+                                                                verify_fa=FALSE,
+                                                            ),
                                                             title="Compress spacing"
                                                         ),
+
                                                         downloadButton_custom(
                                                             "download_dotView_inter",
                                                             title="Download the Plot",
                                                             status="secondary",
                                                             icon=icon("download"),
                                                             label=HTML(""),
+                                                            class="my-download-button-class",
                                                             style="color: #fff;
-                                                                   background-color: #019858;
+                                                                   background-color: #6B8E23;
                                                                    border-color: #fff;
                                                                    padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                   margin: 5px 5px 5px 5px;"
                                                         )
                                                     ),
                                                     column(
@@ -2284,12 +2310,12 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                                 status="secondary",
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
+                                                                class="my-download-button-class",
                                                                 style="color: #fff;
-                                                                   background-color: #019858;
+                                                                   background-color: #6B8E23;
                                                                    border-color: #fff;
                                                                    padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                   margin: 5px 5px 5px 5px;"
                                                             )
                                                         )
                                                     ),
@@ -2362,6 +2388,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                             width="40px",
                                                             icon=icon("search"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #8080C0;
                                                                    border-color: #fff;
@@ -2394,7 +2421,7 @@ observeEvent(input$confirm_inter_comparing_go, {
         })
 
         observe({
-            if( length(dirPath) > 0 && !is.null(input$chr_num_cutoff) ){
+            if( length(collinearAnalysisDir) > 0 && !is.null(input$chr_num_cutoff) ){
                 inter_species_dir <- dirname(comparing_df$comparing_Path)
                 genesFile <- paste0(inter_species_dir, "/genes.txt")
                 chr_gene_num_file <- paste0(inter_species_dir, "/chr_gene_nums.txt")
@@ -2449,7 +2476,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                     updatePickerInput(
                         session,
                         "synteny_query_chr_inter",
-                        choices=querys,
+                        choices=gtools::mixedsort(querys),
                         choicesOpt=list(
                             content=lapply(gtools::mixedsort(querys), function(choice) {
                                 HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
@@ -2479,7 +2506,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                     updatePickerInput(
                         session,
                         "synteny_subject_chr_inter",
-                        choices=subjects,
+                        choices=gtools::mixedsort(subjects),
                         choicesOpt=list(
                             content=lapply(gtools::mixedsort(subjects), function(choice) {
                                 HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
@@ -2505,11 +2532,20 @@ observeEvent(input$confirm_inter_comparing_go, {
 })
 
 observeEvent(input$synplot_go_inter, {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
             shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+
+            output$foundItemsMessage_inter <- renderUI({
+                HTML("")
+            })
+
+            output$multiplicon_mirco_inter_plot <- renderUI({
+                HTML("")
+            })
+
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
             tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
             tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
@@ -2691,75 +2727,6 @@ observeEvent(input$synplot_go_inter, {
                 segs_pos_file <- paste0(inter_species_dir, "/segments.merged_pos.txt")
 
                 observe({
-                    # if( input$scale_data_inter == "Segments" ){
-                    #     if( !file.exists(segs_pos_file) ){
-                    #         obtain_coordiantes_for_segments(
-                    #             seg_file=segmentsfile,
-                    #             sp1=gsub(" ", "_", querySpecies),
-                    #             gff_file1=sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
-                    #             sp2=gsub(" ", "_", subjectSpecies),
-                    #             gff_file2=sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
-                    #             out_file=segs_pos_file
-                    #         )
-                    #     }
-                    #     segs_data <- suppressMessages(
-                    #         vroom(
-                    #             segs_pos_file,
-                    #             delim="\t"
-                    #         )
-                    #     )
-                    #     selected_segs_data <- segs_data %>%
-                    #         filter(listX %in% query_selected_chr_list) %>%
-                    #         filter(listY %in% subject_selected_chr_list) %>%
-                    #         filter(multiplicon %in% selected_multiplicons_Id)
-                    #
-                    #     widthSpacingRainbow <- reactiveValues(
-                    #         value=800
-                    #     )
-                    #     heightSpacingRainbow <- reactiveValues(
-                    #         value=300
-                    #     )
-                    #     observeEvent(input[["svg_vertical_spacing_add_rainbow_inter"]], {
-                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value + 50
-                    #     })
-                    #     observeEvent(input[["svg_vertical_spacing_sub_rainbow_inter"]], {
-                    #         heightSpacingRainbow$value <- heightSpacingRainbow$value - 50
-                    #     })
-                    #     observeEvent(input[["svg_horizontal_spacing_add_rainbow_inter"]], {
-                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value + 50
-                    #     })
-                    #     observeEvent(input[["svg_horizontal_spacing_sub_rainbow_inter"]], {
-                    #         widthSpacingRainbow$value <- widthSpacingRainbow$value - 50
-                    #     })
-                    #     if( input$scale_link_inter == "True length" ){
-                    #         print(nrow(selected_segs_data))
-                    #         plot_parallel_data <- list(
-                    #             "plot_id"="SyntenicBlock_inter",
-                    #             "segs"=selected_segs_data,
-                    #             "query_sp"=querySpecies,
-                    #             "query_chr_lens"=query_chr_len_df,
-                    #             "subject_sp"=subjectSpecies,
-                    #             "subject_chr_lens"=subject_chr_len_df,
-                    #             "width"=widthSpacingRainbow$value,
-                    #             "height"=heightSpacingRainbow$value
-                    #         )
-                    #         session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                    #     }
-                    #     else{
-                    #         plot_parallel_data <- list(
-                    #             "plot_id"="SyntenicBlock_inter",
-                    #             "anchorpoints"=selected_anchorpoints,
-                    #             "query_sp"=querySpecies,
-                    #             "query_chr_nums"=query_chr_num_df,
-                    #             "subject_sp"=subjectSpecies,
-                    #             "subject_chr_nums"=subject_chr_num_df,
-                    #             "width"=widthSpacingRainbow$value,
-                    #             "height"=heightSpacingRainbow$value
-                    #         )
-                    #         session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
-                    #     }
-                    # }
-                    # else{
                         widthSpacingRainbow <- reactiveValues(
                             value=800
                         )
@@ -2816,11 +2783,11 @@ observeEvent(input$synplot_go_inter, {
 })
 
 observeEvent(input[["searchButton_inter"]], {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$inter_list_A) && isTruthy(input$inter_list_B) ){
             shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
             tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
             tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
@@ -2962,12 +2929,12 @@ observeEvent(input[["searchButton_inter"]], {
                                         "Draw Plot",
                                         icon=icon("pencil-alt"),
                                         status="secondary",
+                                        class="my-start-button-class",
                                         style="color: #fff;
                                                background-color: #8080C0;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 32px 5px 5px 5px;
-                                               animation: glowing 5000ms infinite; "
+                                               margin: 32px 5px 5px 5px;"
                                     )
                                 )
                             )
@@ -3132,12 +3099,12 @@ observeEvent(input[["searchButton_inter"]], {
                                         status="secondary",
                                         icon=icon("download"),
                                         label=HTML(""),
+                                        class="my-download-button-class",
                                         style="color: #fff;
-                                               background-color: #019858;
+                                               background-color: #6B8E23;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 5px 5px 5px 5px;
-                                               animation: glowingD 5000ms infinite;"
+                                               margin: 5px 5px 5px 5px;"
                                     )
                                 ),
                                 column(
@@ -3189,14 +3156,14 @@ observeEvent(input[["searchButton_inter"]], {
 })
 
 observeEvent(input[["plotMicro_inter"]], {
-    dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-    if( length(dirPath) > 0 ){
+    collinearAnalysisDir <- collinear_analysis_dir_Val()
+    if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$multiplicon_choose_inter) && !is.null(input$multiplicon_choose_inter) ){
             if( isTruthy(input$gene_inter) && input$gene_inter != "" ){
                 shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)
-                    load(paste0(dirPath, "/synteny.comparing.RData"))
+                    load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
                     tmp_comparing_id_1 <- paste0(input$inter_list_A[1], "_vs_", input$inter_list_B[1])
                     tmp_comparing_id_2 <- paste0(input$inter_list_B[1], "_vs_", input$inter_list_A[1])
                     comparing_df <- path_df[path_df$comparing_ID == tmp_comparing_id_1 |
@@ -3598,8 +3565,8 @@ observeEvent(input$confirm_multi_comparing_go, {
 
             shinyjs::runjs(setTimeoutFunction)
 
-            dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            collinearAnalysisDir <- collinear_analysis_dir_Val()
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
             multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
 
@@ -3801,12 +3768,12 @@ observeEvent(input$confirm_multi_comparing_go, {
                                         "Draw Plot",
                                         icon=icon("play"),
                                         status="secondary",
+                                        class="my-start-button-class",
                                         style="color: #fff;
                                                background-color: #009393;
                                                border-color: #fff;
                                                padding: 5px 14px 5px 14px;
-                                               margin: 50px 5px 5px 5px;
-                                               animation: glowing 5300ms infinite; "
+                                               margin: 50px 5px 5px 5px;"
                                     )
                                 ),
                                 column(
@@ -3855,12 +3822,12 @@ observeEvent(input$confirm_multi_comparing_go, {
                                             status="secondary",
                                             icon=icon("download"),
                                             label=HTML(""),
+                                            class="my-download-button-class",
                                             style="color: #fff;
-                                                   background-color: #019858;
+                                                   background-color: #6B8E23;
                                                    border-color: #fff;
                                                    padding: 5px 14px 5px 14px;
-                                                   margin: 5px 5px 5px 5px;
-                                                   animation: glowingD 5000ms infinite;"
+                                                   margin: 5px 5px 5px 5px;"
                                         )
                                     ),
                                     column(
@@ -3894,8 +3861,8 @@ observeEvent(input$synplot_multiple_go, {
         else{
             shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
-            dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-            load(paste0(dirPath, "/synteny.comparing.RData"))
+            collinearAnalysisDir <- collinear_analysis_dir_Val()
+            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
             multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
 
             sp_gff_info_xls <- paste0(
@@ -4219,8 +4186,8 @@ observeEvent(input$confirm_clustering_go, {
 
         shinyjs::runjs(setTimeoutFunction)
 
-        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        load(paste0(dirPath, "/synteny.comparing.RData"))
+        collinearAnalysisDir <- collinear_analysis_dir_Val()
+        load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
         cluster_species_A <- gsub("_", " ", input$cluster_species_A)
         cluster_species_B <- gsub("_", " ", input$cluster_species_B)
@@ -4308,12 +4275,12 @@ observeEvent(input$confirm_clustering_go, {
                                                             "Start Clustering Analysis",
                                                             icon=icon("play"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #009393;
                                                                    border-color: #fff;
                                                                    padding: 5px 10px 5px 10px;
-                                                                   margin: 50px 5px 5px 35px;
-                                                                   animation: glowing 5000ms infinite; "
+                                                                   margin: 50px 5px 5px 35px;"
                                                         )
                                                     )
                                                 ),
@@ -4339,7 +4306,10 @@ observeEvent(input$confirm_clustering_go, {
                                                         actionButton(
                                                             "svg_spacing_sub_cluster",
                                                             "",
-                                                            icon("compress"),
+                                                            icon(
+                                                                "down-left-and-up-right-to-center",
+                                                                verify_fa=FALSE,
+                                                            ),
                                                             title="Compress spacing"
                                                         ),
                                                         downloadButton_custom(
@@ -4348,12 +4318,12 @@ observeEvent(input$confirm_clustering_go, {
                                                             status="secondary",
                                                             icon=icon("download"),
                                                             label=HTML(""),
+                                                            class="my-download-button-class",
                                                             style="color: #fff;
-                                                                   background-color: #019858;
+                                                                   background-color: #6B8E23;
                                                                    border-color: #fff;
                                                                    padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;
-                                                                   animation: glowingD 5000ms infinite;"
+                                                                   margin: 5px 5px 5px 5px;"
                                                         )
                                                     ),
                                                     column(
@@ -4399,6 +4369,7 @@ observeEvent(input$confirm_clustering_go, {
                                                             "",
                                                             icon=icon("search"),
                                                             status="secondary",
+                                                            class="my-start-button-class",
                                                             style="color: #fff;
                                                                    background-color: #8080C0;
                                                                    border-color: #fff;
@@ -4437,7 +4408,7 @@ observeEvent(input$confirm_clustering_go, {
                                                         )
                                                     ),
                                                     column(
-                                                        2,
+                                                        3,
                                                         div(
                                                             style="/*margin-bottom: 10px;*/
                                                                    border-radius: 10px;
@@ -4452,7 +4423,7 @@ observeEvent(input$confirm_clustering_go, {
                                                             actionButton(
                                                                 "svg_vertical_spacing_sub_par",
                                                                 "",
-                                                                icon("compress"),
+                                                                icon("down-left-and-up-right-to-center", verify_fa=FALSE),
                                                                 title="Compress spacing"
                                                             ),
                                                             downloadButton_custom(
@@ -4461,12 +4432,12 @@ observeEvent(input$confirm_clustering_go, {
                                                                 status="secondary",
                                                                 icon=icon("download"),
                                                                 label="",
+                                                                class="my-download-button-class",
                                                                 style="color: #fff;
-                                                                           background-color: #019858;
-                                                                           border-color: #fff;
-                                                                           padding: 5px 14px 5px 14px;
-                                                                           margin: 5px 5px 5px 5px;
-                                                                           animation: glowingD 5000ms infinite;"
+                                                                       background-color: #6B8E23;
+                                                                       border-color: #fff;
+                                                                       padding: 5px 14px 5px 14px;
+                                                                       margin: 5px 5px 5px 5px;"
                                                             )
                                                         )
                                                     )
@@ -4494,8 +4465,8 @@ observeEvent(input$cluster_go, {
         shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
         incProgress(amount=.1, message="Preparing data...")
-        dirPath <- parseDirPath(roots=c(computer="/"), input$iadhoredir)
-        load(paste0(dirPath, "/synteny.comparing.RData"))
+        collinearAnalysisDir <- collinear_analysis_dir_Val()
+        load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
 
         cluster_species_A <- input$cluster_species_A
         cluster_species_B <- input$cluster_species_B
