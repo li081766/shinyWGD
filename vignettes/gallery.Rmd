@@ -43,11 +43,11 @@ the **`shinyWGD`** server or package.
 
  ---
 
-### *Single species*
-<img src="../inst/shinyWGD/www/images/Paralogous_One_Species_Ks-01.jpg" width=400>
+### *Without GMM modeling*
+<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Elaeis2.ks.png" width=400>
 
-### *Multiple species*
-<img src="../inst/shinyWGD/www/images/Paralogous_Multiple_Species_Ks-01.jpg" width=700>
+### *With GMM modeling*
+<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Elaeis2.ks_with_GMM.png" width=400>
 
  ---
 
@@ -81,6 +81,12 @@ the **`shinyWGD`** server or package.
 ### *Micro-synteny plot*
 <img src="../inst/shinyWGD/www/images/microSyn_one_species.svg" width=600>
 
+  #### *In true chromosomal length scale*
+  <img src="../inst/shinyWGD/www/images/one_species.Multiplicon_5.true_length.svg" width=600>
+
+  #### *In gene number scale*
+  <img src="../inst/shinyWGD/www/images/one_species.Multiplicon_5.gene_number.svg" width=600>
+
  ---
 
 ## Inter-comparing alignment
@@ -90,9 +96,6 @@ the **`shinyWGD`** server or package.
 
 ### *Parallel-line plot*
 <img src="../inst/shinyWGD/www/images/Elaeis_guineensis_vs_Asparagus_officinalis.Parallel-01.jpg" width=600>
-
-### *Micro-synteny plot*
-<img src="../inst/shinyWGD/www/images/Elaeis_guineensis_vs_Asparagus_officinalis.microSyn.svg" width=600>
 
  ---
 
@@ -108,6 +111,7 @@ the **`shinyWGD`** server or package.
 
 ## *PAR zoom-in plot*
 <img src="../inst/shinyWGD/www/images/PAR.cluster.svg" width="50%">
+<img src="../inst/shinyWGD/www/images/Vitis_vinifera_vs_Oryza_sativa.PAR_1.cluster.link.svg" width="50%">
 
  ---
 
