@@ -130,7 +130,7 @@ run_diamond_and_filter() {
 		line1="${input_data_array[$i]}"
 		IFS=$'\t' read -r species fasta_file gff_file <<< "$line1"
 
-		if [[ ! -e "$gff_file" ]]; then
+		if [[ ! -e "../$gff_file" ]]; then
 			echo "Skipping $species: gff_file does not exist"
 			continue
 		fi
@@ -148,17 +148,15 @@ run_diamond_and_filter() {
 			if [[ ! -e "$outdir" ]]; then
 				mkdir -p "$outdir"
 			fi
-			run_diamond "$species" "$fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
+			run_diamond "$species" "../$fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
 			run_filter_blast "$blastOutFile" "$out_filter_file"
 		fi
-
-		iadhore_sp_list+=("$species")
 
 		for (( j = i + 1; j < ${#input_data_array[@]}; j++ )); do
 			line2="${input_data_array[$j]}"
 			IFS=$'\t' read -r other_species other_fasta_file other_gff_file <<< "$line2"
 
-			if [[ ! -e "$other_gff_file" ]]; then
+			if [[ ! -e "../$other_gff_file" ]]; then
 				echo "Skipping $other_species: gff_file does not exist"
 				continue
 			fi
@@ -171,10 +169,7 @@ run_diamond_and_filter() {
 			filteredFile="$outdir/${species}_vs_${other_species}.blastp.pairs"
 			# Run Diamond and filter blast results if output files don't exist
 			if [[ "$species" != "$other_species" && ! -e "$filteredFile" ]]; then
-				if [[ ! -e "$outdir" ]]; then
-					mkdir -p $outdir
-				fi
-				run_diamond_2sp "$species" "$fasta_file" "$other_species" "$other_fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
+				run_diamond_2sp "$species" "$fasta_file" "$other_species" "../$other_fasta_file" "$cdsFile" "$pepFile" "$blastOutFile" "$num_core"
 				run_filter_blast "$blastOutFile" "$filteredFile"
 			fi
 			gzip "$blastOutFile"
