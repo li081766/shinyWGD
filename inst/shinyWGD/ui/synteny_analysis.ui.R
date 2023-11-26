@@ -1,5 +1,5 @@
 Synteny_Analysis_ui <- tabPanel(
-    "Collinear",
+    "Collinearity",
     value="synteny_analysis",
     fluidRow(
         column(

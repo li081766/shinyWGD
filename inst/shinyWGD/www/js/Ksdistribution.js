@@ -1791,7 +1791,7 @@ function MultipleBarPlotting(InputData) {
     modal.style("display", "block");
 
     setTimeout(function () {
-        var subplotWidth = width / 2;
+        var subplotWidth = width / 1.8;
         var subplotHeight = height / numRows;
 
         d3.select("#" + plotId).selectAll("svg").remove();

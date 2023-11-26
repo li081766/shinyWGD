@@ -885,8 +885,8 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                             prettyRadioButtons(
                                                                 inputId="scale_link_intra",
                                                                 label=HTML("<font color='orange'>Scale in</font>:"),
-                                                                choices=c("Gene number", "True length"),
-                                                                selected="Gene number",
+                                                                choices=c("Gene order", "True length"),
+                                                                selected="Gene order",
                                                                 icon=icon("check"),
                                                                 inline=TRUE,
                                                                 status="info",
@@ -1177,6 +1177,17 @@ observeEvent(input$synplot_go_intra, {
                 query_chr_num_df <- gene_num_df %>%
                     filter(sp==gsub(" ", "_", querySpecies)) %>%
                     filter(seqchr %in% query_selected_chr_list)
+
+                query_chr_num_df$seqchr <- as.character(query_chr_num_df$seqchr)
+
+                # Sort the dataframe based on seqchr
+                # query_chr_num_df_sorted <- query_chr_num_df[gtools::mixedsort(query_chr_num_df$seqchr), ]
+
+                # print(query_chr_num_df)
+                # print(query_chr_num_df_sorted)
+                # print(as.numeric(gsub("[^[:digit:]]+", "", query_chr_num_df$seqchr)))
+                query_chr_num_df <- query_chr_num_df[order(as.numeric(gsub("[^[:digit:]]+", "", query_chr_num_df$seqchr))),]
+
 
                 anchoredPointScutoff <- "anchoredPointsCutoff_intra"
 
@@ -1502,7 +1513,7 @@ observeEvent(input[["searchButton_intra"]], {
                                         prettyRadioButtons(
                                             inputId="scale_plotMicro_intra",
                                             label=HTML("<font color='orange'>Scale in</font>:"),
-                                            choices=c("True length", "Gene number"),
+                                            choices=c("True length", "Gene order"),
                                             selected="True length",
                                             icon=icon("check"),
                                             status="info",
@@ -2348,8 +2359,8 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                             prettyRadioButtons(
                                                                 inputId="scale_link_inter",
                                                                 label=HTML("<font color='orange'>Scale in</font>:"),
-                                                                choices=c("Gene number", "True length"),
-                                                                selected="Gene number",
+                                                                choices=c("Gene order", "True length"),
+                                                                selected="Gene order",
                                                                 icon=icon("check"),
                                                                 inline=TRUE,
                                                                 status="info",
@@ -2988,7 +2999,7 @@ observeEvent(input[["searchButton_inter"]], {
                                         prettyRadioButtons(
                                             inputId="scale_plotMicro_inter",
                                             label=HTML("<font color='orange'>Scale in</font>:"),
-                                            choices=c("True length", "Gene number"),
+                                            choices=c("True length", "Gene order"),
                                             selected="True length",
                                             icon=icon("check"),
                                             status="info",
@@ -3741,7 +3752,7 @@ observeEvent(input$confirm_multi_comparing_go, {
                                         prettyRadioButtons(
                                             inputId="scale_multiple",
                                             label=HTML("<font color='orange'>Scale in</font>:"),
-                                            choices=c("True length", "Gene number"),
+                                            choices=c("True length", "Gene order"),
                                             selected="True length",
                                             icon=icon("check"),
                                             status="info",
