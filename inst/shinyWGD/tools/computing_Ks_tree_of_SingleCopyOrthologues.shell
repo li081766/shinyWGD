@@ -286,6 +286,7 @@ done < "$tmp_rows_file"
 waitPids
 
 merge_aligned_files_into_phylip "$singleCopyOrthologues" "singleCopyGeneDir" "$phylip"
+tar czf singleCopyGeneDir.tar.gz singleCopyGeneDir && rm -r singleCopyGeneDir
 compute_ks "$phylip" "$tree"
 
 # Get the end time of the script
