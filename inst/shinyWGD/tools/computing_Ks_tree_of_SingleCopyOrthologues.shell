@@ -132,6 +132,13 @@ merge_aligned_files_into_phylip() {
     for aligned_file in "${aligned_files[@]}"; do
         local orthogroup=$(basename "$aligned_file" | cut -d'.' -f1)
 
+		count=$(grep -c '^>' "$aligned_file")
+
+		if [ "$count" -ne "${#species_names[@]}" ]; then
+			echo "Skipping $aligned_file: Mismatch in the number of sequences."
+			continue
+		fi
+
         # Read the aligned sequences from the file
         while IFS= read -r line; do
             if [[ $line == '>'* ]]; then
@@ -146,7 +153,7 @@ merge_aligned_files_into_phylip() {
     # Write the concatenated sequences to the output phylip file
     echo "${#species_names[@]} ${#concatenated_seqs[${species_names[0]}]}" > "$output_file"
     for species in "${species_names[@]}"; do
-        printf "%-20s    %s\n" "$species" "${concatenated_seqs[$species]}" >> "$output_file"
+        printf "%-40s    %s\n" "$species" "${concatenated_seqs[$species]}" >> "$output_file"
     done
 
     rm "$temp_file"
