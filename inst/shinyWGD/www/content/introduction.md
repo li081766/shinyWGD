@@ -4,7 +4,7 @@
 
 ---
 
-Welcome to **`shinyWGD`** Server – your gateway to seamless Whole Genome Duplication (WGD) analysis!
+Welcome to **`shinyWGD`** Server – **`a freely accessible and inclusive platform`**, providing an open space for users to explore and analyze Whole Genome Duplication (WGD) events.
 
 Designed with a user-friendly interface, **`shinyWGD`** empowers users with an intuitive, interactive platform that eliminates the need for programming skills. Whether you're a experienced researcher or new to WGD analysis, **`shinyWGD`** offers a comprehensive solution.
 
@@ -29,11 +29,9 @@ Dive into the world of WGD analysis with **`shinyWGD`** Server – freely distri
     - This module simplifies the identification of WGD events using <i>K</i><sub>s</sub> age distribution. Leveraging Data Preparation outputs, users customize selections in the configuration settings for tailored results. The module corrects paralog <i>K</i><sub>s</sub> distribution peaks with two methods: normal mixture model fitting and SiZer. It also utilizes relative rate tests to quantify substitution rate differences. Ideal for users exploring WGD events through <i>K</i><sub>s</sub> age distribution analysis.
   - <a href="javascript:void(0);" onclick="switchToSyntenyAnalysisTab()"><font color="orange"><img src="images/syntenyIcon.svg" alt="Icon" width="20" height="20"> Collinearity</font></a>
     - This module broadens the investigation of collinear relationships across all studied species, surpassing the capabilities of [`ksrates`](https://github.com/VIB-PSB/ksrates). It provides visualizations of collinear blocks. Additionally, users can delve into the exploration of putative ancestral regions (PARs) through clustering analysis, offering a more detailed and interactive exploration of the genomic architecture.
-  - <a href="javascript:void(0);" onclick="switchToTreeBuildingTab()"><font color="orange"><img src="images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> VizWGD </font></a>
-    - This module lets users customize the <i>K</i><sub>s</sub> unit tree, MCMCtree's time tree, or a combined tree. Upload a tree file, click branches to add WGD events, and adjust colors and symbols. Highlight geological time regions with ease.
-  - <a href="javascript:void(0);" onclick="switchToGalleryTab()"><font color="orange"><img src="images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> TreeRcon</font></a>
+  - <a href="javascript:void(0);" onclick="switchToTreeReconTab()"><font color="orange"><img src="images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> TreeRecon</font></a>
     - This module visualizes [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) output and posterior distributions of WGD retention rates (q) for potential WGDs under selected models.
+  - <a href="javascript:void(0);" onclick="switchToTreeBuildingTab()"><font color="orange"><img src="images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> VizWGD </font></a>
+    - This module lets users customize the MCMCtree's time tree, or a ultrametic tree. Upload a tree file, click branches to add WGD events, and adjust colors and symbols. Highlight geological time regions with ease.
 - ##### <a href="javascript:void(0);" onclick="switchToDataPreparationTab()"><font color="#6650C9"><i class="fa-solid fa-image"></i> Gallery</font></a>
 - ##### <a href="javascript:void(0);" onclick="switchToHelpTab()"><font color="#6650C9"><i class="fa-solid fa-question"></i> Help</font></a>
-
-

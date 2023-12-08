@@ -33,13 +33,13 @@ library(fontawesome)
 # Getting Started
 
 This vignette provides the examples of output using 
-the **`shinyWGD`** server or package.
+the **`shinyWGD`** server or package. 
 
 <br></br>
 
-# <i>K</i><sub>s</sub> Age Distribution
+# <i>K</i><sub>s</sub>Dist
 
-## Paralog <i>K</i><sub>s</sub> age distribution
+## Paralogous <i>K</i><sub>s</sub> age distribution
 
  ---
 
@@ -51,22 +51,22 @@ the **`shinyWGD`** server or package.
 
  ---
 
-### Ortholog <i>K</i><sub>s</sub> age distribution
-<img src="../inst/shinyWGD/www/images/Wgd_plot_ortholog.svg" width=500>
+### Orthologous <i>K</i><sub>s</sub> age distribution
+<img src="../inst/shinyWGD/www/images/Wgd_plot_ortholog.svg" width=700>
 
  ---
 
-## Raletive rate correctiong
+## Raletive rate correctiong 
 
-### *With paralogous species*
-<img src="../inst/shinyWGD/www/images/Rate_correction_with_paralogous_species.svg" width=600>
+<img src="../inst/shinyWGD/www/images/Wgd_plot_rate.svg" width=700>
 
-### *Without paralogous species*
-<img src="../inst/shinyWGD/www/images/Rate_correction.svg" width=600>
+## Phylo-<i>K</i><sub>s</sub> analysis
+
+<img src="../inst/shinyWGD/www/images/ksTree.Plot.svg" width=700>
 
  ---
 
-# Synteny Aanlysis
+# Collinearity
 
  ---
  
@@ -79,7 +79,6 @@ the **`shinyWGD`** server or package.
 <img src="../inst/shinyWGD/www/images/Elaeis_guineensis.Parallel.svg" width=600>
 
 ### *Micro-synteny plot*
-<img src="../inst/shinyWGD/www/images/microSyn_one_species.svg" width=600>
 
   #### *In true chromosomal length scale*
   <img src="../inst/shinyWGD/www/images/one_species.Multiplicon_5.true_length.svg" width=600>
@@ -115,16 +114,13 @@ the **`shinyWGD`** server or package.
 
  ---
 
-# Tree Building
-
-## <i>K</i><sub>s</sub> unit tree plot
-<img src="../inst/shinyWGD/www/images/ksTree.Plot.svg" width=400>
+# VizWGD
 
 ## TimeTree plot
-<img src="../inst/shinyWGD/www/images/timeTree.Plot.svg" width=400>
+<img src="../inst/shinyWGD/www/images/timeTree.Plot.svg" width=600>
 
-## <i>K</i><sub>s</sub> unit tree and TimeTree joint tree plot
-<img src="../inst/shinyWGD/www/images/ksTree_timeTree.jointPlot.svg" width=600>
+## Ultrametic tree plot
+<img src="../inst/shinyWGD/www/images/ultrametricTree.Plot.svg" width=600>
 
  ---
 
