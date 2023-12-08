@@ -132,44 +132,45 @@ Data_preparation_ui <- tabPanel(
                 )
             ),
             # This div container only works for a remote server mode
-            # div(class="boxLike",
-            #     style="background-color: #FFFFF4;",
-            #     h4(icon("play"), "Script Executing"),
-            #     hr(class="setting"),
-            #     fluidRow(
-            #         column(
-            #             12,
-            #             div(
-            #                 style="padding-left: 5px;",
-            #                 HTML("The scripts will be executed in the <b><font color='#9F5000'>PSB computing cluster</b></font>. Please provide your email address below. A confirmation email will be sent to the provided email address when the job is finished."),
-            #                 column(
-            #                     12,
-            #                     div(
-            #                         style="padding-top:25px;",
-            #                         textInput(
-            #                             inputId="users_email_address",
-            #                             label=HTML("<b>Your email</b>:"),
-            #                             value="",
-            #                             width="100%",
-            #                             placeholder="your_name@mail.com"
-            #                         )
-            #                     )
-            #                 )
-            #             )
-            #         ),
-            #         column(
-            #             12,
-            #             hr(class="setting"),
-            #             div(
-            #                 style="padding-top: 5px;
-            #                        padding-bottom: 15px;
-            #                        padding-left: 5px",
-            #                 HTML("Choose a script to submit to the <b><font color='#9F5000'>PSB computing cluster</b></font>"),
-            #             ),
-            #             uiOutput("WgdKsratesIadhoreScriptRun")
-            #         )
-            #     )
-            # ),
+#             div(class="boxLike",
+#                 style="background-color: #FFFFF4;",
+#                 h4(icon("play"), "Script Executing"),
+#                 hr(class="setting"),
+#                 fluidRow(
+#                     column(
+#                         12,
+#                         div(
+#                             style="padding-left: 5px;",
+# 							  HTML("The scripts will be submited in the <b><font color='#9F5000'>PSB computing cluster</b></font> if you click the sumbit button below. A <b>unique identifier</b> will be generated. Please take notes of this identifier. You must use this identifier to download the output."),
+#                     		  column(
+#                         	  	  12,
+#                         		  uiOutput("WgdKsratesIadhoreScriptRun")
+#                     		  )
+#                         )
+#                     ),
+#                     column(
+#                         12,
+# 						  hr(class="setting"),
+# 						  h5(HTML("<b>OR</b>")),
+# 						  HTML("You can put you email address in below. A confirmation email will be sent to the p
+#                               rovided email address when the job is finished."),
+#                         div(
+# 							  # tags$head(
+# 						      #    tags$style(type="text/css", "label{ display: table-cell; text-align: center; vertical-align: middle; } .form-group { display: table-row;}"),
+# 							  # ),
+#                             style="padding-top: 10px;
+#                             padding-bottom: 10px;",
+#                             textInput(
+#                                 inputId="users_email_address",
+#                                 label=HTML("<b>Your email</b>:&nbsp;&nbsp;"),
+#                                 value="",
+#                                 width="80%",
+#                                 placeholder="your_name@mail.com"
+#                             )
+#                         )
+#                     )
+#                 )
+#             ),
             div(class="boxLike",
                 style="background-color: #FFFFF4;",
                 h4(icon("download"), "Data Downloading"),
