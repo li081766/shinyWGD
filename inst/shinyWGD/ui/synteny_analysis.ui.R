@@ -42,7 +42,7 @@ Synteny_Analysis_ui <- tabPanel(
                                    position: relative;",
                             fileInput(
                                 'collinear_data_zip_file',
-                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                label=h6(icon("file-zipper"), HTML("Upload the <b>.tar.gz</b> File")),
                                 multiple=FALSE,
                                 accept=c(
                                     ".zip",

@@ -39,6 +39,11 @@ output$introductionPanel <- renderUI({
               }
             "),
             tags$script("
+              function switchToTreeReconTab() {
+                Shiny.setInputValue('switchTab', 'tree_reconciliation', {priority: 'event'});
+              }
+            "),
+            tags$script("
               function switchToGalleryTab() {
                 Shiny.setInputValue('switchTab', 'gallery_page', {priority: 'event'});
               }

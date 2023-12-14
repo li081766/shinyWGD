@@ -30,10 +30,6 @@ Whale_Preparation_ui <- tabPanel(
             column(
                 12,
                 uiOutput("whaleDataUploadPanel")
-            ),
-            column(
-                12,
-                uiOutput("whaleCommandPanel")
             )
         ),
         column(
@@ -107,19 +103,19 @@ Whale_Preparation_ui <- tabPanel(
                         #            margin: 5px 5px 5px 200px;
                         #            animation: glowing 5000ms infinite;"
                         # ),
-                        # downloadButton_custom(
-                        #     "speciesTreePlotDownload",
-                        #     status="secondary",
-                        #     icon=icon("download"),
-                        #     label=HTML(""),
-                        #     title="Download svg figure",
-                        #     style="color: #fff;
-                        #            background-color: #019858;
-                        #            border-color: #fff;
-                        #            padding: 5px 14px 5px 14px;
-                        #            margin: 5px 5px 5px 5px;
-                        #            animation: glowingD 5000ms infinite;"
-                        # )
+                        downloadButton_custom(
+                            "speciesTreePlotDownload",
+                            status="secondary",
+                            icon=icon("download"),
+                            label=HTML(""),
+                            title="Download svg figure",
+                            style="color: #fff;
+                                   background-color: #019858;
+                                   border-color: #fff;
+                                   padding: 5px 14px 5px 14px;
+                                   margin: 5px 5px 5px 5px;
+                                   animation: glowingD 5000ms infinite;"
+                        )
                     ),
                     column(
                         12,
@@ -132,6 +128,10 @@ Whale_Preparation_ui <- tabPanel(
             column(
                 12,
                 uiOutput("whaleConfigurePanel")
+            ),
+            column(
+                12,
+                uiOutput("whaleCommandPanel")
             )
         )
     ),

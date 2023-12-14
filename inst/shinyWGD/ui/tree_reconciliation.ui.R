@@ -1,5 +1,5 @@
 Tree_Reconciliation_ui <- tabPanel(
-    "Gene Tree – Species Tree Reconciliation Analysis",
+    "TreeRecon",
     value="tree_reconciliation",
     fluidRow(
         column(
@@ -18,7 +18,7 @@ Tree_Reconciliation_ui <- tabPanel(
                     vertical-align: middle;
                 "
                 ),
-                HTML("Gene Tree – Species Tree Reconciliation Analysis")
+                HTML("TreeRecon: Gene Tree – Species Tree Reconciliation Analysis")
             ),
             style="padding-bottom: 5px;
                    padding-top: 5px;
@@ -29,23 +29,67 @@ Tree_Reconciliation_ui <- tabPanel(
             width=3,
             div(class="boxLike",
                 style="background-color: #FAF9F6;
+                       padding-left: 10px;",
+                h4(icon("upload"), "Uploading"),
+                hr(class="setting"),
+                h5(HTML("<font color='green'><b><i>shinyWGD</i> Whale Analysis</b></font> Data")),
+                style="background-color: #FAF9F6;
                        margin: 5px 5px 5px 5px;
                        padding: 5px 10px 10px 10px;",
-                column(
-                    12,
-                    h4(icon("upload"), "Uploading"),
-                    hr(class="setting"),
-                    fileInput(
-                        inputId="uploadSpeciesTree",
-                        label=HTML("<font color='green'><b>Species Time Tree</b></font> in <font color='red'><b><i>Newick</b></i></font> format:")
+                fluidRow(
+                    class="justify-content-left",
+                    style="padding-bottom: 15px;
+                           padding-top: 5px",
+                    column(
+                        12,
+                        div(
+                            style="padding-left: 10px;
+                                   position: relative;",
+                            fileInput(
+                                'whale_data_zip_file',
+                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                multiple=FALSE,
+                                accept=c(
+                                    ".zip",
+                                    ".gz"
+                                ),
+                                width="80%"
+                            ),
+                            actionButton(
+                                inputId="whale_TreeRecon_example",
+                                "",
+                                icon=icon("question"),
+                                status="secondary",
+                                class="my-start-button-class",
+                                title="Click to use the example data to demo run the TreeRecon Analysis",
+                                style="color: #fff;
+                                       background-color: #87CEEB;
+                                       border-color: #fff;
+                                       position: absolute;
+                                       top: 63%;
+                                       left: 90%;
+                                       margin-top: -15px;
+                                       margin-left: -15px;
+                                       padding: 5px 14px 5px 10px;
+                                       width: 30px; height: 30px; border-radius: 50%;"
+                            )
+                        )
+                    ),
+                    column(
+                        12,
+                        uiOutput("selectedTreeReconDirName")
                     )
-                ),
-                column(
-                    12,
-                    HTML("<font color='orange'><b>ALE files</b></font> directory:<br>"),
-                    shinyDirButton("aleDir", "Select a Folder", "Upload"),
-                    uiOutput("numberAleFiles")
                 )
+                # fluidRow(
+                #     column(
+                #         12,
+                #         hr(class="setting")
+                #     ),
+                #     column(
+                #         12,
+                #         uiOutput("selectedSubAnalysisDir")
+                #     )
+                # )
             ),
             # div(class="boxLike",
             #     style="background-color: #FAF9F6;
@@ -70,105 +114,108 @@ Tree_Reconciliation_ui <- tabPanel(
             #     12,
             #     uiOutput("wgdCommnadPanel")
             # ),
-            div(class="boxLike",
-                style="background-color: #FBFEEC;
-                       margin: 5px 5px 5px 5px;
-                       padding: 5px 10px 10px 10px;",
-                column(
-                    12,
-                    uiOutput("whaleCommandPanel")
-                )
-            )
+            # div(class="boxLike",
+            #     style="background-color: #FBFEEC;
+            #            margin: 5px 5px 5px 5px;
+            #            padding: 5px 10px 10px 10px;",
+            #     column(
+            #         12,
+            #         uiOutput("whaleOutputPanel")
+            #     )
+            # )
         ),
         column(
-            id="speciesTreeOutputPanel",
+            # id="speciesTreeOutputPanel",
             width=9,
             div(class="boxLike",
                 style="background-color: white;",
-                fluidRow(
-                    column(
-                        9,
-                        tags$style(
-                            HTML(".rotate-135 {
+                column(
+                    12,
+                    uiOutput("whaleOutputPanel")
+                ),
+                column(
+                    12,
+                    hr(class="setting")
+                ),
+                column(
+                    12,
+                    h5(HTML("The species cladograms with the putative WGD events in the <b>Whale</b> analysis"))
+                ),
+                # column(
+                #     12,
+                #     hr(class="setting")
+                # ),
+                column(
+                    12,
+                    fluidRow(
+                        column(
+                            9,
+                            tags$style(
+                                HTML(".rotate-135 {
                                     transform: rotate(135deg);
                                 }"),
-                            HTML(".rotate-45{
+                                HTML(".rotate-45{
                                     transform: rotate(45deg);
                                 }")
-                        ),
-                        actionButton(
-                            "svg_vertical_spacing_add_species",
-                            "",
-                            icon("arrows-alt-v"),
-                            title="Expand vertical spacing",
-                            style="border-color: #fff;"
-                        ),
-                        actionButton(
-                            "svg_vertical_spacing_sub_species",
-                            "",
-                            icon(
-                                "down-left-and-up-right-to-center",
-                                verify_fa=FALSE,
-                                class="rotate-135"
                             ),
-                            title="Compress vertical spacing",
-                            style="border-color: #fff;"
-                        ),
-                        actionButton(
-                            "svg_horizontal_spacing_add_species",
-                            "",
-                            icon("arrows-alt-h"),
-                            title="Expand horizontal spacing",
-                            style="border-color: #fff;"
-                        ),
-                        actionButton(
-                            "svg_horizontal_spacing_sub_species",
-                            "",
-                            icon(
-                                "down-left-and-up-right-to-center",
-                                verify_fa=FALSE,
-                                class="rotate-45"
+                            actionButton(
+                                "TreeRecon_svg_vertical_spacing_add_species",
+                                "",
+                                icon("arrows-alt-v"),
+                                title="Expand vertical spacing",
+                                style="border-color: #fff;"
                             ),
-                            title="Compress horizontal spacing",
-                            style="border-color: #fff; "
-                        ),
-                        actionButton(
-                            "update_output",
-                            "",
-                            icon("sync"),
-                            title="Update plot",
-                            style="color: #fff;
-                                   background-color: #019858;
-                                   border-color: #fff;
-                                   padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 200px;
-                                   animation: glowing 5000ms infinite;"
-                        ),
-                        downloadButton_custom(
-                            "speciesTreePlotDownload",
-                            status="secondary",
-                            icon=icon("download"),
-                            label=HTML(""),
-                            title="Download svg figure",
-                            class="my-download-button-class",
-                            style="color: #fff;
+                            actionButton(
+                                "TreeRecon_svg_vertical_spacing_sub_species",
+                                "",
+                                icon(
+                                    "down-left-and-up-right-to-center",
+                                    verify_fa=FALSE,
+                                    class="rotate-135"
+                                ),
+                                title="Compress vertical spacing",
+                                style="border-color: #fff;"
+                            ),
+                            actionButton(
+                                "TreeRecon_svg_horizontal_spacing_add_species",
+                                "",
+                                icon("arrows-alt-h"),
+                                title="Expand horizontal spacing",
+                                style="border-color: #fff;"
+                            ),
+                            actionButton(
+                                "TreeRecon_svg_horizontal_spacing_sub_species",
+                                "",
+                                icon(
+                                    "down-left-and-up-right-to-center",
+                                    verify_fa=FALSE,
+                                    class="rotate-45"
+                                ),
+                                title="Compress horizontal spacing",
+                                style="border-color: #fff; "
+                            ),
+                            downloadButton_custom(
+                                "speciesWhaleTreeReconPlotDownload",
+                                status="secondary",
+                                icon=icon("download"),
+                                label=HTML(""),
+                                title="Download svg figure",
+                                class="my-download-button-class",
+                                style="color: #fff;
                                    background-color: #6B8E23;
                                    border-color: #fff;
                                    padding: 5px 14px 5px 14px;
                                    margin: 5px 5px 5px 5px;"
-                        )
-                    ),
-                    column(
-                        12,
-                        div(
-                            id="speciesTree_plot",
+                            )
+                        ),
+                        column(
+                            12,
+                            div(
+                                id="speciesWhaleTreeRecon_plot",
+                            )
                         )
                     )
                 )
-            ),
-            column(
-                12,
-                uiOutput("whaleConfigurePanel")
             )
         )
     ),

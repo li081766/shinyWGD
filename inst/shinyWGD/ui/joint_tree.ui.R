@@ -27,80 +27,80 @@ Joint_Tree_ui <- tabPanel(
         column(
             id="jointTreeSettingPanel",
             width=3,
-            div(class="boxLike",
-                style="background-color: #FAF9F6;",
-                h5(icon("upload"), HTML("Uploading <font color='green'><i>K</i><sub>s</sub> Tree</font>")),
-                hr(class="setting"),
-                fluidRow(
-                    column(
-                        12,
-                        div(
-                            style="padding-left: 10px;
-                                   position: relative;",
-                            fileInput(
-                                inputId="uploadKsTree",
-                                label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Tree</b></font> File:"),
-                                width="80%",
-                                accept=c(".newick", ".tre", ".tree")
-                            ),
-                            actionButton(
-                                inputId="ks_tree_example",
-                                "",
-                                icon=icon("question"),
-                                status="secondary",
-                                title="Click to see the example of Ks Unit Tree file",
-                                class="my-start-button-class",
-                                style="color: #fff;
-                                       background-color: #87CEEB;
-                                       border-color: #fff;
-                                       position: absolute;
-                                       top: 53%;
-                                       left: 90%;
-                                       margin-top: -15px;
-                                       margin-left: -15px;
-                                       padding: 5px 14px 5px 10px;
-                                       width: 30px; height: 30px; border-radius: 50%;"
-                            )
-                        )
-                    )
-                ),
-                fluidRow(
-                    column(
-                        12,
-                        div(
-                            style="padding-left: 10px;
-                                   position: relative;",
-                            fileInput(
-                                inputId="uploadKsPeakTable",
-                                label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Peak</b></font> File (Optional):"),
-                                width="80%",
-                                accept=c(".csv", ".txt", ".xls")
-                            ),
-                            actionButton(
-                                inputId="ks_peaks_example",
-                                "",
-                                icon=icon("question"),
-                                title="Click to see the example of Ks Peak file",
-                                status="secondary",
-                                class="my-start-button-class",
-                                style="color: #fff;
-                                       background-color: #87CEEB;
-                                       border-color: #fff;
-                                       position: absolute;
-                                       top: 53%;
-                                       left: 90%;
-                                       margin-top: -15px;
-                                       margin-left: -15px;
-                                       padding: 5px 14px 5px 10px;
-                                       width: 30px; height: 30px; border-radius: 50%;"
-                            )
-                        )
-                    )
-                )
-            ),
+            # div(class="boxLike",
+            #     style="background-color: #FAF9F6;",
+            #     h5(icon("upload"), HTML("Uploading <font color='green'><i>K</i><sub>s</sub> Tree</font>")),
+            #     hr(class="setting"),
+            #     fluidRow(
+            #         column(
+            #             12,
+            #             div(
+            #                 style="padding-left: 10px;
+            #                        position: relative;",
+            #                 fileInput(
+            #                     inputId="uploadKsTree",
+            #                     label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Tree</b></font> File:"),
+            #                     width="80%",
+            #                     accept=c(".newick", ".tre", ".tree")
+            #                 ),
+            #                 actionButton(
+            #                     inputId="ks_tree_example",
+            #                     "",
+            #                     icon=icon("question"),
+            #                     status="secondary",
+            #                     title="Click to see the example of Ks Unit Tree file",
+            #                     class="my-start-button-class",
+            #                     style="color: #fff;
+            #                            background-color: #87CEEB;
+            #                            border-color: #fff;
+            #                            position: absolute;
+            #                            top: 53%;
+            #                            left: 90%;
+            #                            margin-top: -15px;
+            #                            margin-left: -15px;
+            #                            padding: 5px 14px 5px 10px;
+            #                            width: 30px; height: 30px; border-radius: 50%;"
+            #                 )
+            #             )
+            #         )
+            #     ),
+            #     fluidRow(
+            #         column(
+            #             12,
+            #             div(
+            #                 style="padding-left: 10px;
+            #                        position: relative;",
+            #                 fileInput(
+            #                     inputId="uploadKsPeakTable",
+            #                     label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Peak</b></font> File (Optional):"),
+            #                     width="80%",
+            #                     accept=c(".csv", ".txt", ".xls")
+            #                 ),
+            #                 actionButton(
+            #                     inputId="ks_peaks_example",
+            #                     "",
+            #                     icon=icon("question"),
+            #                     title="Click to see the example of Ks Peak file",
+            #                     status="secondary",
+            #                     class="my-start-button-class",
+            #                     style="color: #fff;
+            #                            background-color: #87CEEB;
+            #                            border-color: #fff;
+            #                            position: absolute;
+            #                            top: 53%;
+            #                            left: 90%;
+            #                            margin-top: -15px;
+            #                            margin-left: -15px;
+            #                            padding: 5px 14px 5px 10px;
+            #                            width: 30px; height: 30px; border-radius: 50%;"
+            #                 )
+            #             )
+            #         )
+            #     )
+            # ),
             div(class="boxLike",
                 style="background-color: #FBFEEC;",
-                h5(icon("upload"), HTML("Uploading <font color='orange'><i>MCMCTREE</i></font>")),
+                h5(icon("upload"), HTML("Uploading Phylogenetic Tree")),
                 hr(class="setting"),
                 fluidRow(
                     column(
@@ -110,15 +110,15 @@ Joint_Tree_ui <- tabPanel(
                                    position: relative;",
                             fileInput(
                                 inputId="uploadTimeTree",
-                                label=HTML("<font color='orange'><b><i>MCMCTree</i> Tree</b></font> File:"),
+                                label=HTML("<b>Phylogenetic Tree</b> file (Optional: <b>Time Tree</b> file):"),
                                 width="80%",
-                                accept=c(".nexus", ".tre", ".tree")
+                                accept=c(".nexus", ".tre", ".tree", ".newick")
                             ),
                             actionButton(
                                 inputId="MCMC_tree_example",
                                 "",
                                 icon=icon("question"),
-                                title="Click to see the example of MCMCTree Tree file",
+                                title="Click to see the example of the Phylogenetic Tree file",
                                 class="my-start-button-class",
                                 status="secondary",
                                 style="color: #fff;
@@ -143,7 +143,7 @@ Joint_Tree_ui <- tabPanel(
                                    position: relative;",
                             fileInput(
                                 inputId="uploadTimeTable",
-                                label=HTML("<font color='orange'><b>WGDs Time </b></font> File (Optional):"),
+                                label=HTML("<b>WGDs Time </b> File (Optional but only for <i><b>Time Tree</i></b>):"),
                                 width="80%",
                                 accept=c(".csv", ".txt", ".xls")
                             ),

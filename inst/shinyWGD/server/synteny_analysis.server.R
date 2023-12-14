@@ -618,129 +618,140 @@ observeEvent(input$confirm_intra_comparing_go, {
 
         shinyjs::runjs(setTimeoutFunction)
 
-        withProgress(message='Configuration in progress', value=0, {
-            Sys.sleep(.2)
-            incProgress(amount=.3, message="Configuring...")
+        collinearAnalysisDir <- collinear_analysis_dir_Val()
 
-            collinearAnalysisDir <- collinear_analysis_dir_Val()
+        intra_list <- input$iadhore_intra_species_list
+        intra_species <- gsub("_", " ", input$iadhore_intra_species_list)
 
-            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
+        load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
+        intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+        intra_species_dir <- dirname(intra_selected_df$comparing_Path)
 
-            color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
-                            "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
-            color_list_selected <- rep(color_list, length.out=nrow(path_df))
+        anchorpointfile <- paste0(intra_species_dir, "/anchorpoints.txt")
 
-            intra_list <- input$iadhore_intra_species_list
-            intra_species <- gsub("_", " ", input$iadhore_intra_species_list)
+        check_data <- read.table(anchorpointfile, header=TRUE)
+        check_num_rows <- nrow(check_data)
 
-            panelTitle <- paste0("<font color='#DCFEE3'><b><i>", intra_species, "</i></b></font>")
-            queryChrPanelTitle <- HTML(paste("Select <font color='#68AC57'><i><b>", intra_species, "</b></i></font> chromosomes:"))
+        if( check_num_rows > 1 ){
+            withProgress(message='Configuration in progress', value=0, {
+                Sys.sleep(.2)
+                incProgress(amount=.3, message="Configuring...")
 
-            output$iadhore_output <- renderUI({
-                div(
-                    class="boxLike",
-                    style="padding-right: 50px;
+                load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
+
+                color_list <- c("#F5FFE8", "#ECF5FF", "#FDFFFF", "#FBFFFD", "#F0FFF0",
+                                "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
+                color_list_selected <- rep(color_list, length.out=nrow(path_df))
+
+
+                panelTitle <- paste0("<font color='#DCFEE3'><b><i>", intra_species, "</i></b></font>")
+                queryChrPanelTitle <- HTML(paste("Select <font color='#68AC57'><i><b>", intra_species, "</b></i></font> chromosomes:"))
+
+                output$iadhore_output <- renderUI({
+                    div(
+                        class="boxLike",
+                        style="padding-right: 50px;
                            padding-left: 50px;
                            padding-top: 10px;
                            padding-bottom: 10px;
                            background-color: white",
-                    fluidRow(
-                        column(
-                            width=12,
-                            div(
-                                style="padding-bottom: 10px;",
-                                bsButton(
-                                    inputId="plot_intra_button",
-                                    label=HTML(panelTitle),
-                                    style="info"
-                                ) %>%
-                                    bs_embed_tooltip(
-                                        title="Click to see more details",
-                                        placement="right",
-                                        trigger="hover",
-                                        options=list(container="body")
+                        fluidRow(
+                            column(
+                                width=12,
+                                div(
+                                    style="padding-bottom: 10px;",
+                                    bsButton(
+                                        inputId="plot_intra_button",
+                                        label=HTML(panelTitle),
+                                        style="info"
                                     ) %>%
-                                    bs_attach_collapse("plot_panel_collapse_intra"),
-                                bs_collapse(
-                                    id="plot_panel_collapse_intra",
-                                    show=TRUE,
-                                    content=tags$div(
-                                        class="well",
-                                        fluidRow(
-                                            div(
-                                                style="padding-right: 30px;
+                                        bs_embed_tooltip(
+                                            title="Click to see more details",
+                                            placement="right",
+                                            trigger="hover",
+                                            options=list(container="body")
+                                        ) %>%
+                                        bs_attach_collapse("plot_panel_collapse_intra"),
+                                    bs_collapse(
+                                        id="plot_panel_collapse_intra",
+                                        show=TRUE,
+                                        content=tags$div(
+                                            class="well",
+                                            fluidRow(
+                                                div(
+                                                    style="padding-right: 30px;
                                                       padding-left: 30px;
                                                       padding-top: 10px;
                                                       padding-bottom: 10px;",
-                                                fluidRow(
-                                                    column(
-                                                        2,
-                                                        h5(HTML(paste0("<font color='orange'>", icon("dna"), "&nbsp;Chromosome</font> setting")))
-                                                    ),
-                                                    column(
-                                                        4,
-                                                        div(
-                                                            style="padding: 12px 10px 5px 10px;
+                                                    fluidRow(
+                                                        column(
+                                                            2,
+                                                            h5(HTML(paste0("<font color='orange'>", icon("dna"), "&nbsp;Chromosome</font> setting")))
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            div(
+                                                                style="padding: 12px 10px 5px 10px;
                                                                    border-radius: 10px;
                                                                    background-color: #F8F8FF",
-                                                            sliderInput(
-                                                                inputId="chr_num_cutoff",
-                                                                label=HTML("Set the <font color='orange'>mininum gene number</font> in the chromosome:"),
-                                                                min=0,
-                                                                max=500,
-                                                                step=50,
-                                                                value=100
-                                                            ),
-                                                        )
-                                                    ),
-                                                    column(
-                                                        4,
-                                                        div(
-                                                            style="padding: 12px 10px 20px 10px;
-                                                                   border-radius: 10px;
-                                                                   background-color: #F8F8FF",
-                                                            pickerInput(
-                                                                inputId="synteny_query_chr_intra",
-                                                                label=queryChrPanelTitle,
-                                                                options=list(
-                                                                    title='Please select chromosomes below',
-                                                                    `selected-text-format`="count > 1",
-                                                                    `actions-box`=TRUE
+                                                                sliderInput(
+                                                                    inputId="chr_num_cutoff",
+                                                                    label=HTML("Set the <font color='orange'>mininum gene number</font> in the chromosome:"),
+                                                                    min=0,
+                                                                    max=500,
+                                                                    step=50,
+                                                                    value=100
                                                                 ),
-                                                                choices=NULL,
-                                                                selected=NULL,
-                                                                multiple=TRUE
+                                                            )
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            div(
+                                                                style="padding: 12px 10px 20px 10px;
+                                                                   border-radius: 10px;
+                                                                   background-color: #F8F8FF",
+                                                                pickerInput(
+                                                                    inputId="synteny_query_chr_intra",
+                                                                    label=queryChrPanelTitle,
+                                                                    options=list(
+                                                                        title='Please select chromosomes below',
+                                                                        `selected-text-format`="count > 1",
+                                                                        `actions-box`=TRUE
+                                                                    ),
+                                                                    choices=NULL,
+                                                                    selected=NULL,
+                                                                    multiple=TRUE
+                                                                )
                                                             )
                                                         )
-                                                    )
-                                                ),
-                                                hr(class="setting"),
-                                                fluidRow(
-                                                    column(
-                                                        2,
-                                                        h5(HTML("<font color='orange'>Anchor points</font> setting:"))
                                                     ),
-                                                    column(
-                                                        4,
-                                                        div(
-                                                            style="padding: 12px 10px 5px 10px;
+                                                    hr(class="setting"),
+                                                    fluidRow(
+                                                        column(
+                                                            2,
+                                                            h5(HTML("<font color='orange'>Anchor points</font> setting:"))
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            div(
+                                                                style="padding: 12px 10px 5px 10px;
                                                                    border-radius: 10px;
                                                                    background-color: #FFF5EE;",
-                                                            sliderInput(
-                                                                inputId="anchoredPointsCutoff_intra",
-                                                                label=HTML("Set <font color='orange'>anchor points per multiplicon:</font>"),
-                                                                min=3,
-                                                                max=30,
-                                                                step=1,
-                                                                value=3
+                                                                sliderInput(
+                                                                    inputId="anchoredPointsCutoff_intra",
+                                                                    label=HTML("Set <font color='orange'>anchor points per multiplicon:</font>"),
+                                                                    min=3,
+                                                                    max=30,
+                                                                    step=1,
+                                                                    value=3
+                                                                )
                                                             )
-                                                        )
-                                                    ),
-                                                    column(
-                                                        4,
-                                                        tags$head(
-                                                            tags$style(HTML(
-                                                                "@keyframes glowing {
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            tags$head(
+                                                                tags$style(HTML(
+                                                                    "@keyframes glowing {
                                                                      0% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
                                                                      50% { background-color: #64A600; box-shadow: 0 0 20px #43b0d1; }
                                                                      100% { background-color: #548C00; box-shadow: 0 0 5px #0795ab; }
@@ -750,197 +761,198 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                                      50% { background-color: #8C8C00; box-shadow: 0 0 20px #43b0d1; }
                                                                      100% { background-color: #5B5B00; box-shadow: 0 0 5px #0795ab; }
                                                                      }"
-                                                            ))
-                                                        ),
-                                                        actionButton(
-                                                            inputId="synplot_go_intra",
-                                                            "Draw Syntenty Plot",
-                                                            icon=icon("pencil-alt"),
-                                                            status="secondary",
-                                                            class="my-start-button-class",
-                                                            style="color: #fff;
+                                                                ))
+                                                            ),
+                                                            actionButton(
+                                                                inputId="synplot_go_intra",
+                                                                "Draw Syntenty Plot",
+                                                                icon=icon("pencil-alt"),
+                                                                status="secondary",
+                                                                class="my-start-button-class",
+                                                                style="color: #fff;
                                                                    background-color: #009393;
                                                                    border-color: #fff;
                                                                    padding: 5px 10px 5px 10px;
                                                                    margin: 50px 5px 5px 35px;"
+                                                            )
                                                         )
-                                                    )
-                                                ),
-                                                hr(class="setting"),
-                                                fluidRow(
-                                                    column(
-                                                        12,
-                                                        h6(HTML("<b>The Dot Plot:</b>")),
-                                                        tags$style(
-                                                            HTML(".rotate-135 {
+                                                    ),
+                                                    hr(class="setting"),
+                                                    fluidRow(
+                                                        column(
+                                                            12,
+                                                            h6(HTML("<b>The Dot Plot:</b>")),
+                                                            tags$style(
+                                                                HTML(".rotate-135 {
                                                                     transform: rotate(135deg);
                                                                 }"),
-                                                            HTML(".rotate-45{
+                                                                HTML(".rotate-45{
                                                                     transform: rotate(45deg);
                                                                 }")
-                                                        ),
-                                                        actionButton(
-                                                            "svg_spacing_add_dot_intra",
-                                                            "",
-                                                            icon("arrows-alt-v", class="rotate-45"),
-                                                            title="Expand spacing"
-                                                        ),
-                                                        actionButton(
-                                                            "svg_spacing_sub_dot_intra",
-                                                            "",
-                                                            icon(
-                                                                "down-left-and-up-right-to-center",
-                                                                verify_fa=FALSE,
                                                             ),
-                                                            title="Compress spacing"
-                                                        ),
-                                                        downloadButton_custom(
-                                                            "download_dotView_intra",
-                                                            title="Download the Plot",
-                                                            status="secondary",
-                                                            icon=icon("download"),
-                                                            label=HTML(""),
-                                                            class="my-download-button-class",
-                                                            style="color: #fff;
-                                                                   background-color: #6B8E23;
-                                                                   border-color: #fff;
-                                                                   padding: 5px 14px 5px 14px;
-                                                                   margin: 5px 5px 5px 5px;"
-                                                        )
-                                                    ),
-                                                    column(
-                                                        width=12,
-                                                        id="dotView_intra"
-                                                    )
-                                                ),
-                                                hr(class="setting"),
-                                                fluidRow(
-                                                    column(
-                                                        12,
-                                                        h6(HTML("<b>The Parallel Link Plot:</b>"))
-                                                    ),
-                                                    column(
-                                                        4,
-                                                        div(
-                                                            style="/*display: flex; align-items: center;*/
-                                                                   text-align: center;
-                                                                   margin-bottom: 10px;                                                   border-radius: 10px;
-                                                                   border-radius: 10px;
-                                                                   padding: 10px 10px 0px 10px;
-                                                                   background-color: #FFF5EE;",
                                                             actionButton(
-                                                                "svg_vertical_spacing_add_rainbow_intra",
+                                                                "svg_spacing_add_dot_intra",
                                                                 "",
-                                                                icon("arrows-alt-v"),
-                                                                title="Expand vertical spacing"
+                                                                icon("arrows-alt-v", class="rotate-45"),
+                                                                title="Expand spacing"
                                                             ),
                                                             actionButton(
-                                                                "svg_vertical_spacing_sub_rainbow_intra",
+                                                                "svg_spacing_sub_dot_intra",
                                                                 "",
                                                                 icon(
                                                                     "down-left-and-up-right-to-center",
                                                                     verify_fa=FALSE,
-                                                                    class="rotate-135"
                                                                 ),
-                                                                title="Compress vertical spacing"
-                                                            ),
-                                                            actionButton(
-                                                                "svg_horizontal_spacing_add_rainbow_intra",
-                                                                "",
-                                                                icon("arrows-alt-h"),
-                                                                title="Expand horizontal spacing"
-                                                            ),
-                                                            actionButton(
-                                                                "svg_horizontal_spacing_sub_rainbow_intra",
-                                                                "",
-                                                                icon(
-                                                                    "down-left-and-up-right-to-center",
-                                                                    verify_fa=FALSE,
-                                                                    class="rotate-45"
-                                                                ),
-                                                                title="Compress horizontal spacing"
+                                                                title="Compress spacing"
                                                             ),
                                                             downloadButton_custom(
-                                                                "download_SyntenicBlock_intra",
+                                                                "download_dotView_intra",
                                                                 title="Download the Plot",
                                                                 status="secondary",
                                                                 icon=icon("download"),
                                                                 label=HTML(""),
                                                                 class="my-download-button-class",
                                                                 style="color: #fff;
+                                                                   background-color: #6B8E23;
+                                                                   border-color: #fff;
+                                                                   padding: 5px 14px 5px 14px;
+                                                                   margin: 5px 5px 5px 5px;"
+                                                            )
+                                                        ),
+                                                        column(
+                                                            width=12,
+                                                            id="dotView_intra"
+                                                        )
+                                                    ),
+                                                    hr(class="setting"),
+                                                    fluidRow(
+                                                        column(
+                                                            12,
+                                                            h6(HTML("<b>The Parallel Link Plot:</b>"))
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            div(
+                                                                style="/*display: flex; align-items: center;*/
+                                                                   text-align: center;
+                                                                   margin-bottom: 10px;                                                   border-radius: 10px;
+                                                                   border-radius: 10px;
+                                                                   padding: 10px 10px 0px 10px;
+                                                                   background-color: #FFF5EE;",
+                                                                actionButton(
+                                                                    "svg_vertical_spacing_add_rainbow_intra",
+                                                                    "",
+                                                                    icon("arrows-alt-v"),
+                                                                    title="Expand vertical spacing"
+                                                                ),
+                                                                actionButton(
+                                                                    "svg_vertical_spacing_sub_rainbow_intra",
+                                                                    "",
+                                                                    icon(
+                                                                        "down-left-and-up-right-to-center",
+                                                                        verify_fa=FALSE,
+                                                                        class="rotate-135"
+                                                                    ),
+                                                                    title="Compress vertical spacing"
+                                                                ),
+                                                                actionButton(
+                                                                    "svg_horizontal_spacing_add_rainbow_intra",
+                                                                    "",
+                                                                    icon("arrows-alt-h"),
+                                                                    title="Expand horizontal spacing"
+                                                                ),
+                                                                actionButton(
+                                                                    "svg_horizontal_spacing_sub_rainbow_intra",
+                                                                    "",
+                                                                    icon(
+                                                                        "down-left-and-up-right-to-center",
+                                                                        verify_fa=FALSE,
+                                                                        class="rotate-45"
+                                                                    ),
+                                                                    title="Compress horizontal spacing"
+                                                                ),
+                                                                downloadButton_custom(
+                                                                    "download_SyntenicBlock_intra",
+                                                                    title="Download the Plot",
+                                                                    status="secondary",
+                                                                    icon=icon("download"),
+                                                                    label=HTML(""),
+                                                                    class="my-download-button-class",
+                                                                    style="color: #fff;
                                                                        background-color: #6B8E23;
                                                                        border-color: #fff;
                                                                        padding: 5px 14px 5px 14px;
                                                                        margin: 5px 5px 5px 5px;"
+                                                                )
                                                             )
-                                                        )
-                                                    ),
-                                                    column(
-                                                        4,
-                                                        div(
-                                                            style="margin-bottom: 10px;
+                                                        ),
+                                                        column(
+                                                            4,
+                                                            div(
+                                                                style="margin-bottom: 10px;
                                                                    border-radius: 10px;
                                                                    padding: 5px 10px 0px 10px;
                                                                    background-color: #FFF5EE;",
-                                                            prettyRadioButtons(
-                                                                inputId="scale_link_intra",
-                                                                label=HTML("<font color='orange'>Scale in</font>:"),
-                                                                choices=c("Gene order", "True length"),
-                                                                selected="Gene order",
-                                                                icon=icon("check"),
-                                                                inline=TRUE,
-                                                                status="info",
-                                                                animation="jelly"
+                                                                prettyRadioButtons(
+                                                                    inputId="scale_link_intra",
+                                                                    label=HTML("<font color='orange'>Scale in</font>:"),
+                                                                    choices=c("Gene order", "True length"),
+                                                                    selected="Gene order",
+                                                                    icon=icon("check"),
+                                                                    inline=TRUE,
+                                                                    status="info",
+                                                                    animation="jelly"
+                                                                )
                                                             )
+                                                        ),
+                                                        column(
+                                                            width=12,
+                                                            id="SyntenicBlock_intra"
                                                         )
                                                     ),
-                                                    column(
-                                                        width=12,
-                                                        id="SyntenicBlock_intra"
-                                                    )
-                                                ),
-                                                hr(class="splitting"),
-                                                fluidRow(
-                                                    column(
-                                                        12,
-                                                        h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
-                                                    )
-                                                ),
-                                                fluidRow(
-                                                    column(
-                                                        4,
-                                                        textInput(
-                                                            inputId="gene_intra",
-                                                            label="Seach the Gene:",
-                                                            value="",
-                                                            width="100%",
-                                                            placeholder="Gene Id"
+                                                    hr(class="splitting"),
+                                                    fluidRow(
+                                                        column(
+                                                            12,
+                                                            h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
                                                         )
                                                     ),
-                                                    column(
-                                                        1,
-                                                        actionButton(
-                                                            inputId="searchButton_intra",
-                                                            "",
-                                                            width="40px",
-                                                            icon=icon("search"),
-                                                            status="secondary",
-                                                            class="my-start-button-class",
-                                                            style="color: #fff;
+                                                    fluidRow(
+                                                        column(
+                                                            4,
+                                                            textInput(
+                                                                inputId="gene_intra",
+                                                                label="Seach the Gene:",
+                                                                value="",
+                                                                width="100%",
+                                                                placeholder="Gene Id"
+                                                            )
+                                                        ),
+                                                        column(
+                                                            1,
+                                                            actionButton(
+                                                                inputId="searchButton_intra",
+                                                                "",
+                                                                width="40px",
+                                                                icon=icon("search"),
+                                                                status="secondary",
+                                                                class="my-start-button-class",
+                                                                style="color: #fff;
                                                                    background-color: #8080C0;
                                                                    border-color: #fff;
                                                                    margin: 30px 0px 0px -15px; "
+                                                            )
+                                                        ),
+                                                        column(
+                                                            7,
+                                                            uiOutput("foundItemsMessage_intra")
+                                                        ),
+                                                    ),
+                                                    fluidRow(
+                                                        column(
+                                                            12,
+                                                            uiOutput("multiplicon_mirco_intra_plot")
                                                         )
-                                                    ),
-                                                    column(
-                                                        7,
-                                                        uiOutput("foundItemsMessage_intra")
-                                                    ),
-                                                ),
-                                                fluidRow(
-                                                    column(
-                                                        12,
-                                                        uiOutput("multiplicon_mirco_intra_plot")
                                                     )
                                                 )
                                             )
@@ -950,83 +962,94 @@ observeEvent(input$confirm_intra_comparing_go, {
                             )
                         )
                     )
-                )
-            })
+                })
 
-            incProgress(amount=1, message="Configuration Done")
-            Sys.sleep(.4)
-        })
+                incProgress(amount=1, message="Configuration Done")
+                Sys.sleep(.4)
+                observe({
+                    if( length(collinearAnalysisDir) > 0 && !is.null(input$chr_num_cutoff) ){
+                        intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
+                        intra_species_dir <- dirname(intra_selected_df$comparing_Path)
+                        genesFile <- paste0(intra_species_dir, "/genes.txt")
+                        chr_gene_num_file <- paste0(intra_species_dir, "/chr_gene_nums.txt")
 
-        observe({
-            if( length(collinearAnalysisDir) > 0 && !is.null(input$chr_num_cutoff) ){
-                intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
-                intra_species_dir <- dirname(intra_selected_df$comparing_Path)
-                genesFile <- paste0(intra_species_dir, "/genes.txt")
-                chr_gene_num_file <- paste0(intra_species_dir, "/chr_gene_nums.txt")
-
-                if( !file.exists(chr_gene_num_file) ){
-                    if( file.exists(genesFile) ){
-                        genes <- suppressMessages(
-                            vroom(
-                                genesFile,
-                                delim="\t",
-                                col_names=TRUE
+                        if( !file.exists(chr_gene_num_file) ){
+                            if( file.exists(genesFile) ){
+                                genes <- suppressMessages(
+                                    vroom(
+                                        genesFile,
+                                        delim="\t",
+                                        col_names=TRUE
+                                    )
+                                )
+                                gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                                colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
+                                gene_num_df$gene_num <- gene_num_df$gene_num + 1
+                                write.table(
+                                    gene_num_df,
+                                    file=chr_gene_num_file,
+                                    sep="\t",
+                                    quote=F,
+                                    row.names=FALSE
+                                )
+                            }
+                            else{
+                                shinyalert(
+                                    "Oops",
+                                    "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
+                                    type="error"
+                                )
+                            }
+                        }else{
+                            gene_num_df <- read.table(
+                                chr_gene_num_file,
+                                sep="\t",
+                                header=TRUE
                             )
-                        )
-                        gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
-                        colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
-                        gene_num_df$gene_num <- gene_num_df$gene_num + 1
-                        write.table(
-                            gene_num_df,
-                            file=chr_gene_num_file,
-                            sep="\t",
-                            quote=F,
-                            row.names=FALSE
-                        )
-                    }
-                    else{
-                        shinyalert(
-                            "Oops",
-                            "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
-                            type="error"
-                        )
-                    }
-                }else{
-                    gene_num_df <- read.table(
-                        chr_gene_num_file,
-                        sep="\t",
-                        header=TRUE
-                    )
-                }
+                        }
 
-                if( is.null(gene_num_df) ){
-                    querys <- NULL
-                }else{
-                    querys <- gene_num_df %>%
-                        filter(gene_num >= input$chr_num_cutoff) %>%
-                        arrange(seqchr) %>%
-                        pull(seqchr)
-                }
-                if( length(querys) > 0 ){
-                    updatePickerInput(
-                        session,
-                        "synteny_query_chr_intra",
-                        choices=gtools::mixedsort(querys),
-                        choicesOpt=list(
-                            content=lapply(gtools::mixedsort(querys), function(choice) {
-                                HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
-                            })
-                        )
-                    )
-                }else{
-                    shinyalert(
-                        "Oops",
-                        "No chromosome found. Please lower the cutoff of gene number in the chromosome, and then try again...",
-                        type="error"
-                    )
-                }
-            }
-        })
+                        if( is.null(gene_num_df) ){
+                            querys <- NULL
+                        }else{
+                            querys <- gene_num_df %>%
+                                filter(gene_num >= input$chr_num_cutoff) %>%
+                                arrange(seqchr) %>%
+                                pull(seqchr)
+                        }
+                        if( length(querys) > 0 ){
+                            updatePickerInput(
+                                session,
+                                "synteny_query_chr_intra",
+                                choices=gtools::mixedsort(querys),
+                                choicesOpt=list(
+                                    content=lapply(gtools::mixedsort(querys), function(choice) {
+                                        HTML(paste0("<div style='color: #68AC57;'>", choice, "</div>"))
+                                    })
+                                )
+                            )
+                        }else{
+                            shinyalert(
+                                "Oops",
+                                "No chromosome found. Please lower the cutoff of gene number in the chromosome, and then try again...",
+                                type="error"
+                            )
+                        }
+                    }
+                })
+            })
+        }else{
+            shinyalert(
+                "Oops",
+                paste0(
+                    "i-ADHoRe output are not correct for ",
+                    gsub("_", " ", intra_selected_df$comparing_ID),
+                    ". Please check the i-ADHoRe output in the i-adhore.",
+                    intra_selected_df$comparing_ID, "_vs_", intra_selected_df$comparing_ID,
+                    "folder."
+                ),
+                type="error"
+            )
+        }
     }else{
         shinyalert(
             "Oops",
@@ -1038,22 +1061,11 @@ observeEvent(input$confirm_intra_comparing_go, {
 
 observe({
     collinearAnalysisDir <- collinear_analysis_dir_Val()
-    if( length(collinearAnalysisDir) > 0 ){
-        if( isTruthy(input$iadhore_intra_species_list) && input$iadhore_intra_species_list != "" ){
-            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
-            intra_list <- input$iadhore_intra_species_list
-            intra_selected_df <- path_df[path_df$comparing_ID %in% intra_list, ]
-            intra_species_dir <- dirname(intra_selected_df$comparing_Path)
-
-            syn_dir <- dirname(dirname(dirname(intra_selected_df$comparing_Path)))[1]
-            sp_gff_info_xls <- paste0(file.path(syn_dir), "/Species.info.xls")
-
-            sp_chr_len_file <- paste0(dirname(sp_gff_info_xls), "/species_chr_len.RData")
-            if( !file.exists(sp_chr_len_file) ){
-                chr_len_df <- obtain_chromosome_length(sp_gff_info_xls)
-                save(chr_len_df, file=sp_chr_len_file)
-            }
-        }
+    sp_gff_info_xls <- paste0(collinearAnalysisDir, "/Species.info.xls")
+    sp_chr_len_file <- paste0(collinearAnalysisDir, "/species_chr_len.RData")
+    if( !file.exists(sp_chr_len_file) ){
+        chr_len_df <- obtain_chromosome_length(sp_gff_info_xls)
+        save(chr_len_df, file=sp_chr_len_file)
     }
 })
 
@@ -1114,17 +1126,17 @@ observeEvent(input$synplot_go_intra, {
             )
 
             iadhoreDir <- dirname(intra_selected_df$comparing_Path)
+            genesFile <- paste0(iadhoreDir, "/genes.txt")
+            multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
+            multiplicon_ks_file <- paste0(iadhoreDir, "/multiplicons.merged_ks.txt")
+            anchorpointfile <- paste0(iadhoreDir, "/anchorpoints.txt")
+            anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
+            anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
+            ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
 
             withProgress(message='Analyzing in progress', value=0, {
                 Sys.sleep(.2)
                 incProgress(amount=.3, message="Preparing Data...")
-                genesFile <- paste0(iadhoreDir, "/genes.txt")
-                multiplicon_file <- paste0(iadhoreDir, "/multiplicons.txt")
-                multiplicon_ks_file <- paste0(iadhoreDir, "/multiplicons.merged_ks.txt")
-                anchorpointfile <- paste0(iadhoreDir, "/anchorpoints.txt")
-                anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
-                anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
-                ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
 
                 if( file.exists(ks_file) ){
                     if( !file.exists(anchorpointout_file) ){
@@ -3920,7 +3932,6 @@ observeEvent(input$synplot_multiple_go, {
 
             genes_file <- paste0(dirname(multiple_species_df$comparing_Path), "/genes.txt")
             chr_gene_num_file <- paste0(dirname(multiple_species_df$comparing_Path), "/chr_gene_nums.txt")
-
             if( !file.exists(chr_gene_num_file) ){
                 if( file.exists(genes_file) ){
                     genes <- suppressMessages(

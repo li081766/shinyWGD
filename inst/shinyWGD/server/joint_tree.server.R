@@ -1,89 +1,7 @@
-observeEvent(input$ks_tree_example, {
-    showModal(
-        modalDialog(
-            title=HTML("The example of the <font color='green'><b><i>K</i><sub>s</sub> Unit Tree</b></font> file"),
-            size="xl",
-            uiOutput("ks_tree_example_panel")
-        )
-    )
-
-    output$ks_tree_example_panel <- renderUI({
-        fluidRow(
-            div(
-                style="padding-bottom: 10px;
-                       padding-left: 20px;
-                       padding-right: 20px;
-                       max-width: 100%;
-                       overflow-x: auto;",
-                column(
-                    12,
-                    verbatimTextOutput("KsUnitTreeExample"),
-                    HTML(
-                        paste0(
-                            "<b>shinyWGD</b> uses the single-copy gene families built by <b>OrthoFinder</b> to calculate the <i>K</i><sub>s</sub> unit tree. <br>",
-                            "Users can check the tree in the <b>Orthofinder_wd</b> folder, named <b>singleCopyGene.ds_tree.newick</b>.<br>",
-                            "Once uploading the tree file in the <font color='green'><i>K</i><sub>s</sub> Tree</font> File panel, the <i>K</i><sub>s</sub> unit tree will displayed in the right side of the page. <br>"
-                        )
-                    )
-                )
-            )
-        )
-    })
-
-    output$KsUnitTreeExample <- renderText({
-        "(((((Oryza_sativa: 0.851278, Ananas_comosus: 0.414701): 0.161500, Elaeis_guineensis: 0.305355): 0.072762, (Asparagus_officinalis: 0.555063, Phalaenopsis_equestris: 0.759018): 0.059749): 0.134396, (Spirodela_polyrhiza: 0.960412, Zostera_marina: 0.984538): 0.046686): 0.779397, Vitis_vinifera: 0.042369);"
-    })
-})
-
-observeEvent(input$ks_peaks_example, {
-    showModal(
-        modalDialog(
-            title=HTML("The example of the <font color='green'><b><i>K</i><sub>s</sub> peaks table</b></font> file"),
-            size="xl",
-            uiOutput("ks_peaks_example_panel")
-        )
-    )
-
-    ks_peak_data_file <- "www/content/ks_peaks_example.xls"
-    output$ksPeakExampleTable <- renderTable({
-        species_info_example <- read.table(
-            ks_peak_data_file,
-            header=TRUE,
-            sep="\t",
-            quote=""
-        )
-        colnames(species_info_example) <- gsub("\\.", " ", colnames(species_info_example))
-        colnames(species_info_example)[4] <- "95% Confidence Interval"
-
-        species_info_example
-    })
-
-    output$ks_peaks_example_panel <- renderUI({
-        fluidRow(
-            div(
-                style="padding-bottom: 10px;
-                       padding-left: 20px;
-                       padding-right: 20px;
-                       max-width: 100%;
-                       overflow-x: auto;",
-                column(
-                    12,
-                    tableOutput("ksPeakExampleTable"),
-                    HTML(
-                        paste0(
-                            "After uploading the <i>K</i><sub>s</sub> peak file, the corresponding <i>K</i><sub>s</sub> peaks of each studied species will be placed into the <i>K</i><sub>s</sub> unit tree.<br>"
-                        )
-                    )
-                )
-            )
-        )
-    })
-})
-
 observeEvent(input$MCMC_tree_example, {
     showModal(
         modalDialog(
-            title=HTML("The example of the <font color='green'><b>MCMCTree Output Tree</b></font> file"),
+            title=HTML("The example of the <font color='green'><b>Phylogenetic Tree</b></font> file"),
             size="xl",
             uiOutput("MCMC_tree_example_panel")
         )
@@ -99,14 +17,51 @@ observeEvent(input$MCMC_tree_example, {
                        overflow-x: auto;",
                 column(
                     12,
+                    h5(HTML("<br></br><font color='green'><b>Phylogenetic Tree</b></font> Example:"))
+                ),
+                column(
+                    12,
+                    verbatimTextOutput("UltrametricTreeExample"),
+                    HTML(
+                        paste0(
+                            "The format of the tree is <b>Newick</b>. <br>",
+                            "Users can click the text of the species name to change the color or add a symbol to the species in the <b>right Tree panel</b>. <br>",
+                            "Users can click the branch to add the WGD events into the branch.<br></br>"
+                        )
+                    )
+                ),
+                hr(class="setting"),
+                column(
+                    12,
+                    h5(HTML("<font color='green'><b>Time Tree</b></font> Example:"))
+                ),
+                column(
+                    12,
+                    verbatimTextOutput("TimeTreeExample"),
+                    HTML(
+                        paste0(
+                            "The format of the time tree is in <b>Newick</b>, same as the output of <b>TimeTreeFetcher</b> of <b>shinyWGD</b>. <br>",
+                            "Be careful with the time unit, please use the <b>100 million years</b> as the time scale.<br>",
+                            "Users can click the text of the species name to change the color or add a symbol to the species in the <b>right Tree panel</b>. <br>",
+                            "Users can click the branch to add the WGD events into the branch.<br></br>"
+                        )
+                    )
+                ),
+                hr(class="setting"),
+                column(
+                    12,
+                    h5(HTML("<font color='green'><b>MCMCTree Tree</b></font> Example:"))
+                ),
+                column(
+                    12,
                     verbatimTextOutput("MCMCTreeExample"),
                     HTML(
                         paste0(
-                            "Users can upload a nexus tree with the divergence time information. <br>",
                             "The format of the tree is the output file of <b>MCMCTree</b>, named <b>FigTree.tre</b>. <br>",
+                            "Users can also upload a nexus tree with the divergence time information by revising the part after <b>\"=\"</b>. <br>",
                             "Be careful with the time unit, please use the <b>100 million years</b> as the time scale.<br>",
-                            "Users can click the text of the species name to change the color or add a symbol to the species. <br>",
-                            "Users can click the branch to add a WGD into the branch.<br>"
+                            "Users can click the text of the species name to change the color or add a symbol to the species in the <b>right Tree panel</b>. <br>",
+                            "Users can click the branch to add the WGD events into the branch.<br></br>"
                         )
                     )
                 )
@@ -121,6 +76,14 @@ BEGIN TREES;
         UTREE 1 = (((((Oryza_sativa: 0.976947, Ananas_comosus: 0.976947) [&95%HPD={0.926361, 1.05635}]: 0.182469, Elaeis_guineensis: 1.159417) [&95%HPD={1.05857, 1.26857}]: 0.118543, (Asparagus_officinalis: 1.122381, Phalaenopsis_equestris: 1.122381) [&95%HPD={1.00604, 1.20401}]: 0.155580) [&95%HPD={1.16136, 1.39443}]: 0.205808, (Spirodela_polyrhiza: 1.267766, Zostera_marina: 1.267766) [&95%HPD={1.06518, 1.44988}]: 0.216003) [&95%HPD={1.34808, 1.6164}]: 0.061015, Vitis_vinifera: 1.544783) [&95%HPD={1.429, 1.64351}];
 
 END;"
+    })
+
+    output$UltrametricTreeExample <- renderText({
+        "(((((Oryza_sativa, Ananas_comosus), Elaeis_guineensis), (Asparagus_officinalis, Phalaenopsis_equestris)), (Spirodela_polyrhiza, Zostera_marina)), Vitis_vinifera);"
+    })
+
+    output$TimeTreeExample <- renderText({
+        "(Asparagus_officinalis:117.61,(Apostasia_shenzhenica:84.55,(Dendrobium_catenatum:52.11,Phalaenopsis_equestris:52.11):32.44):33.06);"
     })
 })
 
@@ -196,8 +159,12 @@ observe({
             timeTreeFile <- input$uploadTimeTree$datapath
             timeTreeInfo <- readLines(textConnection(readChar(timeTreeFile, file.info(timeTreeFile)$size)))
             closeAllConnections()
-            timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
-            sp_count <- str_count(timeTree, ":")
+            if( any(grep("=", timeTreeInfo)) ){
+                timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
+                sp_count <- str_count(timeTree, ":")
+            }else{
+                sp_count <- as.numeric(str_count(timeTreeInfo[1], ",")) * 2
+            }
         }
         trunc_val <- as.numeric(sp_count) * 20
         heightSpacing$value <- trunc_val
@@ -232,8 +199,24 @@ observe({
             timeTreeFile <- input$uploadTimeTree$datapath
             timeTreeInfo <- readLines(textConnection(readChar(timeTreeFile, file.info(timeTreeFile)$size)))
             closeAllConnections()
-            timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
-            joint_tree_data[["timeTree"]] <- timeTree
+            if( any(grep("=", timeTreeInfo)) ){
+                timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
+                joint_tree_data[["timeTree"]] <- timeTree
+
+                if( isTruthy(input$uploadTimeTable) ){
+                    timeTableFile <- input$uploadTimeTable$datapath
+                    timeTable <- suppressMessages(
+                        vroom(
+                            timeTableFile,
+                            col_names=c("species", "wgds", "color"),
+                            delim="\t"
+                        )
+                    )
+                    joint_tree_data[["wgdtable"]] <- timeTable
+                }
+            }else{
+                joint_tree_data[["ultrametricTree"]] <- timeTreeInfo[1]
+            }
         }
         if( isTruthy(input$uploadKsPeakTable) ){
             ksPeakTableFile <- input$uploadKsPeakTable$datapath
@@ -254,18 +237,10 @@ observe({
             }
             joint_tree_data[["ksPeak"]] <- ksPeak
         }
-        if( isTruthy(input$uploadTimeTable) ){
-            timeTableFile <- input$uploadTimeTable$datapath
-            timeTable <- suppressMessages(
-                vroom(
-                    timeTableFile,
-                    col_names=c("species", "wgds", "color"),
-                    delim="\t"
-                )
-            )
-            joint_tree_data[["wgdtable"]] <- timeTable
-        }
+
         joint_tree_data[["height"]] <- heightSpacing$value
+        joint_tree_data[["plot_id"]] <- "jointtree_plot"
+        joint_tree_data[["download_id"]] <- "jointTreePlotDownload"
         session$sendCustomMessage("jointTreePlot", joint_tree_data)
     }
 })

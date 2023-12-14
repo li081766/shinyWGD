@@ -205,6 +205,8 @@ output$ksanalysisPanel <- renderUI({
             replace_informal_name_to_latin_name(names_df, x)
         })
 
+        ref_species_remaining <- sort(species_tree_df[, 1])
+
         div(class="boxLike",
             style="background-color: #FBFEEC;",
             fluidRow(
@@ -223,7 +225,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="paralogous_ks_button",
-                                label=HTML("<font color='white'><b>&nbsp;Paralog <i>K</i><sub>s</sub>&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Paralogous <i>K</i><sub>s</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -276,7 +278,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="orthologous_ks_button",
-                                label=HTML("<font color='white'><b>&nbsp;Ortholog <i>K</i><sub>s</sub>&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Orthologous <i>K</i><sub>s</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -293,9 +295,11 @@ output$ksanalysisPanel <- renderUI({
                                     class="well",
                                     pickerInput(
                                         inputId="ortholog_ks_files_list_A",
-                                        label=HTML("<b><font color='#38B0E4'>Reference Species</font></b>"),
+                                        label=HTML("Select <b><font color='#38B0E4'>Species</font></b> to compare"),
                                         options=list(
-                                            title='Please select species below'
+                                            title='Please select species below',
+                                            `selected-text-format`="count > 1",
+                                            "max-options"=5
                                         ),
                                         choices=unlist(species_list),
                                         choicesOpt=list(
@@ -303,23 +307,21 @@ output$ksanalysisPanel <- renderUI({
                                                 paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>")
                                             })
                                         ),
-                                        multiple=FALSE
+                                        multiple=TRUE
                                     ),
                                     pickerInput(
-                                        inputId="ortholog_ks_files_list_B",
-                                        label=HTML("<b><font color='#B97D4B'>Species to Compare</font></b>"),
+                                        inputId="ortholog_paranome_species",
+                                        label=HTML("Select <b><font color='#fc8d59'>Species</font></b> to draw <font color='#fc8d59'><b>paralogous <i>K</i><sub>s</sub> distribution</b></font> (optional):"),
                                         options=list(
-                                            title='Please select species below',
-                                            `selected-text-format`="count > 1",
-                                            `actions-box`=TRUE
+                                            title='Please select species below'
                                         ),
                                         choices=unlist(species_list),
                                         choicesOpt=list(
                                             content=lapply(unlist(species_list), function(choice) {
-                                                paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
+                                                paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
                                             })
                                         ),
-                                        multiple=TRUE
+                                        multiple=FALSE
                                     ),
                                     div(
                                         class="d-flex justify-content-end",
@@ -345,7 +347,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="rate_correct_button",
-                                label=HTML("<font color='white'><b>&nbsp;Rate Correction&nbsp;&#x25BC;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Rate Correction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -366,7 +368,13 @@ output$ksanalysisPanel <- renderUI({
                                         options=list(
                                             title='Please select species below'
                                         ),
-                                        choices=character(0)
+                                        choices=ref_species_remaining,
+                                        choicesOpt=list(
+                                            content=lapply(ref_species_remaining, function(choice) {
+                                                choice <- gsub("_", " ", choice)
+                                                paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                                            })
+                                        )
                                     ),
                                     pickerInput(
                                         inputId="select_outgroup_species",
@@ -386,7 +394,7 @@ output$ksanalysisPanel <- renderUI({
                                         inputId="select_study_species",
                                         label=HTML("Choose <b><font color='#C699FF'>Other</font></b> species to analyze:"),
                                         options=list(
-                                            title='Please select one or multiple species below',
+                                            title='Please select species below',
                                             `selected-text-format`="count > 1",
                                             `actions-box`=TRUE
                                         ),
@@ -398,24 +406,115 @@ output$ksanalysisPanel <- renderUI({
                                         ),
                                         multiple=TRUE
                                     ),
-                                    hr(class="setting"),
-                                    pickerInput(
-                                        inputId="select_focal_species",
-                                        label=HTML("Choose <b><font color='#54B4D3'>Focal</font></b> species to draw paralog <b><i>K</i><sub>s</sub></b> distribution (optional):"),
-                                        options=list(
-                                            title='Please select species below'
-                                        ),
-                                        choices=unlist(species_list),
-                                        choicesOpt=list(
-                                            content=lapply(unlist(species_list), function(choice) {
-                                                paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
-                                            })
+                                    div(
+                                        class="d-flex justify-content-end",
+                                        actionButton(
+                                            inputId="confirm_rate_correction_go",
+                                            "Confirm analysis",
+                                            title="Confirm the selection",
+                                            class="my-confirm-button-class",
+                                            status="secondary",
+                                            style="color: #fff;
+                                                   background-color: #C0C0C0;
+                                                   border-color: #fff;
+                                                   margin: 22px 0px 0px 0px; ",
+                                        )
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    column(
+                        width=12,
+                        div(
+                            style="padding-bottom: 10px;",
+                            bsButton(
+                                inputId="phylo_ks_button",
+                                label=HTML("<font color='white'><b>&nbsp;Phylo-<i>K</i><sub>s</sub> Analysis&nbsp;&#x25BC;</b></font>"),
+                                icon=icon("list"),
+                                style="success"
+                            ) %>%
+                                bs_embed_tooltip(
+                                    title="Click to set",
+                                    placement="right",
+                                    trigger="hover",
+                                    options=list(container="body")
+                                ) %>%
+                                bs_attach_collapse("phylo_ks_collapse"),
+                            bs_collapse(
+                                id="phylo_ks_collapse",
+                                content=tags$div(
+                                    class="well",
+                                    fluidRow(
+                                        column(
+                                            12,
+                                            div(
+                                                style="padding-left: 10px;
+                                                       position: relative;",
+                                                fileInput(
+                                                    inputId="uploadPhyloKsTree",
+                                                    label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Tree</b></font> File:"),
+                                                    width="80%",
+                                                    accept=c(".newick", ".tre", ".tree")
+                                                ),
+                                                actionButton(
+                                                    inputId="phylo_ks_tree_example",
+                                                    "",
+                                                    icon=icon("question"),
+                                                    status="secondary",
+                                                    title="Click to see the example of Ks Unit Tree file",
+                                                    class="my-start-button-class",
+                                                    style="color: #fff;
+                                                           background-color: #87CEEB;
+                                                           border-color: #fff;
+                                                           position: absolute;
+                                                           top: 53%;
+                                                           left: 90%;
+                                                           margin-top: -15px;
+                                                           margin-left: -15px;
+                                                           padding: 5px 14px 5px 10px;
+                                                           width: 30px; height: 30px; border-radius: 50%;"
+                                                )
+                                            )
+                                        )
+                                    ),
+                                    fluidRow(
+                                        column(
+                                            12,
+                                            div(
+                                                style="padding-left: 10px;
+                                                       position: relative;",
+                                                fileInput(
+                                                    inputId="uploadPhyloKsPeakTable",
+                                                    label=HTML("<font color='green'><b><i>K</i><sub>s</sub> Peak</b></font> File (Optional):"),
+                                                    width="80%",
+                                                    accept=c(".csv", ".txt", ".xls")
+                                                ),
+                                                actionButton(
+                                                    inputId="phylo_ks_peaks_example",
+                                                    "",
+                                                    icon=icon("question"),
+                                                    title="Click to see the example of Ks Peak file",
+                                                    status="secondary",
+                                                    class="my-start-button-class",
+                                                    style="color: #fff;
+                                                           background-color: #87CEEB;
+                                                           border-color: #fff;
+                                                           position: absolute;
+                                                           top: 53%;
+                                                           left: 90%;
+                                                           margin-top: -15px;
+                                                           margin-left: -15px;
+                                                           padding: 5px 14px 5px 10px;
+                                                           width: 30px; height: 30px; border-radius: 50%;"
+                                                )
+                                            )
                                         )
                                     ),
                                     div(
                                         class="d-flex justify-content-end",
                                         actionButton(
-                                            inputId="confirm_rate_correction_go",
+                                            inputId="confirm_phylo_ks_go",
                                             "Confirm analysis",
                                             title="Confirm the selection",
                                             class="my-confirm-button-class",
@@ -436,59 +535,118 @@ output$ksanalysisPanel <- renderUI({
     }
 })
 
-observeEvent(input$ortholog_ks_files_list_A, {
-    if( is.null(buttonClicked()) ){
-        ksAnalysisDir <- ks_example_dir
-    }
-    else if( buttonClicked() == "fileInput" ){
-        ksAnalysisDir <- ks_analysis_dir_Val()
-    }
-    else if( buttonClicked() == "actionButton" ){
-        ksAnalysisDir <- ks_example_dir
-    }
-
-    ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-    names_df <- map_informal_name_to_latin_name(species_info_file[1])
-    paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
-    species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
-        replace_informal_name_to_latin_name(names_df, x)
-    })
-    selected_species <- input$ortholog_ks_files_list_A
-    remaining_species <- setdiff(unlist(species_list), selected_species)
-    updatePickerInput(
-        session,
-        "ortholog_ks_files_list_B",
-        choices=remaining_species,
-        choicesOpt=list(
-            content=lapply(remaining_species, function(choice) {
-                paste0("<div style='color: #B97D4B; font-style: italic;'>", choice, "</div>")
-            })
+observeEvent(input$phylo_ks_tree_example, {
+    showModal(
+        modalDialog(
+            title=HTML("The example of the <font color='green'><b><i>K</i><sub>s</sub> Unit Tree</b></font> file"),
+            size="xl",
+            uiOutput("phylo_ks_tree_example_panel")
         )
     )
+
+    output$phylo_ks_tree_example_panel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    verbatimTextOutput("phyloKsUnitTreeExample"),
+                    HTML(
+                        paste0(
+                            "<b>shinyWGD</b> uses the single-copy gene families built by <b>OrthoFinder</b> to calculate the <i>K</i><sub>s</sub> unit tree. <br>",
+                            "Users can check the tree in the <b>Orthofinder_wd</b> folder, named <b>singleCopyGene.ds_tree.newick</b>.<br>",
+                            "Once uploading the tree file in the <font color='green'><i>K</i><sub>s</sub> Tree</font> File panel, the <i>K</i><sub>s</sub> unit tree will displayed in the right side of the page. <br>"
+                        )
+                    )
+                )
+            )
+        )
+    })
+
+    output$phyloKsUnitTreeExample <- renderText({
+        "(((Phalaenopsis_equestris: 0.236436, Dendrobium_catenatum: 0.167833): 0.243397, Apostasia_shenzhenica: 0.443454): 0.597705, Asparagus_officinalis: 0.485116);"
+    })
+})
+
+observeEvent(input$phylo_ks_peaks_example, {
+    showModal(
+        modalDialog(
+            title=HTML("The example of the <font color='green'><b><i>K</i><sub>s</sub> peaks table</b></font> file"),
+            size="xl",
+            uiOutput("phylo_ks_peaks_example_panel")
+        )
+    )
+
+    ks_peak_data_file <- "www/content/ks_peaks_example.xls"
+    output$phyloKsPeakExampleTable <- renderTable({
+        species_info_example <- read.table(
+            ks_peak_data_file,
+            header=TRUE,
+            sep="\t",
+            quote=""
+        )
+        colnames(species_info_example) <- gsub("\\.", " ", colnames(species_info_example))
+        colnames(species_info_example)[4] <- "95% Confidence Interval"
+
+        species_info_example
+    })
+
+    output$phylo_ks_peaks_example_panel <- renderUI({
+        fluidRow(
+            div(
+                style="padding-bottom: 10px;
+                       padding-left: 20px;
+                       padding-right: 20px;
+                       max-width: 100%;
+                       overflow-x: auto;",
+                column(
+                    12,
+                    tableOutput("phyloKsPeakExampleTable"),
+                    HTML(
+                        paste0(
+                            "After uploading the <i>K</i><sub>s</sub> peak file, the corresponding <i>K</i><sub>s</sub> peaks of each studied species will be placed into the <i>K</i><sub>s</sub> unit tree.<br>"
+                        )
+                    )
+                )
+            )
+        )
+    })
 })
 
 observeEvent(input$rate_correct_button, {
     shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="block";')
     shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="none";')
     shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("phylo_ks_collapse").style.display="none";')
 })
 
 observeEvent(input$paralogous_ks_button, {
     shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="block";')
     shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="none";')
     shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("phylo_ks_collapse").style.display="none";')
 })
 
 observeEvent(input$orthologous_ks_button, {
     shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="block";')
-    #shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.transition="height 0.5s ease-in-out";')
     shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="none";')
     shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("phylo_ks_collapse").style.display="none";')
 })
 
-observe({
-    observeEvent(input$treeOrderList, {
+observeEvent(input$phylo_ks_button, {
+    shinyjs::runjs('document.getElementById("ortholog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("rate_correction_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("paralog_ks_files_collapse").style.display="none";')
+    shinyjs::runjs('document.getElementById("phylo_ks_collapse").style.display="block";')
+})
+
+observeEvent(input$select_ref_species, {
+    if( isTruthy(input$select_ref_species) && input$select_ref_species != "" ){
         num_rows <- length(input$treeOrderList) / 3
         num_cols <- 3
         species_tree_df <- matrix(
@@ -498,91 +656,61 @@ observe({
             byrow=TRUE
         )
 
-        species_tree_df <- species_tree_df[-nrow(species_tree_df), ]
-        species_remaining <- sort(species_tree_df[, 1])
+        species_tree_df <- as.data.frame(species_tree_df)
+        colnames(species_tree_df) <- c("Species", "id", "pId")
+        species_tree_df$id <- as.numeric(species_tree_df$id)
+        species_tree_df$pId <- as.numeric(species_tree_df$pId)
+
+        under_score <- grepl("_", species_tree_df[1, 1])
+
+        if( under_score ){
+            bait_id <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "id"]
+            bait_pId <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "pId"]
+        }else{
+            bait_id <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "id"]
+            bait_pId <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "pId"]
+        }
+
+        filtered_df <- species_tree_df[species_tree_df$id > bait_id, ]
+        if( filtered_df[1, "pId"] == bait_pId ){
+            filtered_df <- filtered_df[-1, ]
+        }
 
         updatePickerInput(
             session,
-            "select_ref_species",
-            choices=species_remaining,
+            "select_outgroup_species",
+            choices=filtered_df$Species,
             choicesOpt=list(
-                content=lapply(species_remaining, function(choice) {
+                content=lapply(filtered_df$Species, function(choice) {
                     choice <- gsub("_", " ", choice)
-                    paste0("<div style='color: #54B4D3; font-style: italic;'>", choice, "</div>")
+                    paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
                 })
             )
         )
-    })
-})
 
-observe({
-    if( isTruthy(input$select_ref_species) && input$select_ref_species != "" ){
-        observeEvent(input$treeOrderList, {
-            num_rows <- length(input$treeOrderList) / 3
-            num_cols <- 3
-            species_tree_df <- matrix(
-                input$treeOrderList,
-                nrow=num_rows,
-                ncol=num_cols,
-                byrow=TRUE
-            )
-
-            species_tree_df <- as.data.frame(species_tree_df)
-            colnames(species_tree_df) <- c("Species", "id", "pId")
-            species_tree_df$id <- as.numeric(species_tree_df$id)
-            species_tree_df$pId <- as.numeric(species_tree_df$pId)
-
-            under_score <- grepl("_", species_tree_df[1, 1])
-
-            if( under_score ){
-                bait_id <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "id"]
-                bait_pId <- species_tree_df[species_tree_df$Species == gsub(" ", "_", input$select_ref_species), "pId"]
-            }else{
-                bait_id <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "id"]
-                bait_pId <- species_tree_df[species_tree_df$Species == gsub("_", " ", input$select_ref_species), "pId"]
-            }
-
-            filtered_df <- species_tree_df[species_tree_df$id > bait_id, ]
-            if( filtered_df[1, "pId"] == bait_pId ){
-                filtered_df <- filtered_df[-1, ]
+        observeEvent(input$select_outgroup_species, {
+            outgroup_id <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "id"]
+            outgroup_pId <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "pId"]
+            filtered_study_df <- species_tree_df[(species_tree_df$id < outgroup_id) & (species_tree_df$Species != input$select_ref_species), ]
+            if( nrow(filtered_study_df) > 0 && filtered_study_df[nrow(filtered_study_df), "pId"] == outgroup_pId ){
+                filtered_study_df <- filtered_study_df[-nrow(filtered_study_df), ]
             }
             updatePickerInput(
                 session,
-                "select_outgroup_species",
-                choices=filtered_df$Species,
+                "select_study_species",
+                choices=sort(filtered_study_df$Species),
                 choicesOpt=list(
-                    content=lapply(filtered_df$Species, function(choice) {
+                    content=lapply(sort(filtered_study_df$Species), function(choice) {
                         choice <- gsub("_", " ", choice)
-                        paste0("<div style='color: #fc8d59; font-style: italic;'>", choice, "</div>")
+                        paste0("<div style='color: #998ec3; font-style: italic;'>", choice, "</div>")
                     })
                 )
             )
-
-            observeEvent(input$select_outgroup_species, {
-                outgroup_id <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "id"]
-                outgroup_pId <- species_tree_df[species_tree_df$Species == input$select_outgroup_species, "pId"]
-                filtered_study_df <- species_tree_df[(species_tree_df$id < outgroup_id) & (species_tree_df$Species != input$select_ref_species), ]
-                if( nrow(filtered_study_df) > 0 && filtered_study_df[nrow(filtered_study_df), "pId"] == outgroup_pId ){
-                    filtered_study_df <- filtered_study_df[-nrow(filtered_study_df), ]
-                }
-                updatePickerInput(
-                    session,
-                    "select_study_species",
-                    choices=sort(filtered_study_df$Species),
-                    choicesOpt=list(
-                        content=lapply(sort(filtered_study_df$Species), function(choice) {
-                            choice <- gsub("_", " ", choice)
-                            paste0("<div style='color: #998ec3; font-style: italic;'>", choice, "</div>")
-                        })
-                    )
-                )
-            })
         })
     }
 })
 
 observeEvent(input$confirm_paralog_ks_go, {
-    shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
     shinyjs::runjs("$('#confirm_paralog_ks_go').css('background-color', 'green');")
     updateActionButton(
         session,
@@ -596,6 +724,11 @@ observeEvent(input$confirm_paralog_ks_go, {
         }, 12000);"
 
     shinyjs::runjs(setTimeoutFunction)
+
+    # shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+
+    shinyjs::addClass(selector = "#Wgd_plot_paralog", class = "my-svg-container")
+    shinyjs::runjs('$(".my-svg-container").empty();')
 
     if( is.null(buttonClicked()) ){
         ksAnalysisDir <- ks_example_dir
@@ -616,7 +749,6 @@ observeEvent(input$confirm_paralog_ks_go, {
         paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
         # infer the peaks of paralog ks
-        ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
         species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
@@ -639,17 +771,18 @@ observeEvent(input$confirm_paralog_ks_go, {
                         4,
                         div(
                             style="background-color: #F8F8FF;
-                                   padding: 10px 10px 1px 10px;
+                                   padding: 10px 10px 10px -1px;
                                    border-radius: 10px;",
                             prettyRadioButtons(
-                                inputId="peaks_choice",
-                                label=HTML("<font color='orange'>Peaks in</font>:"),
-                                choices=c("Paranome", "Anchored pairs"),
+                                inputId="distribution_choice",
+                                label=HTML("<font color='orange'><i>K</i><sub>s</sub> Distribution</font>:"),
+                                choices=c("All", "Paranome", "Anchor pairs"),
+                                selected="All",
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
                             )
-                        ),
+                        )
                     ),
                     column(
                         4,
@@ -660,12 +793,12 @@ observeEvent(input$confirm_paralog_ks_go, {
                             prettyRadioButtons(
                                 inputId="gmm_choice",
                                 label=HTML("<font color='orange'>GMM modelling</font>:"),
-                                choices=c("Paranome", "Anchored pairs"),
+                                choices=c("Paranome", "Anchor pairs"),
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
                             )
-                        ),
+                        )
                     ),
                     column(
                         4,
@@ -675,8 +808,8 @@ observeEvent(input$confirm_paralog_ks_go, {
                                    border-radius: 10px;",
                             prettyRadioButtons(
                                 inputId="sizer_choice",
-                                label=HTML("<font color='orange'>Sizer modelling</font>:"),
-                                choices=c("Paranome", "Anchored pairs"),
+                                label=HTML("<font color='orange'>Sizer analysis</font>:"),
+                                choices=c("Paranome", "Anchor pairs"),
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
@@ -695,14 +828,15 @@ observeEvent(input$confirm_paralog_ks_go, {
                                    padding: 10px 10px 1px 10px;
                                    border-radius: 10px;",
                             prettyRadioButtons(
-                                inputId="peaks_choice",
-                                label=HTML("<font color='orange'>Peaks in</font>:"),
+                                inputId="distribution_choice",
+                                label=HTML("<font color='orange'><i>K</i><sub>s</sub> Distribution</font>:"),
                                 choices=c("Paranome"),
+                                selected="Paranome",
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
                             )
-                        ),
+                        )
                     ),
                     column(
                         4,
@@ -714,6 +848,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 inputId="gmm_choice",
                                 label=HTML("<font color='orange'>GMM modelling</font>:"),
                                 choices=c("Paranome"),
+                                selected="Paranome",
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
@@ -730,6 +865,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 inputId="sizer_choice",
                                 label=HTML("<font color='orange'>Sizer modelling</font>:"),
                                 choices=c("Paranome"),
+                                selected="Paranome",
                                 icon=icon("check"),
                                 status="info",
                                 animation="jelly"
@@ -749,7 +885,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                            padding-top: 10px;",
                     column(
                         12,
-                        h4(HTML("<b><font color='#9B3A4D'>Paralog <i>K</i><sub>s</sub></font> Age Distribution</b>"))
+                        h4(HTML("<b><font color='#9B3A4D'>Paralogous <i>K</i><sub>s</sub></font> Age Distribution</b>"))
                     ),
                     div(
                         style="padding: 10px 10px 10px 10px;",
@@ -760,14 +896,14 @@ observeEvent(input$confirm_paralog_ks_go, {
                                 h5(HTML("Select <b><font color='orange'>Data</b></font> for:"))
                             ),
                             column(
-                                6,
+                                8,
                                 uiOutput("data_choosing")
                             ),
                             column(
                                 2,
                                 actionButton(
                                     inputId="paralog_ks_plot_go",
-                                    HTML("Start<br><b>paralog <i>K</i><sub>s</sub></b></br>analysis"),
+                                    "Start",
                                     icon=icon("play"),
                                     status="secondary",
                                     title="Click to start",
@@ -776,7 +912,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                                            background-color: #27ae60;
                                            border-color: #fff;
                                            padding: 5px 14px 5px 14px;
-                                           margin: 5px 5px 5px 5px;"
+                                           margin: 25px 5px 5px 5px;"
                                 )
                             )
                         ),
@@ -847,7 +983,7 @@ observeEvent(input$confirm_paralog_ks_go, {
                         hr(class="setting"),
                         fluidRow(
                             column(
-                                9,
+                                12,
                                 fluidRow(
                                     column(
                                         6,
@@ -910,10 +1046,14 @@ observeEvent(input$confirm_paralog_ks_go, {
                     ),
                     fluidRow(
                         column(
-                            12,
+                            6,
                             div(
                                 id="Wgd_plot_paralog"
                             )
+                        ),
+                        column(
+                            6,
+                            uiOutput("ks_peak_table_output")
                         )
                     ),
                     hr(class="setting"),
@@ -933,12 +1073,12 @@ observeEvent(input$confirm_paralog_ks_go, {
                                                background-color: #F0FFFF",
                                         sliderInput(
                                             inputId="y_limit_paralog",
-                                            label=HTML("Set the <font color='orange'>Y axis limit</font>:"),
+                                            label=HTML("<font color='orange'>Y axis limit</font>:"),
                                             min=0,
-                                            max=10000,
-                                            step=500,
+                                            max=6000,
+                                            step=200,
                                             value=2000
-                                        ),
+                                        )
                                     )
                                 ),
                                 column(
@@ -956,50 +1096,10 @@ observeEvent(input$confirm_paralog_ks_go, {
                                             choices=list(),
                                             selected=NULL,
                                             multiple=FALSE
-                                        ),
+                                        )
                                     )
                                 )
-                                # column(
-                                #     4,
-                                #     div(
-                                #         style="padding: 12px 10px 5px 10px;
-                                #                border-radius: 10px;
-                                #                background-color: #F0FFFF",
-                                #         sliderInput(
-                                #             inputId="gmm_comp_paralog",
-                                #             label=HTML("<font color='orange'>Choose GMM component</font>:&nbsp;"),
-                                #             min=0,
-                                #             step=1,
-                                #             max=10,
-                                #             value=3
-                                #         )
-                                #     )
-                                # ),
-                                # column(
-                                #     2,
-                                #     div(
-                                #         style="padding: 12px 10px 5px 10px;
-                                #                border-radius: 10px;
-                                #                background-color: #F0FFFF",
-                                #         HTML("Add the <font color='orange'>GMM modelling lines</font>:"),
-                                #         prettyToggle(
-                                #             inputId="add_gmm_mode_lines",
-                                #             label_on="Yes!",
-                                #             icon_on=icon("check"),
-                                #             status_on="info",
-                                #             status_off="warning",
-                                #             label_off="No..",
-                                #             icon_off=icon("remove", verify_fa=FALSE)
-                                #         )
-                                #     )
-                                # )
                             )
-                        ),
-                    ),
-                    fluidRow(
-                        column(
-                            12,
-                            uiOutput("ks_peak_table_output")
                         )
                     )
                 )
@@ -1020,277 +1120,138 @@ observeEvent(input$confirm_paralog_ks_go, {
     }
 })
 
+observeEvent(input$distribution_choice, {
+    if( isTruthy(input$distribution_choice) && input$distribution_choice == "Paranome" ){
+        updatePrettyRadioButtons(
+            session,
+            "gmm_choice",
+            choices=c("Paranome"),
+            selected="Paranome"
+        )
+        updatePrettyRadioButtons(
+            session,
+            "sizer_choice",
+            choices=c("Paranome"),
+            selected="Paranome"
+        )
+    }else if( isTruthy(input$distribution_choice) && input$distribution_choice == "Anchor pairs" ){
+        updatePrettyRadioButtons(
+            session,
+            "gmm_choice",
+            choices=c("Anchor pairs"),
+            selected="Anchor pairs"
+        )
+        updatePrettyRadioButtons(
+            session,
+            "sizer_choice",
+            choices=c("Anchor pairs"),
+            selected="Anchor pairs"
+        )
+    }else if( isTruthy(input$distribution_choice) && input$distribution_choice == "All" ){
+        updatePrettyRadioButtons(
+            session,
+            "gmm_choice",
+            choices=c("Paranome", "Anchor pairs"),
+            selected="Paranome"
+        )
+        updatePrettyRadioButtons(
+            session,
+            "sizer_choice",
+            choices=c("Paranome", "Anchor pairs"),
+            selected="Paranome"
+        )
+    }
+})
+
+output$ks_peak_table_output <- renderUI({
+    if( isTruthy(input$gmm_comp_paralog) && input$gmm_comp_paralog != "" ){
+        fluidRow(
+            column(
+                10,
+                fluidRow(
+                    column(
+                        12,
+                        h5(HTML("<b><font color='#9B3A4D'><i>K</i><sub>s</sub></font></b> Peak Info")),
+                        DTOutput("selected_gmm_table")
+                    ),
+                    column(
+                        12,
+                        div(class="float-right",
+                            downloadButton_custom(
+                                "ksPeakCsvDownload",
+                                title="Download the Peaks info Table",
+                                status="secondary",
+                                icon=icon("download"),
+                                label=".csv",
+                                class="my-download-button-class",
+                                style="color: #fff;
+                                       background-color: #6B8E23;
+                                       border-color: #fff;
+                                       padding: 5px 14px 5px 14px;
+                                       margin: 25px 5px 5px 5px;"
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    }
+})
+
 observeEvent(input$paralog_ks_plot_go, {
-    #shinyjs::runjs('document.getElementById("Wgd_plot_paralog").innerHTML="";')
-    withProgress(message='Analyzing in progress', value=0, {
-        if( is.null(buttonClicked()) ){
-            ksAnalysisDir <- ks_example_dir
-        }
-        else if( buttonClicked() == "fileInput" ){
-            ksAnalysisDir <- ks_analysis_dir_Val()
-        }
-        else if( buttonClicked() == "actionButton" ){
-            ksAnalysisDir <- ks_example_dir
-        }
+    shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
+    if( file.exists(species_info_file[1]) ){
+        paralog_species <- input$paralog_ks_files_list
+        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
         species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-        if( file.exists(species_info_file[1]) ){
-            paralog_species <- input$paralog_ks_files_list
-            ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-            species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-            ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
-            paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
+        ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
+        paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
 
-            names_df <- map_informal_name_to_latin_name(species_info_file[1])
+        names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
-            species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
-                replace_informal_name_to_latin_name(names_df, x)
-            })
+        species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
+            replace_informal_name_to_latin_name(names_df, x)
+        })
 
-            paralog_ksfile_df <- data.frame(
-                species=unlist(species_list),
-                path=paralog_ksfiles)
+        paralog_ksfile_df <- data.frame(
+            species=unlist(species_list),
+            path=paralog_ksfiles
+        )
 
-            # infer the peaks of paralog ks
-            ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
-            if( !(file.exists(ksPeaksFile)) ){
-                selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
-                withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
-                    maxK <- input[["ks_maxK_paralog"]]
-                    peaks_df <- data.frame()
-                    selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
-                    ks_file <- selected_paralog_ksfile_df$path
-                    ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
+        selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
+        files_list <- selected_paralog_ksfile_df$path
+        ks_file <- selected_paralog_ksfile_df$path
+        ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
 
-                    incProgress(
-                        amount=0.4,
-                        message=paste0("Find peaks for ", selected_paralog_ksfile_df$species, " ...")
-                    )
+        if( isTruthy(input$distribution_choice) && input$distribution_choice == "Paranome" ){
+            files_list_new <- c(ks_file)
+        }else if( isTruthy(input$distribution_choice) && input$distribution_choice == "Anchor pairs" ){
+            files_list_new <- c(ks_anchor_file)
+        }else if( isTruthy(input$distribution_choice) && input$distribution_choice == "All" ){
+            files_list_new <- c(ks_file, ks_anchor_file)
+        }
 
-                    if( input$peaks_choice == "Paranome" ){
-                        raw_df <- read.table(
-                            ks_file,
-                            header=TRUE,
-                            sep="\t"
-                        )
-                        raw_ks <- raw_df[raw_df$Ks>=0 & raw_df$Ks<=maxK, ]$Ks
-                        all_peaks <- PeaksInKsDistributionValues(raw_ks, peak.maxK=3)
-                        bs_CI_list <- c()
-                        for( i in 1:length(all_peaks) ){
-                            bootPeak <- bootStrapPeaks(raw_ks, peak.index=i, rep=500, peak.maxK=3)
-                            bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
-                            bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
-                            bs_CI_list <- c(bs_CI_list, bs_CI)
-                        }
-                        peaks_df <- data.frame(
-                            species=rep(selected_paralog_ksfile_df$species, length(all_peaks)),
-                            peak_in="Paranome",
-                            peak=format(all_peaks, nsmall=2),
-                            CI=bs_CI_list
-                        )
-                    }
-                    else{
-                        anchors_df <- read.table(
-                            ks_anchor_file,
-                            header=TRUE,
-                            sep="\t"
-                        )
-                        anchors_ks <- anchors_df[anchors_df$Ks>=0 & anchors_df$Ks<=maxK, ]$Ks
-                        anchors_peaks <- PeaksInKsDistributionValues(anchors_ks, peak.maxK=3)
-                        bs_CI_list <- c()
-                        for( i in 1:length(anchors_peaks) ){
-                            bootPeak <- bootStrapPeaks(anchors_ks, peak.index=i, rep=500, peak.maxK=3)
-                            bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
-                            bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
-                            bs_CI_list <- c(bs_CI_list, bs_CI)
-                        }
-                        peaks_df <- data.frame(
-                            species=rep(selected_paralog_ksfile_df$species, length(anchors_peaks)),
-                            peak_in="Anchor pairs",
-                            peak=anchors_peaks,
-                            CI=bs_CI_list
-                        )
-                    }
+        if( input$gmm_choice == "Paranome" ){
+            ks_title <- gsub(".tsv$", "", basename(ks_file))
+        }else{
+            ks_title <- gsub(".tsv$", "", basename(ks_anchor_file))
+        }
 
-                    col_names <- c("Species",  "Peak in", "Peak", "95% Confidence Interval")
-                    colnames(peaks_df) <- col_names
-                    write.table(
-                        peaks_df,
-                        file=ksPeaksFile,
-                        row.names=FALSE,
-                        sep="\t",
-                        quote=FALSE
-                    )
-                    Sys.sleep(.2)
-                    incProgress(amount=.2, message="Find peaks done")
-                })
-            }
-            else{
-                peaksInfo <- read.table(
-                    ksPeaksFile,
-                    header=TRUE,
-                    sep="\t"
-                )
-                tested_species <- unique(peaksInfo$Species)
+        gmm_pre_outfile <- paste0(dirname(ks_file), "/", ks_title, ".gmm.Rdata")
 
-                if( !(all(input$paralog_ks_files_list %in% tested_species)) ){
-                    need_to_test_speices <- setdiff(input$paralog_ks_files_list, tested_species)
-                    selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% need_to_test_speices, ]
-                    withProgress(message='Inference the Peaks of the paralog Ks in progress', value=0, {
-                        maxK <- input[["ks_maxK_paralog"]]
-                        peaks_df <- data.frame()
-                        selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
-                        ks_file <- selected_paralog_ksfile_df$path
-                        ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
-
-                        incProgress(
-                            amount=0.4,
-                            message=paste0("Find peaks for ", selected_paralog_ksfile_df$species, " ...")
-                        )
-
-                        if( input$peaks_choice == "Paranome" ){
-                            raw_df <- read.table(
-                                ks_file,
-                                header=TRUE,
-                                sep="\t"
-                            )
-                            raw_ks <- raw_df[raw_df$Ks>=0 & raw_df$Ks<=maxK, ]$Ks
-                            all_peaks <- PeaksInKsDistributionValues(raw_ks, peak.maxK=3)
-                            bs_CI_list <- c()
-                            for( i in 1:length(all_peaks) ){
-                                bootPeak <- bootStrapPeaks(raw_ks, peak.index=i, rep=500, peak.maxK=3)
-                                bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
-                                bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
-                                bs_CI_list <- c(bs_CI_list, bs_CI)
-                            }
-                            peaks_df <- data.frame(
-                                species=rep(selected_paralog_ksfile_df$species, length(all_peaks)),
-                                peak_in="Paranome",
-                                peak=format(all_peaks, nsmall=2),
-                                CI=bs_CI_list
-                            )
-                        }
-                        else{
-                            anchors_df <- read.table(
-                                ks_anchor_file,
-                                header=TRUE,
-                                sep="\t"
-                            )
-                            anchors_ks <- anchors_df[anchors_df$Ks>=0 & anchors_df$Ks<=maxK, ]$Ks
-                            anchors_peaks <- PeaksInKsDistributionValues(anchors_ks, peak.maxK=3)
-                            bs_CI_list <- c()
-                            for( i in 1:length(anchors_peaks) ){
-                                bootPeak <- bootStrapPeaks(anchors_ks, peak.index=i, rep=500, peak.maxK=3)
-                                bs_peak_95_interval <- quantile(bootPeak, c(0.025, 0.975))
-                                bs_CI <- paste(round(bs_peak_95_interval[1], 2), "-", round(bs_peak_95_interval[2], 2), sep="")
-                                bs_CI_list <- c(bs_CI_list, bs_CI)
-                            }
-                            peaks_df <- data.frame(
-                                species=rep(selected_paralog_ksfile_df$species, length(anchors_peaks)),
-                                peak_in="Anchor pairs",
-                                peak=anchors_peaks,
-                                CI=bs_CI_list
-                            )
-                        }
-
-                        col_names <- c("Species",  "Peak in", "Peak", "95% Confidence Interval")
-                        colnames(peaks_df) <- col_names
-                        write.table(
-                            peaks_df,
-                            file=ksPeaksFile,
-                            row.names=FALSE,
-                            col.names=FALSE,
-                            sep="\t",
-                            quote=FALSE,
-                            append=TRUE
-                        )
-                        Sys.sleep(.2)
-                        incProgress(amount=.2, message="Find peaks done")
-                    })
-                }
-
-                peaksInfo <- read.table(
-                    ksPeaksFile,
-                    header=TRUE,
-                    sep="\t"
-                )
-
-                output$ks_peak_table_output <- renderUI({
-                    selected_peaks_info <- peaksInfo[peaksInfo$Species %in% input$paralog_ks_files_list, ]
-                    output$ks_peak_table_output <- renderUI({
-                        fluidRow(
-                            column(
-                                12,
-                                hr(class="splitting")
-                            ),
-                            column(
-                                8,
-                                fluidRow(
-                                    column(
-                                        6,
-                                        h4(HTML("<b><font color='#9B3A4D'>Paralog <i>K</i><sub>s</sub></font></b> Peaks"))
-                                    ),
-                                    column(
-                                        12,
-                                        selected_peaks_info %>%
-                                            setNames(., colnames(.) %>% gsub("X95\\.\\.Confidence\\.Interval", "95% Confidence Interval", .)) %>%
-                                            setNames(., colnames(.) %>% gsub("Peak\\.In", "Peak In", .)) %>%
-                                            datatable(
-                                                options=list(
-                                                    searching=TRUE
-                                                ),
-                                                rownames=FALSE
-                                            ) %>%
-                                            formatStyle(
-                                                "Species",
-                                                fontWeight='bold',
-                                                fontStyle="italic"
-                                            )
-                                    ),
-                                    column(
-                                        12,
-                                        div(class="float-right",
-                                            downloadButton_custom(
-                                                "ksPeakCsvDownload",
-                                                title="Download the Peaks info Table",
-                                                status="secondary",
-                                                icon=icon("download"),
-                                                label=".csv",
-                                                class="my-download-button-class",
-                                                style="color: #fff;
-                                                      background-color: #6B8E23;
-                                                      border-color: #fff;
-                                                      padding: 5px 14px 5px 14px;
-                                                      margin: 5px 5px 5px 5px;"
-                                            )
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    })
-                })
-
-                output$ksPeakCsvDownload <- downloadHandler(
-                    filename=function() {
-                        "peaksInfo.csv"
-                    },
-                    content=function(file) {
-                        write.csv(peaksInfo, file)
-                    }
-                )
-            }
-
-            selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
-            files_list <- selected_paralog_ksfile_df$path
-            ks_file <- selected_paralog_ksfile_df$path
-            ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
-
-            if( file.exists(ks_anchor_file) ){
-                files_list_new <- c(ks_file, ks_anchor_file)
-            }else{
-                files_list_new <- c(ks_file)
-            }
+        withProgress(message='Analyzing in progress', value=0, {
             full_data <- calculateKsDistribution4wgd_multiple(
                 files_list_new,
                 plot.mode=input[["plot_mode_option_paralog"]],
@@ -1308,11 +1269,6 @@ observeEvent(input$paralog_ks_plot_go, {
 
             ks.mclust <- data.frame()
             ks.sizer <- list()
-            if( input$gmm_choice == "Paranome" ){
-                ks_title <- gsub(".tsv$", "", basename(ks_file))
-            }else{
-                ks_title <- gsub(".tsv$", "", basename(ks_anchor_file))
-            }
             ks_data <- ksDist[ksDist$title == ks_title, ]
             ks_value <- ks_data$ks
 
@@ -1323,7 +1279,6 @@ observeEvent(input$paralog_ks_plot_go, {
             )
 
             # GMM modelling
-            gmm_pre_outfile <- paste0(dirname(ks_file), "/", ks_title, ".gmm.Rdata")
             if( file.exists(gmm_pre_outfile) ){
                 load(gmm_pre_outfile)
             }else{
@@ -1332,6 +1287,10 @@ observeEvent(input$paralog_ks_plot_go, {
             }
             df$title <- ks_title
             ks.mclust <- rbind(ks.mclust, df)
+
+            ks.mclust$lower_bound <- qlnorm(0.025, meanlog=ks.mclust$mean, sdlog=ks.mclust$sigmasq)
+            ks.mclust$upper_bound <- qlnorm(0.975, meanlog=ks.mclust$mean, sdlog=ks.mclust$sigmasq)
+
             ks.bic <- unique(ks.mclust[, c("title", "comp", "BIC")])
             emmix_outfile <- paste0(dirname(ks_file), "/", ks_title, ".emmix.output.xls")
             if( !file.exists(emmix_outfile) ){
@@ -1345,12 +1304,13 @@ observeEvent(input$paralog_ks_plot_go, {
             }
 
             gmm_BIC_df <- unique(ks.mclust[, c("comp", "BIC")])
+            best_comp <- gmm_BIC_df[gmm_BIC_df$BIC == max(gmm_BIC_df$BIC), ]
             gmm_BIC_list <- sapply(1:nrow(gmm_BIC_df), function(i) {
                 paste0(
                     "comp: <b>",
                     gmm_BIC_df[i, "comp"],
                     "</b>, BIC: <b>",
-                    round(gmm_BIC_df[i, "BIC"], 3),
+                    round(gmm_BIC_df[i, "BIC"], 2),
                     "</b>"
                 )
             }, simplify="list")
@@ -1363,33 +1323,47 @@ observeEvent(input$paralog_ks_plot_go, {
                     content=lapply(gmm_BIC_list, function(choice) {
                         HTML(choice)
                     })
-                )
+                ),
+                selected=gmm_BIC_list[best_comp$comp]
             )
 
             incProgress(
                 amount=0.3,
-                message=paste0("SiZer modelling for ", ks_title, " ...")
+                message=paste0("SiZer analyzing for ", ks_title, " ...")
             )
 
             #Sizer modelling
-            sizer_pre_outfile <- paste0(dirname(ks_file), "/", ks_title, ".sizer.Rdata")
-            if( file.exists(sizer_pre_outfile) ){
-                load(sizer_pre_outfile)
+            sizer_pre_paranome_outfile <- paste0(dirname(ks_file), "/", ks_title, ".sizer.paranome.Rdata")
+            sizer_pre_anchor_point_outfile <- paste0(dirname(ks_file), "/", ks_title, ".sizer.anchorpoint.Rdata")
+            if( input$gmm_choice == "Paranome" ){
+                if( file.exists(sizer_pre_paranome_outfile) ){
+                    load(sizer_pre_paranome_outfile)
+                }else{
+                    ks_file_tmp <- ks_file
+                    ksd_tmp <- read.wgd_ksd(ks_file_tmp)
+                    ks_value_tmp <- ksd_tmp$ks_dist$Ks[ksd_tmp$ks_dist$Ks <= input[["ks_maxK_paralog"]]]
+                    df_sizer <- SiZer(
+                        ks_value_tmp,
+                        gridsize=c(500, 50),
+                        bw=c(0.01, 5)
+                    )
+                    save(df_sizer, file=sizer_pre_paranome_outfile)
+                }
             }
             else{
-                if( input$gmm_choice == "Paranome" ){
-                    ks_file_tmp <- ks_file
+                if( file.exists(sizer_pre_anchor_point_outfile) ){
+                    load(sizer_pre_anchor_point_outfile)
                 }else{
                     ks_file_tmp <- ks_anchor_file
+                    ksd_tmp <- read.wgd_ksd(ks_file_tmp)
+                    ks_value_tmp <- ksd_tmp$ks_dist$Ks[ksd_tmp$ks_dist$Ks <= input[["ks_maxK_paralog"]]]
+                    df_sizer <- SiZer(
+                        ks_value_tmp,
+                        gridsize=c(500, 50),
+                        bw=c(0.01, 5)
+                    )
+                    save(df_sizer, file=sizer_pre_anchor_point_outfile)
                 }
-                ksd_tmp <- read.wgd_ksd(ks_file_tmp)
-                ks_value_tmp <- ksd_tmp$ks_dist$Ks[ksd_tmp$ks_dist$Ks <= input[["ks_maxK_paralog"]]]
-                df_sizer <- SiZer(
-                    ks_value_tmp,
-                    gridsize=c(500, 50),
-                    bw=c(0.01, 5)
-                )
-                save(df_sizer, file=sizer_pre_outfile)
             }
 
             ks.sizer[[ks_title]] <- list(
@@ -1402,24 +1376,24 @@ observeEvent(input$paralog_ks_plot_go, {
             Sys.sleep(.2)
             incProgress(amount=.5, message="Calculating done...")
 
-            widthSpacing <- reactiveValues(
-                value=1000
+            widthPhyloKsSpacing <- reactiveValues(
+                value=500
             )
-            heightSpacing <- reactiveValues(
+            heightPhyloKsSpacing <- reactiveValues(
                 value=500
             )
 
             observeEvent(input$ks_svg_vertical_spacing_add, {
-                heightSpacing$value <- heightSpacing$value + 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_vertical_spacing_sub, {
-                heightSpacing$value <- heightSpacing$value - 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value - 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_add, {
-                widthSpacing$value <- widthSpacing$value + 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_sub, {
-                widthSpacing$value <- widthSpacing$value - 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value - 50
             })
 
             observe({
@@ -1447,8 +1421,9 @@ observeEvent(input$paralog_ks_plot_go, {
                         "ylim"=input[["y_limit_paralog"]],
                         "color"="",
                         "opacity"=input[["ks_transparency_paralog"]],
-                        "width"=widthSpacing$value,
-                        "height"=heightSpacing$value
+                        "width"=widthPhyloKsSpacing$value,
+                        "height"=heightPhyloKsSpacing$value,
+                        "dataType"=input$gmm_choice
                     )
                 }else{
                     plot_wgd_data <- list(
@@ -1463,16 +1438,205 @@ observeEvent(input$paralog_ks_plot_go, {
                         "ylim"=input[["y_limit_paralog"]],
                         "color"="",
                         "opacity"=input[["ks_transparency_paralog"]],
-                        "width"=widthSpacing$value,
-                        "height"=heightSpacing$value
+                        "width"=widthPhyloKsSpacing$value,
+                        "height"=heightPhyloKsSpacing$value,
+                        "dataType"=input$gmm_choice
                     )
                 }
                 session$sendCustomMessage("Paralog_Bar_Plotting", plot_wgd_data)
             })
-        }
-        Sys.sleep(.2)
-        incProgress(amount=.4, message="Ploting done...")
-    })
+            Sys.sleep(.2)
+            incProgress(amount=.4, message="Ploting done...")
+
+            observeEvent(input$gmm_comp_paralog, {
+                if( file.exists(emmix_outfile) && input$gmm_comp_paralog != "" ){
+                    ks.mclust <- read.table(
+                        emmix_outfile,
+                        header=TRUE,
+                        sep="\t"
+                    )
+
+                    selected_comp <- as.numeric(
+                        regmatches(input$gmm_comp_paralog, regexpr("\\d+", input$gmm_comp_paralog))
+                    )
+
+                    selected_gmm_info <- ks.mclust[ks.mclust$comp == selected_comp, ]
+                    selected_gmm_info$CI <- paste0(
+                        round(selected_gmm_info$lower_bound, 2),
+                        "-",
+                        round(selected_gmm_info$upper_bound, 2)
+                    )
+                    selected_gmm_info <- selected_gmm_info[c("comp", "BIC", "mode", "CI")]
+                    selected_gmm_info$mode <- round(selected_gmm_info$mode, 2)
+                    selected_gmm_info$BIC <- round(selected_gmm_info$BIC, 2)
+                    selected_gmm_info$Species <- input$paralog_ks_files_list
+                    selected_gmm_info[["Peak in"]] <- input$gmm_choice
+                    selected_gmm_info <- selected_gmm_info[c("mode", "CI", "comp")]
+
+                    shinyInputTest <- function(FUN, len, id, ...) {
+                        inputs <- character(len)
+                        for( i in seq_len(len) ){
+                            inputs[i] <- as.character(
+                                tagList(
+                                    div(
+                                        style="padding-bottom: -20px; margin-bottom: -25px; ",
+                                        FUN(paste0(id, i), label=NULL, width="10px", ...)
+                                    )
+                                )
+                            )
+                        }
+                        inputs
+                    }
+
+                    selected_gmm_info_with_checkb <- cbind(
+                        Select=shinyInputTest(checkboxInput, nrow(selected_gmm_info), "checkb"),
+                        selected_gmm_info
+                    )
+
+                    select_row_js <- c(
+                        "$('[id^=checkb]').on('click', function(){",
+                        "  var id = this.getAttribute('id');",
+                        "  var i = parseInt(/checkb(\\d+)/.exec(id)[1]);",
+                        "  var checkbox = $('[id^=checkb]:eq(' + (i - 1) + ')');",
+                        "  var value = checkbox.prop('checked');",
+                        "  var secondColValue = $('[id^=checkb]:eq(' + (i - 1) + ')').closest('tr').find('td:eq(1)').text();",
+                        "  var info = [{row: i, peak: secondColValue, value: value}];",
+                        "  Shiny.setInputValue('gmm_true_peaks:DT.cellInfo', info);",
+                        "})"
+                    )
+
+                    output$selected_gmm_table <- renderDT({
+                        selected_gmm_info_with_checkb %>%
+                            setNames(., colnames(.) %>% gsub("CI", "95% Confidence Interval", .)) %>%
+                            setNames(., colnames(.) %>% gsub("mode", "Peak", .)) %>%
+                            setNames(., colnames(.) %>% gsub("comp", "Component", .)) %>%
+                            setNames(., colnames(.) %>% gsub("Select", "Select to plot", .)) %>%
+                            datatable(
+                                options=list(
+                                    searching=FALSE,
+                                    lengthMenu=list(c(-1), c('All')),
+                                    paging=FALSE,
+                                    info=FALSE,
+                                    dom='t'
+                                ),
+                                rownames=FALSE,
+                                escape=FALSE,
+                                editable=list(target="cell", disable=list(columns=7)),
+                                selection="none",
+                                callback=JS(select_row_js)
+                            )
+
+                    }, server=FALSE)
+
+                    selected_comp <- as.numeric(
+                        regmatches(input$gmm_comp_paralog, regexpr("\\d+", input$gmm_comp_paralog))
+                    )
+
+                    ksMclust <- ks.mclust %>%
+                        filter(comp == selected_comp) %>%
+                        ungroup()
+
+                    selected_best_gmm_info <- reactiveVal(data.frame())
+                    observeEvent(input$gmm_true_peaks, {
+                        selected_gmm_info_tmp <- ksMclust[input$gmm_true_peaks$row, ]
+                        if( input$gmm_true_peaks$value ){
+                            selected_best_gmm_info(rbind(selected_best_gmm_info(), selected_gmm_info_tmp))
+                        }else{
+                            row_to_remove <- input$gmm_true_peaks$row
+                            updated_data <- selected_best_gmm_info()[rownames(selected_best_gmm_info()) != row_to_remove, ]
+                            selected_best_gmm_info(updated_data)
+                        }
+                    })
+
+                    observe({
+                        if( input$gmm_comp_paralog != "" ){
+                            selectedBarData <- barData[barData$ks >= 0 & barData$ks <= input[["ks_maxK_paralog"]], ]
+                            names_df <- map_informal_name_to_latin_name(species_info_file[1])
+
+                            ploted_gmm_lines_info <- selected_best_gmm_info()
+                            if( nrow(ploted_gmm_lines_info) > 0 ){
+                                ploted_gmm_lines_info <- ploted_gmm_lines_info[order(ploted_gmm_lines_info$mode), ]
+
+                                plot_wgd_data <- list(
+                                    "plot_id"="Wgd_plot_paralog",
+                                    "species_list"=names_df,
+                                    "ks_title"=ks_title,
+                                    "ks_bar_df"=selectedBarData,
+                                    "paralog_id"=paralog_id,
+                                    "mclust_df"=ploted_gmm_lines_info,
+                                    "sizer_list"=ks.sizer,
+                                    "xlim"=input[["ks_maxK_paralog"]],
+                                    "ylim"=input[["y_limit_paralog"]],
+                                    "color"="",
+                                    "opacity"=input[["ks_transparency_paralog"]],
+                                    "width"=widthPhyloKsSpacing$value,
+                                    "height"=heightPhyloKsSpacing$value,
+                                    "dataType"=input$gmm_choice
+                                )
+                            }else{
+                                selected_comp <- as.numeric(
+                                    regmatches(input$gmm_comp_paralog, regexpr("\\d+", input$gmm_comp_paralog))
+                                )
+
+                                ksMclust <- ks.mclust %>%
+                                    filter(comp == selected_comp) %>%
+                                    ungroup()
+
+                                plot_wgd_data <- list(
+                                    "plot_id"="Wgd_plot_paralog",
+                                    "species_list"=names_df,
+                                    "ks_title"=ks_title,
+                                    "ks_bar_df"=selectedBarData,
+                                    "paralog_id"=paralog_id,
+                                    "mclust_df"=ksMclust,
+                                    "sizer_list"=ks.sizer,
+                                    "xlim"=input[["ks_maxK_paralog"]],
+                                    "ylim"=input[["y_limit_paralog"]],
+                                    "color"="",
+                                    "opacity"=input[["ks_transparency_paralog"]],
+                                    "width"=widthPhyloKsSpacing$value,
+                                    "height"=heightPhyloKsSpacing$value,
+                                    "dataType"=input$gmm_choice
+                                )
+                            }
+                            session$sendCustomMessage("Paralog_Bar_Plotting", plot_wgd_data)
+                        }
+                    })
+
+                    output$ksPeakCsvDownload <- downloadHandler(
+                        filename=function() {
+                            paste0(
+                                gsub(" ", "_", paralog_species),
+                                ".paralogous_Ks_peaksInfo.csv"
+                            )
+                        },
+                        content=function(file) {
+                            download_df <- selected_best_gmm_info()[c("mode", "lower_bound", "upper_bound")]
+                            download_df["95% Confidence Interval"] <- paste0(
+                                round(download_df$lower_bound, 2),
+                                "-",
+                                round(download_df$upper_bound, 2)
+                            )
+                            download_df$Species <- paralog_species
+                            download_df["Peak in"] <- input$gmm_choice
+                            download_df$mode <- round(download_df$mode, 2)
+                            download_df <- download_df[, c("Species", "Peak in", "mode", "95% Confidence Interval")]
+                            names(download_df) <- c("Species", "Peak in", "Peak", "95% Confidence Interval")
+                            download_df <- download_df[order(download_df$Peak), ]
+
+                            write.table(
+                                download_df,
+                                file=file,
+                                sep="\t",
+                                quote=FALSE,
+                                row.names=FALSE
+                            )
+                        }
+                    )
+                }
+            })
+        })
+    }
 })
 
 observeEvent(input$confirm_ortholog_ks_go, {
@@ -1503,211 +1667,317 @@ observeEvent(input$confirm_ortholog_ks_go, {
 
     species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
     if( file.exists(species_info_file[1]) ){
-        paralog_species <- input$paralog_ks_files_list
-        ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
-        species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
-        ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
-        paralog_ksfiles <- ksfiles[grepl("paralog_distributions", ksfiles)]
-
-        # infer the peaks of paralog ks
-        ksPeaksFile <- paste0(ksAnalysisDir, "/ksrates_wd/ksPeaks.xls")
-        names_df <- map_informal_name_to_latin_name(species_info_file[1])
-
-        species_list <- lapply(gsub(".ks.tsv", "", basename(paralog_ksfiles)), function(x) {
-            replace_informal_name_to_latin_name(names_df, x)
-        })
-
-        paralog_ksfile_df <- data.frame(
-            species=unlist(species_list),
-            path=paralog_ksfiles
-        )
-        selected_paralog_ksfile_df <- paralog_ksfile_df[paralog_ksfile_df$species %in% input$paralog_ks_files_list, ]
-        ks_file <- selected_paralog_ksfile_df$path
-        ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
-
-        withProgress(message='Configure in progress', value=0, {
-            output$ks_analysis_output <- renderUI({
-                div(
-                    class="boxLike",
-                    style="background-color: #FDFFFF;
-                           padding-bottom: 10px;
-                           padding-top: 10px;",
-                    column(
-                        12,
-                        h4(HTML("<b><font color='#9B3A4D'>Ortholog <i>K</i><sub>s</sub></font> Age Distribution</b>"))
-                    ),
+        if( isTruthy(input$ortholog_ks_files_list_A) && length(input$ortholog_ks_files_list_A) > 1 ){
+            withProgress(message='Configure in progress', value=0, {
+                output$ks_analysis_output <- renderUI({
                     div(
-                        style="padding: 10px 10px 10px 10px;",
+                        class="boxLike",
+                        style="background-color: #FDFFFF;
+                               padding-bottom: 10px;
+                               padding-top: 10px;",
+                        column(
+                            12,
+                            h4(HTML("<b><font color='#9B3A4D'>Orthologous <i>K</i><sub>s</sub></font> Age Distribution</b>"))
+                        ),
+                        div(
+                            style="padding: 10px 10px 10px 10px;",
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    2,
+                                    h5(HTML("<b><font color='orange'><i>K</i><sub>s</sub> </font></b> setting:")),
+                                ),
+                                if( !isTruthy(input$ortholog_paranome_species) ){
+                                    column(
+                                        10,
+                                        fluidRow(
+                                            column(
+                                                4,
+                                                div(
+                                                    style="/*display: flex; align-items: center; */
+                                                           margin-bottom: -10px;
+                                                           border-radius: 10px;
+                                                           padding: 10px 10px 0px 10px;
+                                                           background-color: #FFF5EE;",
+                                                    sliderInput(
+                                                        inputId="ks_maxK_ortholog",
+                                                        label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
+                                                        min=0,
+                                                        step=1,
+                                                        max=5,
+                                                        value=5
+                                                    )
+                                                )
+                                            ),
+                                            column(
+                                                3,
+                                                actionButton(
+                                                    inputId="ortholog_ks_plot_go",
+                                                    # HTML("Start<br><b>ortholog <i>K</i><sub>s</sub></b></br>analysis"),
+                                                    "Start",
+                                                    icon=icon("play"),
+                                                    status="secondary",
+                                                    class="my-start-button-class",
+                                                    title="Click to start",
+                                                    style="color: #fff;
+                                                           background-color: #27ae60;
+                                                           border-color: #fff;
+                                                           padding: 5px 14px 5px 14px;
+                                                           margin: 25px 5px 5px 5px;"
+                                                )
+                                            )
+                                        )
+                                    )
+                                }
+                                else{
+                                    column(
+                                        10,
+                                        fluidRow(
+                                            column(
+                                                4,
+                                                div(
+                                                    style="/*display: flex; align-items: center; */
+                                                           margin-bottom: -10px;
+                                                           border-radius: 10px;
+                                                           padding: 10px 10px 0px 10px;
+                                                           background-color: #FFF5EE;",
+                                                    sliderInput(
+                                                        inputId="ks_maxK_ortholog",
+                                                        label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
+                                                        min=0,
+                                                        step=1,
+                                                        max=5,
+                                                        value=5
+                                                    )
+                                                )
+                                            ),
+                                            column(
+                                                4,
+                                                div(
+                                                    style="/*display: flex; align-items: center; */
+                                                           margin-bottom: -10px;
+                                                           border-radius: 10px;
+                                                           padding: 10px 10px 0px 10px;
+                                                           background-color: #FFF5EE;",
+                                                    pickerInput(
+                                                        inputId="plot_ortholog_paralog_species",
+                                                        label=HTML("<font color='orange'>Data</font> used for <font color='orange'>Paralogous <i>K</i><sub>s</sub> Distribution</font>:"),
+                                                        choices=c("All", "Paranome", "Anchor pairs"),
+                                                        multiple=FALSE,
+                                                        selected="All",
+                                                        inline=TRUE
+                                                    )
+                                                )
+                                            ),
+                                            column(
+                                                2,
+                                                actionButton(
+                                                    inputId="ortholog_ks_plot_go",
+                                                    # HTML("Start<br><b>ortholog <i>K</i><sub>s</sub></b></br>analysis"),
+                                                    "Start",
+                                                    icon=icon("play"),
+                                                    status="secondary",
+                                                    class="my-start-button-class",
+                                                    title="Click to start",
+                                                    style="color: #fff;
+                                                           background-color: #27ae60;
+                                                           border-color: #fff;
+                                                           padding: 5px 14px 5px 14px;
+                                                           margin: 25px 5px 5px 5px;"
+                                                )
+                                            )
+                                        )
+                                    )
+                                }
+                            ),
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    9,
+                                    fluidRow(
+                                        column(
+                                            6,
+                                            tags$style(
+                                                HTML(".rotate-135 {
+                                                transform: rotate(135deg);
+                                            }"),
+                                                HTML(".rotate-45{
+                                                transform: rotate(45deg);
+                                            }")
+                                            ),
+                                            actionButton(
+                                                "ks_svg_vertical_spacing_add",
+                                                "",
+                                                icon("arrows-alt-v"),
+                                                title="Expand vertical spacing"
+                                            ),
+                                            actionButton(
+                                                "ks_svg_vertical_spacing_sub",
+                                                "",
+                                                icon(
+                                                    "down-left-and-up-right-to-center",
+                                                    verify_fa=FALSE,
+                                                    class="rotate-135"
+                                                ),
+                                                title="Compress vertical spacing"
+                                            ),
+                                            actionButton(
+                                                "ks_svg_horizontal_spacing_add",
+                                                "",
+                                                icon("arrows-alt-h"),
+                                                title="Expand horizontal spacing"
+                                            ),
+                                            actionButton(
+                                                "ks_svg_horizontal_spacing_sub",
+                                                "",
+                                                icon(
+                                                    "down-left-and-up-right-to-center",
+                                                    verify_fa=FALSE,
+                                                    class="rotate-45"
+                                                ),
+                                                title="Compress horizontal spacing"
+                                            ),
+                                            downloadButton_custom(
+                                                "ksPlotOrthologousDownload",
+                                                title="Download the Plot",
+                                                status="secondary",
+                                                icon=icon("download"),
+                                                class="my-download-button-class",
+                                                label=".svg",
+                                                style="color: #fff;
+                                                      background-color: #6B8E23;
+                                                      border-color: #fff;
+                                                      padding: 5px 5px 5px 5px;"
+                                            )
+                                        )
+                                    )
+                                )
+                            )
+                        ),
+                        fluidRow(
+                            column(
+                                12,
+                                div(
+                                    id="Wgd_plot_ortholog"
+                                )
+                            )
+                        ),
                         hr(class="setting"),
                         fluidRow(
                             column(
                                 2,
-                                h5(HTML("<b><font color='orange'><i>K</i><sub>s</sub> </font></b> setting:")),
+                                h5(HTML("<b><font color='orange'>Figure</b></font> setting:")),
                             ),
-                            column(
-                                10,
-                                fluidRow(
-                                    column(
-                                        4,
-                                        div(
-                                            style="/*display: flex; align-items: center; */
-                                                   margin-bottom: -10px;
-                                                   border-radius: 10px;
-                                                   padding: 10px 10px 0px 10px;
-                                                   background-color: #FFF5EE;",
-                                            sliderInput(
-                                                inputId="ks_maxK_ortholog",
-                                                label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
-                                                min=0,
-                                                step=1,
-                                                max=10,
-                                                value=5
+                            if( isTruthy(input$ortholog_paranome_species) ){
+                                column(
+                                    10,
+                                    fluidRow(
+                                        column(
+                                            4,
+                                            div(
+                                                style="padding: 12px 10px 5px 10px;
+                                                       border-radius: 10px;
+                                                       background-color: #F0FFFF",
+                                                sliderInput(
+                                                    inputId="y2_limit_ortholog_paralog",
+                                                    label=HTML("<font color='orange'>Retained Duplicates Y axis limit</font>:"),
+                                                    min=0,
+                                                    step=200,
+                                                    max=6000,
+                                                    value=2000
+                                                )
+                                            )
+                                        ),
+                                        column(
+                                            4,
+                                            div(
+                                                style="padding: 12px 10px 5px 10px;
+                                                       border-radius: 10px;
+                                                       background-color: #F0FFFF",
+                                                sliderInput(
+                                                    inputId="y_limit_ortholog",
+                                                    label=HTML("<font color='orange'>Ortholog Density Y axis limit</font>:"),
+                                                    min=0,
+                                                    step=0.2,
+                                                    max=5,
+                                                    value=2
+                                                ),
+                                            )
+                                        ),
+                                        column(
+                                            4,
+                                            div(
+                                                style="padding: 12px 10px 5px 10px;
+                                                       border-radius: 10px;
+                                                       background-color: #F0FFFF",
+                                                sliderInput(
+                                                    inputId="opacity_paralog",
+                                                    label=HTML("<font color='orange'>Transparency</font>:"),
+                                                    min=0,
+                                                    max=1,
+                                                    step=0.1,
+                                                    value=0.5
+                                                )
                                             )
                                         )
-                                    ),
-                                    column(
-                                        3,
-                                        actionButton(
-                                            inputId="ortholog_ks_plot_go",
-                                            HTML("Start<br><b>ortholog <i>K</i><sub>s</sub></b></br>analysis"),
-                                            icon=icon("play"),
-                                            status="secondary",
-                                            class="my-start-button-class",
-                                            title="Click to start",
-                                            style="color: #fff;
-                                                   background-color: #27ae60;
-                                                   border-color: #fff;
-                                                   padding: 5px 14px 5px 14px;
-                                                   margin: 5px 5px 5px 5px;"
-                                        )
                                     )
                                 )
-                            )
-                        ),
-                        hr(class="setting"),
-                        fluidRow(
-                            column(
-                                9,
-                                fluidRow(
-                                    column(
-                                        6,
-                                        tags$style(
-                                            HTML(".rotate-135 {
-                                                transform: rotate(135deg);
-                                            }"),
-                                            HTML(".rotate-45{
-                                                transform: rotate(45deg);
-                                            }")
-                                        ),
-                                        actionButton(
-                                            "ks_svg_vertical_spacing_add",
-                                            "",
-                                            icon("arrows-alt-v"),
-                                            title="Expand vertical spacing"
-                                        ),
-                                        actionButton(
-                                            "ks_svg_vertical_spacing_sub",
-                                            "",
-                                            icon(
-                                                "down-left-and-up-right-to-center",
-                                                verify_fa=FALSE,
-                                                class="rotate-135"
-                                            ),
-                                            title="Compress vertical spacing"
-                                        ),
-                                        actionButton(
-                                            "ks_svg_horizontal_spacing_add",
-                                            "",
-                                            icon("arrows-alt-h"),
-                                            title="Expand horizontal spacing"
-                                        ),
-                                        actionButton(
-                                            "ks_svg_horizontal_spacing_sub",
-                                            "",
-                                            icon(
-                                                "down-left-and-up-right-to-center",
-                                                verify_fa=FALSE,
-                                                class="rotate-45"
-                                            ),
-                                            title="Compress horizontal spacing"
-                                        ),
-                                        downloadButton_custom(
-                                            "ksPlotOrthologousDownload",
-                                            title="Download the Plot",
-                                            status="secondary",
-                                            icon=icon("download"),
-                                            class="my-download-button-class",
-                                            label=".svg",
-                                            style="color: #fff;
-                                                  background-color: #6B8E23;
-                                                  border-color: #fff;
-                                                  padding: 5px 5px 5px 5px;"
-                                        )
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    fluidRow(
-                        column(
-                            12,
-                            div(
-                                id="Wgd_plot_ortholog"
-                            )
-                        )
-                    ),
-                    hr(class="setting"),
-                    fluidRow(
-                        column(
-                            2,
-                            h5(HTML("<b><font color='orange'>Figure</b></font> setting:")),
-                        ),
-                        column(
-                            10,
-                            fluidRow(
+                            }
+                            else{
                                 column(
-                                    4,
-                                    div(
-                                        style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
-                                        sliderInput(
-                                            inputId="y_limit_ortholog",
-                                            label=HTML("Set the <font color='orange'>Y axis limit</font>:"),
-                                            min=0,
-                                            step=0.2,
-                                            max=5,
-                                            value=2
+                                    10,
+                                    fluidRow(
+                                        column(
+                                            4,
+                                            div(
+                                                style="padding: 12px 10px 5px 10px;
+                                                       border-radius: 10px;
+                                                       background-color: #F0FFFF",
+                                                sliderInput(
+                                                    inputId="y_limit_ortholog",
+                                                    label=HTML("<font color='orange'>Y axis limit</font>:"),
+                                                    min=0,
+                                                    step=0.2,
+                                                    max=5,
+                                                    value=2
+                                                ),
+                                            )
                                         ),
-                                    )
-                                ),
-                                column(
-                                    4,
-                                    div(
-                                        style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
-                                        sliderInput(
-                                            inputId="opacity_paralog",
-                                            label=HTML("Set the <font color='orange'>Transparency</font>:"),
-                                            min=0,
-                                            max=1,
-                                            step=0.1,
-                                            value=0.5
+                                        column(
+                                            4,
+                                            div(
+                                                style="padding: 12px 10px 5px 10px;
+                                                       border-radius: 10px;
+                                                       background-color: #F0FFFF",
+                                                sliderInput(
+                                                    inputId="opacity_paralog",
+                                                    label=HTML("<font color='orange'>Transparency</font>:"),
+                                                    min=0,
+                                                    max=1,
+                                                    step=0.1,
+                                                    value=0.5
+                                                )
+                                            )
                                         )
                                     )
                                 )
-                            )
-                        ),
+                            }
+                        )
                     )
-                )
-            })
+                })
 
-            Sys.sleep(.2)
-            incProgress(amount=.5, message="Configure done ...")
-            incProgress(amount=1)
-            Sys.sleep(.1)
-        })
+                Sys.sleep(.2)
+                incProgress(amount=.5, message="Configure done ...")
+                incProgress(amount=1)
+                Sys.sleep(.1)
+            })
+        }else{
+            shinyalert(
+                "Oops!",
+                "Please choose at lease two species for orthologous study!",
+                type="error"
+            )
+        }
     }
     else{
         shinyalert(
@@ -1719,9 +1989,8 @@ observeEvent(input$confirm_ortholog_ks_go, {
 })
 
 observeEvent(input$ortholog_ks_plot_go, {
-    #shinyjs::runjs('document.getElementById("Wgd_plot_ortholog").innerHTML="";')
+    shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
     withProgress(message='Analyzing in progress', value=0, {
-        # session$sendCustomMessage("Progress_Bar_Update", "")
         if( is.null(buttonClicked()) ){
             ksAnalysisDir <- ks_example_dir
         }
@@ -1734,7 +2003,6 @@ observeEvent(input$ortholog_ks_plot_go, {
 
         species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
         if( file.exists(species_info_file[1]) ){
-            paralog_species <- input$paralog_ks_files_list
             ksfiles <- list.files(path=ksAnalysisDir, pattern="\\.ks.tsv$", full.names=TRUE, recursive=TRUE)
             species_info_file <- list.files(path=ksAnalysisDir, pattern="Species.info.xls", full.names=TRUE, recursive=TRUE)
             ortholog_ksfiles <- ksfiles[grepl("ortholog_distributions", ksfiles)]
@@ -1742,46 +2010,79 @@ observeEvent(input$ortholog_ks_plot_go, {
 
             names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
-            widthSpacing <- reactiveValues(
-                value=600
+            widthPhyloKsSpacing <- reactiveValues(
+                value=1000
             )
-            heightSpacing <- reactiveValues(
+            heightPhyloKsSpacing <- reactiveValues(
                 value=350
             )
             observeEvent(input$ks_svg_vertical_spacing_add, {
-                heightSpacing$value <- heightSpacing$value + 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_vertical_spacing_sub, {
-                heightSpacing$value <- heightSpacing$value - 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value - 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_add, {
-                widthSpacing$value <- widthSpacing$value + 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_sub, {
-                widthSpacing$value <- widthSpacing$value - 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value - 50
             })
 
             speciesA <- input$ortholog_ks_files_list_A
-            speciesB <- input$ortholog_ks_files_list_B
-
-            matching_A <- which(names_df$latin_name == gsub("_", " ", speciesA))
-            speciesA_informal_name <- names_df$informal_name[matching_A]
-            speciesA_files <- ortholog_ksfiles[grepl(speciesA_informal_name, ortholog_ksfiles)]
 
             files_list <- c()
 
-            for( i in 1:length(speciesB) ){
-                pattenEach <- which(names_df$latin_name == gsub("_", " ", speciesB[[i]]))
+            for( i in 1:length(speciesA) ){
+                pattenEach <- which(names_df$latin_name == gsub("_", " ", speciesA[[i]]))
                 each_informal_name <- names_df$informal_name[pattenEach]
-                species_A_B_file <- speciesA_files[grepl(each_informal_name, speciesA_files)]
-                files_list <- c(files_list, species_A_B_file)
+                species_A_file <- ortholog_ksfiles[grepl(each_informal_name, ortholog_ksfiles)]
+                for( j in 1:length(speciesA) ){
+                    if( j > i ){
+                        pattenEach_B <- which(names_df$latin_name == gsub("_", " ", speciesA[[j]]))
+                        species_A_B_file <- species_A_file[grepl(pattenEach_B, species_A_file)]
+                        if( !is.null(species_A_B_file) ){
+                            files_list <- c(files_list, species_A_B_file)
+                        }
+                    }
+                }
             }
+            files_list <- unique(files_list)
 
             full_data <- calculateKsDistribution4wgd_multiple(
                 files_list,
                 maxK=input[["ks_maxK_ortholog"]],
             )
             denData <- full_data$density
+
+            newick_tree_file <- paste0(dirname(species_info_file), "/tree.newick")
+            treeTopology <- readLines(textConnection(readChar(newick_tree_file, file.info(newick_tree_file)$size)))
+            closeAllConnections()
+
+            ks_bar_data <- NULL
+
+            if( isTruthy(input$ortholog_paranome_species) ){
+                ortholog_paranome_informal_name <- names_df[names_df$latin_name == input$ortholog_paranome_species, ]$informal_name
+                selected_ks_files <- c()
+                selected_paralog_ks_file <- paralog_ksfiles[grepl(ortholog_paranome_informal_name, paralog_ksfiles)]
+                selected_paralog_anchor_ks_file <- gsub("ks.tsv$", "ks_anchors.tsv", selected_paralog_ks_file)
+                if( input$plot_ortholog_paralog_species == "All" ){
+                    selected_ks_files <- c(selected_ks_files, selected_paralog_ks_file)
+                    selected_ks_files <- c(selected_ks_files, selected_paralog_anchor_ks_file)
+                }
+                else if( input$plot_ortholog_paralog_species == "Anchor pairs" ){
+                    selected_ks_files <- c(selected_ks_files, selected_paralog_anchor_ks_file)
+                }
+                else{
+                    selected_ks_files <- c(selected_ks_files, selected_paralog_ks_file)
+                }
+
+                selected_ks_data <- calculateKsDistribution4wgd_multiple(
+                    selected_ks_files
+                )
+
+                ks_bar_data <- selected_ks_data$bar
+            }
 
             Sys.sleep(.2)
             incProgress(amount=.4, message="Calculating done...")
@@ -1796,10 +2097,19 @@ observeEvent(input$ortholog_ks_plot_go, {
                     "names_df"=names_df,
                     "color"="",
                     "opacity"=input[["opacity_paralog"]],
-                    "width"=widthSpacing$value,
-                    "height"=heightSpacing$value
+                    "width"=widthPhyloKsSpacing$value,
+                    "height"=heightPhyloKsSpacing$value,
+                    "tree_topology"=treeTopology[1]
                 )
-                session$sendCustomMessage("Otholog_Density_Plotting", plot_wgd_data)
+
+                if( !is.null(ks_bar_data) ){
+                    selected_paralog_ks_bar_data <- ks_bar_data[ks_bar_data$ks <= input[["ks_maxK_ortholog"]], ]
+                    plot_wgd_data[["ks_bar_df"]] <- selected_paralog_ks_bar_data
+                    plot_wgd_data[["y2lim"]] <- input$y2_limit_ortholog_paralog
+                    plot_wgd_data[["ortholog_paralog_species"]] <- input$ortholog_paranome_species
+                }
+
+                session$sendCustomMessage("Otholog_Density_Tree_Plotting", plot_wgd_data)
             })
             Sys.sleep(.2)
             incProgress(amount=.4, message="Ploting done...")
@@ -1866,22 +2176,6 @@ observeEvent(input$confirm_rate_correction_go, {
                         column(
                             5,
                             h4(HTML("<b><font color='#91cf60'>Substitution Rate Correction</font></b>"))
-                        ),
-                        column(
-                            6,
-                            actionButton(
-                                inputId="rate_plot_go",
-                                HTML("Start <b>rate correction</b> analysis"),
-                                icon=icon("play"),
-                                status="secondary",
-                                title="Click to start",
-                                class="my-start-button-class",
-                                style="color: #fff;
-                                   background-color: #27ae60;
-                                   border-color: #fff;
-                                   padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;"
-                            )
                         )
                     ),
                     div(
@@ -1952,9 +2246,9 @@ observeEvent(input$confirm_rate_correction_go, {
                                             class="my-download-button-class",
                                             label=".svg",
                                             style="color: #fff;
-                                                  background-color: #6B8E23;
-                                                  border-color: #fff;
-                                                  padding: 5px 5px 5px 5px;"
+                                                   background-color: #6B8E23;
+                                                   border-color: #fff;
+                                                   padding: 5px 5px 5px 5px;"
                                         )
                                     )
                                 )
@@ -1983,58 +2277,105 @@ observeEvent(input$confirm_rate_correction_go, {
                 )
             })
 
-            if( isTruthy(input$select_focal_species) & input$select_focal_species != ""  ){
+            # if( isTruthy(input$select_focal_species) & input$select_focal_species != ""  ){
                 output$rate_ks_setting <- renderUI({
                     fluidRow(
                         column(
-                            4,
-                            div(
-                                style="padding: 12px 10px 5px 10px;
-                                                   border-radius: 10px;
-                                                   background-color: #FFF5EE;",
-                                pickerInput(
-                                    inputId="plot_mode_option_rate",
-                                    label=HTML("<font color='orange'><i>K</i><sub>s</sub> Mode</font>:"),
-                                    choices=c("weighted", "average", "min", "pairwise"),
-                                    multiple=FALSE,
-                                    selected="weighted",
-                                    inline=TRUE
+                            12,
+                            fluidRow(
+                                column(
+                                    4,
+                                    div(
+                                        style="/*display: flex; align-items: center; */
+                                               margin-bottom: -10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 0px 10px;
+                                               background-color: #FFF5EE;",
+                                        pickerInput(
+                                            inputId="plot_mode_option_rate",
+                                            label=HTML("<font color='orange'><i>K</i><sub>s</sub> Mode</font>:"),
+                                            choices=c("weighted", "average", "min", "pairwise"),
+                                            multiple=FALSE,
+                                            selected="weighted",
+                                            inline=TRUE
+                                        )
+                                    )
+                                ),
+                                column(
+                                    4,
+                                    div(
+                                        style="/*display: flex; align-items: center; */
+                                               margin-bottom: -10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 0px 10px;
+                                               background-color: #FFF5EE;",
+                                        pickerInput(
+                                            inputId="plot_reference_species_data",
+                                            label=HTML("<font color='orange'>Data</font> used for <font color='orange'>Paralogous <i>K</i><sub>s</sub> Distribution</font>:"),
+                                            choices=c("All", "Paranome", "Anchor pairs"),
+                                            multiple=FALSE,
+                                            selected="All",
+                                            inline=TRUE
+                                        )
+                                    )
                                 )
                             )
                         ),
                         column(
-                            4,
-                            div(
-                                style="/*display: flex; align-items: center;*/
-                                                   margin-bottom: -10px;
-                                                   border-radius: 10px;
-                                                   padding: 10px 10px 0px 10px;
-                                                   background-color: #FFF5EE;",
-                                sliderInput(
-                                    inputId="ks_binWidth_rate",
-                                    label=HTML("<font color='orange'>BinWidth</font>:&nbsp;"),
-                                    min=0,
-                                    max=0.2,
-                                    step=0.01,
-                                    value=0.1
-                                )
-                            )
-                        ),
-                        column(
-                            4,
-                            div(
-                                style="/*display: flex; align-items: center; */
-                                                   margin-bottom: -10px;                                                   border-radius: 10px;
-                                                   border-radius: 10px;
-                                                   padding: 10px 10px 0px 10px;
-                                                   background-color: #FFF5EE;",
-                                sliderInput(
-                                    inputId="ks_maxK_rate",
-                                    label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
-                                    min=0,
-                                    step=1,
-                                    max=10,
-                                    value=5
+                            12,
+                            hr(class="setting"),
+                            fluidRow(
+                                column(
+                                    4,
+                                    div(
+                                        style="/*display: flex; align-items: center;*/
+                                               margin-bottom: -10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 0px 10px;
+                                               background-color: #FFF5EE;",
+                                        sliderInput(
+                                            inputId="ks_binWidth_rate",
+                                            label=HTML("<font color='orange'>BinWidth</font>:&nbsp;"),
+                                            min=0,
+                                            max=0.2,
+                                            step=0.01,
+                                            value=0.1
+                                        )
+                                    )
+                                ),
+                                column(
+                                    4,
+                                    div(
+                                        style="/*display: flex; align-items: center; */
+                                               margin-bottom: -10px;
+                                               border-radius: 10px;
+                                               padding: 10px 10px 0px 10px;
+                                               background-color: #FFF5EE;",
+                                        sliderInput(
+                                            inputId="ks_maxK_rate",
+                                            label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
+                                            min=0,
+                                            step=1,
+                                            max=5,
+                                            value=5
+                                        )
+                                    )
+                                ),
+                                column(
+                                    3,
+                                    actionButton(
+                                        inputId="rate_plot_go",
+                                        "Start",
+                                        icon=icon("play"),
+                                        status="secondary",
+                                        title="Click to start",
+                                        class="my-start-button-class",
+                                        style="color: #fff;
+                                               background-color: #27ae60;
+                                               border-color: #fff;
+                                               padding: 5px 14px 5px 14px;
+                                               margin: 13px 5px 15px 5px;"
+                                    )
                                 )
                             )
                         )
@@ -2047,104 +2388,43 @@ observeEvent(input$confirm_rate_correction_go, {
                             4,
                             div(
                                 style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
-                                sliderInput(
-                                    inputId="y1_limit_rate",
-                                    label=HTML("Set the <font color='orange'>Y1 axis limit</font>:"),
-                                    min=0,
-                                    step=500,
-                                    max=8000,
-                                    value=1500
-                                ),
-                            )
-                        ),
-                        column(
-                            4,
-                            div(
-                                style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
+                                       border-radius: 10px;
+                                       background-color: #F0FFFF",
                                 sliderInput(
                                     inputId="y2_limit_rate",
-                                    label=HTML("Set the <font color='orange'>Y2 axis limit</font>:"),
+                                    label=HTML("<font color='orange'>Ortholog Density Y axis limit</font>:"),
                                     min=0,
                                     step=0.2,
                                     max=5,
                                     value=2
-                                ),
+                                )
                             )
                         ),
                         column(
                             4,
                             div(
                                 style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
-                                sliderInput(
-                                    inputId="opacity_rate",
-                                    label=HTML("Set the <font color='orange'>Transparency</font>:"),
-                                    min=0,
-                                    max=1,
-                                    step=0.1,
-                                    value=0.5
-                                )
-                            )
-                        )
-                    )
-                })
-            }
-            else{
-                output$rate_ks_setting <- renderUI({
-                    fluidRow(
-                        column(
-                            4,
-                            div(
-                                style="/*display: flex; align-items: center; */
-                                                   margin-bottom: -10px;                                                   border-radius: 10px;
-                                                   border-radius: 10px;
-                                                   padding: 10px 10px 0px 10px;
-                                                   background-color: #FFF5EE;",
-                                sliderInput(
-                                    inputId="ks_maxK_rate",
-                                    label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
-                                    min=0,
-                                    step=1,
-                                    max=10,
-                                    value=5
-                                )
-                            )
-                        )
-                    )
-                })
-
-                output$rate_figure_setting <- renderUI({
-                    fluidRow(
-                        column(
-                            4,
-                            div(
-                                style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
+                                       border-radius: 10px;
+                                       background-color: #F0FFFF",
                                 sliderInput(
                                     inputId="y1_limit_rate",
-                                    label=HTML("Set the <font color='orange'>Y axis limit</font>:"),
+                                    label=HTML("<font color='orange'>Retained Duplicates Y axis limit</font>:"),
                                     min=0,
-                                    step=0.2,
-                                    max=5,
-                                    value=2
-                                ),
+                                    step=200,
+                                    max=6000,
+                                    value=2500
+                                )
                             )
                         ),
                         column(
                             4,
                             div(
                                 style="padding: 12px 10px 5px 10px;
-                                               border-radius: 10px;
-                                               background-color: #F0FFFF",
+                                       border-radius: 10px;
+                                       background-color: #F0FFFF",
                                 sliderInput(
                                     inputId="opacity_rate",
-                                    label=HTML("Set the <font color='orange'>Transparency</font>:"),
+                                    label=HTML("<font color='orange'>Transparency</font>:"),
                                     min=0,
                                     max=1,
                                     step=0.1,
@@ -2154,7 +2434,68 @@ observeEvent(input$confirm_rate_correction_go, {
                         )
                     )
                 })
-            }
+            # }
+            # else{
+            #     output$rate_ks_setting <- renderUI({
+            #         fluidRow(
+            #             column(
+            #                 4,
+            #                 div(
+            #                     style="/*display: flex; align-items: center; */
+            #                                        margin-bottom: -10px;
+            #                                        border-radius: 10px;
+            #                                        padding: 10px 10px 0px 10px;
+            #                                        background-color: #FFF5EE;",
+            #                     sliderInput(
+            #                         inputId="ks_maxK_rate",
+            #                         label=HTML("<font color='orange'><i>K</i><sub>s</sub> limit</font>:&nbsp;"),
+            #                         min=0,
+            #                         step=1,
+            #                         max=10,
+            #                         value=5
+            #                     )
+            #                 )
+            #             )
+            #         )
+            #     })
+            #
+            #     output$rate_figure_setting <- renderUI({
+            #         fluidRow(
+            #             column(
+            #                 4,
+            #                 div(
+            #                     style="padding: 12px 10px 5px 10px;
+            #                                    border-radius: 10px;
+            #                                    background-color: #F0FFFF",
+            #                     sliderInput(
+            #                         inputId="y1_limit_rate",
+            #                         label=HTML("Set the <font color='orange'>Y axis limit</font>:"),
+            #                         min=0,
+            #                         step=0.2,
+            #                         max=5,
+            #                         value=2
+            #                     ),
+            #                 )
+            #             ),
+            #             column(
+            #                 4,
+            #                 div(
+            #                     style="padding: 12px 10px 5px 10px;
+            #                                    border-radius: 10px;
+            #                                    background-color: #F0FFFF",
+            #                     sliderInput(
+            #                         inputId="opacity_rate",
+            #                         label=HTML("Set the <font color='orange'>Transparency</font>:"),
+            #                         min=0,
+            #                         max=1,
+            #                         step=0.1,
+            #                         value=0.5
+            #                     )
+            #                 )
+            #             )
+            #         )
+            #     })
+            # }
 
 
             Sys.sleep(.2)
@@ -2173,6 +2514,7 @@ observeEvent(input$confirm_rate_correction_go, {
 })
 
 observeEvent(input$rate_plot_go, {
+    shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
     shinyjs::runjs("$('#confirm_rate_correction_go').css('background-color', 'green');")
     updateActionButton(
         session,
@@ -2201,23 +2543,23 @@ observeEvent(input$rate_plot_go, {
         names_df <- map_informal_name_to_latin_name(species_info_file[1])
 
         withProgress(message='Analyzing in progress', value=0, {
-            widthSpacing <- reactiveValues(
-                value=600
+            widthPhyloKsSpacing <- reactiveValues(
+                value=1100
             )
-            heightSpacing <- reactiveValues(
+            heightPhyloKsSpacing <- reactiveValues(
                 value=350
             )
             observeEvent(input$ks_svg_vertical_spacing_add, {
-                heightSpacing$value <- heightSpacing$value + 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_vertical_spacing_sub, {
-                heightSpacing$value <- heightSpacing$value - 50
+                heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value - 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_add, {
-                widthSpacing$value <- widthSpacing$value + 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value + 50
             })
             observeEvent(input$ks_svg_horizontal_spacing_sub, {
-                widthSpacing$value <- widthSpacing$value - 50
+                widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value - 50
             })
 
             ks_selected_files <- c()
@@ -2235,6 +2577,10 @@ observeEvent(input$rate_plot_go, {
             ref2outgroupFile <- ortholog_ksfiles[grepl(ref_informal_name, ortholog_ksfiles) & grepl(outgroup_informal_name, ortholog_ksfiles)]
             ks_selected_files <- c(ks_selected_files, ref2outgroupFile)
 
+            ref2outgroup_id <- gsub(".tsv$", "", basename(ref2outgroupFile))
+
+            ks_files_for_correction <- c()
+
             mode_df <- data.frame()
             for( i in 1:length(studySpecies) ){
                 pattenEach <- which(names_df$latin_name == gsub("_", " ", studySpecies[[i]]))
@@ -2242,6 +2588,8 @@ observeEvent(input$rate_plot_go, {
                 ref2studyFile <- ortholog_ksfiles[grepl(ref_informal_name, ortholog_ksfiles) & grepl(each_informal_name, ortholog_ksfiles)]
                 study2outgroupFile <- ortholog_ksfiles[grepl(each_informal_name, ortholog_ksfiles) & grepl(outgroup_informal_name, ortholog_ksfiles)]
                 ks_selected_files <- c(ks_selected_files, study2outgroupFile)
+
+                ks_files_for_correction <- c(ks_files_for_correction, ref2studyFile)
 
                 # relative rate test
                 # source("tools/substitution_rate_correction.R", local=T, encoding="UTF-8")
@@ -2267,8 +2615,13 @@ observeEvent(input$rate_plot_go, {
             Sys.sleep(.2)
             incProgress(amount=.4, message="Calculating done...")
 
-            if( isTruthy(input$select_focal_species) & input$select_focal_species != "" ){
-                pattenFocal <- which(names_df$latin_name == input$select_focal_species)
+            # if( isTruthy(input$select_focal_species) & input$select_focal_species != "" ){
+
+            req(input[["ks_binWidth_rate"]])
+            req(input[["plot_mode_option_rate"]])
+            req(input[["plot_reference_species_data"]])
+
+                pattenFocal <- which(names_df$latin_name == gsub("_", " ", input$select_ref_species))
                 each_focal_name <- names_df$informal_name[pattenFocal]
 
                 ks_file <- paralog_ksfiles[grepl(each_focal_name, paralog_ksfiles)]
@@ -2276,14 +2629,17 @@ observeEvent(input$rate_plot_go, {
 
                 ks_anchor_file <- gsub(".ks.tsv$", ".ks_anchors.tsv", ks_file)
 
-                if( file.exists(ks_anchor_file) ){
-                    files_list_new <- c(ks_file, ks_anchor_file)
-                }else{
-                    files_list_new <- c(ks_file)
+                files_list_new <- c()
+                if( input$plot_reference_species_data == "All" ){
+                    files_list_new <- c(files_list_new, ks_file)
+                    files_list_new <- c(files_list_new, ks_anchor_file)
                 }
-
-                req(input[["ks_binWidth_rate"]])
-                req(input[["plot_mode_option_rate"]])
+                else if( input$plot_reference_species_data == "Anchor pairs" ){
+                    files_list_new <- c(files_list_new, ks_anchor_file)
+                }
+                else{
+                    files_list_new <- c(files_list_new, ks_file)
+                }
 
                 files_list_new <- c(files_list_new, ks_selected_files)
 
@@ -2295,6 +2651,15 @@ observeEvent(input$rate_plot_go, {
                 )
                 barData <- full_data$bar
                 denData <- full_data$density
+
+                full_data_correction <- calculateKsDistribution4wgd_multiple(
+                    ks_files_for_correction,
+                    plot.mode=input[["plot_mode_option_rate"]],
+                    maxK=input[["ks_maxK_rate"]],
+                    binWidth=input[["ks_binWidth_rate"]]
+                )
+                denData_for_correction <- full_data_correction$density
+
                 Sys.sleep(.2)
                 incProgress(amount=.4, message="Calculating done...")
 
@@ -2304,53 +2669,224 @@ observeEvent(input$rate_plot_go, {
                     plot_wgd_data <- list(
                         "plot_id"="Wgd_plot_rate",
                         "ks_density_df"=selectedDenData,
+                        "ks_density_for_correct_df"=denData_for_correction,
+                        "ref2outgroup_id"=ref2outgroup_id,
                         "species_list"=names_df,
                         "ks_bar_df"=selectedBarData,
                         "rate_correction_df"=mode_df,
                         "paralog_id"=paralog_id,
-                        "paralogSpecies"=input$select_focal_species,
+                        "paralogSpecies"=gsub("_", " ", input$select_ref_species),
                         "xlim"=input[["ks_maxK_rate"]],
                         "ylim"=input[["y1_limit_rate"]],
                         "y2lim"=input[["y2_limit_rate"]],
                         "color"="",
                         "opacity"=input[["opacity_rate"]],
-                        "width"=widthSpacing$value,
-                        "height"=heightSpacing$value
+                        "width"=widthPhyloKsSpacing$value,
+                        "height"=heightPhyloKsSpacing$value
                     )
                     session$sendCustomMessage("Bar_Density_Plotting", plot_wgd_data)
                 })
-            }else{
-                plot_wgd_data <- list(
-                    "paralog_id"=""
-                )
-                files_list <- ks_selected_files
-
-                full_data <- calculateKsDistribution4wgd_multiple(
-                    files_list
-                )
-                denData <- full_data$density
-                Sys.sleep(.2)
-                incProgress(amount=.4, message="Calculating done...")
-
-                observe({
-                    selectedDenData <- denData[denData$ks >= 0 & denData$ks <= input[["ks_maxK_rate"]], ]
-                    plot_wgd_data <- list(
-                        "plot_id"="Wgd_plot_rate",
-                        "ks_density_df"=selectedDenData,
-                        "rate_correction_df"=mode_df,
-                        "species_list"=names_df,
-                        "xlim"=input[["ks_maxK_rate"]],
-                        "y2lim"=input[["y1_limit_rate"]],
-                        "color"="",
-                        "opacity"=input[["opacity_rate"]],
-                        "width"=widthSpacing$value,
-                        "height"=heightSpacing$value
-                    )
-                    session$sendCustomMessage("Bar_Density_Plotting", plot_wgd_data)
-                })
-            }
+            # }
+            # else{
+            #     plot_wgd_data <- list(
+            #         "paralog_id"=""
+            #     )
+            #     files_list <- ks_selected_files
+            #
+            #     full_data <- calculateKsDistribution4wgd_multiple(
+            #         files_list
+            #     )
+            #     denData <- full_data$density
+            #     Sys.sleep(.2)
+            #     incProgress(amount=.4, message="Calculating done...")
+            #
+            #     observe({
+            #         selectedDenData <- denData[denData$ks >= 0 & denData$ks <= input[["ks_maxK_rate"]], ]
+            #         plot_wgd_data <- list(
+            #             "plot_id"="Wgd_plot_rate",
+            #             "ks_density_df"=selectedDenData,
+            #             "rate_correction_df"=mode_df,
+            #             "species_list"=names_df,
+            #             "xlim"=input[["ks_maxK_rate"]],
+            #             "y2lim"=input[["y1_limit_rate"]],
+            #             "color"="",
+            #             "opacity"=input[["opacity_rate"]],
+            #             "width"=widthPhyloKsSpacing$value,
+            #             "height"=heightPhyloKsSpacing$value
+            #         )
+            #         session$sendCustomMessage("Bar_Density_Plotting", plot_wgd_data)
+            #     })
+            # }
             Sys.sleep(.2)
             incProgress(amount=.4, message="Ploting done...")
         })
     }
 })
+
+observeEvent(input$confirm_phylo_ks_go, {
+    shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+    shinyjs::runjs("$('#confirm_phylo_ks_go').css('background-color', 'green');")
+    updateActionButton(
+        session,
+        "confirm_phylo_ks_go",
+        icon=icon("check")
+    )
+
+    setTimeoutFunction <- "setTimeout(function() {
+              $('#confirm_phylo_ks_go').css('background-color', '#C0C0C0');
+              //$('#confirm_phylo_ks_go').empty();
+        }, 6000);"
+
+    shinyjs::runjs(setTimeoutFunction)
+
+    if( is.null(buttonClicked()) ){
+        ksAnalysisDir <- ks_example_dir
+    }
+    else if( buttonClicked() == "fileInput" ){
+        ksAnalysisDir <- ks_analysis_dir_Val()
+    }
+    else if( buttonClicked() == "actionButton" ){
+        ksAnalysisDir <- ks_example_dir
+    }
+
+    output$ks_analysis_output <- renderUI({
+        div(
+            class="boxLike",
+            style="background-color: white;
+                   padding-bottom: 10px;
+                   padding-top: 10px",
+            fluidRow(
+                column(
+                    9,
+                    tags$style(
+                        HTML(".rotate-135 {
+                                transform: rotate(135deg);
+                            }"),
+                        HTML(".rotate-45{
+                                transform: rotate(45deg);
+                            }")
+                    ),
+                    actionButton(
+                        "phylo_ks_svg_vertical_spacing_add",
+                        "",
+                        icon("arrows-alt-v"),
+                        title="Expand vertical spacing"
+                    ),
+                    actionButton(
+                        "phylo_ks_svg_vertical_spacing_sub",
+                        "",
+                        icon(
+                            "down-left-and-up-right-to-center",
+                            verify_fa=FALSE,
+                            class="rotate-135"
+                        ),
+                        title="Compress vertical spacing"
+                    ),
+                    actionButton(
+                        "phylo_ks_svg_horizontal_spacing_add",
+                        "",
+                        icon("arrows-alt-h"),
+                        title="Expand horizontal spacing"
+                    ),
+                    actionButton(
+                        "phylo_ks_svg_horizontal_spacing_sub",
+                        "",
+                        icon(
+                            "down-left-and-up-right-to-center",
+                            verify_fa=FALSE,
+                            class="rotate-45"
+                        ),
+                        title="Compress horizontal spacing"
+                    ),
+                    downloadButton_custom(
+                        "phyloKsTreePlotDownload",
+                        status="secondary",
+                        icon=icon("download"),
+                        title="Download the plot",
+                        class="my-donwload-button-class",
+                        label=HTML(""),
+                        style="color: #fff;
+                              background-color: #6B8E23;
+                              border-color: #fff;
+                              padding: 5px 14px 5px 14px;
+                              margin: 5px 5px 5px 5px;"
+                    )
+                ),
+                column(
+                    12,
+                    div(
+                        id="phylo_ks_tree_plot",
+                    )
+                )
+            )
+        )
+    })
+
+
+    widthPhyloKsSpacing <- reactiveValues(value=600)
+    heightPhyloKsSpacing <- reactiveValues(value=NULL)
+
+    observe({
+        if( isTruthy(input$uploadPhyloKsTree) ){
+            phyloKsTreeFile <- input$uploadPhyloKsTree$datapath
+            phyloKsTree <- readLines(textConnection(readChar(phyloKsTreeFile, file.info(phyloKsTreeFile)$size)))
+            closeAllConnections()
+            sp_count <- str_count(phyloKsTree[1], ":")
+            trunc_val <- as.numeric(sp_count) * 20
+            heightPhyloKsSpacing$value <- trunc_val
+        }
+    })
+
+    observeEvent(input$phylo_ks_svg_vertical_spacing_add, {
+        heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value + 50
+    })
+    observeEvent(input$phylo_ks_svg_vertical_spacing_sub, {
+        heightPhyloKsSpacing$value <- heightPhyloKsSpacing$value - 50
+    })
+    observeEvent(input$phylo_ks_svg_horizontal_spacing_add, {
+        widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value + 50
+    })
+    observeEvent(input$phylo_ks_svg_horizontal_spacing_sub, {
+        widthPhyloKsSpacing$value <- widthPhyloKsSpacing$value - 50
+    })
+
+    observe({
+        if( isTruthy(input$uploadPhyloKsTree) ){
+            phyloKsTreeFile <- input$uploadPhyloKsTree$datapath
+            phyloKsTree <- readLines(textConnection(readChar(phyloKsTreeFile, file.info(phyloKsTreeFile)$size)))
+            closeAllConnections()
+
+            phylo_ks_tree_data <- list(
+                "width"=widthPhyloKsSpacing$value
+            )
+
+            phylo_ks_tree_data[["ksTree"]] <- phyloKsTree[1]
+
+            if( isTruthy(input$uploadPhyloKsPeakTable) ){
+                ksPeakTableFile <- input$uploadPhyloKsPeakTable$datapath
+                ksPeak <- suppressMessages(
+                    vroom(
+                        ksPeakTableFile,
+                        col_names=c("species", "type", "peak", "confidence_interval"),
+                        delim="\t",
+                        skip=1
+                    )
+                )
+                if( ncol(ksPeak) == 4 ){
+                    color_list <- c(
+                        "#ff7f00", "#FFA750", "#0064A7", "#008DEC",
+                        "#088A00", "#0CD300", "#e31a1c", "#fb9a99", "#cab2d6"
+                    )
+                    ksPeak$color <- color_list[match(ksPeak$species, unique(ksPeak$species))]
+                }
+                phylo_ks_tree_data[["ksPeak"]] <- ksPeak
+            }
+
+            phylo_ks_tree_data[["height"]] <- heightPhyloKsSpacing$value
+            phylo_ks_tree_data[["plot_id"]] <- "phylo_ks_tree_plot"
+            phylo_ks_tree_data[["download_id"]] <- "phyloKsTreePlotDownload"
+            session$sendCustomMessage("jointTreePlot", phylo_ks_tree_data)
+        }
+    })
+})
+

@@ -42,7 +42,7 @@ source(file="ui/extracting_tree.ui.R", local=T, encoding="UTF-8")
 source(file="ui/ks_age_distribution.ui.R", local=T, encoding="UTF-8")
 source(file="ui/joint_tree.ui.R", local=T, encoding="UTF-8")
 source(file="ui/synteny_analysis.ui.R", local=T, encoding="UTF-8")
-#source(file="ui/tree_reconciliation.ui.R", local=T, encoding="UTF-8")
+source(file="ui/tree_reconciliation.ui.R", local=T, encoding="UTF-8")
 source(file="ui/gallery.ui.R", local=T, encoding="UTF-8")
 source(file="ui/help.ui.R", local=T, encoding="UTF-8")
 
@@ -57,6 +57,7 @@ ui <- tagList(
     includeScript("www/js/tippy-bundle.umd.v6.3.7.min.js"),
     includeScript("www/js/progress_bar.js"),
     includeScript("https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"),
+    includeScript("https://cdn.jsdelivr.net/npm/sweetalert2@11"),
     shinyjs::useShinyjs(),
     tags$head(
         tags$link(
@@ -92,8 +93,8 @@ ui <- tagList(
             icon=icon("pencil-alt"),
             Ks_Age_Distribution_ui,
             Synteny_Analysis_ui,
-            Joint_Tree_ui,
-            #Tree_Reconciliation_ui
+            Tree_Reconciliation_ui,
+            Joint_Tree_ui
         ),
         Gallery_ui,
         Help_ui
@@ -187,7 +188,7 @@ server <- function(input, output, session){
     source(file="server/ks_age_distribution.server.R", local=T, encoding="UTF-8")
     source(file="server/joint_tree.server.R", local=T, encoding="UTF-8")
     source(file="server/synteny_analysis.server.R", local=T, encoding="UTF-8")
-    #source(file="server/tree_reconciliation.server.R", local=T, encoding="UTF-8")
+    source(file="server/tree_reconciliation.server.R", local=T, encoding="UTF-8")
     source(file="server/gallery.server.R", local=T, encoding="UTF-8")
     source(file="server/help.server.R", local=T, encoding="UTF-8")
 }
