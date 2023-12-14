@@ -43,8 +43,10 @@ observeEvent(input$upload_data_file_example, {
                             "<font color='green'><i aria-label='warning icon' class='fa fa-warning fa-fw' role='presentation'></i></font> Do not contain the <a href='https://en.wikipedia.org/wiki/Alternative_splicing' target='_blank'>alternative isoforms</a> of each gene.<br>",
                             "<sup>b</sup> <b>gff</b> is the format consists of one line per feature, each containing nine columns of data, plus optional track definition lines, see more <a href='https://www.ensembl.org/info/website/upload/gff.html' target='_blank'>click here</a>.<br>",
                             "The file can be <b>gff</b>, <b>gff3</b>, <b>gzipped-gff</b>, or <b>gzipped-gff3</b>.<br>",
-                            "This column is <strong>mandatory</strong> for <strong>focal species</strong> and is <strong>optional</strong> for <strong>other species</strong>.</br>",
-                            "<b>Make sure you upload fasta and gff files with the same name in this table field.</b>"
+                            "This column is <strong>mandatory</strong> for the <strong>focal species</strong> and is <strong>optional</strong> for the <strong>other species</strong>.</br>",
+                            "<b>Make sure you upload fasta and gff files with the same name in this table field.</b>",
+                            "<p><br></br></p>",
+                            "<p>To download the demo data, <a href='https://github.com/li081766/shinyWGD_Demo_Data/blob/main/4sp_orchids.CDS_GFF_Example_Data.tar.gz' target='_blank'>click here</a>.</p>"
                         )
                     )
                 )
@@ -610,133 +612,67 @@ observeEvent(input$newick_file_example, {
 output$multipleSpeciesPanel <- renderUI({
     if( input$number_of_study_species > 2 ){
         div(
-            style="display: inline-flex;",
             column(
-                8,
+                12,
                 HTML(
-                    "If switching on the right mode, <font color='green'><b>i-ADHoRe</b></font> will study all the species within one run. The code will be appended to the main script of <font color='green'><b>run_diamond_iadhore.sh</b></font>. See more details in <font color='green'><b>i-ADHoRe</b></font> manual"
-                ),
+                    paste(
+                        "If the below mode is enabled, <font color='green'><b>i-ADHoRe</b></font> will analyze all the species within a single run.",
+                        "The corresponding code will be added to the main script of <font color='green'><i><b>run_diamond_iadhore.sh</b></i></font>.",
+                        "For more details, refer to the <font color='green'><b>i-ADHoRe</b></font> manual."
+                    )
+                )
             ),
             column(
-                4,
-                style="margin-top: 20px;",
-                switchInput(
+                12,
+                style="margin-top: 5px;",
+                prettyToggle(
                     inputId="multiple_iadhore",
-                    onStatus="success",
-                    offStatus="danger",
-                    size="normal"
+                    label_on="Yes!",
+                    icon_on=icon("check"),
+                    status_on="info",
+                    status_off="warning",
+                    label_off="No..",
+                    bigger=TRUE,
+                    icon_off=icon("remove"),
+                    animation="rotate"
                 ) %>%
                     bs_embed_tooltip(
                         title="Switch On to activate the multiple speices model",
                         placement="right",
                         trigger="hover",
                         options=list(container="body")
-                    ),
+                    )
             )
         )
     }
 })
 
 output$WgdKsratesIadhoreScriptRun <- renderUI({
-    num <- toupper(as.english(input$number_of_study_species))
-    if( input$number_of_study_species < 2 ){
-        mode <- "Whole-Paranome"
-        fluidRow(
-            class="justify-content-end",
-            style="padding-bottom: 5px;",
-            column(
-                12,
-                actionButton(
-                    inputId="wgd_run_server",
-                    HTML("Run <b><i>wgd</i></b>"),
-                    icon=icon("play"),
-                    title="Click to submit the job to the computing server",
-                    width="180px",
-                    status="secondary",
-                    class="my-start-button-class",
-                    style="text-align: left;
-                           color: #fff;
-                           background-color: #27ae60;
-                           border-color: #fff;
-                           padding: 5px 14px 5px 14px;
-                           margin: 5px 5px 5px 5px; "
-                )
+    fluidRow(
+        class="justify-content-end",
+        style="padding-bottom: 5px;",
+        column(
+            12,
+            actionButton(
+                inputId="job_run_server",
+                "Submit Jobs",
+                icon=icon("play"),
+                title="Click to submit the job to the PSB computing server",
+                status="secondary",
+                class="my-start-button-class",
+                style="text-align: left;
+                       color: #fff;
+                       background-color: #27ae60;
+                       border-color: #fff;
+                       padding: 5px 14px 5px 14px;
+                       margin: 5px 5px 5px 5px; "
             )
+        ),
+        column(
+            12,
+            uiOutput("job_unique_id")
         )
-    }
-    else{
-        fluidRow(
-            div(
-                style="padding-left: 20px;
-                       padding-right: 20px;",
-                fluidRow(
-                    column(
-                        12,
-                        actionButton(
-                            inputId="ksrates_run_server",
-                            HTML("Run <b><i>ksrates</b></i>"),
-                            width="180px",
-                            icon=icon("play"),
-                            title="Click to submit the job to the computing server",
-                            status="secondary",
-                            class="my-start-button-class",
-                            style="text-align: left;
-                                   color: #fff;
-                                   background-color: #27ae60;
-                                   border-color: #fff;
-                                   padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px; "
-                        )
-                    )
-                ),
-                fluidRow(
-                    column(
-                        12,
-                        actionButton(
-                            inputId="iadhore_run_server",
-                            HTML("Run <b><i>i-ADHoRe</b></i>"),
-                            icon=icon("play"),
-                            title="Click to submit the job to the computing server",
-                            width="180px",
-                            status="secondary",
-                            class="my-start-button-class",
-                            style="text-align: left;
-                                   color: #fff;
-                                   background-color: #27ae60;
-                                   border-color: #fff;
-                                   padding: 5px 14px 5px 14px;
-                                   margin: 5px 5px 5px 5px;"
-                        )
-                    )
-                ),
-                if( input$number_of_study_species > 2 ){
-                    fluidRow(
-                        column(
-                            12,
-                            div(
-                                style="padding-bottom: 15px;",
-                                actionButton(
-                                    inputId="orthofinder_run_server",
-                                    HTML("Run <i><b>OrthoFinder</b></i>"),
-                                    icon=icon("play"),
-                                    title="Click to submit the job to the computing server",
-                                    width="180px",
-                                    status="secondary",
-                                    class="my-start-button-class",
-                                    style="text-align: left;
-                                           color: #fff;
-                                           background-color: #27ae60;
-                                           border-color: #fff;
-                                           padding: 5px 14px 5px 14px;
-                                           margin: 5px 5px 5px 5px; "
-                                )
-                            )
-                        )
-                    )
-                }
-            )
-        )
-    }
+    )
 })
 
 output$WgdKsratesIadhoreDataDownload <- renderUI({
@@ -746,9 +682,9 @@ output$WgdKsratesIadhoreDataDownload <- renderUI({
             div(class="float-left",
                 downloadButton_custom(
                     outputId="wgd_ksrates_data_download",
-                    label="Download Analysis Data",
+                    label="Download Data and Scripts",
                     icon=icon("download"),
-                    title="Click to download the analysis data",
+                    title="Click to download the analysis data and the scripts",
                     status="secondary",
                     class="my-download-button-class",
                     style="color: #fff;
@@ -796,6 +732,11 @@ observe({
         isTruthy(input$selected_data_files) ||
         isTruthy(input$proteome_1)
     ){
+        # for server
+        # base_dir <- "/www/bioinformatics01_rw/ShinyWGD"
+        # timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+        # working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+
         base_dir <- tempdir()
         timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
         working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
@@ -816,8 +757,6 @@ observe({
         observeEvent(input$upload_data_file, {
             working_wd <- data_preparation_dir_Val()
             original_data_wd <- original_data_wd_Val()
-            print(working_wd)
-            print(original_data_wd)
             if( !is.null(input$upload_data_file) && !is.null(working_wd) ){
                 shinyalert(
                     "Success",
@@ -1619,6 +1558,7 @@ observeEvent(input$orthofinder_go, {
                     "Rscript tools/prepare_orthofinder.R",
                     "-i", species_info,
                     "-o", orthofinder_dir,
+                    "-s", gsub(" ", "_", input$select_focal_species),
                     "-c", cmd_file
                 )
             )
@@ -1748,6 +1688,66 @@ observeEvent(input$go_codes_orthofinder, {
                 uiOutput("orthofinderParameterPanel")
             )
         )
+    }
+})
+
+observeEvent(input$job_run_server, {
+    if( input$number_of_study_species > 5 ){
+        shinyalert(
+            "Oops!",
+            "To control resource usage, the PSB computing cluster restricts studies to a maximum of five species. Please execute the generated scripts locally.",
+            type="error"
+        )
+    }else{
+        working_wd <- data_preparation_dir_Val()
+        unique_id <- gsub("Analysis_", "", basename(working_wd))
+
+        output$job_unique_id <- renderUI({
+            column(
+                12,
+                "Job id:",
+                verbatimTextOutput("job_id_text"),
+                "Make sure to take note of this ID as you will need it for downloading the results from our server."
+            )
+        })
+        output$job_id_text <- renderText({
+            unique_id
+        })
+        print(working_wd)
+        # submit the job to psb computing cluster
+        sh_files <- list.files(working_wd, pattern="\\.sh$", full.names=TRUE, recursive=TRUE)
+        print(sh_files)
+
+        submit_job <- function(script_file) {
+            # system(paste("cd", dirname(script_file)))
+            print(dirname(script_file))
+            if( grepl("run_ksrates.sh", script_file) ){
+                print(script_file)
+                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
+                Sys.sleep(10000)
+            }
+            if( grepl("run_ksrates.sh", script_file) ){
+                print(script_file)
+                # system(paste("qsub -cwd -l h_vmem=8g -pe serial 4", basename(script_file)))
+                Sys.sleep(10000)
+            }
+            if( grepl("run_orthofinder.sh", script_file) ){
+                print(script_file)
+                # system(paste("qsub -cwd -l h_vmem=8g -pe serial 4", basename(script_file)))
+                Sys.sleep(10000)
+            }
+            if( grepl("run_paralog_ks_rest_species.sh", script_file) ){
+                print(script_file)
+                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
+                Sys.sleep(10000)
+            }
+            if( grep("run_wgd.sh", script_file) ){
+                print(script_file)
+                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
+                Sys.sleep(10000)
+            }
+        }
+        lapply(sh_files, submit_job)
     }
 })
 
