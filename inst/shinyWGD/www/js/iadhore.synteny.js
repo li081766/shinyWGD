@@ -11,42 +11,23 @@ var colorScale = d3.scaleLinear()
     .domain([0, 1, 2, 3, 5])
     .range(["red", "orange", "green", "#018571", "blue"]);
 
+Shiny.addCustomMessageHandler("Parallel_Plotting", ParallelPlottingV2);
+function ParallelPlottingV2(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var queryChrInfo = convertShinyData(InputData.query_chr_lens);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_lens);
+    var width = InputData.width;
+    var height = InputData.height;
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var scaleRatio = width / 800;
 
-var script = document.createElement('script');
-script.src = 'https://d3js.org/d3.v7.min.js';
-document.head.appendChild(script);
-script.onload = function () {
-    // Your D3 v7 code goes here
-    console.log("iadhore d3 version:", d3.version);
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
 
-    Shiny.addCustomMessageHandler("Parallel_Plotting", ParallelPlottingV2);
-    function ParallelPlottingV2(InputData) {
-        var plotId = InputData.plot_id;
-        var segmentInfo = convertShinyData(InputData.segs);
-        var queryChrInfo = convertShinyData(InputData.query_chr_lens);
-        var subjectChrInfo = convertShinyData(InputData.subject_chr_lens);
-        var width = InputData.width;
-        var height = InputData.height;
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var scaleRatio = width / 800;
-
-        /* console.log("segmentInfo", segmentInfo);
-        console.log("queryChrInfo", queryChrInfo);
-        console.log("subjectChrInfo", subjectChrInfo); */
-
-        /* queryChrInfo = queryChrInfo.sort(function (a, b) {
-            return b.len - a.len;
-        });
-
-        subjectChrInfo = subjectChrInfo.sort(function (a, b) {
-            return b.len - a.len;
-        });
-
-        segmentInfo.sort(function (a, b) {
-            return (b.endX - b.startX) - (a.endY - a.startY);
-        }); */
-
+    scriptV7.onload = function () {
         const query_chr_colors = [
             "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
             "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
@@ -479,32 +460,38 @@ script.onload = function () {
         // tippy(".queryChrs rect", { trigger: "mouseenter", followCursor: "initial", delay: [tooltipDelay, null] });
         // tippy(".subjectChrs rect", { trigger: "mouseenter", followCursor: "initial", delay: [tooltipDelay, null] });
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("download_" + plotId,
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
-        // downloadSVGwithForeign("dotView_download", "dotView");
     }
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("download_" + plotId,
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
+    // downloadSVGwithForeign("dotView_download", "dotView");
+}
 
-    Shiny.addCustomMessageHandler("Parallel_Number_Plotting", ParallelNumPlotting);
-    function ParallelNumPlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorpointInfo = convertShinyData(InputData.anchorpoints);
-        var queryChrInfo = convertShinyData(InputData.query_chr_nums);
-        var subjectChrInfo = convertShinyData(InputData.subject_chr_nums);
-        var width = InputData.width;
-        var height = InputData.height;
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var scaleRatio = width / 800;
+Shiny.addCustomMessageHandler("Parallel_Number_Plotting", ParallelNumPlotting);
+function ParallelNumPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorpointInfo = convertShinyData(InputData.anchorpoints);
+    var queryChrInfo = convertShinyData(InputData.query_chr_nums);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_nums);
+    var width = InputData.width;
+    var height = InputData.height;
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var scaleRatio = width / 800;
 
-        const query_chr_colors = [
-            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
-            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
-        ];
-        const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
+    ];
+    const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
 
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // draw a parallel syntenic plot
         d3.select("#" + plotId).select("svg").remove();
 
@@ -886,36 +873,43 @@ script.onload = function () {
             })
 
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("download_" + plotId,
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
-        // downloadSVGwithForeign("dotView_download", "dotView");
     }
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("download_" + plotId,
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
+    // downloadSVGwithForeign("dotView_download", "dotView");
+}
 
-    Shiny.addCustomMessageHandler("Parallel_Multiple_Plotting", parallelMultiplePlotting);
-    function parallelMultiplePlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var segmentInfo = convertShinyData(InputData.segs);
-        var chrLenInfo = convertShinyData(InputData.chr_lens);
-        var chrOrder = convertShinyData(InputData.chr_order);
-        // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
-        var spOrder = InputData.sp_order;
-        var width = InputData.width;
-        var height = InputData.height;
+Shiny.addCustomMessageHandler("Parallel_Multiple_Plotting", parallelMultiplePlotting);
+function parallelMultiplePlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var chrLenInfo = convertShinyData(InputData.chr_lens);
+    var chrOrder = convertShinyData(InputData.chr_order);
+    // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
+    var spOrder = InputData.sp_order;
+    var width = InputData.width;
+    var height = InputData.height;
 
-        var overlapCutOff = 0.1;
+    var overlapCutOff = 0.1;
 
-        /*         console.log("segmentInfo", segmentInfo);
-                console.log("chrLenInfo", chrLenInfo);
-                console.log("chrOrder", chrOrder);
-                console.log("spOrder", spOrder); */
+    /*         console.log("segmentInfo", segmentInfo);
+            console.log("chrLenInfo", chrLenInfo);
+            console.log("chrOrder", chrOrder);
+            console.log("spOrder", spOrder); */
 
-        const query_chr_colors = [
-            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
-            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
-        const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
+    const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
 
         // draw a parallel syntenic plot
         d3.select("#parallel_plot_multiple_species").select("svg").remove();
@@ -1250,8 +1244,8 @@ script.onload = function () {
             .attr("fill", "#BEBEBE")
             .attr("opacity", 0.69)
             .attr("stroke", "#BEBEBE")
-/*             .attr("stroke-width", 1.28)
-            .attr("stroke-opacity", 0.69) */
+            /*             .attr("stroke-width", 1.28)
+                        .attr("stroke-opacity", 0.69) */
             /* .attr("data-tippy-content", d => {
                 return "<b><font color='#FFE153'>" + d.listX + ":</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
                     "<font color='red'><b>&#8595</b></font><br>" +
@@ -1347,112 +1341,118 @@ script.onload = function () {
                     .attr("fill", "#BEBEBE")
                     .attr("opacity", 0.69);
             })
-        .on("click", function (e, d) {
-            if (popUpMenu.style('visibility') == 'visible') {
-                popUpMenu.style('visibility', 'hidden');
-                popUpMenu.style('opacity', 1);
-            } else {
-                popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
-                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                    "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
-                    "<p><div id='color-options'></div>");
-
-                d3.select('#close-btn').on('click', closePopUp);
-                function closePopUp() {
+            .on("click", function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
                     popUpMenu.style('visibility', 'hidden');
                     popUpMenu.style('opacity', 1);
-                };
+                } else {
+                    popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<p><div id='color-options'></div>");
 
-                var selectedPath = d3.select(this.parentNode).selectAll("path");
-                var testPath = d3.select("this");
-                var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
-                var colorOptions = d3.select('#color-options')
-                    .selectAll('div')
-                    .data(colors)
-                    .enter()
-                    .append('div')
-                    .style('cursor', 'pointer')
-                    .style('background-color', function (d) { return d; })
-                    .style('width', '20px')
-                    .style('height', '20px')
-                    .style('margin-right', '5px')
-                    .style('display', 'inline-block')
-                    .on('click', function () {
-                        var color = d3.select(this).style('background-color');
-                        selectedPath.each(function (pathData) {
-                            if (pathData === d ||
-                                (pathData.listX === d.listX &&
-                                    ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
-                                        (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
-                                            (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        d.startX < pathData.startX && d.endX > pathData.endX ||
-                                        d.startX > pathData.startX && d.endX < pathData.endX)) ||
-                                (pathData.listX === d.listY &&
-                                    ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
-                                        (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                        (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
-                                            (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                        d.startY < pathData.startX && d.endY > pathData.endX ||
-                                        d.startY > pathData.startX && d.endY < pathData.endX)) ||
-                                (pathData.listY === d.listY &&
-                                    ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
-                                        (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                        (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
-                                            (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                        d.startY < pathData.startY && d.endY > pathData.endY ||
-                                        d.startY > pathData.startY && d.endY < pathData.endY)) ||
-                                (pathData.listY === d.listX &&
-                                    ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
-                                        (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
-                                        (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
-                                            (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        d.startX < pathData.startY && d.endX > pathData.endY ||
-                                        d.startX > pathData.startY && d.endX < pathData.endY))
-                            ) {
-                                d3.select(this).raise().style('fill', color).attr("opacity", 0.95);
-                            }
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                        popUpMenu.style('opacity', 1);
+                    };
+
+                    var selectedPath = d3.select(this.parentNode).selectAll("path");
+                    var testPath = d3.select("this");
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            selectedPath.each(function (pathData) {
+                                if (pathData === d ||
+                                    (pathData.listX === d.listX &&
+                                        ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
+                                            (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
+                                                (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            d.startX < pathData.startX && d.endX > pathData.endX ||
+                                            d.startX > pathData.startX && d.endX < pathData.endX)) ||
+                                    (pathData.listX === d.listY &&
+                                        ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
+                                            (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                            (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
+                                                (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                            d.startY < pathData.startX && d.endY > pathData.endX ||
+                                            d.startY > pathData.startX && d.endY < pathData.endX)) ||
+                                    (pathData.listY === d.listY &&
+                                        ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
+                                            (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                            (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
+                                                (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                            d.startY < pathData.startY && d.endY > pathData.endY ||
+                                            d.startY > pathData.startY && d.endY < pathData.endY)) ||
+                                    (pathData.listY === d.listX &&
+                                        ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
+                                            (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                            (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
+                                                (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            d.startX < pathData.startY && d.endX > pathData.endY ||
+                                            d.startX > pathData.startY && d.endX < pathData.endY))
+                                ) {
+                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.95);
+                                }
+                            });
                         });
-                    });
 
-                var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                popUpMenu.style('left', (mouseX + 10) + 'px')
-                    .style('top', (mouseY - 10) + 'px')
-                    .style('visibility', 'visible')
-                    .style('opacity', 0.9);
-            }
-        });
-
-        downloadSVG("parallel_download_multiple",
-            "parallel_plot_multiple_species",
-            "Multiple_Species_Alignment.Parallel.svg");
-        // downloadSVGwithForeign("dotView_download", "dotView");
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                        .style('opacity', 0.9);
+                }
+            });
     }
 
-    Shiny.addCustomMessageHandler("Parallel_Multiple_Gene_Num_Plotting", parallelMultipleGeneNumPlotting);
-    function parallelMultipleGeneNumPlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var segmentInfo = convertShinyData(InputData.segs);
-        var chrNumInfo = convertShinyData(InputData.chr_nums);
-        var chrOrder = convertShinyData(InputData.chr_order);
-        // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
-        var spOrder = InputData.sp_order;
-        var width = InputData.width;
-        var height = InputData.height;
+    downloadSVG("parallel_download_multiple",
+        "parallel_plot_multiple_species",
+        "Multiple_Species_Alignment.Parallel.svg");
+    // downloadSVGwithForeign("dotView_download", "dotView");
+}
 
-        var overlapCutOff = 0.1;
+Shiny.addCustomMessageHandler("Parallel_Multiple_Gene_Num_Plotting", parallelMultipleGeneNumPlotting);
+function parallelMultipleGeneNumPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var chrNumInfo = convertShinyData(InputData.chr_nums);
+    var chrOrder = convertShinyData(InputData.chr_order);
+    // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
+    var spOrder = InputData.sp_order;
+    var width = InputData.width;
+    var height = InputData.height;
 
-        /*         console.log("segmentInfo", segmentInfo);
-                console.log("chrNumInfo", chrNumInfo);
-                console.log("chrOrder", chrOrder);
-                console.log("spOrder", spOrder); */
+    var overlapCutOff = 0.1;
 
-        const query_chr_colors = [
-            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
-            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
-        const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+    /*         console.log("segmentInfo", segmentInfo);
+            console.log("chrNumInfo", chrNumInfo);
+            console.log("chrOrder", chrOrder);
+            console.log("spOrder", spOrder); */
 
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
+    const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // draw a parallel syntenic plot
         d3.select("#parallel_plot_multiple_species").select("svg").remove();
 
@@ -1789,9 +1789,9 @@ script.onload = function () {
             .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
             .attr("fill", "#BEBEBE")
             .attr("opacity", 0.69)
-/*             .attr("stroke", "#BEBEBE")
-            .attr("stroke-width", 1.28)
-            .attr("stroke-opacity", 0.69) */
+            /*             .attr("stroke", "#BEBEBE")
+                        .attr("stroke-width", 1.28)
+                        .attr("stroke-opacity", 0.69) */
             /* .attr("data-tippy-content", d => {
                 return "<b><font color='#FFE153'>" + d.listX + ":</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
                     "<font color='red'><b>&#8595</b></font><br>" +
@@ -1805,7 +1805,7 @@ script.onload = function () {
                     .attr("fill", function (otherPathData) {
                         if (otherPathData === d) {
                             return "red";
-                        }else if (
+                        } else if (
                             (otherPathData.listX === d.listX &&
                                 ((otherPathData.StartX > d.startX && otherPathData.startX < d.endX && otherPathData.endX > d.endX &&
                                     (d.endX - otherPathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
@@ -1887,120 +1887,108 @@ script.onload = function () {
                     .attr("fill", "#BEBEBE")
                     .attr("opacity", 0.69);
             })
-        .on("click", function (e, d) {
-            if (popUpMenu.style('visibility') == 'visible') {
-                popUpMenu.style('visibility', 'hidden');
-                popUpMenu.style('opacity', 1);
-            } else {
-                popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
-                    "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                    "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
-                    "<p><div id='color-options'></div>");
-
-                d3.select('#close-btn').on('click', closePopUp);
-                function closePopUp() {
+            .on("click", function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
                     popUpMenu.style('visibility', 'hidden');
                     popUpMenu.style('opacity', 1);
-                };
+                } else {
+                    popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<p><div id='color-options'></div>");
 
-                var selectedPath = d3.select(this.parentNode).selectAll("path");
-                var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
-                var colorOptions = d3.select('#color-options')
-                    .selectAll('div')
-                    .data(colors)
-                    .enter()
-                    .append('div')
-                    .style('cursor', 'pointer')
-                    .style('background-color', function (d) { return d; })
-                    .style('width', '20px')
-                    .style('height', '20px')
-                    .style('margin-right', '5px')
-                    .style('display', 'inline-block')
-                    .on('click', function () {
-                        var color = d3.select(this).style('background-color');
-                        selectedPath.each(function (pathData) {
-                            if (pathData === d ||
-                                (pathData.listX === d.listX &&
-                                    ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
-                                        (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
-                                            (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        d.startX < pathData.startX && d.endX > pathData.endX ||
-                                        d.startX > pathData.startX && d.endX < pathData.endX)) ||
-                                (pathData.listX === d.listY &&
-                                    ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
-                                        (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                        (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
-                                            (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
-                                        d.startY < pathData.startX && d.endY > pathData.endX ||
-                                        d.startY > pathData.startX && d.endY < pathData.endX)) ||
-                                (pathData.listY === d.listY &&
-                                    ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
-                                        (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                        (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
-                                            (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
-                                        d.startY < pathData.startY && d.endY > pathData.endY ||
-                                        d.startY > pathData.startY && d.endY < pathData.endY)) ||
-                                (pathData.listY === d.listX &&
-                                    ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
-                                        (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
-                                        (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
-                                            (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
-                                        d.startX < pathData.startY && d.endX > pathData.endY ||
-                                        d.startX > pathData.startY && d.endX < pathData.endY))
-                            ) {
-                                d3.select(this).raise().style('fill', color).attr("opacity", 0.91);
-                            }
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                        popUpMenu.style('opacity', 1);
+                    };
+
+                    var selectedPath = d3.select(this.parentNode).selectAll("path");
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            selectedPath.each(function (pathData) {
+                                if (pathData === d ||
+                                    (pathData.listX === d.listX &&
+                                        ((pathData.StartX > d.startX && pathData.startX < d.endX && pathData.endX > d.endX &&
+                                            (d.endX - pathData.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            (pathData.startX < d.starX && pathData.endX > d.startX && pathData.endX < d.endX &&
+                                                (pathData.endX - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            d.startX < pathData.startX && d.endX > pathData.endX ||
+                                            d.startX > pathData.startX && d.endX < pathData.endX)) ||
+                                    (pathData.listX === d.listY &&
+                                        ((pathData.StartX > d.startY && pathData.startX < d.endY && pathData.endX > d.startY &&
+                                            (d.endY - pathData.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                            (pathData.startX < d.starY && pathData.endX > d.startY && pathData.endX < d.endY &&
+                                                (pathData.endY - d.startX) > overlapCutOff * (d.endY - d.startY)) ||
+                                            d.startY < pathData.startX && d.endY > pathData.endX ||
+                                            d.startY > pathData.startX && d.endY < pathData.endX)) ||
+                                    (pathData.listY === d.listY &&
+                                        ((pathData.StartY > d.startY && pathData.startY < d.endY && pathData.endY > d.endY &&
+                                            (d.endY - pathData.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                            (pathData.startY < d.starY && pathData.endY > d.startY && pathData.endY < d.endY &&
+                                                (pathData.endY - d.startY) > overlapCutOff * (d.endY - d.startY)) ||
+                                            d.startY < pathData.startY && d.endY > pathData.endY ||
+                                            d.startY > pathData.startY && d.endY < pathData.endY)) ||
+                                    (pathData.listY === d.listX &&
+                                        ((pathData.StartY > d.startX && pathData.startY < d.endX && pathData.endY > d.startX &&
+                                            (d.endX - pathData.startY) > overlapCutOff * (d.endX - d.startX)) ||
+                                            (pathData.startY < d.startX && pathData.endY > d.startX && pathData.endY < d.endX &&
+                                                (pathData.endY - d.startX) > overlapCutOff * (d.endX - d.startX)) ||
+                                            d.startX < pathData.startY && d.endX > pathData.endY ||
+                                            d.startX > pathData.startY && d.endX < pathData.endY))
+                                ) {
+                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.91);
+                                }
+                            });
                         });
-                    });
 
-                var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-                var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-                popUpMenu.style('left', (mouseX + 10) + 'px')
-                    .style('top', (mouseY - 10) + 'px')
-                    .style('visibility', 'visible')
-                    .style('opacity', 0.9);
-            }
-        });
-
-        downloadSVG("parallel_download_multiple",
-            "parallel_plot_multiple_species",
-            "Multiple_Species_Alignment.Parallel.svg");
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                        .style('opacity', 0.9);
+                }
+            });
     }
 
-    Shiny.addCustomMessageHandler("Dot_Num_Plotting_paranome", DotNumPlotting_paranome)
-    function DotNumPlotting_paranome(InputData) {
-        var plotId = InputData.plot_id;
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var anchorpointInfo = convertShinyData(InputData.anchorpoints);
-        var queryChrInfo = convertShinyData(InputData.query_chr_gene_nums);
-        var subjectChrInfo = convertShinyData(InputData.subject_chr_gene_nums);
-        var queryDepthInfo = convertShinyData(InputData.query_depths);
-        var subjectDepthInfo = convertShinyData(InputData.subject_depths);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var plotSize = InputData.size
+    downloadSVG("parallel_download_multiple",
+        "parallel_plot_multiple_species",
+        "Multiple_Species_Alignment.Parallel.svg");
+}
 
-        const scaleRatio = plotSize / 400;
+Shiny.addCustomMessageHandler("Dot_Num_Plotting_paranome", DotNumPlotting_paranome)
+function DotNumPlotting_paranome(InputData) {
+    var plotId = InputData.plot_id;
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var anchorpointInfo = convertShinyData(InputData.anchorpoints);
+    var queryChrInfo = convertShinyData(InputData.query_chr_gene_nums);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_gene_nums);
+    var queryDepthInfo = convertShinyData(InputData.query_depths);
+    var subjectDepthInfo = convertShinyData(InputData.subject_depths);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var plotSize = InputData.size
 
-        /*         console.log("multipliconInfo", multipliconInfo);
-                console.log("anchorpointInfo", anchorpointInfo);
-                console.log("queryChrInfo", queryChrInfo);
-                console.log("subjectChrInfo", subjectChrInfo);
-                console.log("queryDepthInfo", queryDepthInfo);
-                console.log("subjectDepthInfo", subjectDepthInfo);
-                console.log("querySpecies", querySpecies);
-                console.log("subjectSpecies", subjectSpecies); */
+    const scaleRatio = plotSize / 400;
 
-        // sort the chromosome position based on the gene number
-        /* queryChrInfo = queryChrInfo.sort(function (a, b) {
-            return b.num - a.num;
-        });
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
 
-        subjectChrInfo = subjectChrInfo.sort(function (a, b) {
-            return b.num - a.num;
-        }); */
-
+    scriptV7.onload = function () {
         // define plot dimension
         let topPadding = 150 * scaleRatio;
         const longestXLabelLength = d3.max(queryChrInfo, d => d.seqchr.toString().length);
@@ -2570,30 +2558,55 @@ script.onload = function () {
         }; */
     }
 
-    Shiny.addCustomMessageHandler("Dot_Num_Plotting", DotNumPlotting);
-    function DotNumPlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var anchorpointInfo = convertShinyData(InputData.anchorpoints);
-        var queryChrInfo = convertShinyData(InputData.query_chr_gene_nums);
-        var subjectChrInfo = convertShinyData(InputData.subject_chr_gene_nums);
-        var queryDepthInfo = convertShinyData(InputData.query_depths);
-        var subjectDepthInfo = convertShinyData(InputData.subject_depths);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var plotSize = InputData.size;
+    /*         console.log("multipliconInfo", multipliconInfo);
+            console.log("anchorpointInfo", anchorpointInfo);
+            console.log("queryChrInfo", queryChrInfo);
+            console.log("subjectChrInfo", subjectChrInfo);
+            console.log("queryDepthInfo", queryDepthInfo);
+            console.log("subjectDepthInfo", subjectDepthInfo);
+            console.log("querySpecies", querySpecies);
+            console.log("subjectSpecies", subjectSpecies); */
 
-        const scaleRatio = plotSize / 400;
+    // sort the chromosome position based on the gene number
+    /* queryChrInfo = queryChrInfo.sort(function (a, b) {
+        return b.num - a.num;
+    });
 
-        // console.log("queryChrInfo", queryChrInfo);
-        // sort the chromosome position based on the gene number
-        queryChrInfo = queryChrInfo.sort(function (a, b) {
-            return b.num - a.num;
-        });
+    subjectChrInfo = subjectChrInfo.sort(function (a, b) {
+        return b.num - a.num;
+    }); */
+}
 
-        subjectChrInfo = subjectChrInfo.sort(function (a, b) {
-            return b.num - a.num;
-        });
+Shiny.addCustomMessageHandler("Dot_Num_Plotting", DotNumPlotting);
+function DotNumPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var anchorpointInfo = convertShinyData(InputData.anchorpoints);
+    var queryChrInfo = convertShinyData(InputData.query_chr_gene_nums);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_gene_nums);
+    var queryDepthInfo = convertShinyData(InputData.query_depths);
+    var subjectDepthInfo = convertShinyData(InputData.subject_depths);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var plotSize = InputData.size;
+
+    const scaleRatio = plotSize / 400;
+
+    // console.log("queryChrInfo", queryChrInfo);
+    // sort the chromosome position based on the gene number
+    queryChrInfo = queryChrInfo.sort(function (a, b) {
+        return b.num - a.num;
+    });
+
+    subjectChrInfo = subjectChrInfo.sort(function (a, b) {
+        return b.num - a.num;
+    });
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
 
         // define plot dimension
         let topPadding = 150 * scaleRatio;
@@ -3098,15 +3111,15 @@ script.onload = function () {
             .attr("height", 80 * scaleRatio)
             .attr("fill", "url(#color-scale)")
             .attr("fill-opacity", 0.7);
-
+    
         var axisScale = d3.scaleLinear()
             .domain([0, 5])
             .range([50 * scaleRatio, 130 * scaleRatio]);
-
+    
         // Create the axis
         var axis = d3.axisLeft(axisScale)
             .ticks(5);
-
+    
         var axisGroup = svg.append("g")
             .attr("class", "axis")
             .attr("transform", "translate(" + (leftPadding * scaleRatio - 70) + "," + 5 + ")")
@@ -3115,7 +3128,7 @@ script.onload = function () {
             .attr("dominant-baseline", "hanging")
             .attr("font-size", "10px")
             .attr("font-family", "calibri");
-
+    
         svg.append("text")
             .attr("class", "legend")
             .attr("transform", "translate(" + (leftPadding * scaleRatio) + "," + 5 + ")")
@@ -3135,116 +3148,122 @@ script.onload = function () {
         tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
         tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("download_" + plotId,
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".dot_plot.svg");
-
-        // Convert the SVG to PNG
-        /* const svgXml = new XMLSerializer().serializeToString(svg.node());
-        const img = new Image();
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
-
-        img.onload = function () {
-            var canvas = document.createElement("canvas");
-            var scale = 2;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            const pngDataUrl = canvas.toDataURL('image/png');
-
-            const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
-            if (previousPngImg) {
-                previousPngImg.remove();
-            }
-
-            const pngImg = new Image();
-            pngImg.src = pngDataUrl;
-            document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
-        }; */
     }
 
-    Shiny.addCustomMessageHandler("searchGene", searchGene);
-    function searchGene(InputData) {
-        var plotId = InputData.plot_id;
-        var searchMultiplicon = convertShinyData(InputData.geneId);
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("download_" + plotId,
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".dot_plot.svg");
 
-        var svg = d3.select("#dotView_" + plotId)
-            .select("svg")
-        var foundMultiplicons = new Set();
-        var foundItems = 0;
-        svg.selectAll("circle")
-            .each(function (d) {
-                var circle = d3.select(this);
-                var multiplicon = circle.attr("id").split("_")[1];
-                if (searchMultiplicon.find(function (obj) {
-                    return obj.multiplicon == multiplicon;
-                })) {
-                    //circle.attr("visibility", "visible");
-                    foundItems++;
-                    foundMultiplicons.add(multiplicon);
-                } // else {
-                //  circle.attr("visibility", "hidden");
-                // }
-                /* if (searchMultiplicon.find(function (obj) { return obj.multiplicon == multiplicon; })) {
-                    circle.attr("r", 4);
-                } */
-            });
-        if (foundItems > 0) {
-            var message = "<span style='color: #FF79BC; font-weight: bold;'>" + foundItems + " Anchor Point" + (foundItems === 1 ? "</span> is" : "s</span> are") + " found in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>" + Array.from(foundMultiplicons).join(", ") + "</span>)";
-            Shiny.onInputChange("foundMultiplicons_" + plotId, Array.from(foundMultiplicons));
-        } else {
-            var message = "<span style='color: #FF79BC; font-weight: bold;'> No Anchor Point</span> is found!";
+    // Convert the SVG to PNG
+    /* const svgXml = new XMLSerializer().serializeToString(svg.node());
+    const img = new Image();
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
+
+    img.onload = function () {
+        var canvas = document.createElement("canvas");
+        var scale = 2;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+
+        const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
+        if (previousPngImg) {
+            previousPngImg.remove();
         }
-        Shiny.onInputChange("foundItemsMessage_" + plotId, message);
+
+        const pngImg = new Image();
+        pngImg.src = pngDataUrl;
+        document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
+    }; */
+}
+
+Shiny.addCustomMessageHandler("searchGene", searchGene);
+function searchGene(InputData) {
+    var plotId = InputData.plot_id;
+    var searchMultiplicon = convertShinyData(InputData.geneId);
+
+    var svg = d3.select("#dotView_" + plotId)
+        .select("svg")
+    var foundMultiplicons = new Set();
+    var foundItems = 0;
+    svg.selectAll("circle")
+        .each(function (d) {
+            var circle = d3.select(this);
+            var multiplicon = circle.attr("id").split("_")[1];
+            if (searchMultiplicon.find(function (obj) {
+                return obj.multiplicon == multiplicon;
+            })) {
+                //circle.attr("visibility", "visible");
+                foundItems++;
+                foundMultiplicons.add(multiplicon);
+            } // else {
+            //  circle.attr("visibility", "hidden");
+            // }
+            /* if (searchMultiplicon.find(function (obj) { return obj.multiplicon == multiplicon; })) {
+                circle.attr("r", 4);
+            } */
+        });
+    if (foundItems > 0) {
+        var message = "<span style='color: #FF79BC; font-weight: bold;'>" + foundItems + " Anchor Point" + (foundItems === 1 ? "</span> is" : "s</span> are") + " found in Multiplicon (ID: <span style='color: #EA7500; font-weight: bold;'>" + Array.from(foundMultiplicons).join(", ") + "</span>)";
+        Shiny.onInputChange("foundMultiplicons_" + plotId, Array.from(foundMultiplicons));
+    } else {
+        var message = "<span style='color: #FF79BC; font-weight: bold;'> No Anchor Point</span> is found!";
     }
+    Shiny.onInputChange("foundItemsMessage_" + plotId, message);
+}
 
-    Shiny.addCustomMessageHandler("Remove_previous_plot", removePreviousPlots);
-    function removePreviousPlots(InputData) {
-        var plotId = InputData.svg_id;
-        d3.select("#" + plotId).select("svg").remove();
-    }
+Shiny.addCustomMessageHandler("Remove_previous_plot", removePreviousPlots);
+function removePreviousPlots(InputData) {
+    var plotId = InputData.svg_id;
+    d3.select("#" + plotId).select("svg").remove();
+}
 
-    Shiny.addCustomMessageHandler("microSynPlotting", microSynPlotting);
-    function microSynPlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var chrGeneInfo = convertShinyData(InputData.genes);
-        var chrInfo = convertShinyData(InputData.chrs);
-        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var targeGene = InputData.targe_gene;
-        var width = InputData.width;
-        var height = InputData.height;
-        var heightScale = InputData.heightScale;
+Shiny.addCustomMessageHandler("microSynPlotting", microSynPlotting);
+function microSynPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var chrGeneInfo = convertShinyData(InputData.genes);
+    var chrInfo = convertShinyData(InputData.chrs);
+    var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var targeGene = InputData.targe_gene;
+    var width = InputData.width;
+    var height = InputData.height;
+    var heightScale = InputData.heightScale;
 
-        var svgHeightRatio = 1 + heightScale / 500;
+    var svgHeightRatio = 1 + heightScale / 500;
 
-        var colorGene = InputData.color_gene;
+    var colorGene = InputData.color_gene;
 
-        var linkAll = InputData.link_all;
+    var linkAll = InputData.link_all;
 
-        /* console.log("plotId", plotId);
-        console.log("anchorPointInfo", anchorPointInfo);
-        console.log("anchorPointGroupInfo", anchorPointGroupInfo);
-        console.log("multipliconInfo", multipliconInfo);
-        console.log("chrGeneInfo", chrGeneInfo);
-        console.log("chrInfo", chrInfo);
-        console.log("querySpecies", querySpecies);
-        console.log("subjectSpecies", subjectSpecies);
-        console.log("targeGene", targeGene);
-        console.log("width", width);
-        console.log("height", height); */
+    /* console.log("plotId", plotId);
+    console.log("anchorPointInfo", anchorPointInfo);
+    console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+    console.log("multipliconInfo", multipliconInfo);
+    console.log("chrGeneInfo", chrGeneInfo);
+    console.log("chrInfo", chrInfo);
+    console.log("querySpecies", querySpecies);
+    console.log("subjectSpecies", subjectSpecies);
+    console.log("targeGene", targeGene);
+    console.log("width", width);
+    console.log("height", height); */
 
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // define syntenic plot dimension
         let topPadding = 50;
         let bottomPadding = 50;
@@ -3920,48 +3939,53 @@ script.onload = function () {
             }
         });
         tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("download_microSyntenicBlock_" + plotId,
-            "microSyntenicBlock_" + plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
     }
 
-    Shiny.addCustomMessageHandler("microSynInterPlotting", microSynInterPlotting);
-    function microSynInterPlotting(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var chrGeneInfo = convertShinyData(InputData.genes);
-        var chrInfo = convertShinyData(InputData.chrs);
-        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var targeGene = InputData.targe_gene;
-        var width = InputData.width;
-        var height = InputData.height;
-        var heightScale = InputData.heightScale;
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVGs("download_microSyntenicBlock_" + plotId,
+        "microSyntenicBlock_" + plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+}
 
-        var svgHeightRatio = 1 + heightScale / 500;
+Shiny.addCustomMessageHandler("microSynInterPlotting", microSynInterPlotting);
+function microSynInterPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var chrGeneInfo = convertShinyData(InputData.genes);
+    var chrInfo = convertShinyData(InputData.chrs);
+    var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var targeGene = InputData.targe_gene;
+    var width = InputData.width;
+    var height = InputData.height;
+    var heightScale = InputData.heightScale;
 
-        var colorGene = InputData.color_gene;
+    var svgHeightRatio = 1 + heightScale / 500;
 
-        var linkAll = InputData.link_all;
-        /* 
-                console.log("plotId", plotId);
-                console.log("anchorPointInfo", anchorPointInfo);
-                console.log("anchorPointGroupInfo", anchorPointGroupInfo);
-                console.log("multipliconInfo", multipliconInfo);
-                console.log("chrGeneInfo", chrGeneInfo);
-                console.log("chrInfo", chrInfo);
-                console.log("querySpecies", querySpecies);
-                console.log("subjectSpecies", subjectSpecies);
-                console.log("targeGene", targeGene);
-                console.log("width", width);
-                console.log("height", height); */
+    var colorGene = InputData.color_gene;
 
+    var linkAll = InputData.link_all;
+    /* 
+            console.log("plotId", plotId);
+            console.log("anchorPointInfo", anchorPointInfo);
+            console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+            console.log("multipliconInfo", multipliconInfo);
+            console.log("chrGeneInfo", chrGeneInfo);
+            console.log("chrInfo", chrInfo);
+            console.log("querySpecies", querySpecies);
+            console.log("subjectSpecies", subjectSpecies);
+            console.log("targeGene", targeGene);
+            console.log("width", width);
+            console.log("height", height); */
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // define syntenic plot dimension
         let topPadding = 50;
         let leftPadding = 10;
@@ -4640,48 +4664,52 @@ script.onload = function () {
             }
         });
         tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("download_microSyntenicBlock_" + plotId,
-            "microSyntenicBlock_" + plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
     }
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVGs("download_microSyntenicBlock_" + plotId,
+        "microSyntenicBlock_" + plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+}
 
-    Shiny.addCustomMessageHandler("microSynPlottingGeneNumber", microSynPlottingGeneNumber);
-    function microSynPlottingGeneNumber(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var chrGeneInfo = convertShinyData(InputData.genes);
-        var chrInfo = convertShinyData(InputData.chrs);
-        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var targeGene = InputData.targe_gene;
-        var width = InputData.width;
-        var height = InputData.height;
-        var heightScale = InputData.heightScale;
+Shiny.addCustomMessageHandler("microSynPlottingGeneNumber", microSynPlottingGeneNumber);
+function microSynPlottingGeneNumber(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var chrGeneInfo = convertShinyData(InputData.genes);
+    var chrInfo = convertShinyData(InputData.chrs);
+    var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var targeGene = InputData.targe_gene;
+    var width = InputData.width;
+    var height = InputData.height;
+    var heightScale = InputData.heightScale;
 
-        var svgHeightRatio = 1 + heightScale / 500;
+    var svgHeightRatio = 1 + heightScale / 500;
 
-        var colorGene = InputData.color_gene;
+    var colorGene = InputData.color_gene;
 
-        var linkAll = InputData.link_all;
+    var linkAll = InputData.link_all;
 
-        /* console.log("plotId", plotId);
-        console.log("anchorPointInfo", anchorPointInfo);
-        console.log("anchorPointGroupInfo", anchorPointGroupInfo);
-        console.log("multipliconInfo", multipliconInfo);
-        console.log("chrGeneInfo", chrGeneInfo);
-        console.log("chrInfo", chrInfo);
-        console.log("querySpecies", querySpecies);
-        console.log("subjectSpecies", subjectSpecies);
-        console.log("targeGene", targeGene);
-        console.log("width", width);
-        console.log("height", height); */
+    /* console.log("plotId", plotId);
+    console.log("anchorPointInfo", anchorPointInfo);
+    console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+    console.log("multipliconInfo", multipliconInfo);
+    console.log("chrGeneInfo", chrGeneInfo);
+    console.log("chrInfo", chrInfo);
+    console.log("querySpecies", querySpecies);
+    console.log("subjectSpecies", subjectSpecies);
+    console.log("targeGene", targeGene);
+    console.log("width", width);
+    console.log("height", height); */
 
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // define syntenic plot dimension
         let topPadding = 50;
         let bottomPadding = 50;
@@ -5346,48 +5374,52 @@ script.onload = function () {
             }
         });
         tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("download_microSyntenicBlock_" + plotId,
-            "microSyntenicBlock_" + plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
     }
 
-    Shiny.addCustomMessageHandler("microSynInterPlottingGeneNumber", microSynInterPlottingGeneNumber);
-    function microSynInterPlottingGeneNumber(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
-        var multipliconInfo = convertShinyData(InputData.multiplicons);
-        var chrGeneInfo = convertShinyData(InputData.genes);
-        var chrInfo = convertShinyData(InputData.chrs);
-        var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var targeGene = InputData.targe_gene;
-        var width = InputData.width;
-        var height = InputData.height;
-        var heightScale = InputData.heightScale;
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVGs("download_microSyntenicBlock_" + plotId,
+        "microSyntenicBlock_" + plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+}
 
-        var svgHeightRatio = 1 + heightScale / 500;
+Shiny.addCustomMessageHandler("microSynInterPlottingGeneNumber", microSynInterPlottingGeneNumber);
+function microSynInterPlottingGeneNumber(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+    var multipliconInfo = convertShinyData(InputData.multiplicons);
+    var chrGeneInfo = convertShinyData(InputData.genes);
+    var chrInfo = convertShinyData(InputData.chrs);
+    var anchorPointGroupInfo = convertShinyData(InputData.achorPointGroups);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var targeGene = InputData.targe_gene;
+    var width = InputData.width;
+    var height = InputData.height;
+    var heightScale = InputData.heightScale;
 
-        var colorGene = InputData.color_gene;
+    var svgHeightRatio = 1 + heightScale / 500;
 
-        var linkAll = InputData.link_all;
+    var colorGene = InputData.color_gene;
 
-        /*         console.log("plotId", plotId);
-                console.log("anchorPointInfo", anchorPointInfo);
-                console.log("anchorPointGroupInfo", anchorPointGroupInfo);
-                console.log("multipliconInfo", multipliconInfo);
-                console.log("chrGeneInfo", chrGeneInfo);
-                console.log("chrInfo", chrInfo);
-                console.log("querySpecies", querySpecies);
-                console.log("subjectSpecies", subjectSpecies);
-                console.log("targeGene", targeGene);
-                console.log("width", width);
-                console.log("height", height); */
+    var linkAll = InputData.link_all;
 
+    /*         console.log("plotId", plotId);
+            console.log("anchorPointInfo", anchorPointInfo);
+            console.log("anchorPointGroupInfo", anchorPointGroupInfo);
+            console.log("multipliconInfo", multipliconInfo);
+            console.log("chrGeneInfo", chrGeneInfo);
+            console.log("chrInfo", chrInfo);
+            console.log("querySpecies", querySpecies);
+            console.log("subjectSpecies", subjectSpecies);
+            console.log("targeGene", targeGene);
+            console.log("width", width);
+            console.log("height", height); */
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
         // define syntenic plot dimension
         let topPadding = 50;
         let leftPadding = 10;
@@ -5462,7 +5494,7 @@ script.onload = function () {
         }
         /* console.log("ploygonScale", ploygonScale);
         console.log("each gene", ChrScaler(1));
- */
+    */
         chrInfo.forEach((eachChr, i) => {
             const microPlot = svg.append("g")
                 .attr("class", "microSynteny")
@@ -6052,1583 +6084,1582 @@ script.onload = function () {
             }
         });
         tippy(".achorPointRibbons", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("download_microSyntenicBlock_" + plotId,
-            "microSyntenicBlock_" + plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
     }
 
-    // Shiny.addCustomMessageHandler("microSynPlottingOld", microSynPlottingOld);
-    function microSynPlottingOld(InputData) {
-        var plotId = InputData.plot_id;
-        var anchorPointInfo = convertShinyData(InputData.anchorpoints);
-        var queryChrInfo = convertShinyData(InputData.query_chr_info);
-        var queryGeneInfo = convertShinyData(InputData.query_chr_genes);
-        var subjectChrInfo = convertShinyData(InputData.subject_chr_info);
-        var subjectGeneInfo = convertShinyData(InputData.subject_chr_genes);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var targeGene = InputData.targe_gene;
-        var width = InputData.width;
-        var height = InputData.height;
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVGs("download_microSyntenicBlock_" + plotId,
+        "microSyntenicBlock_" + plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+}
 
-        const query_chr_colors = [
-            "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
-            "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
-        ];
-        const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
+// Shiny.addCustomMessageHandler("microSynPlottingOld", microSynPlottingOld);
+function microSynPlottingOld(InputData) {
+    var plotId = InputData.plot_id;
+    var anchorPointInfo = convertShinyData(InputData.anchorpoints);
+    var queryChrInfo = convertShinyData(InputData.query_chr_info);
+    var queryGeneInfo = convertShinyData(InputData.query_chr_genes);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_info);
+    var subjectGeneInfo = convertShinyData(InputData.subject_chr_genes);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var targeGene = InputData.targe_gene;
+    var width = InputData.width;
+    var height = InputData.height;
 
-        // console.log("width", width);
-        // console.log("height", height);
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
+    ];
+    const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
 
-        // console.log("anchorPointInfo", anchorPointInfo);
-        // console.log("queryChrInfo", queryChrInfo);
-        // console.log("subjectChrInfo", subjectChrInfo);
+    // console.log("width", width);
+    // console.log("height", height);
 
-        // Group the data by multiplicon
-        const groupedQueryChr = queryChrInfo.reduce((groups, obj) => {
-            const { multiplicon, max, min } = obj;
-            if (!groups[multiplicon]) {
-                groups[multiplicon] = { multiplicon, sum: max - min };
-            } else {
-                groups[multiplicon].sum += max - min;
-            }
-            return groups;
-        }, {});
-        let maxQueryChrSum = -Infinity;
-        let maxQueryChrMultiplicon = null;
-        Object.values(groupedQueryChr).forEach((group) => {
-            if (group.sum > maxQueryChrSum) {
-                maxQueryChrSum = group.sum;
-                maxQueryChrMultiplicon = group.multiplicon;
-            }
-        });
-        // const maxQueryChrSum = Math.max(...Object.values(groupedQueryChr).map((group) => group.sum));
-        // console.log("maxQueryChrMultiplicon", maxQueryChrMultiplicon, "maxQueryChrSum", maxQueryChrSum);
+    // console.log("anchorPointInfo", anchorPointInfo);
+    // console.log("queryChrInfo", queryChrInfo);
+    // console.log("subjectChrInfo", subjectChrInfo);
 
-        const groupedSubjectChr = subjectChrInfo.reduce((groups, obj) => {
-            const { multiplicon, max, min } = obj;
-            if (!groups[multiplicon]) {
-                groups[multiplicon] = { multiplicon, sum: max - min };
-            } else {
-                groups[multiplicon].sum += max - min;
-            }
-            return groups;
-        }, {});
-        let maxSubjectChrSum = -Infinity;
-        let maxSubjectChrMultiplicon = null;
-        Object.values(groupedSubjectChr).forEach((group) => {
-            if (group.sum > maxSubjectChrSum) {
-                maxSubjectChrSum = group.sum;
-                maxSubjectChrMultiplicon = group.multiplicon;
-            }
-        });
-        // const maxSubjectChrSum = Math.max(...Object.values(groupedSubjectChr).map((group) => group.sum));
-        // console.log("maxSubjectChrMultiplicon", maxSubjectChrMultiplicon, "maxSubjectChrSum", maxSubjectChrSum);
-
-        if (maxQueryChrSum > maxSubjectChrSum) {
-            var scaleData = queryChrInfo.filter(item => item.multiplicon === maxQueryChrMultiplicon);
+    // Group the data by multiplicon
+    const groupedQueryChr = queryChrInfo.reduce((groups, obj) => {
+        const { multiplicon, max, min } = obj;
+        if (!groups[multiplicon]) {
+            groups[multiplicon] = { multiplicon, sum: max - min };
         } else {
-            var scaleData = subjectChrInfo.filter(item => item.multiplicon === maxSubjectChrMultiplicon);
+            groups[multiplicon].sum += max - min;
         }
+        return groups;
+    }, {});
+    let maxQueryChrSum = -Infinity;
+    let maxQueryChrMultiplicon = null;
+    Object.values(groupedQueryChr).forEach((group) => {
+        if (group.sum > maxQueryChrSum) {
+            maxQueryChrSum = group.sum;
+            maxQueryChrMultiplicon = group.multiplicon;
+        }
+    });
+    // const maxQueryChrSum = Math.max(...Object.values(groupedQueryChr).map((group) => group.sum));
+    // console.log("maxQueryChrMultiplicon", maxQueryChrMultiplicon, "maxQueryChrSum", maxQueryChrSum);
 
-        const allMultiplicons = anchorPointInfo.map(item => item.multiplicon);
-        const uniqueMultiplicons = [...new Set(allMultiplicons)];
-        // console.log("uniqueMultiplicons", uniqueMultiplicons);
+    const groupedSubjectChr = subjectChrInfo.reduce((groups, obj) => {
+        const { multiplicon, max, min } = obj;
+        if (!groups[multiplicon]) {
+            groups[multiplicon] = { multiplicon, sum: max - min };
+        } else {
+            groups[multiplicon].sum += max - min;
+        }
+        return groups;
+    }, {});
+    let maxSubjectChrSum = -Infinity;
+    let maxSubjectChrMultiplicon = null;
+    Object.values(groupedSubjectChr).forEach((group) => {
+        if (group.sum > maxSubjectChrSum) {
+            maxSubjectChrSum = group.sum;
+            maxSubjectChrMultiplicon = group.multiplicon;
+        }
+    });
+    // const maxSubjectChrSum = Math.max(...Object.values(groupedSubjectChr).map((group) => group.sum));
+    // console.log("maxSubjectChrMultiplicon", maxSubjectChrMultiplicon, "maxSubjectChrSum", maxSubjectChrSum);
 
-        // define syntenic plot dimension
-        let topPadding = 50 * height / 200;
-        let bottomPadding = 30 * height / 200;
-        let leftPadding = 10;
-        let rightPadding = 50;
-        let chrRectHeight = 4;
-        let innerPadding = 20;
-        var tooltipDelay = 500;
-
-        var middlePoint = (width - leftPadding - rightPadding) / 2;
-        d3.select("#microSyntenicBlock_" + plotId)
-            .select("svg").remove();
-        const svg = d3.select("#microSyntenicBlock_" + plotId)
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height * uniqueMultiplicons.length);
-
-        const innerScale = d3.scaleLinear()
-            .domain([0, 1])
-            .range([
-                0,
-                width - leftPadding - rightPadding
-            ]);
-
-        var scaleChrData = calc_micro_accumulate_len(scaleData, innerScale, innerPadding);
-        const ChrScaler = d3
-            .scaleLinear()
-            .domain([
-                scaleChrData[0].accumulate_start,
-                scaleChrData[scaleChrData.length - 1].accumulate_end
-            ])
-            .range([
-                0 + leftPadding,
-                width - rightPadding
-            ]);
-
-        uniqueMultiplicons.forEach((multipliconIdx, each) => {
-            const strMultipliconIdx = multipliconIdx.toString();
-            const matchedAnchorPointsInfo = anchorPointInfo.filter(item => item.multiplicon === multipliconIdx);
-            var matchedQueryChrInfo = queryChrInfo.filter(item => item.multiplicon === strMultipliconIdx);
-            matchedQueryChrInfo = calc_micro_accumulate_len(matchedQueryChrInfo, innerScale, innerPadding);
-            var matchedSubjectChrInfo = subjectChrInfo.filter(item => item.multiplicon === strMultipliconIdx);
-            matchedSubjectChrInfo = calc_micro_accumulate_len(matchedSubjectChrInfo, innerScale, innerPadding);
-            var matchedQueryGeneInfo = queryGeneInfo.filter(item => item.multiplicon === strMultipliconIdx);
-            var matchedSubjectGeneInfo = subjectGeneInfo.filter(item => item.multiplicon === strMultipliconIdx);
-
-            const queryGroup = svg.append("g")
-                .attr("class", "queryChrs")
-                .attr("transform", `translate(0, ${ 200 * each })`);
-            const subjectGroup = svg.append("g")
-                .attr("class", "subjectChrs")
-                .attr("transform", `translate(0, ${ 200 * each })`);
-
-            var queryWidth = d3.max(matchedQueryChrInfo, function (d) { return d.accumulate_end; });
-            var subjectWidth = d3.max(matchedSubjectChrInfo, function (d) { return d.accumulate_end; });
-
-            if (queryWidth > subjectWidth) {
-                // var startX = middlePoint - ChrScaler(subjectWidth) / 2;
-                var startX = ChrScaler(queryWidth) / 2 - ChrScaler(subjectWidth) / 2;
-            } else if (queryWidth < subjectWidth) {
-                var startX = ChrScaler(subjectWidth) / 2 - ChrScaler(queryWidth) / 2;
-            } else {
-                var startX = 0;
-            }
-
-            // add main lebel for each chromosome
-            queryGroup.append("text")
-                .text(querySpecies)
-                .attr("id", "queryMainLabel")
-                .attr("x", 5 + leftPadding)
-                .attr("y", topPadding - 10)
-                .attr("font-weight", "bold")
-                .attr("font-size", "14px")
-                .attr("font-style", "italic")
-                // .attr("font-family", "times")
-                .style("fill", "#68AC57");
-
-            const querySpeciesLabelLength = querySpecies.toString().length;
-            const queryTitlePadding = querySpeciesLabelLength * 4;
-
-            svg.append("text")
-                .text("Multiplicon: " + multipliconIdx)
-                .attr("class", "multipliconId")
-                .attr("id", "multipliconId")
-                .attr("x", queryTitlePadding + 120 + leftPadding)
-                .attr("y", topPadding - 10 + 200 * each)
-                .attr("font-weight", "bold")
-                .attr("font-size", "13px")
-                // .attr("font-family", "Calibri")
-                .style("fill", "#4A4AFF");
-
-            queryGroup.selectAll("text")
-                .attr("class", "queryChrLabel")
-                .filter(":not(#queryMainLabel)")
-                .data(matchedQueryChrInfo)
-                .join("text")
-                .text((d) => d.listX)
-                .attr("text-anchor", "middle")
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
-                    } else {
-                        return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
-                    }
-                })
-                .attr("y", function () {
-                    return Number(d3.select("#queryMainLabel").attr("y")) + Number(d3.select(this).node().getBBox().height) + 10;
-                })
-                .attr("font-size", "12px")
-            // .attr("font-family", "Calibri")
-
-            const query_chr_colorScale = d3.scaleOrdinal()
-                .domain(matchedQueryChrInfo.map((d) => d.idx))
-                .range(query_chr_colors);
-
-            queryGroup.selectAll(".queryChrShape")
-                .data(matchedQueryChrInfo)
-                .join("rect")
-                .attr("class", "queryChrShape")
-                .attr("id", (d) => "queryChr_" + d.idx)
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return ChrScaler(d.accumulate_start);
-                    } else {
-                        return Number(startX) + ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5)
-                .attr(
-                    "width",
-                    (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
-                )
-                .attr("height", chrRectHeight)
-                .attr("opacity", 0.6)
-                .attr("fill", (d) => query_chr_colorScale(d.idx))
-                .attr("ry", 3);
-
-            // Add position labels and connecting lines
-            const positionLabels = queryGroup.selectAll(".queryPosLabel")
-                .data(matchedQueryChrInfo);
-
-            // console.log("matchedQueryChrInfo", matchedQueryChrInfo);
-            positionLabels.enter()
-                .append("text")
-                .attr("class", "queryPosLabel")
-                .merge(positionLabels)
-                .text(function (d) {
-                    return numFormatter(d.min / 1000000);
-                })
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        if (ChrScaler(d.len) < 60) {
-                            return ChrScaler(d.accumulate_start) - 5;
-                        } else {
-                            return ChrScaler(d.accumulate_start) + 5;
-                        }
-                    } else {
-                        if (ChrScaler(d.len) < 60) {
-                            return startX + ChrScaler(d.accumulate_start) - 5;
-                        } else {
-                            return startX + ChrScaler(d.accumulate_start) + 5;
-                        }
-                    }
-                })
-                .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height)
-                .attr("text-anchor", function (d) {
-                    if (ChrScaler(d.len) < 60) {
-                        return "end";
-                    } else {
-                        return "start";
-                    }
-                })
-                .attr("font-size", "10px")
-                // .attr("font-family", "Calibri")
-                .attr('fill', 'blue')
-                .attr('opacity', 0.5);
-
-            positionLabels.enter()
-                .append("text")
-                .attr("class", "queryPosLabel")
-                .merge(positionLabels)
-                .text(function (d, idx) {
-                    if (idx === (matchedQueryChrInfo.length - 1)) {
-                        return numFormatter((d.len + d.min) / 1000000) + " Mb";
-                    } else {
-                        return numFormatter((d.len + d.min) / 1000000);
-                    }
-                })
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        if (ChrScaler(d.len) < 60) {
-                            return ChrScaler(d.accumulate_start) + 5;
-                        } else {
-                            return ChrScaler(d.accumulate_end) - 5;
-                        }
-                    } else {
-                        if (ChrScaler(d.len) < 60) {
-                            return startX + ChrScaler(d.accumulate_end) + 5;
-                        } else {
-                            return startX + ChrScaler(d.accumulate_end) - 5;
-                        }
-                    }
-                })
-                .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height)
-                .attr("text-anchor", function (d) {
-                    if (ChrScaler(d.len) < 60) {
-                        return "start";
-                    } else {
-                        return "end";
-                    }
-                })
-                .attr("font-size", "10px")
-                // .attr("font-family", "Calibri")
-                .attr('fill', 'blue')
-                .attr('opacity', 0.5);
-
-            positionLabels.enter()
-                .append("line")
-                .attr("class", "queryPosLabelLine")
-                .merge(positionLabels)
-                .attr("x1", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return ChrScaler(d.accumulate_start);
-                    } else {
-                        return startX + ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y1", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight / 2)
-                .attr("x2", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return ChrScaler(d.accumulate_start);
-                    } else {
-                        return startX + ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y2", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height - 12 + chrRectHeight / 2)
-                .attr("stroke-width", 0.86)
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue");
-
-            positionLabels.enter()
-                .append("line")
-                .attr("class", "queryPosLabelLine")
-                .merge(positionLabels)
-                .attr("x1", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return ChrScaler(d.accumulate_end);
-                    } else {
-                        return startX + ChrScaler(d.accumulate_end);
-                    }
-                })
-                .attr("y1", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight / 2)
-                .attr("x2", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return ChrScaler(d.accumulate_end);
-                    } else {
-                        return startX + ChrScaler(d.accumulate_end);
-                    }
-                })
-                .attr("y2", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height - 12 + chrRectHeight / 2)
-                .attr("stroke-width", 0.86)
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue");
-
-            // plot genes to chr 
-            matchedQueryGeneInfo.forEach((d) => {
-                let queryChr = matchedQueryChrInfo.find(e => e.listX === d.seqchr);
-                let queryAccumulateStart = queryChr.accumulate_start + d.start + 1;
-                let queryAccumulateEnd = queryChr.accumulate_start + d.end + 1;
-                if (queryWidth >= subjectWidth) {
-                    d.queryX = ChrScaler(queryAccumulateStart);
-                    d.queryX1 = ChrScaler(queryAccumulateEnd);
-                } else {
-                    d.queryX = startX + ChrScaler(queryAccumulateStart);
-                    d.queryX1 = startX + ChrScaler(queryAccumulateEnd);
-                }
-            })
-
-            queryGroup.selectAll(".queryGeneShape")
-                .data(matchedQueryGeneInfo)
-                .join("polygon")
-                .attr("class", "queryGeneShape")
-                .attr("id", (d) => "queryGene_" + d.gene)
-                .attr("points", (d) => {
-                    const x = d.queryX;
-                    const y = topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 7;
-                    const width = d.queryX1 - d.queryX;
-
-                    // Point out the targetGene                                
-                    if (d.gene === targeGene) {
-                        svg.append("line")
-                            .attr("class", "targe-gene")
-                            .attr('x1', x)
-                            .attr('y1', y + 200 * each)
-                            .attr('x2', x)
-                            .attr('y2', y + 200 * each - 30)
-                            .attr('stroke', 'orange')
-                            .attr('opacity', '0.7')
-                            .attr('stroke-width', "0.8")
-                            .attr("stroke-dasharray", "5 3");
-
-                        svg.append("text")
-                            .attr('x', x)
-                            .attr('y', y + 200 * each - 35)
-                            .text(targeGene)
-                            .attr('fill', 'orange')
-                            .attr("font-size", "9px")
-                            .attr('text-anchor', 'start')
-                        // .attr("font-family", "Calibri")
-                        // .attr("transform", `rotate(30, ${x}, ${y + 200 * each - 25})`);
-                    }
-
-                    if (d.strand === "+") {
-                        if (width > 10) {
-                            return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
-                        } else {
-                            return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
-                        }
-                    } else {
-                        if (width > 10) {
-                            return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
-                        } else {
-                            return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
-                        }
-                    }
-                })
-                .attr("fill", d => (d.strand === "+") ? "green" : "#A6A600")
-                .attr("opacity", 0.8)
-                .attr("data-tippy-content", d => {
-                    return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
-                        "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
-                        "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
-                        "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
-                });
-            tippy(".queryGeneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-            subjectGroup.selectAll("text")
-                .filter(":not(#subjectMainLabel)")
-                .data(matchedSubjectChrInfo)
-                .join("text")
-                .text((d) => d.listY)
-                .attr("text-anchor", "middle")
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
-                    } else {
-                        return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
-                    }
-                })
-                .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20)
-                .attr("font-size", "12px")
-                // .attr("font-family", "Calibri")
-                .attr("class", "queryChrLabel");
-
-            const subject_chr_colorScale = d3.scaleOrdinal()
-                .domain(matchedSubjectChrInfo.map((d) => d.idx))
-                .range(subject_chr_colors);
-
-            subjectGroup.selectAll(".subjectChrShape")
-                .data(matchedSubjectChrInfo)
-                .join("rect")
-                .attr("class", "subjectChrShape")
-                .attr("id", (d) => "subjectChr_" + d.idx)
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return Number(startX) + ChrScaler(d.accumulate_start);
-                    } else {
-                        return ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight)
-                .attr(
-                    "width",
-                    (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
-                )
-                .attr("height", chrRectHeight)
-                .attr("opacity", 0.6)
-                .attr("fill", (d) => subject_chr_colorScale(d.idx))
-                .attr("ry", 3);
-
-
-            const subjectPositionLabels = subjectGroup.selectAll(".subjectPosLabel")
-                .data(matchedSubjectChrInfo);
-
-            subjectPositionLabels.enter()
-                .append("text")
-                .attr("class", "subjectPosLabel")
-                .merge(subjectPositionLabels)
-                .text(function (d) {
-                    return numFormatter(d.min / 1000000);
-                })
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        if (ChrScaler(d.len) < 60) {
-                            return startX + ChrScaler(d.accumulate_start) - 5;
-                        } else {
-                            return startX + ChrScaler(d.accumulate_start) + 5;
-                        }
-                    } else {
-                        if (ChrScaler(d.len) < 60) {
-                            return ChrScaler(d.accumulate_start) - 5;
-                        } else {
-                            return ChrScaler(d.accumulate_start) + 5;
-                        }
-                    }
-                })
-                .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight - 2)
-                .attr("text-anchor", function (d) {
-                    if (ChrScaler(d.len) < 60) {
-                        return "end";
-                    } else {
-                        return "start";
-                    }
-                })
-                .attr("font-size", "10px")
-                // .attr("font-family", "Calibri")
-                .attr('fill', 'blue')
-                .attr('opacity', 0.5);
-
-            subjectPositionLabels.enter()
-                .append("text")
-                .attr("class", "subjectPosLabel")
-                .merge(subjectPositionLabels)
-                .text(function (d, idx) {
-                    if (idx === (matchedSubjectChrInfo.length - 1)) {
-                        return numFormatter((d.len + d.min) / 1000000) + " Mb";
-                    } else {
-                        return numFormatter((d.len + d.min) / 1000000);
-                    }
-                })
-                .attr("x", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        if (ChrScaler(d.len) < 60) {
-                            return startX + ChrScaler(d.accumulate_end) + 5;
-                        } else {
-                            return startX + ChrScaler(d.accumulate_end) - 5;
-                        }
-                    } else {
-                        if (ChrScaler(d.len) < 60) {
-                            return ChrScaler(d.accumulate_end) + 5;
-                        } else {
-                            return ChrScaler(d.accumulate_end) - 5;
-                        }
-                    }
-                })
-                .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight - 2)
-                .attr("text-anchor", function (d) {
-                    if (ChrScaler(d.len) < 60) {
-                        return "start";
-                    } else {
-                        return "end";
-                    }
-                })
-                .attr("font-size", "10px")
-                // .attr("font-family", "Calibri")
-                .attr('fill', 'blue')
-                .attr('opacity', 0.5);
-
-            subjectPositionLabels.enter()
-                .append("line")
-                .attr("class", "subjectPosLabelLine")
-                .merge(subjectPositionLabels)
-                .attr("x1", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return startX + ChrScaler(d.accumulate_start);
-                    } else {
-                        return ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y1", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - chrRectHeight / 2 - 5)
-                .attr("x2", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return startX + ChrScaler(d.accumulate_start);
-                    } else {
-                        return ChrScaler(d.accumulate_start);
-                    }
-                })
-                .attr("y2", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight / 2 - 5)
-                .attr("stroke-width", 0.86)
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue");
-
-            subjectPositionLabels.enter()
-                .append("line")
-                .attr("class", "subjectPosLabelLine")
-                .merge(subjectPositionLabels)
-                .attr("x1", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return startX + ChrScaler(d.accumulate_end);
-                    } else {
-                        return ChrScaler(d.accumulate_end);
-                    }
-                })
-                .attr("y1", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - chrRectHeight / 2 - 5)
-                .attr("x2", function (d) {
-                    if (queryWidth >= subjectWidth) {
-                        return startX + ChrScaler(d.accumulate_end);
-                    } else {
-                        return ChrScaler(d.accumulate_end);
-                    }
-                })
-                .attr("y2", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight / 2 - 5)
-                .attr("stroke-width", 0.86)
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue");
-
-
-            matchedSubjectGeneInfo.forEach((d) => {
-                let subjectChr = matchedSubjectChrInfo.find(e => e.listY === d.seqchr);
-                let subjectAccumulateStart = subjectChr.accumulate_start + d.start + 1;
-                let subjectAccumulateEnd = subjectChr.accumulate_start + d.end + 1;
-                if (queryWidth < subjectWidth) {
-                    d.subjectX = ChrScaler(subjectAccumulateStart);
-                    d.subjectX1 = ChrScaler(subjectAccumulateEnd);
-                } else {
-                    d.subjectX = startX + ChrScaler(subjectAccumulateStart);
-                    d.subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
-                }
-            })
-
-            subjectGroup.selectAll(".subjectGeneShape")
-                .data(matchedSubjectGeneInfo)
-                .join("polygon")
-                .attr("class", "subjectGeneShape")
-                .attr("id", (d) => "subjectGene_" + d.gene)
-                .attr("points", (d) => {
-                    const x = d.subjectX;
-                    const y = height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 10 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 3 - chrRectHeight;
-                    const width = d.subjectX1 - d.subjectX;
-
-                    // Point out the targetGene                                
-                    if (d.gene === targeGene) {
-                        svg.append("line")
-                            .attr("class", "targe-gene")
-                            .attr('x1', x)
-                            .attr('y1', y + 200 * each)
-                            .attr('x2', x)
-                            .attr('y2', y + 200 * each + 45)
-                            .attr('stroke', 'orange')
-                            .attr('opacity', '0.7')
-                            .attr('stroke-width', "0.8")
-                            .attr("stroke-dasharray", "5 3");
-
-                        svg.append("text")
-                            .attr('x', x)
-                            .attr('y', y + 200 * each + 50)
-                            .text(targeGene)
-                            .attr('fill', 'orange')
-                            .attr("font-size", "9px")
-                            .attr('text-anchor', 'start')
-                        // .attr("font-family", "Calibri");
-                        // .attr("transform", `rotate(-30, ${x}, ${y + 200 * each + 25})`);
-                    }
-
-                    if (d.strand === "+") {
-                        if (width > 10) {
-                            return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
-                        } else {
-                            return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
-                        }
-                    } else {
-                        if (width > 10) {
-                            return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
-                        } else {
-                            return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
-                        }
-                    }
-                })
-                .attr("fill", d => (d.strand === "+") ? "green" : "#A6A600")
-                .attr("opacity", 0.8)
-                .attr("data-tippy-content", d => {
-                    const fillColor = d.strand === "+" ? "green" : "#A6A600";
-                    return "Gene: <font color='#4DFFFF'><b>" + d.gene + "</font></b><br>" +
-                        "Chr: <font color='#4DFFFF'><b>" + d.seqchr + "</font></b><br>" +
-                        "Position: <font color='#4DFFFF'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
-                        "Strand: <font color='#4DFFFF'><b>" + d.strand + "</font></b>";
-                });
-
-            tippy(".subjectGeneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-            // prepare anchorpoint data
-            matchedAnchorPointsInfo.forEach((d) => {
-                let queryChr = matchedQueryChrInfo.find(e => e.listX === d.listX);
-                let subjectChr = matchedSubjectChrInfo.find(e => e.listY === d.listY);
-                let queryAccumulateStart = queryChr.accumulate_start + d.startX - queryChr.min + 1;
-                let queryAccumulateEnd = queryChr.accumulate_start + d.endX - queryChr.min + 1;
-                let subjectAccumulateStart = subjectChr.accumulate_start + d.startY - subjectChr.min + 1;
-                let subjectAccumulateEnd = subjectChr.accumulate_start + d.endY - subjectChr.min + 1;
-                if (queryWidth >= subjectWidth) {
-                    queryX = ChrScaler(queryAccumulateStart);
-                    queryX1 = ChrScaler(queryAccumulateEnd);
-                    subjectX = startX + ChrScaler(subjectAccumulateStart);
-                    subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
-                } else {
-                    queryX = startX + ChrScaler(queryAccumulateStart);
-                    queryX1 = startX + ChrScaler(queryAccumulateEnd);
-                    subjectX = ChrScaler(subjectAccumulateStart);
-                    subjectX1 = ChrScaler(subjectAccumulateEnd);
-                }
-
-                d.ribbonPosition = {
-                    source: {
-                        x: queryX,
-                        x1: queryX1,
-                        y: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight + 200 * each,
-                        y1: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight + 200 * each
-                    },
-                    target: {
-                        x: subjectX,
-                        x1: subjectX1,
-                        y: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight + 200 * each,
-                        y1: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight + 200 * each
-                    }
-                };
-            })
-
-            subjectGroup.append("text")
-                .text(subjectSpecies)
-                .attr("id", "subjectMainLabel")
-                .attr("x", 5 + leftPadding)
-                .attr("y", height - bottomPadding + 20)
-                .attr("font-weight", "bold")
-                .attr("font-size", "14px")
-                .attr("font-style", "italic")
-                // .attr("font-family", "times")
-                .style("fill", "#8E549E");
-
-            // console.log("anchorpoint", anchorPointInfo);
-            svg.append("g")
-                .attr("class", "segsRibbons")
-                .selectAll("path")
-                .data(matchedAnchorPointsInfo)
-                .join("path")
-                .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
-                .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
-                //.attr("fill", (d) => query_chr_colorScale(d.idx))
-                .attr("fill", function (d) {
-                    return colorScale(d.Ks);
-                })
-                .attr("opacity", 0.6)
-                .attr("data-tippy-content", d => {
-                    return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
-                        "<font color='red'><b>&#8595</b></font><br>" +
-                        "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
-                        "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
-                });
-        });
-
-        tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVGs("download_" + plotId,
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+    if (maxQueryChrSum > maxSubjectChrSum) {
+        var scaleData = queryChrInfo.filter(item => item.multiplicon === maxQueryChrMultiplicon);
+    } else {
+        var scaleData = subjectChrInfo.filter(item => item.multiplicon === maxSubjectChrMultiplicon);
     }
 
-    Shiny.addCustomMessageHandler("Cluster_Synteny_Plotting_v7", ClusterSyntenyPlottingV7);
-    function ClusterSyntenyPlottingV7(InputData) {
-        var plotId = InputData.plot_id;
-        var segmentedChrInfo = convertShinyData(InputData.segmented_chr);
-        var segmentedAnchorpointsInfo = convertShinyData(InputData.segmented_anchorpoints);
-        var queryChrOrder = InputData.subject_chr_order;
-        var subjectChrOrder = InputData.query_chr_order;
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var plotSize = InputData.size;
-        var parInfo = InputData.pars;
-        var treeByCol = InputData.tree_bycol;
-        var treeByRow = InputData.tree_byrow;
+    const allMultiplicons = anchorPointInfo.map(item => item.multiplicon);
+    const uniqueMultiplicons = [...new Set(allMultiplicons)];
+    // console.log("uniqueMultiplicons", uniqueMultiplicons);
 
-        /* console.log("treeByCol", treeByCol);
-        console.log("treeByRow", treeByRow); */
+    // define syntenic plot dimension
+    let topPadding = 50 * height / 200;
+    let bottomPadding = 30 * height / 200;
+    let leftPadding = 10;
+    let rightPadding = 50;
+    let chrRectHeight = 4;
+    let innerPadding = 20;
+    var tooltipDelay = 500;
 
-        // console.log("parInfo", parInfo);
+    var middlePoint = (width - leftPadding - rightPadding) / 2;
+    d3.select("#microSyntenicBlock_" + plotId)
+        .select("svg").remove();
+    const svg = d3.select("#microSyntenicBlock_" + plotId)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height * uniqueMultiplicons.length);
 
-        var querySpeciesTmp = querySpecies.replace(" ", "_");
-        var queryChrInfo = segmentedChrInfo
-            .filter(item => item.genome === querySpeciesTmp);
+    const innerScale = d3.scaleLinear()
+        .domain([0, 1])
+        .range([
+            0,
+            width - leftPadding - rightPadding
+        ]);
 
-        queryChrInfo = queryChrInfo.map((item, index) => ({ ...item, index: index + 1 }));
-        queryChrInfo = queryChrInfo.sort((a, b) => {
-            const indexA = a.index;
-            const indexB = b.index;
+    var scaleChrData = calc_micro_accumulate_len(scaleData, innerScale, innerPadding);
+    const ChrScaler = d3
+        .scaleLinear()
+        .domain([
+            scaleChrData[0].accumulate_start,
+            scaleChrData[scaleChrData.length - 1].accumulate_end
+        ])
+        .range([
+            0 + leftPadding,
+            width - rightPadding
+        ]);
 
-            const positionA = queryChrOrder.indexOf(indexA);
-            const positionB = queryChrOrder.indexOf(indexB);
+    uniqueMultiplicons.forEach((multipliconIdx, each) => {
+        const strMultipliconIdx = multipliconIdx.toString();
+        const matchedAnchorPointsInfo = anchorPointInfo.filter(item => item.multiplicon === multipliconIdx);
+        var matchedQueryChrInfo = queryChrInfo.filter(item => item.multiplicon === strMultipliconIdx);
+        matchedQueryChrInfo = calc_micro_accumulate_len(matchedQueryChrInfo, innerScale, innerPadding);
+        var matchedSubjectChrInfo = subjectChrInfo.filter(item => item.multiplicon === strMultipliconIdx);
+        matchedSubjectChrInfo = calc_micro_accumulate_len(matchedSubjectChrInfo, innerScale, innerPadding);
+        var matchedQueryGeneInfo = queryGeneInfo.filter(item => item.multiplicon === strMultipliconIdx);
+        var matchedSubjectGeneInfo = subjectGeneInfo.filter(item => item.multiplicon === strMultipliconIdx);
 
-            return positionA - positionB;
-        });
+        const queryGroup = svg.append("g")
+            .attr("class", "queryChrs")
+            .attr("transform", `translate(0, ${ 200 * each })`);
+        const subjectGroup = svg.append("g")
+            .attr("class", "subjectChrs")
+            .attr("transform", `translate(0, ${ 200 * each })`);
 
-        var subjectSpeciesTmp = subjectSpecies.replace(" ", "_");
-        var subjectChrInfo = segmentedChrInfo
-            .filter(item => item.genome === subjectSpeciesTmp);
+        var queryWidth = d3.max(matchedQueryChrInfo, function (d) { return d.accumulate_end; });
+        var subjectWidth = d3.max(matchedSubjectChrInfo, function (d) { return d.accumulate_end; });
 
-        subjectChrInfo = subjectChrInfo.map((item, index) => ({ ...item, index: index + 1 }));
-        subjectChrInfo = subjectChrInfo.sort((a, b) => {
-            const indexA = a.index;
-            const indexB = b.index;
-
-            const positionA = subjectChrOrder.indexOf(indexA);
-            const positionB = subjectChrOrder.indexOf(indexB);
-
-            return positionA - positionB;
-        });
-
-        const scaleRatio = plotSize / 800;
-        // define plot dimension
-        let topPadding = 100;
-        const longestXLabelLength = d3.max(queryChrInfo, d => d.list.toString().length);
-        const xAxisTitlePadding = longestXLabelLength * 6;
-        let bottomPadding = 80 + xAxisTitlePadding;
-        const longestYLabelLength = d3.max(subjectChrInfo, d => d.list.toString().length);
-        const yAxisTitlePadding = longestYLabelLength * 6;
-        let leftPadding = 80 + yAxisTitlePadding;
-        let rightPadding = 100;
-        var tooltipDelay = 400;
-
-        function calc_accumulate_num_renew(inputChrInfo) {
-            let acc_len = 0;
-            inputChrInfo.forEach((e, i) => {
-                e.idx = i;
-                e.accumulate_start = acc_len + 1;
-                e.accumulate_end = e.accumulate_start + e.num_gene_remapped;
-                acc_len = e.accumulate_end;
-            });
-            return inputChrInfo;
-        }
-
-        queryChrInfo = calc_accumulate_num_renew(queryChrInfo);
-        subjectChrInfo = calc_accumulate_num_renew(subjectChrInfo);
-
-        /*         console.log("queryChrOrder", queryChrOrder);
-                console.log("queryChrUn", segmentedChrInfo.filter(item => item.genome === querySpeciesTmp))
-                console.log("queryChrInfo", queryChrInfo);
-                console.log("subjectChrOrder", subjectChrOrder);
-                console.log("subjectChrUn", segmentedChrInfo.filter(item => item.genome === subjectSpeciesTmp))
-                console.log("subjectChrInfo", subjectChrInfo);
-         */
-        // choose the sp with larger width to make the scaler
-        var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
-        var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
-
-        // define plot area size
-        if (subjectWidth < queryWidth) {
-            var xyscale = subjectWidth / queryWidth;
-            var width = (plotSize + leftPadding + rightPadding) * scaleRatio;
-            var height = (plotSize * xyscale + topPadding + bottomPadding) * scaleRatio;
+        if (queryWidth > subjectWidth) {
+            // var startX = middlePoint - ChrScaler(subjectWidth) / 2;
+            var startX = ChrScaler(queryWidth) / 2 - ChrScaler(subjectWidth) / 2;
+        } else if (queryWidth < subjectWidth) {
+            var startX = ChrScaler(subjectWidth) / 2 - ChrScaler(queryWidth) / 2;
         } else {
-            var xyscale = queryWidth / subjectWidth;
-            var width = (plotSize * xyscale + leftPadding + rightPadding) * scaleRatio;
-            var height = (plotSize + topPadding + bottomPadding) * scaleRatio;
+            var startX = 0;
         }
 
-        var xScaler = d3.scaleLinear()
-            .domain([queryChrInfo[0].accumulate_start, queryChrInfo[queryChrInfo.length - 1].accumulate_end])
-            .range([leftPadding, width - rightPadding])
-
-        var yScaler = d3.scaleLinear()
-            .domain([subjectChrInfo[0].accumulate_start, subjectChrInfo[subjectChrInfo.length - 1].accumulate_end])
-            .range([height - bottomPadding, topPadding])
-
-        // prepare anchorpoints data
-        segmentedAnchorpointsInfo.forEach((d) => {
-            let queryChr = queryChrInfo.find(e => e.list === d.listX);
-            let subjectChr = subjectChrInfo.find(e => e.list === d.listY);
-            let queryAccumulateStart = queryChr.accumulate_start + d.coordX + 1;
-            let subjectAccumulateStart = subjectChr.accumulate_start + d.coordY + 1;
-            d.queryPos = {
-                x: queryAccumulateStart
-            };
-            d.subjectPos = {
-                x: subjectAccumulateStart
-            };
-        });
-
-        // console.log("segmentedAnchorpointsInfo", segmentedAnchorpointsInfo);
-
-        const xAxis = d3.axisBottom(xScaler)
-            .tickValues(queryChrInfo.map(e => e.accumulate_end).slice(0, -1));
-        const yAxis = d3.axisLeft(yScaler)
-            .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
-
-        // remove old svgs
-        d3.select("#" + plotId)
-            .select("svg").remove();
-        const svg = d3.select("#" + plotId)
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-        // .style("display", "none");
-
-        // add x axis
-        svg.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", function () {
-                return `translate(0, ${ height - bottomPadding })`;
-            })
-            .call(xAxis)
-            .attr("stroke-width", 0.26)
-            .call(g => g.selectAll(".tick text").remove())
-            .call(g => g.selectAll(".tick line").clone()
-                .attr("y2", function () {
-                    return topPadding + bottomPadding - height;
-                })
-                .attr("stroke-dasharray", "4 1")
-                .attr("stroke-width", 0.26)
-                .attr("stroke-opacity", 0.3)
-                .attr("stroke", "blue")
-            );
-
-        // add y axis;
-        svg.append("g")
-            .attr("class", "axis axis--y")
-            .attr("transform", `translate(${ leftPadding }, 0)`)
-            .call(yAxis)
-            .attr("stroke-width", 0.26)
-            .call(g => g.selectAll(".tick text").remove())
-            .call(g => g.selectAll(".tick line").clone()
-                .attr("x2", function () {
-                    return width - leftPadding - rightPadding;
-                })
-                .attr("stroke-dasharray", "4 1")
-                .attr("stroke-opacity", 0.3)
-                .attr("stroke", "blue")
-                .attr("stroke-width", 0.26)
-            );
-
-        // add top and right border
-        svg.append("g")
-            .append("line")
-            .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
-            .attr("x2", function () {
-                return width - leftPadding - rightPadding;
-            })
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.26)
-            .attr("stroke-opacity", 0.3);
-
-        svg.append("g")
-            .append("line")
-            .attr("transform", function () {
-                return `translate(${ width - rightPadding }, ${ topPadding })`;
-            })
-            .attr("y2", function () {
-                return height - topPadding - bottomPadding
-            })
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.26)
-            .attr("stroke-opacity", 0.3);
-
-        // add text labels on axises
-        svg.append("g")
-            .attr("class", "xLabel")
-            .selectAll("text")
-            .data(queryChrInfo)
-            .join("text")
-            .attr("x", d => {
-                return xScaler(d3.mean([d.accumulate_start, d.accumulate_end]));
-            })
-            .attr("y", function () {
-                return height - bottomPadding + 15;
-            })
-            .attr("font-size", function () {
-                return 8 * scaleRatio + "px";
-            })
-            // .attr("font-family", "calibri")
-            .text(d => d.list)
-            .attr("id", function (d) {
-                var chrName = d.list.replace(":", "_");
-                chrName = chrName.replace("-", "_");
-                return "xLabel_" + chrName;
-            })
-            .attr("text-anchor", "left")
-            .attr("data-tippy-content", (d) => {
-                return "<font color='#68AC57'>" + d.list
-                    + "</font><br>num_gene_remapped: <font color='#68AC57'><b>"
-                    + d.num_gene_remapped + "</b></font>";
-            })
-            .attr("transform", (d) => {
-                return "rotate(90 " + xScaler(d3.mean([d.accumulate_start, d.accumulate_end])) + ","
-                    + (height - bottomPadding + 15) + ")";
-            });
-
-        svg.append("g")
-            .attr("class", "yLabel")
-            .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
-            .selectAll("g")
-            .data(subjectChrInfo)
-            .join("g")
-            .attr("transform", d => `translate(-15 ${ yScaler(d3.mean([d.accumulate_start, d.accumulate_end])) - topPadding })`)
-            .append("text")
-            .attr("font-size", function () {
-                return 8 * scaleRatio + "px";
-            })
-            // .attr("font-family", "calibri")
-            .text(d => d.list)
-            .attr("id", (d) => d.list)
-            .attr("text-anchor", "end")
-            .attr("data-tippy-content", (d) => {
-                return "<font color='#8E549E'>" + d.list
-                    + "</font><br>num_gene_remapped: <font color='#8E549E'><b>"
-                    + d.num_gene_remapped + "</b></font>";
-            });
-
-        // Add title for x and y
-        //const xLabelY = height - 25;
-        svg.append("g")
-            .attr("class", "xTitle")
-            .append("text")
-            .attr("x", function () {
-                return d3.mean([leftPadding * scaleRatio, width])
-            })
-            .attr("y", height - 65)
-            .attr("text-anchor", "middle")
-            .attr("font-size", function () {
-                return 13 * scaleRatio + "px";
-            })
+        // add main lebel for each chromosome
+        queryGroup.append("text")
+            .text(querySpecies)
+            .attr("id", "queryMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", topPadding - 10)
             .attr("font-weight", "bold")
+            .attr("font-size", "14px")
             .attr("font-style", "italic")
             // .attr("font-family", "times")
-            .text(querySpecies)
             .style("fill", "#68AC57");
 
-        svg.append("g")
-            .attr("class", "yTitle")
-            .append("text")
-            .attr("y", function () {
-                return d3.mean([topPadding * scaleRatio, height - bottomPadding * scaleRatio])
-            })
-            .attr("x", leftPadding - yAxisTitlePadding - 10)
-            .attr("text-anchor", "middle")
-            .attr("font-size", function () {
-                return 13 * scaleRatio + "px";
-            })
-            .attr("font-weight", "bold")
-            .attr("font-style", "italic")
-            // .attr("font-family", "times")
-            .attr("transform", function () {
-                return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
-            })
-            .text(subjectSpecies)
-            .style("fill", "#8E549E");
-
-        svg.append('g')
-            .attr("class", "anchorpoints")
-            .selectAll("circle")
-            .data(segmentedAnchorpointsInfo)
-            .join("circle")
-            .attr("cx", d => xScaler(d.queryPos.x))
-            .attr("cy", d => yScaler(d.subjectPos.x))
-            .attr("r", 0.87 * scaleRatio)
-            .attr("id", (d) => "multiplicon_" + d.multiplicon)
-            .attr("fill", function (d) {
-                if (d.Ks > -1) {
-                    return colorScale(d.Ks);
-                } else {
-                    return "#898989"
-                }
-            });
-
-        // Define the gradient for the color scale
-        var defs = svg.append("defs");
-        var gradient = defs.append("linearGradient")
-            .attr("id", "color-scale")
-            .attr("x1", "0%").attr("y1", "0%")
-            .attr("x2", "100%").attr("y2", "0%");
-
-        gradient.append("stop")
-            .attr("offset", "0%")
-            .attr("stop-color", colorScale(0));
-        gradient.append("stop")
-            .attr("offset", "20%")
-            .attr("stop-color", colorScale(1));
-        gradient.append("stop")
-            .attr("offset", "40%")
-            .attr("stop-color", colorScale(2));
-        gradient.append("stop")
-            .attr("offset", "60%")
-            .attr("stop-color", colorScale(3));
-        gradient.append("stop")
-            .attr("offset", "100%")
-            .attr("stop-color", colorScale(4));
-
-        var legendGroup = svg.append("g")
-            .attr("class", "legend")
-            .attr("transform", "translate(" + 5 + "," + 10 + ")");
-
-        legendGroup.append("rect")
-            .attr("x", (width - 200) * scaleRatio)
-            .attr("y", 15 * scaleRatio)
-            .attr("width", 200 * scaleRatio)
-            .attr("height", 15 * scaleRatio)
-            .attr("fill", "url(#color-scale)")
-            .attr("fill-opacity", 0.7);
-
-        var axisScale = d3.scaleLinear()
-            .domain([0, 5])
-            .range([(width - 200) * scaleRatio, width * scaleRatio]);
-
-        // Create the horizontal axis
-        var axis = d3.axisBottom(axisScale)
-            .ticks(5);
-
-        var axisGroup = legendGroup.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(" + 0 + "," + 30 + ")")
-            .call(axis)
-            .attr("text-anchor", "middle")
-            .attr("dominant-baseline", "hanging")
-            .attr("font-size", function () {
-                return 11 * scaleRatio + "px";
-            });
-        // .attr("font-family", "calibri");
-
-        legendGroup.append("text")
-            .attr("x", (width - 103) * scaleRatio)
-            .attr("y", 70 * scaleRatio)
-            .append("tspan")
-            // .attr("font-family", "times")
-            .html("<tspan style='font-style: italic;'>K</tspan>")
-            .style("font-size", function () {
-                return 13 * scaleRatio + "px";
-            })
-            .append("tspan")
-            .text("s")
-            .style("font-size", function () {
-                return 12 * scaleRatio + "px";
-            })
-            .attr("dx", function () {
-                return 1 * scaleRatio + "px";
-            })
-            .attr("dy", function () {
-                return 2 * scaleRatio + "px";
-            });
-
-        //tippy(".multipliscons path", {trigger: "mouseenter", followCursor: "initial",  delay: [tooltipDelay, null]});
-        tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-
-        // Add PARs borders
-        if (typeof parInfo !== "undefined") {
-
-            for (var i = 0; i < Object.keys(parInfo).length; i++) {
-                if (i === 0) {
-                    var listKey = "list";
-                    var parIdKey = "par_id";
-                } else {
-                    var listKey = "list." + i;
-                    var parIdKey = "par_id." + i;
-                }
-
-                if (parInfo.hasOwnProperty(listKey) && parInfo.hasOwnProperty(parIdKey)) {
-                    var listArray = parInfo[listKey];
-                    var parIdArray = parInfo[parIdKey];
-
-                    var filteredParSubjectInfo = subjectChrInfo.filter(function (item) {
-                        return listArray.includes(item.list);
-                    });
-                    var minParSubjectAccumulateStart = filteredParSubjectInfo.reduce(function (min, item) {
-                        return Math.min(min, item.accumulate_start);
-                    }, Infinity);
-                    var maxParSubjectAccumulateEnd = filteredParSubjectInfo.reduce(function (max, item) {
-                        return Math.max(max, item.accumulate_end);
-                    }, -Infinity);
-
-                    var maxY = yScaler(minParSubjectAccumulateStart);
-                    var minY = yScaler(maxParSubjectAccumulateEnd);
-
-                    var filteredParQueryInfo = queryChrInfo.filter(function (item) {
-                        return listArray.includes(item.list);
-                    });
-                    var minParQueryAccumulateStart = filteredParQueryInfo.reduce(function (min, item) {
-                        return Math.min(min, item.accumulate_start);
-                    }, Infinity);
-                    var maxParQueryAccumulateEnd = filteredParQueryInfo.reduce(function (max, item) {
-                        return Math.max(max, item.accumulate_end);
-                    }, -Infinity);
-
-                    var minX = xScaler(minParQueryAccumulateStart);
-                    var maxX = xScaler(maxParQueryAccumulateEnd);
-
-                    svg.append("rect")
-                        .attr("class", "ParRectangle")
-                        .attr("x", minX)
-                        .attr("y", minY)
-                        .attr("width", maxX - minX)
-                        .attr("height", maxY - minY)
-                        .attr("fill", "#EAB904")
-                        .attr("fill-opacity", 0.1)
-                        .attr("stroke", "#EAB904")
-                        .attr("stroke-width", 0.36)
-                        .attr("stroke-opacity", 0.5)
-                        .attr("stroke-dasharray", "5, 5")
-                        .lower();
-
-                    svg.append("text")
-                        .attr("class", "ParRectangle")
-                        .attr("x", (minX + maxX) / 2)
-                        .attr("y", minY - 12)
-                        .attr("text-anchor", "middle")
-                        .attr("alignment-baseline", "hanging")
-                        .attr("font-size", function () {
-                            return 8 * scaleRatio + "px";
-                        })
-                        .attr("font-style", "bold")
-                        //// .attr("font-family", "times")
-                        .style("fill", "#04AFEA")
-                        .text(parIdArray[0].replace("PAR ", "P"));
-                }
-            }
-        }
-
-        // Add the clustering tree
-        colTreeJson = parseTree(treeByCol);
-        // console.log("colTreeJson", colTreeJson);
-
-        var treeColJsonCopy = JSON.parse(JSON.stringify(colTreeJson));
-
-        /* dendrogram(
-            "#dendrogramTreeView",
-            treeColJsonCopy,
-            {
-                hideLabels: false,
-                h: 0.4
-            }
-        ); */
-        // buildTree("#dendrogramTreeView", colTreeJson, 300, 300, 'right');
-        // BuildHclustTree("#dendrogramTreeView", colHclust, 300, 400)
-        /* var script = document.createElement('script');
-        script.src = 'https://d3js.org/d3.v3.min.js';
-        document.head.appendChild(script);
-        script.onload = function () {
-            // dendrogram Tree
-            var svgTree = d3.select("#dendrogramTreeView")
-                .append("svg")
-                .attr("width", 300)
-                .attr("height", 400);
-            var g = svgTree
-                .append("g")
-                .attr("transform", "translate(" + 50 + "," + 50 + ")");
-            var treeJson = JSON.parse(JSON.stringify(colHclust.json));
-
-            BuildHeightTree("#dendrogramTreeView", treeJson, svgTree, 300, 400);
-        } */
-
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("cluster_download",
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + ".cluster.svg");
-
-        // Convert the SVG to PNG
-        /* const svgXml = new XMLSerializer().serializeToString(svg.node());
-        const img = new Image();
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
-
-        img.onload = function () {
-            var canvas = document.createElement("canvas");
-            var scale = 2;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            canvas.width = width;
-            canvas.height = height;
-
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-
-            const pngDataUrl = canvas.toDataURL('image/png');
-
-            const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
-            if (previousPngImg) {
-                previousPngImg.remove();
-            }
-
-            const pngImg = new Image();
-            pngImg.src = pngDataUrl;
-            document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
-        }; */
-    }
-
-    Shiny.addCustomMessageHandler("Cluster_Zoom_In_Plotting_V7", ClusterZoomInPlottingV7);
-    function ClusterZoomInPlottingV7(InputData) {
-        var plotId = InputData.plot_id;
-        var parId = InputData.par_id;
-        var segmentedChrInfo = convertShinyData(InputData.segmented_chr);
-        var segmentedAnchorpointsInfo = convertShinyData(InputData.segmented_anchorpoints);
-        var querySpecies = InputData.query_sp;
-        var subjectSpecies = InputData.subject_sp;
-        var plotSize = InputData.size;
-
-        // console.log("parInfo", parInfo);
-
-        var querySpeciesTmp = querySpecies.replace(" ", "_");
-        var queryChrInfo = segmentedChrInfo
-            .filter(item => item.genome === querySpeciesTmp);
-
-        var subjectSpeciesTmp = subjectSpecies.replace(" ", "_");
-        var subjectChrInfo = segmentedChrInfo
-            .filter(item => item.genome === subjectSpeciesTmp);
-
-        const scaleRatio = plotSize / 400;
-        // define plot dimension
-        let topPadding = 100;
-        const longestXLabelLength = d3.max(queryChrInfo, d => d.list.toString().length);
-        const xAxisTitlePadding = longestXLabelLength * 6;
-        let bottomPadding = 80 + xAxisTitlePadding;
-        const longestYLabelLength = d3.max(subjectChrInfo, d => d.list.toString().length);
-        const yAxisTitlePadding = longestYLabelLength * 6;
-        let leftPadding = 80 + yAxisTitlePadding;
-        let rightPadding = 100;
-        var tooltipDelay = 400;
-
-        function calc_accumulate_num_renew(inputChrInfo) {
-            let acc_len = 0;
-            inputChrInfo.forEach((e, i) => {
-                e.idx = i;
-                e.accumulate_start = acc_len + 1;
-                e.accumulate_end = e.accumulate_start + e.num_gene_remapped;
-                acc_len = e.accumulate_end;
-            });
-            return inputChrInfo;
-        }
-
-        queryChrInfo = calc_accumulate_num_renew(queryChrInfo);
-        subjectChrInfo = calc_accumulate_num_renew(subjectChrInfo);
-
-        var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
-        var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
-
-        if (subjectWidth < queryWidth) {
-            var xyscale = subjectWidth / queryWidth;
-            var width = (plotSize + leftPadding + rightPadding) * scaleRatio;
-            var height = (plotSize * xyscale + topPadding + bottomPadding) * scaleRatio;
-        } else {
-            var xyscale = queryWidth / subjectWidth;
-            var width = (plotSize * xyscale + leftPadding + rightPadding) * scaleRatio;
-            var height = (plotSize + topPadding + bottomPadding) * scaleRatio;
-        }
-
-        var xScaler = d3.scaleLinear()
-            .domain([queryChrInfo[0].accumulate_start, queryChrInfo[queryChrInfo.length - 1].accumulate_end])
-            .range([leftPadding, width - rightPadding])
-
-        var yScaler = d3.scaleLinear()
-            .domain([subjectChrInfo[0].accumulate_start, subjectChrInfo[subjectChrInfo.length - 1].accumulate_end])
-            .range([height - bottomPadding, topPadding])
-
-        segmentedAnchorpointsInfo.forEach((d) => {
-            let queryChr = queryChrInfo.find(e => e.list === d.listX);
-            let subjectChr = subjectChrInfo.find(e => e.list === d.listY);
-            let queryAccumulateStart = queryChr.accumulate_start + d.coordX + 1;
-            let subjectAccumulateStart = subjectChr.accumulate_start + d.coordY + 1;
-            d.queryPos = {
-                x: queryAccumulateStart
-            };
-            d.subjectPos = {
-                x: subjectAccumulateStart
-            };
-        });
-
-        const xAxis = d3.axisBottom(xScaler)
-            .tickValues(queryChrInfo.map(e => e.accumulate_end).slice(0, -1));
-        const yAxis = d3.axisLeft(yScaler)
-            .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
-
-        d3.select("#" + plotId)
-            .select("svg").remove();
-        const svg = d3.select("#" + plotId)
-            .append("svg")
-            .attr("width", width)
-            .attr("height", height);
-
-        svg.append("g")
-            .attr("class", "axis axis--x")
-            .attr("transform", function () {
-                return `translate(0, ${ height - bottomPadding })`;
-            })
-            .call(xAxis)
-            .attr("stroke-width", 0.46)
-            .call(g => g.selectAll(".tick text").remove())
-            .call(g => g.selectAll(".tick line").clone()
-                .attr("y2", function () {
-                    return topPadding + bottomPadding - height;
-                })
-                .attr("stroke-dasharray", "4 1")
-                .attr("stroke-width", 0.46)
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue")
-            );
-
-        svg.append("g")
-            .attr("class", "axis axis--y")
-            .attr("transform", `translate(${ leftPadding }, 0)`)
-            .call(yAxis)
-            .attr("stroke-width", 0.46)
-            .call(g => g.selectAll(".tick text").remove())
-            .call(g => g.selectAll(".tick line").clone()
-                .attr("x2", function () {
-                    return width - leftPadding - rightPadding;
-                })
-                .attr("stroke-dasharray", "4 1")
-                .attr("stroke-opacity", 0.5)
-                .attr("stroke", "blue")
-                .attr("stroke-width", 0.46)
-            );
-
-        svg.append("g")
-            .append("line")
-            .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
-            .attr("x2", function () {
-                return width - leftPadding - rightPadding;
-            })
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.46)
-            .attr("stroke-opacity", 0.5);
-
-        svg.append("g")
-            .append("line")
-            .attr("transform", function () {
-                return `translate(${ width - rightPadding }, ${ topPadding })`;
-            })
-            .attr("y2", function () {
-                return height - topPadding - bottomPadding
-            })
-            .attr("stroke", "black")
-            .attr("stroke-width", 0.46)
-            .attr("stroke-opacity", 0.5);
-
-        svg.append("g")
-            .attr("class", "xLabel")
-            .selectAll("text")
-            .data(queryChrInfo)
-            .join("text")
-            .attr("x", d => {
-                return xScaler(d3.mean([d.accumulate_start, d.accumulate_end]));
-            })
-            .attr("y", function () {
-                return height - bottomPadding + 15;
-            })
-            .attr("font-size", function () {
-                return 10 * scaleRatio + "px";
-            })
-            .text(d => d.list)
-            .attr("id", function (d) {
-                var chrName = d.list.replace(":", "_");
-                chrName = chrName.replace("-", "_");
-                return "xLabel_" + chrName;
-            })
-            .attr("text-anchor", "left")
-            .attr("data-tippy-content", (d) => {
-                return "<font color='#68AC57'>" + d.list
-                    + "</font><br>num_gene_remapped: <font color='#68AC57'><b>"
-                    + d.num_gene_remapped + "</b></font>";
-            })
-            .attr("transform", (d) => {
-                return "rotate(90 " + xScaler(d3.mean([d.accumulate_start, d.accumulate_end])) + ","
-                    + (height - bottomPadding + 15) + ")";
-            });
-
-        svg.append("g")
-            .attr("class", "yLabel")
-            .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
-            .selectAll("g")
-            .data(subjectChrInfo)
-            .join("g")
-            .attr("transform", d => `translate(-15 ${ yScaler(d3.mean([d.accumulate_start, d.accumulate_end])) - topPadding })`)
-            .append("text")
-            .attr("font-size", function () {
-                return 10 * scaleRatio + "px";
-            })
-            // .attr("font-family", "calibri")
-            .text(d => d.list)
-            .attr("id", (d) => d.list)
-            .attr("text-anchor", "end")
-            .attr("data-tippy-content", (d) => {
-                return "<font color='#8E549E'>" + d.list
-                    + "</font><br>num_gene_remapped: <font color='#8E549E'><b>"
-                    + d.num_gene_remapped + "</b></font>";
-            });
-
-        svg.append("g")
-            .attr("class", "xTitle")
-            .append("text")
-            .attr("x", function () {
-                return d3.mean([leftPadding * scaleRatio, width])
-            })
-            .attr("y", height - 65)
-            .attr("text-anchor", "middle")
-            .attr("font-size", function () {
-                return 13 * scaleRatio + "px";
-            })
-            .attr("font-weight", "bold")
-            .attr("font-style", "italic")
-            // .attr("font-family", "times")
-            .text(querySpecies)
-            .style("fill", "#68AC57");
-
-        svg.append("g")
-            .attr("class", "yTitle")
-            .append("text")
-            .attr("y", function () {
-                return d3.mean([topPadding * scaleRatio, height - bottomPadding * scaleRatio])
-            })
-            .attr("x", leftPadding - yAxisTitlePadding - 10)
-            .attr("text-anchor", "middle")
-            .attr("font-size", function () {
-                return 13 * scaleRatio + "px";
-            })
-            .attr("font-weight", "bold")
-            .attr("font-style", "italic")
-            // .attr("font-family", "times")
-            .attr("transform", function () {
-                return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
-            })
-            .text(subjectSpecies)
-            .style("fill", "#8E549E");
-
-        svg.append('g')
-            .attr("class", "anchorpoints")
-            .selectAll("circle")
-            .data(segmentedAnchorpointsInfo)
-            .join("circle")
-            .attr("cx", d => xScaler(d.queryPos.x))
-            .attr("cy", d => yScaler(d.subjectPos.x))
-            .attr("r", 2.37 * scaleRatio)
-            .attr("id", (d) => "multiplicon_" + d.multiplicon)
-            .attr("fill", function (d) {
-                if (d.Ks > -1) {
-                    return colorScale(d.Ks);
-                } else {
-                    return "#898989"
-                }
-            });
+        const querySpeciesLabelLength = querySpecies.toString().length;
+        const queryTitlePadding = querySpeciesLabelLength * 4;
 
         svg.append("text")
-            .attr("x", function () {
-                return d3.mean([leftPadding * scaleRatio, width])
-            })
-            .attr("y", topPadding - 25)
+            .text("Multiplicon: " + multipliconIdx)
+            .attr("class", "multipliconId")
+            .attr("id", "multipliconId")
+            .attr("x", queryTitlePadding + 120 + leftPadding)
+            .attr("y", topPadding - 10 + 200 * each)
+            .attr("font-weight", "bold")
+            .attr("font-size", "13px")
+            // .attr("font-family", "Calibri")
+            .style("fill", "#4A4AFF");
+
+        queryGroup.selectAll("text")
+            .attr("class", "queryChrLabel")
+            .filter(":not(#queryMainLabel)")
+            .data(matchedQueryChrInfo)
+            .join("text")
+            .text((d) => d.listX)
             .attr("text-anchor", "middle")
-            .attr("alignment-baseline", "hanging")
-            .attr("font-size", function () {
-                return 15 * scaleRatio + "px";
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
             })
-            .attr("font-style", "bold")
-            //// .attr("font-family", "times")
-            .style("fill", "#04AFEA")
-            .text(parId);
+            .attr("y", function () {
+                return Number(d3.select("#queryMainLabel").attr("y")) + Number(d3.select(this).node().getBBox().height) + 10;
+            })
+            .attr("font-size", "12px")
+        // .attr("font-family", "Calibri")
 
-        //tippy(".multipliscons path", {trigger: "mouseenter", followCursor: "initial",  delay: [tooltipDelay, null]});
-        tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
-        tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+        const query_chr_colorScale = d3.scaleOrdinal()
+            .domain(matchedQueryChrInfo.map((d) => d.idx))
+            .range(query_chr_colors);
 
-        querySpecies = querySpecies.replace(" ", "_");
-        subjectSpecies = subjectSpecies.replace(" ", "_");
-        downloadSVG("PAR_download",
-            plotId,
-            querySpecies + "_vs_" + subjectSpecies + "." + parId.replace(" ", "_") + ".cluster.svg");
+        queryGroup.selectAll(".queryChrShape")
+            .data(matchedQueryChrInfo)
+            .join("rect")
+            .attr("class", "queryChrShape")
+            .attr("id", (d) => "queryChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_start);
+                } else {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 0.6)
+            .attr("fill", (d) => query_chr_colorScale(d.idx))
+            .attr("ry", 3);
 
-        // Convert the SVG to PNG
-        /* const svgXml = new XMLSerializer().serializeToString(svg.node());
-        const img = new Image();
-        img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
+        // Add position labels and connecting lines
+        const positionLabels = queryGroup.selectAll(".queryPosLabel")
+            .data(matchedQueryChrInfo);
 
-        img.onload = function () {
-            var canvas = document.createElement("canvas");
-            var scale = 2;
-            canvas.style.width = width + 'px';
-            canvas.style.height = height + 'px';
-            canvas.width = width;
-            canvas.height = height;
+        // console.log("matchedQueryChrInfo", matchedQueryChrInfo);
+        positionLabels.enter()
+            .append("text")
+            .attr("class", "queryPosLabel")
+            .merge(positionLabels)
+            .text(function (d) {
+                return numFormatter(d.min / 1000000);
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    if (ChrScaler(d.len) < 60) {
+                        return ChrScaler(d.accumulate_start) - 5;
+                    } else {
+                        return ChrScaler(d.accumulate_start) + 5;
+                    }
+                } else {
+                    if (ChrScaler(d.len) < 60) {
+                        return startX + ChrScaler(d.accumulate_start) - 5;
+                    } else {
+                        return startX + ChrScaler(d.accumulate_start) + 5;
+                    }
+                }
+            })
+            .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height)
+            .attr("text-anchor", function (d) {
+                if (ChrScaler(d.len) < 60) {
+                    return "end";
+                } else {
+                    return "start";
+                }
+            })
+            .attr("font-size", "10px")
+            // .attr("font-family", "Calibri")
+            .attr('fill', 'blue')
+            .attr('opacity', 0.5);
 
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
+        positionLabels.enter()
+            .append("text")
+            .attr("class", "queryPosLabel")
+            .merge(positionLabels)
+            .text(function (d, idx) {
+                if (idx === (matchedQueryChrInfo.length - 1)) {
+                    return numFormatter((d.len + d.min) / 1000000) + " Mb";
+                } else {
+                    return numFormatter((d.len + d.min) / 1000000);
+                }
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    if (ChrScaler(d.len) < 60) {
+                        return ChrScaler(d.accumulate_start) + 5;
+                    } else {
+                        return ChrScaler(d.accumulate_end) - 5;
+                    }
+                } else {
+                    if (ChrScaler(d.len) < 60) {
+                        return startX + ChrScaler(d.accumulate_end) + 5;
+                    } else {
+                        return startX + ChrScaler(d.accumulate_end) - 5;
+                    }
+                }
+            })
+            .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height)
+            .attr("text-anchor", function (d) {
+                if (ChrScaler(d.len) < 60) {
+                    return "start";
+                } else {
+                    return "end";
+                }
+            })
+            .attr("font-size", "10px")
+            // .attr("font-family", "Calibri")
+            .attr('fill', 'blue')
+            .attr('opacity', 0.5);
 
-            const pngDataUrl = canvas.toDataURL('image/png');
+        positionLabels.enter()
+            .append("line")
+            .attr("class", "queryPosLabelLine")
+            .merge(positionLabels)
+            .attr("x1", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_start);
+                } else {
+                    return startX + ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y1", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight / 2)
+            .attr("x2", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_start);
+                } else {
+                    return startX + ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y2", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height - 12 + chrRectHeight / 2)
+            .attr("stroke-width", 0.86)
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue");
 
-            const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
-            if (previousPngImg) {
-                previousPngImg.remove();
+        positionLabels.enter()
+            .append("line")
+            .attr("class", "queryPosLabelLine")
+            .merge(positionLabels)
+            .attr("x1", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_end);
+                } else {
+                    return startX + ChrScaler(d.accumulate_end);
+                }
+            })
+            .attr("y1", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight / 2)
+            .attr("x2", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_end);
+                } else {
+                    return startX + ChrScaler(d.accumulate_end);
+                }
+            })
+            .attr("y2", topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height - 12 + chrRectHeight / 2)
+            .attr("stroke-width", 0.86)
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue");
+
+        // plot genes to chr 
+        matchedQueryGeneInfo.forEach((d) => {
+            let queryChr = matchedQueryChrInfo.find(e => e.listX === d.seqchr);
+            let queryAccumulateStart = queryChr.accumulate_start + d.start + 1;
+            let queryAccumulateEnd = queryChr.accumulate_start + d.end + 1;
+            if (queryWidth >= subjectWidth) {
+                d.queryX = ChrScaler(queryAccumulateStart);
+                d.queryX1 = ChrScaler(queryAccumulateEnd);
+            } else {
+                d.queryX = startX + ChrScaler(queryAccumulateStart);
+                d.queryX1 = startX + ChrScaler(queryAccumulateEnd);
+            }
+        })
+
+        queryGroup.selectAll(".queryGeneShape")
+            .data(matchedQueryGeneInfo)
+            .join("polygon")
+            .attr("class", "queryGeneShape")
+            .attr("id", (d) => "queryGene_" + d.gene)
+            .attr("points", (d) => {
+                const x = d.queryX;
+                const y = topPadding + d3.select("#queryMainLabel").node().getBBox().height + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 7;
+                const width = d.queryX1 - d.queryX;
+
+                // Point out the targetGene                                
+                if (d.gene === targeGene) {
+                    svg.append("line")
+                        .attr("class", "targe-gene")
+                        .attr('x1', x)
+                        .attr('y1', y + 200 * each)
+                        .attr('x2', x)
+                        .attr('y2', y + 200 * each - 30)
+                        .attr('stroke', 'orange')
+                        .attr('opacity', '0.7')
+                        .attr('stroke-width', "0.8")
+                        .attr("stroke-dasharray", "5 3");
+
+                    svg.append("text")
+                        .attr('x', x)
+                        .attr('y', y + 200 * each - 35)
+                        .text(targeGene)
+                        .attr('fill', 'orange')
+                        .attr("font-size", "9px")
+                        .attr('text-anchor', 'start')
+                    // .attr("font-family", "Calibri")
+                    // .attr("transform", `rotate(30, ${x}, ${y + 200 * each - 25})`);
+                }
+
+                if (d.strand === "+") {
+                    if (width > 10) {
+                        return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                    } else {
+                        return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                    }
+                } else {
+                    if (width > 10) {
+                        return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                    } else {
+                        return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                    }
+                }
+            })
+            .attr("fill", d => (d.strand === "+") ? "green" : "#A6A600")
+            .attr("opacity", 0.8)
+            .attr("data-tippy-content", d => {
+                return "Gene: <font color='#FFE153'><b>" + d.gene + "</font></b><br>" +
+                    "Chr: <font color='#FFE153'><b>" + d.seqchr + "</font></b><br>" +
+                    "Position: <font color='#FFE153'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                    "Strand: <font color='#9AFF02'><b>" + d.strand + "</font></b>";
+            });
+        tippy(".queryGeneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+        subjectGroup.selectAll("text")
+            .filter(":not(#subjectMainLabel)")
+            .data(matchedSubjectChrInfo)
+            .join("text")
+            .text((d) => d.listY)
+            .attr("text-anchor", "middle")
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20)
+            .attr("font-size", "12px")
+            // .attr("font-family", "Calibri")
+            .attr("class", "queryChrLabel");
+
+        const subject_chr_colorScale = d3.scaleOrdinal()
+            .domain(matchedSubjectChrInfo.map((d) => d.idx))
+            .range(subject_chr_colors);
+
+        subjectGroup.selectAll(".subjectChrShape")
+            .data(matchedSubjectChrInfo)
+            .join("rect")
+            .attr("class", "subjectChrShape")
+            .attr("id", (d) => "subjectChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                } else {
+                    return ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 0.6)
+            .attr("fill", (d) => subject_chr_colorScale(d.idx))
+            .attr("ry", 3);
+
+
+        const subjectPositionLabels = subjectGroup.selectAll(".subjectPosLabel")
+            .data(matchedSubjectChrInfo);
+
+        subjectPositionLabels.enter()
+            .append("text")
+            .attr("class", "subjectPosLabel")
+            .merge(subjectPositionLabels)
+            .text(function (d) {
+                return numFormatter(d.min / 1000000);
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    if (ChrScaler(d.len) < 60) {
+                        return startX + ChrScaler(d.accumulate_start) - 5;
+                    } else {
+                        return startX + ChrScaler(d.accumulate_start) + 5;
+                    }
+                } else {
+                    if (ChrScaler(d.len) < 60) {
+                        return ChrScaler(d.accumulate_start) - 5;
+                    } else {
+                        return ChrScaler(d.accumulate_start) + 5;
+                    }
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight - 2)
+            .attr("text-anchor", function (d) {
+                if (ChrScaler(d.len) < 60) {
+                    return "end";
+                } else {
+                    return "start";
+                }
+            })
+            .attr("font-size", "10px")
+            // .attr("font-family", "Calibri")
+            .attr('fill', 'blue')
+            .attr('opacity', 0.5);
+
+        subjectPositionLabels.enter()
+            .append("text")
+            .attr("class", "subjectPosLabel")
+            .merge(subjectPositionLabels)
+            .text(function (d, idx) {
+                if (idx === (matchedSubjectChrInfo.length - 1)) {
+                    return numFormatter((d.len + d.min) / 1000000) + " Mb";
+                } else {
+                    return numFormatter((d.len + d.min) / 1000000);
+                }
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    if (ChrScaler(d.len) < 60) {
+                        return startX + ChrScaler(d.accumulate_end) + 5;
+                    } else {
+                        return startX + ChrScaler(d.accumulate_end) - 5;
+                    }
+                } else {
+                    if (ChrScaler(d.len) < 60) {
+                        return ChrScaler(d.accumulate_end) + 5;
+                    } else {
+                        return ChrScaler(d.accumulate_end) - 5;
+                    }
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight - 2)
+            .attr("text-anchor", function (d) {
+                if (ChrScaler(d.len) < 60) {
+                    return "start";
+                } else {
+                    return "end";
+                }
+            })
+            .attr("font-size", "10px")
+            // .attr("font-family", "Calibri")
+            .attr('fill', 'blue')
+            .attr('opacity', 0.5);
+
+        subjectPositionLabels.enter()
+            .append("line")
+            .attr("class", "subjectPosLabelLine")
+            .merge(subjectPositionLabels)
+            .attr("x1", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return startX + ChrScaler(d.accumulate_start);
+                } else {
+                    return ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y1", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - chrRectHeight / 2 - 5)
+            .attr("x2", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return startX + ChrScaler(d.accumulate_start);
+                } else {
+                    return ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y2", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight / 2 - 5)
+            .attr("stroke-width", 0.86)
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue");
+
+        subjectPositionLabels.enter()
+            .append("line")
+            .attr("class", "subjectPosLabelLine")
+            .merge(subjectPositionLabels)
+            .attr("x1", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return startX + ChrScaler(d.accumulate_end);
+                } else {
+                    return ChrScaler(d.accumulate_end);
+                }
+            })
+            .attr("y1", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - chrRectHeight / 2 - 5)
+            .attr("x2", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return startX + ChrScaler(d.accumulate_end);
+                } else {
+                    return ChrScaler(d.accumulate_end);
+                }
+            })
+            .attr("y2", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height + 20 - chrRectHeight / 2 - 5)
+            .attr("stroke-width", 0.86)
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue");
+
+
+        matchedSubjectGeneInfo.forEach((d) => {
+            let subjectChr = matchedSubjectChrInfo.find(e => e.listY === d.seqchr);
+            let subjectAccumulateStart = subjectChr.accumulate_start + d.start + 1;
+            let subjectAccumulateEnd = subjectChr.accumulate_start + d.end + 1;
+            if (queryWidth < subjectWidth) {
+                d.subjectX = ChrScaler(subjectAccumulateStart);
+                d.subjectX1 = ChrScaler(subjectAccumulateEnd);
+            } else {
+                d.subjectX = startX + ChrScaler(subjectAccumulateStart);
+                d.subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
+            }
+        })
+
+        subjectGroup.selectAll(".subjectGeneShape")
+            .data(matchedSubjectGeneInfo)
+            .join("polygon")
+            .attr("class", "subjectGeneShape")
+            .attr("id", (d) => "subjectGene_" + d.gene)
+            .attr("points", (d) => {
+                const x = d.subjectX;
+                const y = height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 10 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 3 - chrRectHeight;
+                const width = d.subjectX1 - d.subjectX;
+
+                // Point out the targetGene                                
+                if (d.gene === targeGene) {
+                    svg.append("line")
+                        .attr("class", "targe-gene")
+                        .attr('x1', x)
+                        .attr('y1', y + 200 * each)
+                        .attr('x2', x)
+                        .attr('y2', y + 200 * each + 45)
+                        .attr('stroke', 'orange')
+                        .attr('opacity', '0.7')
+                        .attr('stroke-width', "0.8")
+                        .attr("stroke-dasharray", "5 3");
+
+                    svg.append("text")
+                        .attr('x', x)
+                        .attr('y', y + 200 * each + 50)
+                        .text(targeGene)
+                        .attr('fill', 'orange')
+                        .attr("font-size", "9px")
+                        .attr('text-anchor', 'start')
+                    // .attr("font-family", "Calibri");
+                    // .attr("transform", `rotate(-30, ${x}, ${y + 200 * each + 25})`);
+                }
+
+                if (d.strand === "+") {
+                    if (width > 10) {
+                        return `${ x },${ y } ${ x + 10 },${ y } ${ x + width },${ y + 5 } ${ x + 10 },${ y + 10 } ${ x },${ y + 10 }`;
+                    } else {
+                        return `${ x },${ y } ${ x + width },${ y + 5 } ${ x },${ y + 10 }`;
+                    }
+                } else {
+                    if (width > 10) {
+                        return `${ x },${ y + 5 } ${ x + 10 },${ y } ${ x + width },${ y } ${ x + width },${ y + 10 } ${ x + 10 },${ y + 10 }`;
+                    } else {
+                        return `${ x },${ y + 5 } ${ x + width },${ y } ${ x + width },${ y + 10 }`;
+                    }
+                }
+            })
+            .attr("fill", d => (d.strand === "+") ? "green" : "#A6A600")
+            .attr("opacity", 0.8)
+            .attr("data-tippy-content", d => {
+                const fillColor = d.strand === "+" ? "green" : "#A6A600";
+                return "Gene: <font color='#4DFFFF'><b>" + d.gene + "</font></b><br>" +
+                    "Chr: <font color='#4DFFFF'><b>" + d.seqchr + "</font></b><br>" +
+                    "Position: <font color='#4DFFFF'><b>" + d.start + " -> " + d.end + "</font></b><br>" +
+                    "Strand: <font color='#4DFFFF'><b>" + d.strand + "</font></b>";
+            });
+
+        tippy(".subjectGeneShape", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+        // prepare anchorpoint data
+        matchedAnchorPointsInfo.forEach((d) => {
+            let queryChr = matchedQueryChrInfo.find(e => e.listX === d.listX);
+            let subjectChr = matchedSubjectChrInfo.find(e => e.listY === d.listY);
+            let queryAccumulateStart = queryChr.accumulate_start + d.startX - queryChr.min + 1;
+            let queryAccumulateEnd = queryChr.accumulate_start + d.endX - queryChr.min + 1;
+            let subjectAccumulateStart = subjectChr.accumulate_start + d.startY - subjectChr.min + 1;
+            let subjectAccumulateEnd = subjectChr.accumulate_start + d.endY - subjectChr.min + 1;
+            if (queryWidth >= subjectWidth) {
+                queryX = ChrScaler(queryAccumulateStart);
+                queryX1 = ChrScaler(queryAccumulateEnd);
+                subjectX = startX + ChrScaler(subjectAccumulateStart);
+                subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
+            } else {
+                queryX = startX + ChrScaler(queryAccumulateStart);
+                queryX1 = startX + ChrScaler(queryAccumulateEnd);
+                subjectX = ChrScaler(subjectAccumulateStart);
+                subjectX1 = ChrScaler(subjectAccumulateEnd);
             }
 
-            const pngImg = new Image();
-            pngImg.src = pngDataUrl;
-            document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
-        }; */
+            d.ribbonPosition = {
+                source: {
+                    x: queryX,
+                    x1: queryX1,
+                    y: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight + 200 * each,
+                    y1: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight + 200 * each
+                },
+                target: {
+                    x: subjectX,
+                    x1: subjectX1,
+                    y: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight + 200 * each,
+                    y1: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight + 200 * each
+                }
+            };
+        })
+
+        subjectGroup.append("text")
+            .text(subjectSpecies)
+            .attr("id", "subjectMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", height - bottomPadding + 20)
+            .attr("font-weight", "bold")
+            .attr("font-size", "14px")
+            .attr("font-style", "italic")
+            // .attr("font-family", "times")
+            .style("fill", "#8E549E");
+
+        // console.log("anchorpoint", anchorPointInfo);
+        svg.append("g")
+            .attr("class", "segsRibbons")
+            .selectAll("path")
+            .data(matchedAnchorPointsInfo)
+            .join("path")
+            .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+            .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+            //.attr("fill", (d) => query_chr_colorScale(d.idx))
+            .attr("fill", function (d) {
+                return colorScale(d.Ks);
+            })
+            .attr("opacity", 0.6)
+            .attr("data-tippy-content", d => {
+                return "Query: <b><font color='#FFE153'>" + d.geneX + "</font></b><br>" +
+                    "<font color='red'><b>&#8595</b></font><br>" +
+                    "Subject: <b><font color='#4DFFFF'>" + d.geneY + "</font></b><br>" +
+                    "<b><font color='orange'><i>K</i><sub>s</sub>: " + d.Ks + "<b></font>";
+            });
+    });
+
+    tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVGs("download_" + plotId,
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".microSyn");
+}
+
+Shiny.addCustomMessageHandler("Cluster_Synteny_Plotting_v7", ClusterSyntenyPlottingV7);
+function ClusterSyntenyPlottingV7(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentedChrInfo = convertShinyData(InputData.segmented_chr);
+    var segmentedAnchorpointsInfo = convertShinyData(InputData.segmented_anchorpoints);
+    var queryChrOrder = InputData.subject_chr_order;
+    var subjectChrOrder = InputData.query_chr_order;
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var plotSize = InputData.size;
+    var parInfo = InputData.pars;
+    var treeByCol = InputData.tree_bycol;
+    var treeByRow = InputData.tree_byrow;
+
+    /* console.log("treeByCol", treeByCol);
+    console.log("treeByRow", treeByRow); */
+
+    // console.log("parInfo", parInfo);
+
+    var querySpeciesTmp = querySpecies.replace(" ", "_");
+    var queryChrInfo = segmentedChrInfo
+        .filter(item => item.genome === querySpeciesTmp);
+
+    queryChrInfo = queryChrInfo.map((item, index) => ({ ...item, index: index + 1 }));
+    queryChrInfo = queryChrInfo.sort((a, b) => {
+        const indexA = a.index;
+        const indexB = b.index;
+
+        const positionA = queryChrOrder.indexOf(indexA);
+        const positionB = queryChrOrder.indexOf(indexB);
+
+        return positionA - positionB;
+    });
+
+    var subjectSpeciesTmp = subjectSpecies.replace(" ", "_");
+    var subjectChrInfo = segmentedChrInfo
+        .filter(item => item.genome === subjectSpeciesTmp);
+
+    subjectChrInfo = subjectChrInfo.map((item, index) => ({ ...item, index: index + 1 }));
+    subjectChrInfo = subjectChrInfo.sort((a, b) => {
+        const indexA = a.index;
+        const indexB = b.index;
+
+        const positionA = subjectChrOrder.indexOf(indexA);
+        const positionB = subjectChrOrder.indexOf(indexB);
+
+        return positionA - positionB;
+    });
+
+    const scaleRatio = plotSize / 800;
+    // define plot dimension
+    let topPadding = 100;
+    const longestXLabelLength = d3.max(queryChrInfo, d => d.list.toString().length);
+    const xAxisTitlePadding = longestXLabelLength * 6;
+    let bottomPadding = 80 + xAxisTitlePadding;
+    const longestYLabelLength = d3.max(subjectChrInfo, d => d.list.toString().length);
+    const yAxisTitlePadding = longestYLabelLength * 6;
+    let leftPadding = 80 + yAxisTitlePadding;
+    let rightPadding = 100;
+    var tooltipDelay = 400;
+
+    function calc_accumulate_num_renew(inputChrInfo) {
+        let acc_len = 0;
+        inputChrInfo.forEach((e, i) => {
+            e.idx = i;
+            e.accumulate_start = acc_len + 1;
+            e.accumulate_end = e.accumulate_start + e.num_gene_remapped;
+            acc_len = e.accumulate_end;
+        });
+        return inputChrInfo;
     }
+
+    queryChrInfo = calc_accumulate_num_renew(queryChrInfo);
+    subjectChrInfo = calc_accumulate_num_renew(subjectChrInfo);
+
+    /*         console.log("queryChrOrder", queryChrOrder);
+            console.log("queryChrUn", segmentedChrInfo.filter(item => item.genome === querySpeciesTmp))
+            console.log("queryChrInfo", queryChrInfo);
+            console.log("subjectChrOrder", subjectChrOrder);
+            console.log("subjectChrUn", segmentedChrInfo.filter(item => item.genome === subjectSpeciesTmp))
+            console.log("subjectChrInfo", subjectChrInfo);
+     */
+    // choose the sp with larger width to make the scaler
+    var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
+    var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
+
+    // define plot area size
+    if (subjectWidth < queryWidth) {
+        var xyscale = subjectWidth / queryWidth;
+        var width = (plotSize + leftPadding + rightPadding) * scaleRatio;
+        var height = (plotSize * xyscale + topPadding + bottomPadding) * scaleRatio;
+    } else {
+        var xyscale = queryWidth / subjectWidth;
+        var width = (plotSize * xyscale + leftPadding + rightPadding) * scaleRatio;
+        var height = (plotSize + topPadding + bottomPadding) * scaleRatio;
+    }
+
+    var xScaler = d3.scaleLinear()
+        .domain([queryChrInfo[0].accumulate_start, queryChrInfo[queryChrInfo.length - 1].accumulate_end])
+        .range([leftPadding, width - rightPadding])
+
+    var yScaler = d3.scaleLinear()
+        .domain([subjectChrInfo[0].accumulate_start, subjectChrInfo[subjectChrInfo.length - 1].accumulate_end])
+        .range([height - bottomPadding, topPadding])
+
+    // prepare anchorpoints data
+    segmentedAnchorpointsInfo.forEach((d) => {
+        let queryChr = queryChrInfo.find(e => e.list === d.listX);
+        let subjectChr = subjectChrInfo.find(e => e.list === d.listY);
+        let queryAccumulateStart = queryChr.accumulate_start + d.coordX + 1;
+        let subjectAccumulateStart = subjectChr.accumulate_start + d.coordY + 1;
+        d.queryPos = {
+            x: queryAccumulateStart
+        };
+        d.subjectPos = {
+            x: subjectAccumulateStart
+        };
+    });
+
+    // console.log("segmentedAnchorpointsInfo", segmentedAnchorpointsInfo);
+
+    const xAxis = d3.axisBottom(xScaler)
+        .tickValues(queryChrInfo.map(e => e.accumulate_end).slice(0, -1));
+    const yAxis = d3.axisLeft(yScaler)
+        .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
+
+    // remove old svgs
+    d3.select("#" + plotId)
+        .select("svg").remove();
+    const svg = d3.select("#" + plotId)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+    // .style("display", "none");
+
+    // add x axis
+    svg.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", function () {
+            return `translate(0, ${ height - bottomPadding })`;
+        })
+        .call(xAxis)
+        .attr("stroke-width", 0.26)
+        .call(g => g.selectAll(".tick text").remove())
+        .call(g => g.selectAll(".tick line").clone()
+            .attr("y2", function () {
+                return topPadding + bottomPadding - height;
+            })
+            .attr("stroke-dasharray", "4 1")
+            .attr("stroke-width", 0.26)
+            .attr("stroke-opacity", 0.3)
+            .attr("stroke", "blue")
+        );
+
+    // add y axis;
+    svg.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", `translate(${ leftPadding }, 0)`)
+        .call(yAxis)
+        .attr("stroke-width", 0.26)
+        .call(g => g.selectAll(".tick text").remove())
+        .call(g => g.selectAll(".tick line").clone()
+            .attr("x2", function () {
+                return width - leftPadding - rightPadding;
+            })
+            .attr("stroke-dasharray", "4 1")
+            .attr("stroke-opacity", 0.3)
+            .attr("stroke", "blue")
+            .attr("stroke-width", 0.26)
+        );
+
+    // add top and right border
+    svg.append("g")
+        .append("line")
+        .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
+        .attr("x2", function () {
+            return width - leftPadding - rightPadding;
+        })
+        .attr("stroke", "black")
+        .attr("stroke-width", 0.26)
+        .attr("stroke-opacity", 0.3);
+
+    svg.append("g")
+        .append("line")
+        .attr("transform", function () {
+            return `translate(${ width - rightPadding }, ${ topPadding })`;
+        })
+        .attr("y2", function () {
+            return height - topPadding - bottomPadding
+        })
+        .attr("stroke", "black")
+        .attr("stroke-width", 0.26)
+        .attr("stroke-opacity", 0.3);
+
+    // add text labels on axises
+    svg.append("g")
+        .attr("class", "xLabel")
+        .selectAll("text")
+        .data(queryChrInfo)
+        .join("text")
+        .attr("x", d => {
+            return xScaler(d3.mean([d.accumulate_start, d.accumulate_end]));
+        })
+        .attr("y", function () {
+            return height - bottomPadding + 15;
+        })
+        .attr("font-size", function () {
+            return 8 * scaleRatio + "px";
+        })
+        // .attr("font-family", "calibri")
+        .text(d => d.list)
+        .attr("id", function (d) {
+            var chrName = d.list.replace(":", "_");
+            chrName = chrName.replace("-", "_");
+            return "xLabel_" + chrName;
+        })
+        .attr("text-anchor", "left")
+        .attr("data-tippy-content", (d) => {
+            return "<font color='#68AC57'>" + d.list
+                + "</font><br>num_gene_remapped: <font color='#68AC57'><b>"
+                + d.num_gene_remapped + "</b></font>";
+        })
+        .attr("transform", (d) => {
+            return "rotate(90 " + xScaler(d3.mean([d.accumulate_start, d.accumulate_end])) + ","
+                + (height - bottomPadding + 15) + ")";
+        });
+
+    svg.append("g")
+        .attr("class", "yLabel")
+        .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
+        .selectAll("g")
+        .data(subjectChrInfo)
+        .join("g")
+        .attr("transform", d => `translate(-15 ${ yScaler(d3.mean([d.accumulate_start, d.accumulate_end])) - topPadding })`)
+        .append("text")
+        .attr("font-size", function () {
+            return 8 * scaleRatio + "px";
+        })
+        // .attr("font-family", "calibri")
+        .text(d => d.list)
+        .attr("id", (d) => d.list)
+        .attr("text-anchor", "end")
+        .attr("data-tippy-content", (d) => {
+            return "<font color='#8E549E'>" + d.list
+                + "</font><br>num_gene_remapped: <font color='#8E549E'><b>"
+                + d.num_gene_remapped + "</b></font>";
+        });
+
+    // Add title for x and y
+    //const xLabelY = height - 25;
+    svg.append("g")
+        .attr("class", "xTitle")
+        .append("text")
+        .attr("x", function () {
+            return d3.mean([leftPadding * scaleRatio, width])
+        })
+        .attr("y", height - 65)
+        .attr("text-anchor", "middle")
+        .attr("font-size", function () {
+            return 13 * scaleRatio + "px";
+        })
+        .attr("font-weight", "bold")
+        .attr("font-style", "italic")
+        // .attr("font-family", "times")
+        .text(querySpecies)
+        .style("fill", "#68AC57");
+
+    svg.append("g")
+        .attr("class", "yTitle")
+        .append("text")
+        .attr("y", function () {
+            return d3.mean([topPadding * scaleRatio, height - bottomPadding * scaleRatio])
+        })
+        .attr("x", leftPadding - yAxisTitlePadding - 10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", function () {
+            return 13 * scaleRatio + "px";
+        })
+        .attr("font-weight", "bold")
+        .attr("font-style", "italic")
+        // .attr("font-family", "times")
+        .attr("transform", function () {
+            return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
+        })
+        .text(subjectSpecies)
+        .style("fill", "#8E549E");
+
+    svg.append('g')
+        .attr("class", "anchorpoints")
+        .selectAll("circle")
+        .data(segmentedAnchorpointsInfo)
+        .join("circle")
+        .attr("cx", d => xScaler(d.queryPos.x))
+        .attr("cy", d => yScaler(d.subjectPos.x))
+        .attr("r", 0.87 * scaleRatio)
+        .attr("id", (d) => "multiplicon_" + d.multiplicon)
+        .attr("fill", function (d) {
+            if (d.Ks > -1) {
+                return colorScale(d.Ks);
+            } else {
+                return "#898989"
+            }
+        });
+
+    // Define the gradient for the color scale
+    var defs = svg.append("defs");
+    var gradient = defs.append("linearGradient")
+        .attr("id", "color-scale")
+        .attr("x1", "0%").attr("y1", "0%")
+        .attr("x2", "100%").attr("y2", "0%");
+
+    gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", colorScale(0));
+    gradient.append("stop")
+        .attr("offset", "20%")
+        .attr("stop-color", colorScale(1));
+    gradient.append("stop")
+        .attr("offset", "40%")
+        .attr("stop-color", colorScale(2));
+    gradient.append("stop")
+        .attr("offset", "60%")
+        .attr("stop-color", colorScale(3));
+    gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", colorScale(4));
+
+    var legendGroup = svg.append("g")
+        .attr("class", "legend")
+        .attr("transform", "translate(" + 5 + "," + 10 + ")");
+
+    legendGroup.append("rect")
+        .attr("x", (width - 200) * scaleRatio)
+        .attr("y", 15 * scaleRatio)
+        .attr("width", 200 * scaleRatio)
+        .attr("height", 15 * scaleRatio)
+        .attr("fill", "url(#color-scale)")
+        .attr("fill-opacity", 0.7);
+
+    var axisScale = d3.scaleLinear()
+        .domain([0, 5])
+        .range([(width - 200) * scaleRatio, width * scaleRatio]);
+
+    // Create the horizontal axis
+    var axis = d3.axisBottom(axisScale)
+        .ticks(5);
+
+    var axisGroup = legendGroup.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(" + 0 + "," + 30 + ")")
+        .call(axis)
+        .attr("text-anchor", "middle")
+        .attr("dominant-baseline", "hanging")
+        .attr("font-size", function () {
+            return 11 * scaleRatio + "px";
+        });
+    // .attr("font-family", "calibri");
+
+    legendGroup.append("text")
+        .attr("x", (width - 103) * scaleRatio)
+        .attr("y", 70 * scaleRatio)
+        .append("tspan")
+        // .attr("font-family", "times")
+        .html("<tspan style='font-style: italic;'>K</tspan>")
+        .style("font-size", function () {
+            return 13 * scaleRatio + "px";
+        })
+        .append("tspan")
+        .text("s")
+        .style("font-size", function () {
+            return 12 * scaleRatio + "px";
+        })
+        .attr("dx", function () {
+            return 1 * scaleRatio + "px";
+        })
+        .attr("dy", function () {
+            return 2 * scaleRatio + "px";
+        });
+
+    //tippy(".multipliscons path", {trigger: "mouseenter", followCursor: "initial",  delay: [tooltipDelay, null]});
+    tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+    // Add PARs borders
+    if (typeof parInfo !== "undefined") {
+
+        for (var i = 0; i < Object.keys(parInfo).length; i++) {
+            if (i === 0) {
+                var listKey = "list";
+                var parIdKey = "par_id";
+            } else {
+                var listKey = "list." + i;
+                var parIdKey = "par_id." + i;
+            }
+
+            if (parInfo.hasOwnProperty(listKey) && parInfo.hasOwnProperty(parIdKey)) {
+                var listArray = parInfo[listKey];
+                var parIdArray = parInfo[parIdKey];
+
+                var filteredParSubjectInfo = subjectChrInfo.filter(function (item) {
+                    return listArray.includes(item.list);
+                });
+                var minParSubjectAccumulateStart = filteredParSubjectInfo.reduce(function (min, item) {
+                    return Math.min(min, item.accumulate_start);
+                }, Infinity);
+                var maxParSubjectAccumulateEnd = filteredParSubjectInfo.reduce(function (max, item) {
+                    return Math.max(max, item.accumulate_end);
+                }, -Infinity);
+
+                var maxY = yScaler(minParSubjectAccumulateStart);
+                var minY = yScaler(maxParSubjectAccumulateEnd);
+
+                var filteredParQueryInfo = queryChrInfo.filter(function (item) {
+                    return listArray.includes(item.list);
+                });
+                var minParQueryAccumulateStart = filteredParQueryInfo.reduce(function (min, item) {
+                    return Math.min(min, item.accumulate_start);
+                }, Infinity);
+                var maxParQueryAccumulateEnd = filteredParQueryInfo.reduce(function (max, item) {
+                    return Math.max(max, item.accumulate_end);
+                }, -Infinity);
+
+                var minX = xScaler(minParQueryAccumulateStart);
+                var maxX = xScaler(maxParQueryAccumulateEnd);
+
+                svg.append("rect")
+                    .attr("class", "ParRectangle")
+                    .attr("x", minX)
+                    .attr("y", minY)
+                    .attr("width", maxX - minX)
+                    .attr("height", maxY - minY)
+                    .attr("fill", "#EAB904")
+                    .attr("fill-opacity", 0.1)
+                    .attr("stroke", "#EAB904")
+                    .attr("stroke-width", 0.36)
+                    .attr("stroke-opacity", 0.5)
+                    .attr("stroke-dasharray", "5, 5")
+                    .lower();
+
+                svg.append("text")
+                    .attr("class", "ParRectangle")
+                    .attr("x", (minX + maxX) / 2)
+                    .attr("y", minY - 12)
+                    .attr("text-anchor", "middle")
+                    .attr("alignment-baseline", "hanging")
+                    .attr("font-size", function () {
+                        return 8 * scaleRatio + "px";
+                    })
+                    .attr("font-style", "bold")
+                    //// .attr("font-family", "times")
+                    .style("fill", "#04AFEA")
+                    .text(parIdArray[0].replace("PAR ", "P"));
+            }
+        }
+    }
+
+    // Add the clustering tree
+    colTreeJson = parseTree(treeByCol);
+    // console.log("colTreeJson", colTreeJson);
+
+    var treeColJsonCopy = JSON.parse(JSON.stringify(colTreeJson));
+
+    /* dendrogram(
+        "#dendrogramTreeView",
+        treeColJsonCopy,
+        {
+            hideLabels: false,
+            h: 0.4
+        }
+    ); */
+    // buildTree("#dendrogramTreeView", colTreeJson, 300, 300, 'right');
+    // BuildHclustTree("#dendrogramTreeView", colHclust, 300, 400)
+    /* var script = document.createElement('script');
+    script.src = 'https://d3js.org/d3.v3.min.js';
+    document.head.appendChild(script);
+    script.onload = function () {
+        // dendrogram Tree
+        var svgTree = d3.select("#dendrogramTreeView")
+            .append("svg")
+            .attr("width", 300)
+            .attr("height", 400);
+        var g = svgTree
+            .append("g")
+            .attr("transform", "translate(" + 50 + "," + 50 + ")");
+        var treeJson = JSON.parse(JSON.stringify(colHclust.json));
+
+        BuildHeightTree("#dendrogramTreeView", treeJson, svgTree, 300, 400);
+    } */
+
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("cluster_download",
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".cluster.svg");
+
+    // Convert the SVG to PNG
+    /* const svgXml = new XMLSerializer().serializeToString(svg.node());
+    const img = new Image();
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
+
+    img.onload = function () {
+        var canvas = document.createElement("canvas");
+        var scale = 2;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+
+        const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
+        if (previousPngImg) {
+            previousPngImg.remove();
+        }
+
+        const pngImg = new Image();
+        pngImg.src = pngDataUrl;
+        document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
+    }; */
+}
+
+Shiny.addCustomMessageHandler("Cluster_Zoom_In_Plotting_V7", ClusterZoomInPlottingV7);
+function ClusterZoomInPlottingV7(InputData) {
+    var plotId = InputData.plot_id;
+    var parId = InputData.par_id;
+    var segmentedChrInfo = convertShinyData(InputData.segmented_chr);
+    var segmentedAnchorpointsInfo = convertShinyData(InputData.segmented_anchorpoints);
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var plotSize = InputData.size;
+
+    // console.log("parInfo", parInfo);
+
+    var querySpeciesTmp = querySpecies.replace(" ", "_");
+    var queryChrInfo = segmentedChrInfo
+        .filter(item => item.genome === querySpeciesTmp);
+
+    var subjectSpeciesTmp = subjectSpecies.replace(" ", "_");
+    var subjectChrInfo = segmentedChrInfo
+        .filter(item => item.genome === subjectSpeciesTmp);
+
+    const scaleRatio = plotSize / 400;
+    // define plot dimension
+    let topPadding = 100;
+    const longestXLabelLength = d3.max(queryChrInfo, d => d.list.toString().length);
+    const xAxisTitlePadding = longestXLabelLength * 6;
+    let bottomPadding = 80 + xAxisTitlePadding;
+    const longestYLabelLength = d3.max(subjectChrInfo, d => d.list.toString().length);
+    const yAxisTitlePadding = longestYLabelLength * 6;
+    let leftPadding = 80 + yAxisTitlePadding;
+    let rightPadding = 100;
+    var tooltipDelay = 400;
+
+    function calc_accumulate_num_renew(inputChrInfo) {
+        let acc_len = 0;
+        inputChrInfo.forEach((e, i) => {
+            e.idx = i;
+            e.accumulate_start = acc_len + 1;
+            e.accumulate_end = e.accumulate_start + e.num_gene_remapped;
+            acc_len = e.accumulate_end;
+        });
+        return inputChrInfo;
+    }
+
+    queryChrInfo = calc_accumulate_num_renew(queryChrInfo);
+    subjectChrInfo = calc_accumulate_num_renew(subjectChrInfo);
+
+    var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
+    var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
+
+    if (subjectWidth < queryWidth) {
+        var xyscale = subjectWidth / queryWidth;
+        var width = (plotSize + leftPadding + rightPadding) * scaleRatio;
+        var height = (plotSize * xyscale + topPadding + bottomPadding) * scaleRatio;
+    } else {
+        var xyscale = queryWidth / subjectWidth;
+        var width = (plotSize * xyscale + leftPadding + rightPadding) * scaleRatio;
+        var height = (plotSize + topPadding + bottomPadding) * scaleRatio;
+    }
+
+    var xScaler = d3.scaleLinear()
+        .domain([queryChrInfo[0].accumulate_start, queryChrInfo[queryChrInfo.length - 1].accumulate_end])
+        .range([leftPadding, width - rightPadding])
+
+    var yScaler = d3.scaleLinear()
+        .domain([subjectChrInfo[0].accumulate_start, subjectChrInfo[subjectChrInfo.length - 1].accumulate_end])
+        .range([height - bottomPadding, topPadding])
+
+    segmentedAnchorpointsInfo.forEach((d) => {
+        let queryChr = queryChrInfo.find(e => e.list === d.listX);
+        let subjectChr = subjectChrInfo.find(e => e.list === d.listY);
+        let queryAccumulateStart = queryChr.accumulate_start + d.coordX + 1;
+        let subjectAccumulateStart = subjectChr.accumulate_start + d.coordY + 1;
+        d.queryPos = {
+            x: queryAccumulateStart
+        };
+        d.subjectPos = {
+            x: subjectAccumulateStart
+        };
+    });
+
+    const xAxis = d3.axisBottom(xScaler)
+        .tickValues(queryChrInfo.map(e => e.accumulate_end).slice(0, -1));
+    const yAxis = d3.axisLeft(yScaler)
+        .tickValues(subjectChrInfo.map(e => e.accumulate_end).slice(0, -1));
+
+    d3.select("#" + plotId)
+        .select("svg").remove();
+    const svg = d3.select("#" + plotId)
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height);
+
+    svg.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", function () {
+            return `translate(0, ${ height - bottomPadding })`;
+        })
+        .call(xAxis)
+        .attr("stroke-width", 0.46)
+        .call(g => g.selectAll(".tick text").remove())
+        .call(g => g.selectAll(".tick line").clone()
+            .attr("y2", function () {
+                return topPadding + bottomPadding - height;
+            })
+            .attr("stroke-dasharray", "4 1")
+            .attr("stroke-width", 0.46)
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue")
+        );
+
+    svg.append("g")
+        .attr("class", "axis axis--y")
+        .attr("transform", `translate(${ leftPadding }, 0)`)
+        .call(yAxis)
+        .attr("stroke-width", 0.46)
+        .call(g => g.selectAll(".tick text").remove())
+        .call(g => g.selectAll(".tick line").clone()
+            .attr("x2", function () {
+                return width - leftPadding - rightPadding;
+            })
+            .attr("stroke-dasharray", "4 1")
+            .attr("stroke-opacity", 0.5)
+            .attr("stroke", "blue")
+            .attr("stroke-width", 0.46)
+        );
+
+    svg.append("g")
+        .append("line")
+        .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
+        .attr("x2", function () {
+            return width - leftPadding - rightPadding;
+        })
+        .attr("stroke", "black")
+        .attr("stroke-width", 0.46)
+        .attr("stroke-opacity", 0.5);
+
+    svg.append("g")
+        .append("line")
+        .attr("transform", function () {
+            return `translate(${ width - rightPadding }, ${ topPadding })`;
+        })
+        .attr("y2", function () {
+            return height - topPadding - bottomPadding
+        })
+        .attr("stroke", "black")
+        .attr("stroke-width", 0.46)
+        .attr("stroke-opacity", 0.5);
+
+    svg.append("g")
+        .attr("class", "xLabel")
+        .selectAll("text")
+        .data(queryChrInfo)
+        .join("text")
+        .attr("x", d => {
+            return xScaler(d3.mean([d.accumulate_start, d.accumulate_end]));
+        })
+        .attr("y", function () {
+            return height - bottomPadding + 15;
+        })
+        .attr("font-size", function () {
+            return 10 * scaleRatio + "px";
+        })
+        .text(d => d.list)
+        .attr("id", function (d) {
+            var chrName = d.list.replace(":", "_");
+            chrName = chrName.replace("-", "_");
+            return "xLabel_" + chrName;
+        })
+        .attr("text-anchor", "left")
+        .attr("data-tippy-content", (d) => {
+            return "<font color='#68AC57'>" + d.list
+                + "</font><br>num_gene_remapped: <font color='#68AC57'><b>"
+                + d.num_gene_remapped + "</b></font>";
+        })
+        .attr("transform", (d) => {
+            return "rotate(90 " + xScaler(d3.mean([d.accumulate_start, d.accumulate_end])) + ","
+                + (height - bottomPadding + 15) + ")";
+        });
+
+    svg.append("g")
+        .attr("class", "yLabel")
+        .attr("transform", `translate(${ leftPadding }, ${ topPadding })`)
+        .selectAll("g")
+        .data(subjectChrInfo)
+        .join("g")
+        .attr("transform", d => `translate(-15 ${ yScaler(d3.mean([d.accumulate_start, d.accumulate_end])) - topPadding })`)
+        .append("text")
+        .attr("font-size", function () {
+            return 10 * scaleRatio + "px";
+        })
+        // .attr("font-family", "calibri")
+        .text(d => d.list)
+        .attr("id", (d) => d.list)
+        .attr("text-anchor", "end")
+        .attr("data-tippy-content", (d) => {
+            return "<font color='#8E549E'>" + d.list
+                + "</font><br>num_gene_remapped: <font color='#8E549E'><b>"
+                + d.num_gene_remapped + "</b></font>";
+        });
+
+    svg.append("g")
+        .attr("class", "xTitle")
+        .append("text")
+        .attr("x", function () {
+            return d3.mean([leftPadding * scaleRatio, width])
+        })
+        .attr("y", height - 65)
+        .attr("text-anchor", "middle")
+        .attr("font-size", function () {
+            return 13 * scaleRatio + "px";
+        })
+        .attr("font-weight", "bold")
+        .attr("font-style", "italic")
+        // .attr("font-family", "times")
+        .text(querySpecies)
+        .style("fill", "#68AC57");
+
+    svg.append("g")
+        .attr("class", "yTitle")
+        .append("text")
+        .attr("y", function () {
+            return d3.mean([topPadding * scaleRatio, height - bottomPadding * scaleRatio])
+        })
+        .attr("x", leftPadding - yAxisTitlePadding - 10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", function () {
+            return 13 * scaleRatio + "px";
+        })
+        .attr("font-weight", "bold")
+        .attr("font-style", "italic")
+        // .attr("font-family", "times")
+        .attr("transform", function () {
+            return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
+        })
+        .text(subjectSpecies)
+        .style("fill", "#8E549E");
+
+    svg.append('g')
+        .attr("class", "anchorpoints")
+        .selectAll("circle")
+        .data(segmentedAnchorpointsInfo)
+        .join("circle")
+        .attr("cx", d => xScaler(d.queryPos.x))
+        .attr("cy", d => yScaler(d.subjectPos.x))
+        .attr("r", 2.37 * scaleRatio)
+        .attr("id", (d) => "multiplicon_" + d.multiplicon)
+        .attr("fill", function (d) {
+            if (d.Ks > -1) {
+                return colorScale(d.Ks);
+            } else {
+                return "#898989"
+            }
+        });
+
+    svg.append("text")
+        .attr("x", function () {
+            return d3.mean([leftPadding * scaleRatio, width])
+        })
+        .attr("y", topPadding - 25)
+        .attr("text-anchor", "middle")
+        .attr("alignment-baseline", "hanging")
+        .attr("font-size", function () {
+            return 15 * scaleRatio + "px";
+        })
+        .attr("font-style", "bold")
+        //// .attr("font-family", "times")
+        .style("fill", "#04AFEA")
+        .text(parId);
+
+    //tippy(".multipliscons path", {trigger: "mouseenter", followCursor: "initial",  delay: [tooltipDelay, null]});
+    tippy(".xLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    tippy(".yLabel text", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    tippy(".multiplicons line", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("PAR_download",
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + "." + parId.replace(" ", "_") + ".cluster.svg");
+
+    // Convert the SVG to PNG
+    /* const svgXml = new XMLSerializer().serializeToString(svg.node());
+    const img = new Image();
+    img.src = 'data:image/svg+xml;base64,' + btoa(svgXml);
+
+    img.onload = function () {
+        var canvas = document.createElement("canvas");
+        var scale = 2;
+        canvas.style.width = width + 'px';
+        canvas.style.height = height + 'px';
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0);
+
+        const pngDataUrl = canvas.toDataURL('image/png');
+
+        const previousPngImg = document.querySelector("#dotView_png_" + plotId + " img");
+        if (previousPngImg) {
+            previousPngImg.remove();
+        }
+
+        const pngImg = new Image();
+        pngImg.src = pngDataUrl;
+        document.querySelector("#dotView_png_" + plotId).appendChild(pngImg);
+    }; */
 }
 
 // Covert shiny transferred data to desired format

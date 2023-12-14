@@ -96,11 +96,13 @@ This page provides a brief introduction to this server.
 
 # Installation
 
-## Install from CRAN
+<!-- ## Install from CRAN
 
 ```r
 install.packages("shinyWGD")
 ```
+-->
+
 
 ## Install the latest development version from GitHub
 
@@ -295,9 +297,9 @@ Once the tree file uploaded, users can check the topology of the tree in the rig
 Users should use <font color="green"><b>wgd</b></font> as the prefix for the name of <b>hypothetical WGD event</b> to satisfy the requirements of `Whale.jl`.
 </blockquote>
 
- <img src="../inst/shinyWGD/www/images/speciesTree.whale.svg" width="800px">
+ <img src="../inst/shinyWGD/www/images/whale_hypothesis.speciesTree.svg" width="400px">
 
-In the above tree figure, four hypothetical WGD events are tested, named as *wgd1*, *wgd2*, *wgd3* and *wgd4*, respectively.
+In the above tree figure, four hypothetical WGD events are tested, named as *wgd1* and *wgd2*, respectively.
 
 Users can review the added **hypothetical WGD event** in the **<font color='#AD1F1F'><i>Hypothetical WGDs</font> to test:</i>** panel in the left side.
 
@@ -305,7 +307,7 @@ Users can define the **Base Model** in the **Base Model** for **Whale** panel an
 
 After setting all the parameters, users can create `Whale` scripts by clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">`r fa(name="play")` Create <b><i>Whale</i></b> Codes</font> button. Then, users can review the scripts by clicking the <font color="#ad5a5a">`r fa(name="share")` Go to <i><b>Whale</b></i> Scripts</font> button
 
-## `r fa(name="tree")` TimeTreeFecher
+## `r fa(name="tree")` TimeTreeFetcher
 
 If users don't ensure the evolutionary relationships among the studied species, **`shinyWGD`**
    provides an alternative way to generate the tree through interacting with [TimeTree.org](http://www.timetree.org/) database.
@@ -357,11 +359,11 @@ Users should choose the compressed file which is originated from the folder crea
 
 Once selecting one species from the drop-down menu of <font style="background-color: green; color: white; padding: 2px; border-radius: 2px;">&nbsp;`r fa(name="list")` Paralogous <i>K</i><sub>s</sub> &#x25BC;</font>, users can click the <font style="background-color: #C0C0C0; color: #fff; padding: 2px; border-radius: 2px;">&nbsp;Confirm analysis&nbsp;</font> to create the output panel in the right side of the page. 
 
-After clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">&nbsp;`r fa(name="play")` Start <b>paralog <i>K</i><sub>s</sub></b> analysis&nbsp;</font>, the paralog <i>K</i><sub>s</sub> age distribution of the selected species will be generated. 
+After clicking the <font style="background-color: #548C00; color: white; padding: 2px; border-radius: 2px;">&nbsp;`r fa(name="play")` Start&nbsp;</font>, the paralogous <i>K</i><sub>s</sub> age distribution of the selected species will be generated. 
 
 **`shinyWGD`** employs two methods to predict the potential peaks of the distribution. 
 
-First, **`shinyWGD`** fits normal mixture models to the <b><i>K</i><sub>s</sub></b> data using maximum likelihood with EMMIX. **`shinyWGD`** will test one to ten components with 500 random starts. Fitted models are selected by the Bayesian Information Criterion (BIC) within **`EMMIX`**. Finally, the fitted models can be drawn above the bar plot of each species.
+First, **`shinyWGD`** fits normal mixture models to the <b><i>K</i><sub>s</sub></b> data using maximum likelihood with EMMIX. **`shinyWGD`** will test one to ten components with 500 random starts. Fitted models are selected by the Bayesian Information Criterion (BIC) within **`EMMIX`**. Finally, the fitted models can be drawn above the bar plot of each species. Users can choose one or several peaks to draw the curve.
 
 Second, **`shinyWGD`** uses **`SiZer`** to identify significant peaks based on the significant zero crossings of derivatives from kernel density estimation. Then, a subplot to show the output of **`SiZer`** will be added under the bar plot.
 
@@ -374,9 +376,11 @@ Please refer to the papers below to see details about **`EMMIX`** and **`SiZer`*
   - Chaudhuri, P. and Marron, J.S., (1999) <i>SiZer for exploration of structures in curves</i>. <b>Journal of the American Statistical Association</b>, 94(447), pp.807-823.
 </blockquote>
 
+On the right side of the plot, a table with GMM peaks information is displayed. Users can choose which peaks to be displayed by clicking the check box of each row.
+
 The example output is below.
 
-<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Elaeis2.ks_with_GMM.png" width="60%">
+<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Apostasia1.ks_anchors-01.png" width="60%">
 
 ### <font color="#23B395">Orthologous <i>K</i><sub>s</sub> age distribution</font>
 
@@ -402,9 +406,9 @@ The example output is below.
 
 <img src="../inst/shinyWGD/www/images/Wgd_plot_rate.svg" width="90%">
 
-In the left figure, Kernel-density estimates (KDEs) of <i>K</i><sub>s</sub> distribution for one-to-one orthologues between <i>A. officinalis</i> and other two species, namely <i>E. guineesis</i> and <i>O. sativa</i>. As the modes (peaks) of the KDE all represent the distances between <i>A. officinalis</i> and the compared species, the differences observed among the <i>K</i><sub>s</sub> values of the modes indicate substitution rate variations among the studied species. The segments with arrows above the KDE denote, from top to bottom, the <i>K</i><sub>s</sub> distances computed for <font color="#E2AF7A"><i>O. sativa</i></font> using <font color="#40ACE2"><i>E. guineensis</i></font> as the reference and <i>A. officinalis</i> as the outgroup. The dotted lines align with the observed modes in the KDE of the orthologous <i>K</i><sub>s</sub> distributions. The black dots on the segments represent the divergence between <i>E. guineensis</i> with <i>O. sativa</i>; hence, the lengths of segments pointed to the right show the <i>K</i><sub>s</sub> accumulated in <i>O. sativa</i> and <i>E. guineensis</i>, whereas the grey segments pointed to the left show the <i>K</i><sub>s</sub> distance between <i>A. officinalis</i> and the divergence of <i>E. guineensis</i>. The grey rectangles show the 95% confidence intervals of the <i>K</i><sub>s</sub> inferred from 200 bootstraps.
+In the left figure, Kernel-density estimates (KDEs) of <i>K</i><sub>s</sub> distribution for one-to-one orthologues between <i>A. officinalis</i> and other three species, namely <i>A. shenzhenica</i>, <i>D. catenatum</i> and <i>P. equestris</i>. As the modes (peaks) of the KDE all represent the distances between <i>A. officinalis</i> and the compared species, the differences observed among the <i>K</i><sub>s</sub> values of the modes indicate substitution rate variations among the studied species. The segments with arrows above the KDE denote, from top to bottom, the <i>K</i><sub>s</sub> distances computed for <i>P. equestris</i> and <i>D. catenatum</i> using <i>A. shenzhenica</i> as the reference and <i>A. officinalis</i> as the outgroup. The dotted lines align with the observed modes in the KDE of the orthologous <i>K</i><sub>s</sub> distributions. The black dots on the segments represent the divergence between <i>A. shenzhenica</i> with <i>D. catenatum</i> and between <i>A. shenzhenica</i> with <i>P. equestris</i>; hence, the lengths of segments pointed to the right show the <i>K</i><sub>s</sub> accumulated in <i>A. shenzhenica</i> and <i>D. catenatum</i> / <i>P. equestris</i>, whereas the grey segments pointed to the left show the <i>K</i><sub>s</sub> distance between <i>A. officinalis</i> and the divergence of <i>A. shenzhenica</i>. The grey rectangles show the 95% confidence intervals of the <i>K</i><sub>s</sub> inferred from 200 bootstraps.
 
-In the right figure, **`shinyWGD`** uses arrows with directions to indicate overestimation (to the right) or underestimation (to the left) of divergence events. The arrow points to the <i>K</i><sub>s</sub> values after correcting for different substitution rates. The bar and line plots are the paralogous <i>K</i><sub>s</sub> distributions of <i>E. guineensis</i>.
+In the right figure, **`shinyWGD`** uses arrows with directions to indicate overestimation (to the right) or underestimation (to the left) of divergence events. The arrow points to the <i>K</i><sub>s</sub> values after correcting for different substitution rates. The bar and line plots are the paralogous <i>K</i><sub>s</sub> distributions of <i>A. shenzhenica</i>.
 
 ### <font color="#23B395">Phylo-<i>K</i><sub>s</sub> analysis</font>
 
@@ -427,28 +431,22 @@ Or, users can prepare a file blow.
           <th style="padding-left: 40px; padding: 5px; border-bottom: 1.6px solid #000;">95% Confidence Interval</th>
         </tr>
         <tr>
-          <td style="padding: 5px;">Elaeis guineensis</td>
-          <td style="padding-left: 40px; padding: 5px;">Paranome</td>
-          <td style="padding-left: 30px; padding: 5px;">0.27</td>
-          <td style="padding-left: 40px; padding: 5px;">0.26-0.27</td>
+          <td style="padding: 5px;">Apostasia shenzhenica</td>
+          <td style="padding-left: 40px; padding: 5px;">Anchor pairs</td>
+          <td style="padding-left: 30px; padding: 5px;">0.97</td>
+          <td style="padding-left: 40px; padding: 5px;">0.55-2.19</td>
         </tr>
         <tr>
-          <td style="padding: 5px;">Elaeis guineensis</td>
-          <td style="padding-left: 40px; padding: 5px;">Paranome</td>
-          <td style="padding-left: 30px; padding: 5px;">0.84</td>
-          <td style="padding-left: 40px; padding: 5px;">0.8-0.86</td>
+          <td style="padding: 5px;">Dendrobium catenatum</td>
+          <td style="padding-left: 40px; padding: 5px;">Anchor pairs</td>
+          <td style="padding-left: 30px; padding: 5px;">0.86</td>
+          <td style="padding-left: 40px; padding: 5px;">0.38-4.18</td>
         </tr>
         <tr>
-          <td style="padding: 5px;">Oryza sativa</td>
-          <td style="padding-left: 40px; padding: 5px;">Paranome</td>
-          <td style="padding-left: 30px; padding: 5px;">0.66</td>
-          <td style="padding-left: 40px; padding: 5px;">0.31-0.897</td>
-        </tr>
-        <tr>
-          <td style="padding: 5px;">Oryza sativa</td>
-          <td style="padding-left: 40px; padding: 5px;">Paranome</td>
-          <td style="padding-left: 30px; padding: 5px;">0.93</td>
-          <td style="padding-left: 40px; padding: 5px;">0.62-1.16</td>
+          <td style="padding: 5px;">Phalaenopsis equestris</td>
+          <td style="padding-left: 40px; padding: 5px;">Anchor pairs</td>
+          <td style="padding-left: 30px; padding: 5px;">0.96</td>
+          <td style="padding-left: 40px; padding: 5px;">0.58-1.92</td>
         </tr>
       </table>
     </div>
@@ -556,13 +554,44 @@ Users can upload a file which contains the WGD events of each studied species to
         </tr>
         <tr>
           <td>Elaeis guineensis</td>
-          <td style="padding-left: 50px;">0.85,0.1-0.2</td>
-          <td style="padding-left: 30px;">#79FF79</td>
+          <td style="padding-left: 50px;">0.75</td>
+          <td style="padding-left: 30px;">#ababab</td>
         </tr>
         <tr>
           <td>Oryza_sativa</td>
-          <td style="padding-left: 50px;">0.32,0.1-0.2,1.26-1.3</td>
-          <td style="padding-left: 30px;">5CADAD</td>
+          <td style="padding-left: 50px;">0.6308-0.6989,1.10-1.17</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Phalaenopsis_equestris</td>
+          <td style="padding-left: 50px;">0.4565-0.7838</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Zostera_marina</td>
+          <td style="padding-left: 50px;">0.64-0.72</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Spirodela polyrhiza</td>
+          <td style="padding-left: 50px;">0.9079,0.8964</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Asparagus officinalis</td>
+          <td style="padding-left: 50px;">0.3245-0.7013</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Ananas comosus</td>
+          <td style="padding-left: 50px;">1.10-1.17,1.17-1.33</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
+        <tr>
+          <td>Vitis vinifera</td>
+          <td style="padding-left: 50px;">1.17-1.33</td>
+          <td style="padding-left: 30px;">#ababab</td>
+        </tr>
       </table>
     </div>
 
@@ -591,7 +620,7 @@ The example output is below.
 - <font color="#6650C9">`r fa(name="terminal")` Scripts</font>
   - <font color="orange">`r fa(name="microscope")` Data Preparation</font>
   - <font color="orange"><img src="../inst/shinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="15" height="15"> Whale Preparation</font>
-  - <font color="orange">`r fa(name="tree")` TimeTreeFecher</font>
+  - <font color="orange">`r fa(name="tree")` TimeTreeFetcher</font>
 - <font color="#6650C9">`r fa(name="pencil-alt")` Analysis</font>
   - <font color="orange"><img src="../inst/shinyWGD/www/images/ksIcon.svg" alt="Icon" width="15" height="15"> <i>K</i><sub>s</sub>Dist</font>
   - <font color="orange"><img src="../inst/shinyWGD/www/images/syntenyIcon.svg" alt="Icon" width="15" height="15"> Collinear</font>
@@ -607,17 +636,34 @@ The example output is below.
 
 - ## External Software
   - [`wgd`](https://github.com/arzwa/wgd)
+    - Default settings
   - [`ksrates`](https://github.com/VIB-PSB/ksrates)
+    - Default settings
   - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
+    - anchor_points: 3
+    - gap_size: 35
+    - alignment_method: gg2
+    - cluster_gap: 40
+    - q_value: 0.75
+    - visualizeGHM: false
+    - visualizeAlignment: false
   - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
+    - parameter: Default settings
   - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
+    - Default settings
   - [`diamond`](https://github.com/bbuchfink/diamond)
+    - Default settings
   - [`MAFFT`](https://mafft.cbrc.jp/alignment/software/)
+    - Default settings
   - [`trimAl`](http://trimal.cgenomics.org/)
+    - automated1
+    - ignorestopcodon
   - [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)
+    - Default settings
   - [`MrBayes`](https://nbisweden.github.io/MrBayes/)
+    - Default settings
   - [`ALE`](https://github.com/ssolo/ALE)
-
+    - Default settings
 - ## R packages
   - `{shiny}`
   - `{shinyjs}`

@@ -1,5 +1,8 @@
-Elaeis guineensis	0.75	orange
-Oryza_sativa	0.20,0.70	#7C5DA0
-Phalaenopsis_equestris	0.7557,0.72-0.81	#68C7FB
-Zostera_marina	0.64-0.72	#59BBA2
-Spirodela polyrhiza	0.95,0.96	#60BB59
+Elaeis guineensis	0.75	#ababab
+Oryza_sativa	0.6308-0.6989,1.10-1.17	#ababab
+Phalaenopsis_equestris	0.4565-0.7838	#ababab
+Zostera_marina	0.64-0.72	#ababab
+Spirodela polyrhiza	0.9079,0.8964	#ababab
+Asparagus officinalis	0.3245-0.7013	#ababab
+Ananas comosus	1.10-1.17,1.17-1.33	#ababab
+Vitis vinifera	1.17-1.33	#ababab

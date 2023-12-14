@@ -33,7 +33,7 @@ library(fontawesome)
 # Getting Started
 
 This vignette provides the examples of output using 
-the **`shinyWGD`** server or package. 
+the **`shinyWGD`** server or package.
 
 <br></br>
 
@@ -41,17 +41,11 @@ the **`shinyWGD`** server or package.
 
 ## Paralogous <i>K</i><sub>s</sub> age distribution
 
- ---
-
-### *Without GMM modeling*
-<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Elaeis2.ks.png" width=400>
-
-### *With GMM modeling*
-<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Elaeis2.ks_with_GMM.png" width=400>
+<img src="../inst/shinyWGD/www/images/Paralogous_Ks.Apostasia1.ks_anchors-01.png" width=400>
 
  ---
 
-### Orthologous <i>K</i><sub>s</sub> age distribution
+## Orthologous <i>K</i><sub>s</sub> age distribution
 <img src="../inst/shinyWGD/www/images/Wgd_plot_ortholog.svg" width=700>
 
  ---

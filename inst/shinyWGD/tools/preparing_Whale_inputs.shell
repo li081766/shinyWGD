@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Check if the correct number of arguments is provided
-if [ $# -ne 5 ]; then
-	echo "Usage: $0 <Orthogroups.tsv> <tree.newick> <focal_species> <ShinyWGD_dir> <num_threads>"
+if [ $# -ne 3 ]; then
+	echo "Usage: $0 <Orthogroups.tsv> <focal_species> <num_threads>"
 	exit 1
 fi
 
@@ -13,21 +13,17 @@ if [ ! -f "$1" ]; then
 	exit 1
 fi
 
-if [ ! -f "$2" ]; then
-	echo "Error: the tree file is not found. Please ensure the tree file first."
-	exit 1
-fi
-
+script_dir=$(dirname "$0")
 
 # Number of threads
-num_threads="$5"
+num_threads="$3"
 
-start_time=$(date +%s) 
+start_time=$(date +%s)
 
 tmp_fifofile="/tmp/$$.fifo"
-mkfifo "$tmp_fifofile"   
+mkfifo "$tmp_fifofile"
 exec 6<> "$tmp_fifofile"
-rm "$tmp_fifofile" 
+rm "$tmp_fifofile"
 
 for ((i=0; i<${num_threads}; i++)); do
 	 echo >&6
@@ -41,9 +37,9 @@ determine_clade_filter_orthofinder(){
 	local wgd_bin="$4"
 
 	sed 's/, /,/g' "$tree_file" | sed 's/ /_/g' >tree.newick
-	
+
     tree=$(cat tree.newick)
-    
+
     # Remove unnecessary characters and split the tree into species names
     species=($(echo "$tree" | tr -d '();' | tr ',' '\n'))
 
@@ -55,7 +51,7 @@ determine_clade_filter_orthofinder(){
             break
         fi
     done
-	   
+
 	# Check if the input species was found
 	if (( index >= 0 )); then
 		# Find the common parent index
@@ -66,9 +62,9 @@ determine_clade_filter_orthofinder(){
 			sister_index=$(( parent_index * 2 + 1 ))
 		else
 			sister_index=$(( parent_index * 2 ))
-		fi		
+		fi
 		# Retrieve the sister species
-		sister_species="${species[sister_index]}"			
+		sister_species="${species[sister_index]}"
 	fi
 
 	# Filter the orthogroups.tsv
@@ -99,7 +95,7 @@ fasta_to_nexus() {
                 current_sequence=""
             fi
 			matched_group=${BASH_REMATCH[1]}
-		    modified_name=${matched_group//-/_}  
+		    modified_name=${matched_group//-/_}
 			sequence_names+=("$modified_name")
         else
 			tmp_line=${line//\*/-}
@@ -120,7 +116,7 @@ fasta_to_nexus() {
 		fi
 	done
 	(( max_name_length++ ))
-	
+
     # Get the number of sequences and sequence length
     num_sequences=${#sequence_names[@]}
 	#sequence_length=$(( ${#sequences[0]} - 1 ))
@@ -155,7 +151,7 @@ run_mrbayes_ALEobserve() {
 	fi
 
 	mkdir ${aln}_mb
-	sed  "s/|/_/g" ${aln} > ${aln}_mb/${aln} 
+	sed  "s/|/_/g" ${aln} > ${aln}_mb/${aln}
 	cd ${aln}_mb
 
 	# Prepare input file for MrBayes
@@ -172,7 +168,7 @@ run_mrbayes_ALEobserve() {
 
 	module load mrbayes
 	mb < ./mbconf.txt > ./log.txt
-	
+
 	python - <<EOF
 from Bio import Phylo
 
@@ -182,15 +178,16 @@ with open("${aln}.treesample", "w") as f:
 			Phylo.write(t, f, format="newick")
 EOF
 
-	# Run ALEobserve 
+	# Run ALEobserve
 	module load ALE_trees
-	ALEobserve ${aln}.treesample 
+	ALEobserve ${aln}.treesample
 
 	cd ..
 }
 
 # Main body
-determine_clade_filter_orthofinder $1 $2 $3 $4
+# determine_clade_filter_orthofinder $1 $2 $3 $4
+python script_dir/orthofilter.py $1 $2 orthogroups.filtered.tsv
 
 #total_genefamily=$(wc -l < orthogroups.filtered.tsv)
 #if (( $total_genefamily >= 1000 )); then
@@ -204,21 +201,21 @@ if [ ! -d "geneTreeCCD" ]; then
     mkdir "geneTreeCCD"
 fi
 
-module load trimal 
+module load trimal
 if [ -f orthogroups.filtered_1000gf.tsv ]; then
-	cut -f 1 orthogroups.filtered_1000gf.tsv | grep -v Orthogroup | while read -r gf; 
+	cut -f 1 orthogroups.filtered_1000gf.tsv | grep -v Orthogroup | while read -r gf;
 	do
 		read -u6
 		{
 			#fasta_to_nexus $align_dir/MultipleSequenceAlignments/$gf.fa geneTreeCCD/$gf.nexus
 			# Use trimAl to transform fasta into nexus
-			trimal -in $align_dir/MultipleSequenceAlignments/$gf.fa -out geneTreeCCD/$gf.nexus -nexus	
+			trimal -in $align_dir/MultipleSequenceAlignments/$gf.fa -out geneTreeCCD/$gf.nexus -nexus
 			cd geneTreeCCD
 			run_mrbayes_ALEobserve $gf.nexus 10 110000
 			cd ..
 			echo >&6
 		} &
-	done	
+	done
 else
 	cut -f 1 orthogroups.filtered.tsv | grep -v Orthogroup | while read -r gf;
 	do
@@ -243,7 +240,7 @@ fi
 wait
 
 
-# Move all ale_files into a new folder to filter 
+# Move all ale_files into a new folder to filter
 if [ -d "all_tree_ALE_files" ]; then
 	rm -r "all_tree_ALE_files"
 else
@@ -251,8 +248,8 @@ else
 fi
 
 mv geneTreeCCD/*/*ale "all_tree_ALE_files"
-python $4/Whale.jl/scripts/ccddata.py all_tree_ALE_files > all_tree_ALE_files.tsv
-python $4/Whale.jl/scripts/ccdfilter.py all_tree_ALE_files.tsv 2 >filtered_tree_ALE_files.tsv
+python script_dir/ccddata.py all_tree_ALE_files > all_tree_ALE_files.tsv
+python script_dir/ccdfilter.py all_tree_ALE_files.tsv 2 >filtered_tree_ALE_files.tsv
 
 # Move filtered ale_files into the final output folder
 if [ -d "selected_tree_ALE_files" ]; then
@@ -263,8 +260,8 @@ fi
 
 cat filtered_tree_ALE_files.tsv | while read i; do cp $i selected_tree_ALE_files; done
 
-#tar czf all_tree_ALE_files.tar.gz all_tree_ALE_files && rm -r all_tree_ALE_files 
-#tar czf geneTreeCCD.tar.gz geneTreeCCD && rm -r geneTreeCCD 
+#tar czf all_tree_ALE_files.tar.gz all_tree_ALE_files && rm -r all_tree_ALE_files
+#tar czf geneTreeCCD.tar.gz geneTreeCCD && rm -r geneTreeCCD
 
 
 # Get the end time of the script
