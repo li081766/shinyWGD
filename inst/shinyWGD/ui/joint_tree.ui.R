@@ -110,9 +110,9 @@ Joint_Tree_ui <- tabPanel(
                                    position: relative;",
                             fileInput(
                                 inputId="uploadTimeTree",
-                                label=HTML("<b>Phylogenetic Tree</b> file (Optional: <b>Time Tree</b> file):"),
+                                label=HTML("<b>Phylogenetic Tree</b> file:"),
                                 width="80%",
-                                accept=c(".nexus", ".tre", ".tree", ".newick")
+                                accept=c(".nexus", ".tre", ".tree", ".newick", ".nwk")
                             ),
                             actionButton(
                                 inputId="MCMC_tree_example",
@@ -135,38 +135,44 @@ Joint_Tree_ui <- tabPanel(
                         )
                     )
                 ),
-                fluidRow(
-                    column(
-                        12,
-                        div(
-                            style="padding-left: 10px;
-                                   position: relative;",
-                            fileInput(
-                                inputId="uploadTimeTable",
-                                label=HTML("<b>WGDs Time </b> File (Optional but only for <i><b>Time Tree</i></b>):"),
-                                width="80%",
-                                accept=c(".csv", ".txt", ".xls")
-                            ),
-                            actionButton(
-                                inputId="wgd_time_table_example",
-                                "",
-                                icon=icon("question"),
-                                status="secondary",
-                                title="Click to see the example of WGD time file",
-                                class="my-start-button-class",
-                                style="color: #fff;
-                                       background-color: #87CEEB;
-                                       border-color: #fff;
-                                       position: absolute;
-                                       top: 53%;
-                                       left: 90%;
-                                       margin-top: -15px;
-                                       margin-left: -15px;
-                                       padding: 5px 14px 5px 10px;
-                                       width: 30px; height: 30px; border-radius: 50%;"
-                            )
-                        )
-                    )
+                # fluidRow(
+                #     column(
+                #         12,
+                #         div(
+                #             style="padding-left: 10px;
+                #                    position: relative;",
+                #             fileInput(
+                #                 inputId="uploadTimeTable",
+                #                 label=HTML("<b>WGDs Time </b> File (Optional but only for <i><b>Time Tree</i></b>):"),
+                #                 width="80%",
+                #                 accept=c(".csv", ".txt", ".xls")
+                #             ),
+                #             actionButton(
+                #                 inputId="wgd_time_table_example",
+                #                 "",
+                #                 icon=icon("question"),
+                #                 status="secondary",
+                #                 title="Click to see the example of WGD time file",
+                #                 class="my-start-button-class",
+                #                 style="color: #fff;
+                #                        background-color: #87CEEB;
+                #                        border-color: #fff;
+                #                        position: absolute;
+                #                        top: 53%;
+                #                        left: 90%;
+                #                        margin-top: -15px;
+                #                        margin-left: -15px;
+                #                        padding: 5px 14px 5px 10px;
+                #                        width: 30px; height: 30px; border-radius: 50%;"
+                #             )
+                #         )
+                #     )
+                # )
+            ),
+            fluidRow(
+                column(
+                    12,
+                    uiOutput("timeTreeSettingPanel")
                 )
             )
         ),

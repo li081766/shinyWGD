@@ -41,7 +41,7 @@ observeEvent(input$MCMC_tree_example, {
                     HTML(
                         paste0(
                             "The format of the time tree is in <b>Newick</b>, same as the output of <b>TimeTreeFetcher</b> of <b>shinyWGD</b>. <br>",
-                            "Be careful with the time unit, please use the <b>100 million years</b> as the time scale.<br>",
+                            "Be careful with the time scale, please select the proper time scale in the <b>Time Tree Setting</b> panel.<br>",
                             "Users can click the text of the species name to change the color or add a symbol to the species in the <b>right Tree panel</b>. <br>",
                             "Users can click the branch to add the WGD events into the branch.<br></br>"
                         )
@@ -59,7 +59,7 @@ observeEvent(input$MCMC_tree_example, {
                         paste0(
                             "The format of the tree is the output file of <b>MCMCTree</b>, named <b>FigTree.tre</b>. <br>",
                             "Users can also upload a nexus tree with the divergence time information by revising the part after <b>\"=\"</b>. <br>",
-                            "Be careful with the time unit, please use the <b>100 million years</b> as the time scale.<br>",
+                            "Be careful with the time time scale, please select the proper time scale in the <b>Time Tree Setting</b> panel.<br>",
                             "Users can click the text of the species name to change the color or add a symbol to the species in the <b>right Tree panel</b>. <br>",
                             "Users can click the branch to add the WGD events into the branch.<br></br>"
                         )
@@ -148,6 +148,74 @@ widthSpacing <- reactiveValues(value=500)
 heightSpacing <- reactiveValues(value=NULL)
 
 observe({
+    if( isTruthy(input$uploadTimeTree) ){
+        timeTreeFile <- input$uploadTimeTree$datapath
+        timeTreeInfo <- readLines(textConnection(readChar(timeTreeFile, file.info(timeTreeFile)$size)))
+        closeAllConnections()
+        if( any(grep("\\d", timeTreeInfo)) ){
+            output$timeTreeSettingPanel <- renderUI({
+                div(class="boxLike",
+                    style="background-color: #F5FFFA;",
+                    h5(icon("cog"), HTML("Time Tree Setting")),
+                    hr(class="setting"),
+                    fluidRow(
+                        column(
+                            12,
+                            div(
+                                style="padding-left: 10px;
+                                       position: relative;",
+                                awesomeRadio(
+                                    inputId="vizTree_time_scale",
+                                    label=HTML("<b>Time scale</b>:"),
+                                    choices=c("100 MYA", "1 MYA"),
+                                    selected="100 MYA",
+                                    inline=TRUE
+                                )
+                            )
+                        )
+                    ),
+                    fluidRow(
+                        column(
+                            12,
+                            div(
+                                style="padding-left: 10px;
+                                   position: relative;",
+                                fileInput(
+                                    inputId="uploadTimeTable",
+                                    label=HTML("<b>WGDs Time </b> File:"),
+                                    width="80%",
+                                    accept=c(".csv", ".txt", ".xls")
+                                ),
+                                actionButton(
+                                    inputId="wgd_time_table_example",
+                                    "",
+                                    icon=icon("question"),
+                                    status="secondary",
+                                    title="Click to see the example of WGD time file",
+                                    class="my-start-button-class",
+                                    style="color: #fff;
+                                           background-color: #87CEEB;
+                                           border-color: #fff;
+                                           position: absolute;
+                                           top: 53%;
+                                           left: 90%;
+                                           margin-top: -15px;
+                                           margin-left: -15px;
+                                           padding: 5px 14px 5px 10px;
+                                           width: 30px; height: 30px; border-radius: 50%;"
+                                )
+                            )
+                        )
+                    )
+                )
+            })
+        }else{
+            output$timeTreeSettingPanel <- renderUI({""})
+        }
+    }
+})
+
+observe({
     if( isTruthy(input$uploadKsTree) || isTruthy(input$uploadTimeTree) ){
         if( isTruthy(input$uploadKsTree) ){
             ksTreeFile <- input$uploadKsTree$datapath
@@ -199,10 +267,16 @@ observe({
             timeTreeFile <- input$uploadTimeTree$datapath
             timeTreeInfo <- readLines(textConnection(readChar(timeTreeFile, file.info(timeTreeFile)$size)))
             closeAllConnections()
-            if( any(grep("=", timeTreeInfo)) ){
-                timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
-                joint_tree_data[["timeTree"]] <- timeTree
-
+            if( any(grep("\\d", timeTreeInfo)) ){
+                vizTreeTimeScale <- gsub(" MYA", "", input$vizTree_time_scale)
+                if( any(grep("=", timeTreeInfo)) ){
+                    timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
+                    joint_tree_data[["timeScale"]] <- vizTreeTimeScale
+                    joint_tree_data[["timeTree"]] <- timeTree
+                }else{
+                    joint_tree_data[["timeScale"]] <- vizTreeTimeScale
+                    joint_tree_data[["timeTree"]] <- timeTreeInfo[1]
+                }
                 if( isTruthy(input$uploadTimeTable) ){
                     timeTableFile <- input$uploadTimeTable$datapath
                     timeTable <- suppressMessages(

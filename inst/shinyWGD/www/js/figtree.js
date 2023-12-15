@@ -232,12 +232,27 @@ function jointTreePlot(InputData) {
     // var longestLen = InputData.longLetterLen;
     // console.log("height", height);
 
+    var timeScale = InputData.timeScale;
+    console.log("timeScale", timeScale);
+
     if (typeof ksTree !== 'undefined') {
         var treeTopolog = ksTree.replace(/[0-9:. ]/g, '');
         var treeTopologJson = parseTreeTopology(treeTopolog);
         var ksTreeJson = parseKsTree(ksTree);
     }
     if (typeof timeTree !== 'undefined') {
+        if (timeScale === "100") {
+            timeTree = timeTree.replace(/(\d+(\.\d+)?)/g, function (match, p1) {
+                var numericValue = parseFloat(p1);
+                if (!isNaN(numericValue)) {
+                    var scaledValue = (numericValue / 100).toFixed(2);
+                    return scaledValue;
+                } else {
+                    return match;
+                }
+            });
+        }
+
         var timeTreeJson = parseTimeTree(timeTree);
     }
     if (typeof ksPeak !== 'undefined') {
@@ -260,8 +275,13 @@ function speciesTreePlot(InputData) {
 
     if (hasFloatLargerThan20) {
         speciesTree = speciesTree.replace(/(\d+\.\d+)/g, function (match, p1) {
-            var floatValue = parseFloat(p1);
-            return (floatValue / 100).toString();
+            var numericValue = parseFloat(p1);
+            if (!isNaN(numericValue)) {
+                var scaledValue = (numericValue / 100).toFixed(2);
+                return scaledValue;
+            } else {
+                return match;
+            }
         });
     }
 
@@ -310,8 +330,13 @@ function speciesTreeUpdatedPlot(InputData) {
 
     if (hasFloatLargerThan20) {
         speciesTree = speciesTree.replace(/(\d+\.\d+)/g, function (match, p1) {
-            var floatValue = parseFloat(p1);
-            return (floatValue / 100).toString();
+            var numericValue = parseFloat(p1);
+            if (!isNaN(numericValue)) {
+                var scaledValue = (numericValue / 100).toFixed(2);
+                return scaledValue;
+            } else {
+                return match;
+            }
         });
     }
 
