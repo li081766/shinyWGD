@@ -260,6 +260,19 @@ function jointTreePlot(InputData) {
     }
     if (typeof wgdTable !== 'undefined') {
         var wgdTableInfo = convertShinyData(wgdTable);
+        if (timeScale === "100") {
+            wgdTableInfo = wgdTableInfo.map(function (item) {
+                return {
+                    species: item.species,
+                    wgds: item.wgds.split('-').map(function (range) {
+                        var numericValue = parseFloat(range);
+                        return !isNaN(numericValue) ? (numericValue / 100).toFixed(4) : range;
+                    }).join('-'),
+                    color: item.color
+                };
+            });
+        }
+        console.log("wgdTableInfo", wgdTableInfo);
     }
     if (typeof ultrametricTree !== 'undefined') {
         var ultrametricTreeJson = parseTreeTopology(ultrametricTree);

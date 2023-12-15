@@ -21,7 +21,7 @@ output$whaleDataUploadPanel <- renderUI({
                                    position: relative;",
                             fileInput(
                                 'orthofinder_data_zip_file',
-                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                label=h6(icon("file-zipper"), "Upload the <b>Zipped</b> File"),
                                 multiple=FALSE,
                                 accept=c(
                                     ".zip",
@@ -275,7 +275,7 @@ observe({
                                padding: 10px 10px 1px 10px;
                                border-radius: 10px;
                                text-align: center;",
-                        HTML(paste("<b>Example:<br>:<br><b><font color='#EE82EE'>Whale Preparation</font></b>"))
+                        HTML(paste("<b>Example:<br><font color='#EE82EE'>Whale Preparation</font></b>"))
                     )
                 )
             })

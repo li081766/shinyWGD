@@ -656,7 +656,7 @@ output$WgdKsratesIadhoreScriptRun <- renderUI({
             actionButton(
                 inputId="job_run_server",
                 "Submit Jobs",
-                icon=icon("play"),
+                icon=icon("paper-plane"),
                 title="Click to submit the job to the PSB computing server",
                 status="secondary",
                 class="my-start-button-class",
@@ -732,32 +732,8 @@ observe({
         isTruthy(input$selected_data_files) ||
         isTruthy(input$proteome_1)
     ){
-        # for server
-        # base_dir <- "/www/bioinformatics01_rw/ShinyWGD"
-        # timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-        # working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
-
-        base_dir <- tempdir()
-        timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-        working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
-
-        while( dir.exists(working_wd) ){
-            Sys.sleep(1)
-            timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-            working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
-        }
-
-        dir.create(working_wd)
-        original_data_wd <- file.path(working_wd, "original_data")
-        dir.create(original_data_wd)
-
-        data_preparation_dir_Val(working_wd)
-        original_data_wd_Val(original_data_wd)
-
         observeEvent(input$upload_data_file, {
-            working_wd <- data_preparation_dir_Val()
-            original_data_wd <- original_data_wd_Val()
-            if( !is.null(input$upload_data_file) && !is.null(working_wd) ){
+            if( !is.null(input$upload_data_file) ){
                 shinyalert(
                     "Success",
                     "You use a file file to upload the data. See more details in Help page",
@@ -774,6 +750,28 @@ observe({
                         type="error",
                     )
                 }else{
+                    # for server
+                    # base_dir <- "/www/bioinformatics01_rw/ShinyWGD"
+                    # timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+                    # working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+
+                    base_dir <- tempdir()
+                    timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+                    working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+
+                    while( dir.exists(working_wd) ){
+                        Sys.sleep(1)
+                        timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+                        working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+                    }
+
+                    dir.create(working_wd)
+                    original_data_wd <- file.path(working_wd, "original_data")
+                    dir.create(original_data_wd)
+
+                    data_preparation_dir_Val(working_wd)
+                    original_data_wd_Val(original_data_wd)
+
                     system(
                         paste0(
                             "cp ",
@@ -1707,47 +1705,77 @@ observeEvent(input$job_run_server, {
                 12,
                 "Job id:",
                 verbatimTextOutput("job_id_text"),
-                "Make sure to take note of this ID as you will need it for downloading the results from our server."
+                HTML("Make sure to take note of this <b>ID</b> as you will need it for downloading the results from our server.")
             )
         })
         output$job_id_text <- renderText({
             unique_id
         })
-        print(working_wd)
+
         # submit the job to psb computing cluster
         sh_files <- list.files(working_wd, pattern="\\.sh$", full.names=TRUE, recursive=TRUE)
         print(sh_files)
 
-        submit_job <- function(script_file) {
-            # system(paste("cd", dirname(script_file)))
-            print(dirname(script_file))
-            if( grepl("run_ksrates.sh", script_file) ){
-                print(script_file)
-                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
-                Sys.sleep(10000)
+        shiny::withProgress(message = 'Submit job in progress', value = 0, {
+
+            total_jobs <- length(sh_files)
+            progress_increment <- 0.8 / total_jobs
+
+            submit_job <- function(script_file) {
+                shiny::incProgress(
+                    amount=progress_increment,
+                    message=paste0("Dealing with ", basename(script_file), " ...")
+                )
+
+                if (length(grepl("run_ksrates.sh", script_file)) > 0) {
+                    # Do your job submission here
+                    Sys.sleep(10)
+                } else if (length(grepl("run_orthofinder.sh", script_file)) > 0) {
+                    # Do your job submission here
+                    Sys.sleep(10)
+                } else if (length(grepl("run_paralog_ks_rest_species.sh", script_file)) > 0) {
+                    # Do your job submission here
+                    Sys.sleep(10)
+                } else if (length(grepl("run_wgd.sh", script_file)) > 0) {
+                    # Do your job submission here
+                    Sys.sleep(10)
+                }
             }
-            if( grepl("run_ksrates.sh", script_file) ){
-                print(script_file)
-                # system(paste("qsub -cwd -l h_vmem=8g -pe serial 4", basename(script_file)))
-                Sys.sleep(10000)
-            }
-            if( grepl("run_orthofinder.sh", script_file) ){
-                print(script_file)
-                # system(paste("qsub -cwd -l h_vmem=8g -pe serial 4", basename(script_file)))
-                Sys.sleep(10000)
-            }
-            if( grepl("run_paralog_ks_rest_species.sh", script_file) ){
-                print(script_file)
-                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
-                Sys.sleep(10000)
-            }
-            if( grep("run_wgd.sh", script_file) ){
-                print(script_file)
-                # system(paste("qsub -cwd -l h_vmem=8g", basename(script_file)))
-                Sys.sleep(10000)
-            }
+
+            # Execute the jobs
+            lapply(sh_files, submit_job)
+
+            incProgress(amount=1, message="Done")
+        })
+    }
+})
+
+observeEvent(input$comfirm_email, {
+    working_wd <- data_preparation_dir_Val()
+    if( is.null(working_wd) ){
+        shinyalert(
+            "Oops",
+            "Please upload the data first, then switch this on ...",
+            type="error"
+        )
+    }else{
+        if( isTruthy(input$users_email_address) ){
+            print(input$users_email_address)
+            email_file_path <- paste0(working_wd, "/user_email.txt")
+
+            writeLines(input$users_email_address, email_file_path)
+            shinyalert(
+                "Your email",
+                input$users_email_address,
+                type="info"
+            )
+        }else{
+            shinyalert(
+                "Oops",
+                "Please input the email address first, then switch this on ...",
+                type="error"
+            )
         }
-        lapply(sh_files, submit_job)
     }
 })
 
