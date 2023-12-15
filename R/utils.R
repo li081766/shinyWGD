@@ -84,7 +84,7 @@ read_data_file <- function(uploadfile){
 check_gff_input <- function(gff_input_name, gff_input_path, working_wd){
     checked_gff <- paste0(working_wd, "/", gff_input_name, ".gff")
     if( str_detect(gff_input_path$name, ".(gff|gff3)$") ){
-        link_gff_cmd <- paste0("cat ", gff_input_path$datapath, " | grep -v '#' ", checked_gff)
+        link_gff_cmd <- paste0("cat ", gff_input_path$datapath, " | grep -v '#' > ", checked_gff)
         system(link_gff_cmd)
     }
     else if( str_detect(gff_input_path$name, regex(".(gff.gz|gff3.gz|gz)$")) ){
