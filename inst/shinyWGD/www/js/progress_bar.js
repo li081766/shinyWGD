@@ -48,6 +48,29 @@ Shiny.addCustomMessageHandler("UpdateProgressBar", function (message) {
     }
 });
 
+Shiny.addCustomMessageHandler("UpdateProgressBarDownload", function (message) {
+    var containerId = message.container;
+    var progressBar = $("#" + containerId).find(".progress-bar");
+    var progressText = $("#" + containerId).find(".progress-text");
+    var programType = message.type;
+
+    var width = message.width;
+
+    progressBar.css("width", width + "%");
+    progressBar.attr("aria-valuenow", width);
+
+    progressText.text(programType).css({
+        "color": "#778899",
+        "position": "absolute",
+        "top": "15px"
+    });
+
+
+    if (width >= 100) {
+        progressBar.removeClass("active");
+    }
+});
+
 
 Shiny.addCustomMessageHandler("Progress_Bar_Update", showPopup);
 function showPopup(message) {

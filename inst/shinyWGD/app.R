@@ -97,7 +97,17 @@ ui <- tagList(
             Joint_Tree_ui
         ),
         Gallery_ui,
-        Help_ui
+        Help_ui,
+        tabPanel(
+            "Downlaod",
+            icon=icon("download"),
+            fluidRow(
+                column(
+                    6,
+                    uiOutput("search_download_page")
+                )
+            )
+        )
     ),
     tags$head(
         tags$style(HTML("
