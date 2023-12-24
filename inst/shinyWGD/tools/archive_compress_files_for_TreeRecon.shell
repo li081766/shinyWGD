@@ -1,0 +1,2 @@
+# For TreeRecon module
+tar czf Whale_Data_for_TreeRecon.tar.gz wgdNodes.txt species_timetree.nwk run_*

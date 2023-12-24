@@ -105,3 +105,58 @@ function showPopup(message) {
         modal.css("display", "none");
     }, 5000000);
 }
+
+var progressBars = {};
+
+Shiny.addCustomMessageHandler("Circular_Progress_Bar_Start", function (message) {
+    var id = message.id;
+    var customPercentage = message.customPercentage || 0;
+    var customText = message.customText || '';
+    // Create a new circular progress bar instance if not exists
+    var circle = progressBars[id];
+    if (!circle) {
+        circle = new ProgressBar.SemiCircle("#wgd_progress_container", {
+            strokeWidth: 6,
+            color: '#FFEA82',
+            trailColor: '#eee',
+            trailWidth: 1,
+            easing: 'easeInOut',
+            duration: 1400,
+            svgStyle: null,
+            text: {
+                value: customPercentage.toFixed(0) + '%',
+                alignToBottom: false
+            },
+            from: { color: '#FFEA82' },
+            to: { color: '#ED6A5A' },
+            // Set default step function for all animate calls
+            step: function (state, bar) {
+                bar.path.setAttribute('stroke', state.color);
+                bar.setText((bar.value() * 100).toFixed(0) + '%');
+                bar.text.style.color = state.color;
+
+                bar.text.style.fontFamily = '"Raleway", Helvetica, sans-serif';
+                bar.text.style.fontSize = '1.5rem';
+            }
+        });
+
+        progressBars[id] = circle;
+    }
+
+    circle.set(customPercentage / 100);
+
+    $('#wgd_progress_text').html(customText);
+    console.log("customText", customText)
+});
+
+
+Shiny.addCustomMessageHandler("Circular_Progress_Bar_Complete", function (message) {
+    var id = message.id;
+    var circle = progressBars[id];
+    if (circle) {
+        circle.animate(1);
+        setTimeout(function () {
+            circle.set(0);
+        }, 2000);
+    }
+});

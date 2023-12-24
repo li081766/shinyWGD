@@ -3,10 +3,10 @@
     font-size: 1.25rem;
 } */
 
-.navbar { 
+.navbar {
 	font-family: Arial;
 	font-size: 1.5rem;
-} 
+}
 
 
 /* .navbar-default:hover {
@@ -20,7 +20,7 @@
 } */
 
 h1, h2, h3, h4, h5, h6 {
-    font-family: Calibri, sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 .title {
@@ -29,8 +29,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 body {
-    font-family: Calibri, sans-serif;
-} 
+    font-family: Arial, sans-serif;
+}
 
 .boxLike {
     margin-top: 15px;
@@ -52,7 +52,7 @@ body {
 }
 
 hr.setting {
-    border-top: 1.66px dashed grey; 
+    border-top: 1.66px dashed grey;
     background-color: transparent;
 }
 

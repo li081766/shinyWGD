@@ -58,6 +58,7 @@ ui <- tagList(
     includeScript("www/js/progress_bar.js"),
     includeScript("https://cdnjs.cloudflare.com/ajax/libs/seedrandom/3.0.5/seedrandom.min.js"),
     includeScript("https://cdn.jsdelivr.net/npm/sweetalert2@11"),
+    includeScript("https://cdn.jsdelivr.net/npm/progressbar.js@1.1.0/dist/progressbar.min.js"),
     shinyjs::useShinyjs(),
     tags$head(
         tags$link(

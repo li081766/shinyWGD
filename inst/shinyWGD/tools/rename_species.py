@@ -17,7 +17,7 @@ def main(input_file, ale_folder, wgdInfo_file):
 
     updated_string = rename_species(input_string)
 
-    with open(input_file + ".updated.nwk", "w") as output_file:
+    with open(input_file.replace(".nwk", "") + ".updated.nwk", "w") as output_file:
         output_file.write(updated_string)
 
     with open(wgdInfo_file, "r") as file:
@@ -25,7 +25,7 @@ def main(input_file, ale_folder, wgdInfo_file):
 
     updated_wgd = rename_species(input_wgd)
     
-    with open(wgdInfo_file + ".updated.txt", "w") as outfile:
+    with open(wgdInfo_file.replace(".txt", "") + ".updated.txt", "w") as outfile:
         outfile.write(updated_wgd)
     
     output_folder_name = os.path.basename(ale_folder) + ".updated"

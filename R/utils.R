@@ -463,7 +463,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
             latin_name <- paste0("latin_name_", i)
             shiny::incProgress(
                 amount=0.8/input$number_of_study_species,
-                message=paste0("Dealing with ", input[[latin_name]], " ...")
+                message=paste0(i, "/", input$number_of_study_species, ". Dealing with ", input[[latin_name]], " ...")
             )
             Sys.sleep(.1)
 
@@ -596,7 +596,7 @@ create_ksrates_configure_file_based_on_table <- function(
 
             shiny::incProgress(
                 amount=0.8/nrow(data_table),
-                message=paste0("Dealing with ", data_table[i, 1], " ...")
+                message=paste0(i, "/", nrow(data_table), ". Dealing with ", data_table[i, 1], " ...")
             )
             Sys.sleep(.1)
 

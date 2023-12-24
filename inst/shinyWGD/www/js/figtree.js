@@ -284,9 +284,9 @@ Shiny.addCustomMessageHandler("speciesTreePlot", speciesTreePlot)
 function speciesTreePlot(InputData) {
     var speciesTree = InputData.speciesTree;
 
-    var hasFloatLargerThan20 = /(\d+\.\d+)/.test(speciesTree) && parseFloat(RegExp.$1) > 20;
+    // var hasFloatLargerThan20 = /(\d+\.\d+)/.test(speciesTree) && parseFloat(RegExp.$1) > 20;
 
-    if (hasFloatLargerThan20) {
+    /* if (hasFloatLargerThan20) {
         speciesTree = speciesTree.replace(/(\d+\.\d+)/g, function (match, p1) {
             var numericValue = parseFloat(p1);
             if (!isNaN(numericValue)) {
@@ -296,7 +296,7 @@ function speciesTreePlot(InputData) {
                 return match;
             }
         });
-    }
+    } */
 
     var wgdNodes = InputData.wgdNodes;
     var height = InputData.height;
@@ -309,7 +309,9 @@ function speciesTreePlot(InputData) {
     if (typeof speciesTree !== 'undefined') {
         var speciesTreeJson;
         try {
-            speciesTreeJson = parseKsTree(speciesTree);
+            var speciesTree = speciesTree.replace(/[0-9:. ]/g, '');
+            var speciesTreeJson = parseTreeTopology(speciesTree);
+            // speciesTreeJson = parseKsTree(speciesTree);
 
             if (Object.keys(speciesTreeJson).length === 0 && speciesTreeJson.constructor === Object) {
                 Swal.fire({
@@ -423,45 +425,6 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
     var diagonal = rightAngleDiagonal();
     var nodes = tree(speciesTreeJson);
     var yscale = scaleBranchLengths(nodes, w).range([w, 0]);
-
-    vis.selectAll('.rule-line')
-        .data(yscale.ticks(11))
-        .enter().append('svg:line')
-        .attr('class', 'rule-line')
-        .attr('y1', 0)
-        .attr('y2', h)
-        .attr('x1', yscale)
-        .attr('x2', yscale)
-        .attr("stroke-dasharray", "4 1")
-        .attr("stroke-width", 0.66)
-        .attr("stroke-opacity", 0.2)
-        .attr("stroke", "blue");
-
-    vis.selectAll("text.rule")
-        .data(yscale.ticks(11))
-        .enter().append("svg:text")
-        .attr("class", "rule")
-        .attr("x", yscale)
-        .attr("y", h + 15)
-        .attr("dy", -3)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "10px")
-        .attr('fill', 'blue')
-        .attr('opacity', 0.3)
-        .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
-
-    var legend = vis.append('g')
-        .attr('class', 'legend')
-        .append('text')
-        .attr('x', function () {
-            return w + 8;
-        })
-        .attr('y', h + 12)
-        .attr('text-anchor', 'start')
-        .attr('font-size', '10px')
-        .attr('fill', 'blue')
-        .attr('opacity', 0.3)
-        .text('million years ago');
 
     var node = vis.selectAll("g.node")
         .data(nodes)
@@ -753,8 +716,8 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
 
     }
 
-    var maxLength = getMaxNodeLength(nodes);
-    drawGeologicTimeBar(maxLength, vis, yscale, h, ori);
+    // var maxLength = getMaxNodeLength(nodes);
+    // drawGeologicTimeBar(maxLength, vis, yscale, h, ori);
 
     downloadSVG("speciesWhaleTreeReconPlotDownload", "speciesWhaleTreeRecon_plot", "whale_TreeRecon.speciesTree.svg");
 }
@@ -1183,7 +1146,7 @@ function jointTreeBuilding(selector, ksTreeJson, ksPeakInfo, treeTopologJson, ti
             buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, (w + 150) / 2 - 5 * longestXLabelLength, h, 'left');
             var treeTopologRatio = (w + 300 + 5 * longestXLabelLength) / 2 / (w + 300);
             buildUltrametricTree(selector, vis, treeTopologJson, longestXLabelLength, w + 150, h, "left", treeTopologRatio);
-            svgFile = "ksTree.Plot.svg";
+            svgFile = "ksTree_ultrametricTree.jointPlot.svg";
         }
 
         if (typeof ultrametricTreeJson !== 'undefined' && typeof ksTreeJson !== 'undefined') {
@@ -1668,8 +1631,8 @@ function buildKsTree(selector, vis, ksTreeJson, ksPeakInfo, w, h, ori) {
                         .attr("fill-opacity", "0.1")
                         .attr("data-tippy-content", () => {
                             return "WGD in <font color='red'><i><b>" + item.species + "</b></i></font>" +
-                                "<br>Peak: <font color='#00EC00'>" + peak + "</font><br>Confidence interval: <font color='#73BF00'>" + numFormatter(min) +
-                                "</font> - <font color='orange'>" + numFormatter(max) + "</font>";
+                                "<br>Peak: <font color='#00EC00'>" + peak + "</font><br>Confidence interval: <font color='#73BF00'>" + numFormatter(min) / 2 +
+                                "</font> - <font color='orange'>" + numFormatter(max) / 2 + "</font>";
                         });
                     tippy(".wgd_rect", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [200, null] });
                 }
@@ -2460,7 +2423,7 @@ function buildUltrametricTree(selector, vis, ultrametricTreeJson, longestXLabelL
                 return "middle";
             }
         })
-        .attr("font-size", "14px")
+        .attr("font-size", "12px")
         .attr('fill', 'black')
         .text(function (d) {
             var name = d.name.replace(/_/g, ' ').replace(/(\w)\w+_(\w+)/, "$1. $2");;
@@ -2767,10 +2730,9 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
 
         var diagonal = rightAngleDiagonal();
         var nodes = tree(speciesTreeJson);
-        var yscale = scaleBranchLengths(nodes, w).range([w, 0]);
     } else {
         var tree = d3.layout.cluster()
-            .size([h, w * ratio])
+            .size([h, w * ratio * 0.8])
             .separation(function (a, b) {
                 return 1;
             })
@@ -2781,54 +2743,9 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                 return node.branchset
             });
 
-        var diagonal = leftAngleDiagonal();
+        var diagonal = ultrametriAngleDiagonal(w);
         var nodes = tree(speciesTreeJson);
-        var yscale = scaleLeftBranchLengths(nodes, w, ratio).range([w * ratio, w]);
     }
-
-    // console.log("timeTreeNodes", nodes);
-    vis.selectAll('.rule-line')
-        .data(yscale.ticks(11))
-        .enter().append('svg:line')
-        .attr('class', 'rule-line') // Add a unique class
-        .attr('y1', 0)
-        .attr('y2', h)
-        .attr('x1', yscale)
-        .attr('x2', yscale)
-        .attr("stroke-dasharray", "4 1")
-        .attr("stroke-width", 0.66)
-        .attr("stroke-opacity", 0.2)
-        .attr("stroke", "blue");
-
-    vis.selectAll("text.rule")
-        .data(yscale.ticks(11))
-        .enter().append("svg:text")
-        .attr("class", "rule")
-        .attr("x", yscale)
-        .attr("y", h + 15)
-        .attr("dy", -3)
-        .attr("text-anchor", "middle")
-        .attr("font-size", "10px")
-        .attr('fill', 'blue')
-        .attr('opacity', 0.3)
-        .text(function (d) { return (Math.round(d * 100) / 100 * 100).toFixed(0); });
-
-    var legend = vis.append('g')
-        .attr('class', 'legend')
-        .append('text')
-        .attr('x', function () {
-            if (ori === "right") {
-                return w + 8;
-            } else {
-                return w + 2;
-            }
-        })
-        .attr('y', h + 12)
-        .attr('text-anchor', 'start')
-        .attr('font-size', '10px')
-        .attr('fill', 'blue')
-        .attr('opacity', 0.3)
-        .text('million years ago');
 
     var node = vis.selectAll("g.node")
         .data(nodes)
@@ -2846,61 +2763,6 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
         })
         .attr("transform", function (d) { return "translate(" + d.y + "," + d.x + ")"; })
 
-    /* vis.selectAll('g.root.node')
-        .append('svg:circle')
-        .attr("r", 4.5)
-        .attr('fill', 'steelblue')
-        .attr('stroke', '#369')
-        .attr('stroke-width', '2px');
-
-    vis.selectAll('g.root.node')
-        .append('text')
-        .attr('fill', '#FF00FF')
-        .attr("dx", function () {
-            if (ori === "right") {
-                return -8;
-            } else {
-                return 8;
-            }
-        })
-        .attr("dy", 4.5)
-        .attr("text-anchor", function () {
-            if (ori === "right") {
-                return "end";
-            } else {
-                return "start";
-            }
-        })
-        .attr("font-size", "14px")
-        .attr("font-family", "calibri")
-        .text("MRCA"); */
-
-    vis.selectAll('g.root.node')
-        .append('line')
-        .attr('stroke', '#aaa')
-        .attr('stroke-width', 2.45)
-        .attr('x1', 0)
-        .attr('y1', 0)
-        .attr('x2', function () {
-            if (ori === "right") {
-                return -10;
-            } else {
-                return 10;
-            }
-        })
-        .attr('y2', 0)
-
-    d3.select('.leaf-pop-up-menu').remove();
-    var leafPopUpMenu = d3.select(selector).append('div')
-        .classed('leaf-pop-up-menu', true)
-        .style('position', 'absolute')
-        .style('top', 0)
-        .style('left', 0)
-        .style('visibility', 'hidden')
-        .style('background-color', 'white')
-        .style('border', '1px solid black')
-        .style('padding', '5px');
-
     vis.selectAll('g.leaf.node')
         .append("svg:text")
         .attr("class", "my-text")
@@ -2908,7 +2770,7 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
             if (ori === "right") {
                 return 8;
             } else {
-                return -8;
+                return w * ratio * 0.25 - longestXLabelLength * 5;
             }
         })
         .attr("dy", 3)
@@ -2916,26 +2778,16 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
             if (ori === "right") {
                 return "start";
             } else {
-                return "end";
+                return "middle";
             }
         })
         .attr("font-size", "14px")
         .attr('fill', 'black')
         .text(function (d) {
-            var name = d.name.replace(/_/g, ' ');
+            var name = d.name.replace(/_/g, ' ').replace(/(\w)\w+_(\w+)/, "$1. $2");;
             return name;
         })
-        .attr('font-style', function (d) {
-            if (d.name.match(/\_/)) {
-                return 'italic';
-            } else {
-                return 'normal';
-            }
-        })
-        .attr("data-tippy-content", (d) => {
-            return "<font color='#00DB00'>" + d.name +
-                "</font>: <font color='orange'>" + numFormatter(d.length) + " Mya</font>";
-        })
+        .attr('font-style', 'italic')
         .on("mouseover", function () {
             ribbonEnterTime = new Date().getTime();
             d3.select(this)
@@ -2951,122 +2803,6 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                     .transition()
                     .duration(50)
                     .attr("fill", "black")
-            }
-        })
-        .on('click', function (d) {
-            if (leafPopUpMenu.style('visibility') == 'visible') {
-                leafPopUpMenu.style('visibility', 'hidden');
-            } else {
-                var name = d.name.replace(/_/g, ' ');
-                if (d.name.match(/\_/)) {
-                    leafPopUpMenu.html("<p><font color='#00DB00'><i>" + name + "</i></font>: <font color='orange'>" +
-                        numFormatter(d.length * 100) + " Mya</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
-                        "<p>Choose a color:</p>" +
-                        "<div id='color-options'></div>" +
-                        "<p></p>" +
-                        "<p>Choose a symbol:" +
-                        "<div id='symbol-options'></div>");
-                    // "<button id='add-symbol' onclick='addSymbol(textElement)'>Add Symbol</button>");
-                } else {
-                    leafPopUpMenu.html("<p><font color='#00DB00'>" + name + "</font>: <font color='orange'>" +
-                        numFormatter(d.length * 100) + " Mya</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
-                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
-                        "<p>Choose a color:" +
-                        "<div id='color-options'></div>" +
-                        "<p></p>" +
-                        "<p>Choose a symbol:" +
-                        "<div id='symbol-options'></div>");
-                    // "<button id='add-symbol' onclick='addSymbol(textElement)'>Add Symbol</button>");
-                }
-                d3.select('#close-btn').on('click', closePopUp);
-                function closePopUp() {
-                    leafPopUpMenu.style('visibility', 'hidden');
-                };
-
-                var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080', '#FFC0CB', 'black'];
-                var textElement = d3.select(this.parentNode).select('.my-text').node();
-                // console.log("textElement", textElement)
-                var colorOptions = d3.select('#color-options')
-                    .selectAll('div')
-                    .data(colors)
-                    .enter()
-                    .append('div')
-                    .style('cursor', 'pointer')
-                    .style('background-color', function (d) { return d; })
-                    .style('width', '20px')
-                    .style('height', '20px')
-                    .style('margin-right', '5px')
-                    .style('display', 'inline-block')
-                    .on('click', function (d) {
-                        d3.select(textElement).style('fill', d);
-                        // closePopUp();
-                    });
-
-                var symbols = [
-                    { name: 'Circle', type: 'circle' },
-                    { name: 'Cross', type: 'cross' },
-                    { name: 'Diamond', type: 'diamond' },
-                    { name: 'Square', type: 'square' },
-                    { name: 'Triangle Up', type: 'triangle-up' }
-                ];
-
-                var clickedLeafNode = this;
-                var symbolOptions = d3.select('#symbol-options')
-                    .selectAll('div')
-                    .data(symbols)
-                    .enter()
-                    .append('div')
-                    .style('cursor', 'pointer')
-                    .style('width', '30px')
-                    .style('height', '30px')
-                    .style('margin-right', '3px')
-                    .style('float', 'left')
-                    .append('svg')
-                    .attr('width', '60')
-                    .attr('height', '60')
-                    .append('path')
-                    .attr('transform', 'translate(15, 15)')
-                    .attr('d', function (d) {
-                        if (d.type === 'circle') {
-                            return d3.svg.symbol().type('circle')();
-                        } else if (d.type === 'cross') {
-                            return d3.svg.symbol().type('cross')();
-                        } else if (d.type === 'diamond') {
-                            return d3.svg.symbol().type('diamond')();
-                        } else if (d.type === 'square') {
-                            return d3.svg.symbol().type('square')();
-                        } else if (d.type === 'triangle-up') {
-                            return d3.svg.symbol().type('triangle-up')();
-                        }
-                    })
-                    .attr('stroke', '#707038')
-                    .attr('fill', '#707038')
-                    .on('click', function (d) {
-                        var leafNode = clickedLeafNode.parentNode;
-                        var symbol = d3.svg.symbol().type(d.type)
-                        var styleAttr = d3.select(clickedLeafNode).attr('style');
-                        var match = styleAttr.match(/fill:\s*(.*?);/);
-                        var textColor = match[1];
-                        /* var textColor = d3.select(clickedLeafNode).select('my-text').style('fill');
-                        console.log(textColor); */
-                        d3.select(leafNode)
-                            .append('path')
-                            .attr('d', symbol)
-                            .attr('stroke', textColor)
-                            .attr('fill', textColor)
-                            .attr('stroke-width', '1px');
-
-                        leafPopUpMenu.style('visibility', 'hidden');
-                    });
-
-                const transformAttributeValue = d3.select(this.parentNode).attr("transform");
-                const match = transformAttributeValue.match(/translate\(([\d.-]+),([\d.-]+)\)/);
-                const xx = parseFloat(match[1]);
-                const yy = parseFloat(match[2]);
-                leafPopUpMenu.style('left', (xx + 200) + 'px')
-                    .style('top', (yy - 5) + 'px')
-                    .style('visibility', 'visible');
             }
         });
     tippy(".my-text rect", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [200, null] });
@@ -3202,7 +2938,7 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
                             var rectWidth = 18;
                             var rectHeight = 18;
                             var rectElement = d3.select(clickedPath.parentNode)
-                                .insert('rect', 'text')
+                                .append("rect")
                                 .attr('class', 'testWgd')
                                 .attr('x', xValue - 9)
                                 .attr('y', yValue - 9)
@@ -3265,90 +3001,6 @@ function buildSpeciesTree(selector, vis, speciesTreeJson, wgdNodesInfo, w, h, or
             this.parentNode.insertBefore(this, firstChild);
         }
     });
-
-    // add a condition when hpd is missing
-    var filteredData = nodes.filter(function (d) {
-        return d.hasOwnProperty("branchHPD") && d.branchHPD !== "";
-    });
-    var maxLength = getMaxNodeLength(nodes);
-    if (filteredData.length === 0) {
-        console.log("No 95% CI HPD data to visualize.");
-    } else {
-        vis.selectAll('g.root.node')
-            .attr('class', 'hpd_rect')
-            .append('rect')
-            .attr('x', function (d) {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                var transformAttr = d3.select(this.parentNode).attr('transform');
-                var translate = transformAttr.match(/translate\(([\d\.]+),([\d\.]+)\)/);
-                var x = translate[1];
-                if (ori === "right") {
-                    return yscale(x2) - x - 5;
-                } else {
-                    return yscale(x1) - x;
-                }
-            })
-            .attr("y", -5)
-            .attr('width', function (d) {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                if (ori === "right") {
-                    return yscale(x1) - yscale(x2);
-                } else {
-                    return yscale(x2) - yscale(x1);
-                }
-            })
-            .attr('height', 10)
-            .attr('fill', '#707038')
-            .attr('fill-opacity', 0.3)
-            .attr("data-tippy-content", (d) => {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                return "Divergence Time: <font color='red'>" + numFormatter(maxLength * 100) + "</font><br>" +
-                    "95%CI = [<font color='#00DB00'>" + numFormatter(x1 * 100) +
-                    ",</font> <font color='orange'>" + numFormatter(x2 * 100) + "</font>]";
-            });
-
-        vis.selectAll('g.inner.node')
-            .attr('class', 'hpd_rect')
-            .append('rect')
-            .attr('x', function (d) {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                var transformAttr = d3.select(this.parentNode).attr('transform');
-                var translate = transformAttr.match(/translate\(([\d\.]+),([\d\.]+)\)/);
-                var x = translate[1];
-                var x = translate[1];
-                if (ori === "right") {
-                    return yscale(x2) - x;
-                } else {
-                    return yscale(x1) - x;
-                };
-            })
-            .attr("y", -6)
-            .attr('width', function (d) {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                if (ori === "right") {
-                    return yscale(x1) - yscale(x2);
-                } else {
-                    return yscale(x2) - yscale(x1);
-                }
-            })
-            .attr('height', 12)
-            .attr('fill', '#707038')
-            .attr('fill-opacity', 0.3)
-            .attr("data-tippy-content", function (d) {
-                var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
-                var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
-                return "Divergence Time: <font color='red'>" + numFormatter((maxLength - d.rootDist) * 100) + " Mya</font>" +
-                    "<br></font>95%CI = [<font color='#00DB00'>" + numFormatter(x1 * 100) +
-                    ",</font> <font color='orange'>" + numFormatter(x2 * 100) + "</font>]";
-            })
-
-        tippy(".hpd_rect rect", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [200, null] });
-    }
 
     // draw geologic time scale
     /*     if (maxLength > 20) {
