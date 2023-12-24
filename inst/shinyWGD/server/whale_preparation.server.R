@@ -21,7 +21,7 @@ output$whaleDataUploadPanel <- renderUI({
                                    position: relative;",
                             fileInput(
                                 'orthofinder_data_zip_file',
-                                label=h6(icon("file-zipper"), "Upload the <b>Zipped</b> File"),
+                                label=h6(icon("file-zipper"), HTML("Upload the <b>Zipped</b> File")),
                                 multiple=FALSE,
                                 accept=c(
                                     ".zip",
@@ -105,7 +105,7 @@ output$whaleDataUploadPanel <- renderUI({
                         paste0(
                             "<i class='fas fa-tree' style='color: #5151A2;'>&nbsp;</i>",
                             "<font color='#5151A2'>",
-                            "<i><b>Tree Extraction</b></i></font>"
+                            "<i><b>TimeTreeFetcher</b></i></font>"
                         )
                     )
                 ),
@@ -435,7 +435,6 @@ observe({
                         fluidRow(
                             column(
                                 8,
-                                HTML("Please insert the <b>Hypothetic WGD events</b> to test in the <b>above tree panel</b>. Click the branch and then follow the rule to insert."),
                                 h6(HTML("<font color='#AD1F1F'>Hypothetic WGDs</font> to test:")),
                                 verbatimTextOutput(
                                     "wgdNeededTestedID",

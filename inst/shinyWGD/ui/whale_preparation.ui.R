@@ -38,10 +38,13 @@ Whale_Preparation_ui <- tabPanel(
             div(class="boxLike",
                 style="background-color: white;
                        margin: 5px 5px 5px 5px;
-                       padding: 5px 10px 10px 10px;",
+                       padding: 5px 10px 10px 20px;",
                 fluidRow(
                     column(
-                        9,
+                        12,
+                        h4(icon("cog"), HTML("<b><i>Hypothetic WGD events</b></i> Inserting")),
+                        hr(class="setting"),
+                        HTML("Please insert the <b>Hypothetic WGD events</b> to test in the <b>below tree panel</b>. Click the branch and then follow the rule to insert.<br>"),
                         tags$style(
                             HTML(".rotate-135 {
                                     transform: rotate(135deg);

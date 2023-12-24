@@ -215,6 +215,10 @@ Tree_Reconciliation_ui <- tabPanel(
                             )
                         )
                     )
+                ),
+                column(
+                    12,
+                    uiOutput("whaleTextOutputPanel")
                 )
             )
         )

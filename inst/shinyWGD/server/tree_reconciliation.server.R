@@ -34,6 +34,7 @@ observeEvent(input$whale_TreeRecon_example, {
     })
 })
 
+# example_data_dir <- "/www/bioinformatics01_rw/ShinyWGD/Example_4Sp/"
 example_data_dir <- file.path(getwd(), "demo_data")
 whale_TreeRecon_example_dir <- file.path(example_data_dir, "Example_Whale_TreeRecon")
 
@@ -72,7 +73,7 @@ observeEvent(input$whale_data_zip_file, {
 
     base_dir <- tempdir()
     timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
-    whaleAnalysisDir <- file.path(base_dir, paste0("Ks_data_", gsub("[ :\\-]", "_", timestamp)))
+    whaleAnalysisDir <- file.path(base_dir, paste0("Whale_output_", gsub("[ :\\-]", "_", timestamp)))
     dir.create(whaleAnalysisDir)
     system(
         paste(
@@ -301,7 +302,7 @@ observe({
             species_tree_updated_data <- list(
                 "width"=widthTreeReconSpacing$value
             )
-            speciesTreeFile <- input$uploadSpeciesTree$datapath
+            speciesTreeFile <- paste0(whaleAnalysisDir, "/species_timetree.nwk")
             speciesTree <- readLines(textConnection(readChar(speciesTreeFile, file.info(speciesTreeFile)$size)))
             closeAllConnections()
 
@@ -309,7 +310,7 @@ observe({
             species_tree_updated_data[["height"]] <- heightTreeReconSpacing$value
 
             # read whale output and determine which wgd events are retained by whale
-            lines <- readLines(whaleOutputFile)
+            lines <- readLines(whaleOutputFile, warn=FALSE)
             lines <- lines[-(1:4)]
 
             dataTmp <- strsplit(lines, "\\s+\\|\\s+|\\s+")
@@ -322,7 +323,7 @@ observe({
             whaleOut <- whaleOutTmp[c("wgdId", "q", "K")]
             whaleOut$K <- apply(whaleOut, 1, function(row) gsub("[><]", "", row["K"]))
             species_tree_updated_data[["wgdInfo"]] <- whaleOut
-            session$sendCustomMessage("speciesTreeUpdatedPlot", species_tree_updated_data)
+            session$sendCustomMessage("speciesTreeUpdatedPlotOLD", species_tree_updated_data)
 
             output$whaleModelTxt <- renderText({
                 whaleModelFile <- paste0(subStudyAnalysisDir, "/output/model.txt")
@@ -366,6 +367,8 @@ observe({
                 }
             })
 
+            whaleModel <- gsub("run_", "", input$select_sub_study)
+            whaleModel <- gsub("_model_\\d+", "", whaleModel)
             panelTitle <- ""
             if( whaleModel == "Constant_rates" ){
                 panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>constant-rates model</i></b></font>"))
@@ -374,52 +377,49 @@ observe({
             }else{
                 panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>critical branch-specific DLWGD model</i></b></font>"))
             }
-            output$whaleConfigurePanel <- renderUI({
+            output$whaleTextOutputPanel <- renderUI({
                 fluidRow(
                     column(
                         id="whaleConfigure",
                         width=12,
-                        div(class="boxLike",
-                            style="background-color: #F2FFE4 ;",
-                            panelTitle,
-                            hr(class="setting"),
-                            fluidRow(
-                                column(
-                                    12,
-                                    h5(HTML("Hypothetic WGDs: the <font color='orange'>posterior mean of duplicate retention rate (q)</font> and the <font color='orange'>Bayes factor (K)</font>")),
-                                    verbatimTextOutput(
-                                        "posteriorMeanBayesFactorTxT",
-                                        placeholder=TRUE
-                                    ),
-                                    h6(HTML("This is the log10 Bayes factor in favor of the <i>q</i> = 0 model. A Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode."))
-                                )
+                        hr(class="splitting"),
+                        panelTitle,
+                        hr(class="setting"),
+                        fluidRow(
+                            column(
+                                12,
+                                h5(HTML("Hypothetic WGDs: the <font color='orange'>posterior mean of duplicate retention rate (q)</font> and the <font color='orange'>Bayes factor (K)</font>")),
+                                verbatimTextOutput(
+                                    "posteriorMeanBayesFactorTxT",
+                                    placeholder=TRUE
+                                ),
+                                h6(HTML("This is the log10 Bayes factor in favor of the <i>q</i> = 0 model. A Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode."))
+                            )
+                        ),
+                        hr(class="setting"),
+                        fluidRow(
+                            column(
+                                12,
+                                h5("Please download the analysis data through the left Download button to see more details about the julia script, the model, and MCMC chains.")
+                            )
+                        ),
+                        column(
+                            12,
+                            h5(HTML("The Chains MCMC chain summary info")),
+                            verbatimTextOutput(
+                                "mcmcChainSummaryTxt",
+                                placeholder=TRUE
                             ),
-                            hr(class="setting")
-                            # fluidRow(
-                            #     column(
-                            #         12,
-                            #         h5("Please download the analysis data through the left Download button to see more details about the julia script, the model, and MCMC chains.")
-                            #     )
-                            # )
-                            # column(
-                            #     12,
-                            #     h5(HTML("The Chains MCMC chain summary info")),
-                            #     verbatimTextOutput(
-                            #         "mcmcChainSummaryTxt",
-                            #         placeholder=TRUE
-                            #     ),
-                            #     h6(HTML("<font color='red'>Note:</font> if the <code>ESS</code> is less than 100, please increase the chain and restart <font color='#a23400'><b><i>Whale</b></i></font>"))
-                            # ),
-                            # hr(class="setting"),
-                            # column(
-                            #     12,
-                            #     h5(HTML("The model used in <font color='#a23400'><i><b>whale</b></i></font>:")),
-                            #     verbatimTextOutput(
-                            #         "whaleModelTxt",
-                            #         placeholder=TRUE
-                            #     )
-                            # )
-                            #    )
+                            h6(HTML("<font color='red'>Note:</font> if the <code>ESS</code> is less than 100, please increase the chain and restart <font color='#a23400'><b><i>Whale</b></i></font>"))
+                        ),
+                        hr(class="setting"),
+                        column(
+                            12,
+                            h5(HTML("The model used in <font color='#a23400'><i><b>whale</b></i></font>:")),
+                            verbatimTextOutput(
+                                "whaleModelTxt",
+                                placeholder=TRUE
+                            )
                         )
                     )
                 )

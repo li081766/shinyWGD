@@ -124,6 +124,7 @@ EOF
 		echo "Kdf = summarize(chain0[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
+		echo "@info dfQK" >>$outFile
 
 	elif [ "$whaleModel" == "Critical_branch" ]; then
 		echo "param = DLWGD(λ=zeros(nn), μ=zeros(nn), η=0.9, q=${qList})" >>$outFile
@@ -182,6 +183,7 @@ EOF
 		echo "Kdf = summarize(chaincritical[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
+		echo "@info dfQK" >>$outFile
 
     else
 		echo "param = DLWGD(λ=zeros(nn), μ=zeros(nn), η=0.9, q=${qList})" >>$outFile
@@ -252,6 +254,7 @@ EOF
 		echo "Kdf = summarize(chainrelaxed[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
+		echo "@info dfQK" >>$outFile
     fi
 
 	echo "wgd_data = readlines(joinpath(out, \"../..\", \"wgdNodes.txt\"))" >>$outFile
