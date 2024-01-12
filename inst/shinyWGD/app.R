@@ -82,7 +82,7 @@ ui <- tagList(
         windowTitle="shinyWGD",
         Introduction_ui,
         navbarMenu(
-            "Scripts",
+            "Setup",
             icon=icon("terminal"),
             Data_preparation_ui,
             Whale_Preparation_ui,
