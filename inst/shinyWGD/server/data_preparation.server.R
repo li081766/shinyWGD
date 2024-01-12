@@ -770,7 +770,9 @@ observe({
                     dir.create(original_data_wd)
 
                     data_preparation_dir_Val(working_wd)
+                    # system(paste("chmod -R 777", working_wd))
                     original_data_wd_Val(original_data_wd)
+                    # system(paste("chmod -R 777", original_data_wd))
 
                     system(
                         paste0(
@@ -876,6 +878,7 @@ observeEvent(input$wgd_go, {
             )
         }
         else{
+            shinyjs::runjs('$("#progress_modal").modal("show");')
             progress_data <- list(
                 "actionbutton"="wgd_go",
                 "container"="wgd_progress_container_js"
@@ -910,6 +913,7 @@ observeEvent(input$wgd_go, {
                 wgd_working_dir <- paste0(working_wd, "/wgd_wd")
                 if( !dir.exists(wgd_working_dir) ){
                     dir.create(wgd_working_dir)
+                    # system(paste("chmod -R 777", wgd_working_dir))
                 }
                 wgd_cmd_sh_file <- paste0(wgd_working_dir, "/run_wgd.sh")
                 wgd_cmd_con <- file(wgd_cmd_sh_file, open="w")
@@ -995,6 +999,7 @@ observeEvent(input$wgd_go, {
                 updateProgress("wgd_progress_container_js", 100, "Create wgd code")
                 Sys.sleep(2)
             })
+            shinyjs::runjs('$("#progress_modal").modal("hide");');
         }
     }
     else{
@@ -1010,6 +1015,7 @@ observeEvent(input$wgd_go, {
             ncols <- ncol(data_table)
             nrows <- nrow(data_table)
             if( nrows == 1 ){
+                shinyjs::runjs('$("#progress_modal").modal("show");')
                 progress_data <- list(
                     "actionbutton"="wgd_go",
                     "container"="wgd_progress_container_js"
@@ -1043,6 +1049,7 @@ observeEvent(input$wgd_go, {
                     wgd_working_dir <- paste0(working_wd, "/wgd_wd")
                     if( !dir.exists(wgd_working_dir) ){
                         dir.create(wgd_working_dir)
+                        # system(paste("chmod -R 777", wgd_working_dir))
                     }
                     wgd_cmd_sh_file <- paste0(wgd_working_dir, "/run_wgd.sh")
                     wgd_cmd_con <- file(wgd_cmd_sh_file, open="w")
@@ -1128,6 +1135,7 @@ observeEvent(input$wgd_go, {
                     updateProgress("wgd_progress_container_js", 100, "Create wgd code")
                     Sys.sleep(2)
                 })
+                shinyjs::runjs('$("#progress_modal").modal("hide");');
             }
         }else{
             shinyalert(
@@ -1194,6 +1202,7 @@ observeEvent(input$ksrates_go, {
                 )
             }
             else{
+                shinyjs::runjs('$("#progress_modal").modal("show");')
                 progress_data <- list(
                     "actionbutton"="ksrates_go",
                     "container"="ksrates_progress_container_js"
@@ -1214,6 +1223,7 @@ observeEvent(input$ksrates_go, {
                     ksratesDir <- paste0(working_wd, "/ksrates_wd")
                     if( !file.exists(ksratesDir) ){
                         dir.create(ksratesDir)
+                        # system(paste("chmod -R 777", ksratesDir))
                     }
                     ksratesconf <- paste0(ksratesDir, "/ksrates_conf.txt")
                     speciesinfoconf <- paste0(working_wd, "/Species.info.xls")
@@ -1251,10 +1261,12 @@ observeEvent(input$ksrates_go, {
                     incProgress(amount=1)
                     Sys.sleep(1)
                 })
+                shinyjs::runjs('$("#progress_modal").modal("hide");');
             }
         }
         else{
             if( !is.null(input$selected_data_files) ){
+                shinyjs::runjs('$("#progress_modal").modal("show");')
                 progress_data <- list("actionbutton"="ksrates_go",
                                       "container"="ksrates_progress_container_js")
                 session$sendCustomMessage(
@@ -1285,9 +1297,11 @@ observeEvent(input$ksrates_go, {
                             incProgress(amount=.35, message="Processing CDS / Annotation Files ...")
                             updateProgress("ksrates_progress_container_js", 35, "Create ksrates code")
                             Sys.sleep(1)
+
                             ksratesDir <- paste0(working_wd, "/ksrates_wd")
                             if( !file.exists(ksratesDir) ){
                                 dir.create(ksratesDir)
+                                # system(paste("chmod -R 777", ksratesDir))
                             }
                             ksratesconf <- paste0(ksratesDir, "/ksrates_conf.txt")
                             speciesinfoconf <- paste0(working_wd, "/Species.info.xls")
@@ -1324,8 +1338,9 @@ observeEvent(input$ksrates_go, {
 
                             incProgress(amount=1)
                             updateProgress("ksrates_progress_container_js", 100, "Create ksrates code")
-                            Sys.sleep(.1)
+                            Sys.sleep(1)
                         })
+                        shinyjs::runjs('$("#progress_modal").modal("hide");');
                     }
                 }
             }else{
@@ -1400,6 +1415,7 @@ observeEvent(input$iadhore_go, {
         )
     }
     else{
+        shinyjs::runjs('$("#progress_modal").modal("show");')
         progress_data <- list(
             "actionbutton"="iadhore_go",
             "container"="iadhore_progress_container_js"
@@ -1416,6 +1432,7 @@ observeEvent(input$iadhore_go, {
             syn_dir <- paste0(working_wd, "/i-ADHoRe_wd")
             if( !file.exists(syn_dir) ){
                 dir.create(syn_dir)
+                # system(paste("chmod -R 777", syn_dir))
             }
             cmd_file <- paste0(syn_dir, "/run_diamond_iadhore.sh")
             system(
@@ -1448,7 +1465,7 @@ observeEvent(input$iadhore_go, {
             updateProgress("iadhore_progress_container_js", 70, "Creat i-ADHoRe code")
             Sys.sleep(1)
 
-            if( input$multiple_iadhore ){
+            if( isTruthy(input$multiple_iadhore) ){
                 system(
                     paste(
                         "sh tools/generating_iadhore_codes.local.shell",
@@ -1478,6 +1495,7 @@ observeEvent(input$iadhore_go, {
             updateProgress("iadhore_progress_container_js", 100, "Creat i-ADHoRe code")
             Sys.sleep(1)
         })
+        shinyjs::runjs('$("#progress_modal").modal("hide");');
     }
 
     iadhorecommandFile <- paste0(working_wd, "/i-ADHoRe_wd/run_diamond_iadhore.sh")
@@ -1517,6 +1535,7 @@ observeEvent(input$orthofinder_go, {
     original_data_wd <- original_data_wd_Val()
     species_info <- paste0(working_wd, "/Species.info.xls")
     if( file.exists(species_info) ){
+        shinyjs::runjs('$("#progress_modal").modal("show");')
         progress_data <- list(
             "actionbutton"="orthofinder_go",
             "container"="orthofinder_progress_container_js"
@@ -1533,10 +1552,12 @@ observeEvent(input$orthofinder_go, {
             orthofinder_dir <- paste0(working_wd, "/OrthoFinder_wd")
             if( !dir.exists(orthofinder_dir) ){
                 dir.create(orthofinder_dir)
+                # system(paste("chmod -R 777", orthofinder_dir))
             }
             ds_tree_dir <- paste0(orthofinder_dir, "/ds_tree_wd")
             if( !dir.exists(ds_tree_dir) ){
                 dir.create(ds_tree_dir)
+                # system(paste("chmod -R 777", ds_tree_dir))
             }
             cmd_file <- paste0(orthofinder_dir, "/run_orthofinder.sh")
             incProgress(amount=.1, message="Create inputs file for OrthoFinder ...")
@@ -1565,6 +1586,7 @@ observeEvent(input$orthofinder_go, {
             updateProgress("orthofinder_progress_container_js", 100, "Create OrthoFinder code")
             Sys.sleep(1)
         })
+        shinyjs::runjs('$("#progress_modal").modal("hide");');
     }
     else{
         shinyalert(
@@ -1715,6 +1737,66 @@ observeEvent(input$job_run_server, {
         # submit the job to psb computing cluster
         sh_files <- list.files(working_wd, pattern="\\.sh$", full.names=TRUE, recursive=TRUE)
 
+        ksrates_sh_file <- sh_files[grepl("run_ksrates.sh", sh_files)]
+
+        ksrates_rest_sh_file <- sh_files[grepl("run_paralog_ks_rest_species.sh", sh_files)]
+
+        iadhore_sh_file <- sh_files[grepl("run_diamond_iadhore.sh", sh_files)]
+
+        sh_files <- sh_files[!(sh_files %in% c(ksrates_sh_file[1], ksrates_rest_sh_file[1]))]
+
+        system(
+            paste(
+                "cat",
+                ksrates_sh_file[1],
+                ksrates_rest_sh_file[1],
+                "| grep -v '#SBATCH'",
+                "| sed 's/--n-threads 1/--n-threads 2/'",
+                ">",
+                paste0(dirname(ksrates_sh_file[1]), "/ksrates_qsub.sh")
+            )
+        )
+
+        system(
+            paste(
+                "echo 'cd ..'",
+                ">>",
+                paste0(dirname(ksrates_sh_file[1]), "/ksrates_qsub.sh")
+            )
+        )
+
+        system(
+            paste(
+                "head -n 2",
+                paste0(getwd()[1], "/tools/archive_compress_files_for_visualization.shell"),
+                ">>",
+                paste0(dirname(ksrates_sh_file[1]), "/ksrates_qsub.sh")
+            )
+        )
+
+        system(
+            paste(
+                "echo 'cd ..'",
+                ">>",
+                iadhore_sh_file[1]
+            )
+        )
+
+        system(
+            paste(
+                "sed -n '4,13p'",
+                paste0(getwd()[1], "/tools/archive_compress_files_for_visualization.shell"),
+                ">>",
+                iadhore_sh_file[1]
+            )
+        )
+
+        sh_files <- c(
+            paste0(dirname(ksrates_sh_file[1]), "/ksrates_qsub.sh"),
+            sh_files
+        )
+
+        shinyjs::runjs('$("#progress_modal").modal("show");')
         shiny::withProgress(message='Submit job in progress', value=0, {
 
             total_jobs <- length(sh_files)
@@ -1726,26 +1808,29 @@ observeEvent(input$job_run_server, {
                     message=paste0("Dealing with ", basename(script_file), " ...")
                 )
 
-                if (length(grepl("run_ksrates.sh", script_file)) > 0) {
-                    # Do your job submission here
+                qsub_wd <- dirname(script_file)
+                setwd(qsub_wd)
+
+                if (length(grepl("ksrates_qsub.sh", script_file)) > 0) {
+                    # system(paste("qsub -cwd -l h_vmem=8g", script_file))
                     Sys.sleep(10)
-                } else if (length(grepl("run_orthofinder.sh", script_file)) > 0) {
-                    # Do your job submission here
-                    Sys.sleep(10)
-                } else if (length(grepl("run_paralog_ks_rest_species.sh", script_file)) > 0) {
-                    # Do your job submission here
+                } else if (length(grepl("run_diamond_iadhore.sh", script_file)) > 0) {
+                    # system(paste("qsub -cwd -l h_vmem=8g", script_file))
                     Sys.sleep(10)
                 } else if (length(grepl("run_wgd.sh", script_file)) > 0) {
-                    # Do your job submission here
+                    # system(paste("qsub -cwd -l h_vmem=8g", script_file))
+                    Sys.sleep(10)
+                } else if (length(grepl("run_orthofinder.sh", script_file)) > 0) {
+                    # system(paste("qsub -cwd -l h_vmem=8g -pe serial 4", script_file))
                     Sys.sleep(10)
                 }
             }
-
-            # Execute the jobs
             lapply(sh_files, submit_job)
 
             incProgress(amount=1, message="Done")
         })
+        setwd(working_wd)
+        shinyjs::runjs('$("#progress_modal").modal("hide");');
     }
 })
 
@@ -1845,7 +1930,7 @@ output$search_download_page <- renderUI({
     )
 })
 
-updateProgress <- function(container, width, type) {
+updateProgressDownload <- function(container, width, type) {
     session$sendCustomMessage(
         "UpdateProgressBarDownload",
         list(container=container, width=width, type=type)
@@ -1853,6 +1938,7 @@ updateProgress <- function(container, width, type) {
 }
 
 observeEvent(input$comfirm_job_search, {
+    # data_wd <- "/www/bioinformatics01_rw/ShinyWGD"
     data_wd <- "/var/folders/dm/nv89839s3dngv7d76s59n0rr0000gn/T/Rtmpg0qnEU/"
     dirs_list <- list.dirs(path=data_wd, full.names=TRUE, recursive=FALSE)
     dirs_list <- dirs_list[grep("Analysis_", dirs_list)]
@@ -1866,11 +1952,11 @@ observeEvent(input$comfirm_job_search, {
                 "Progress_Bar_Complete",
                 progress_data
             )
-            updateProgress("job_search_progress_container_js", 10, "Searching database")
+            updateProgressDownload("job_search_progress_container_js", 10, "Searching database")
 
             job_wd <- dirs_list[grep(input$job_search_identifier, dirs_list)]
             Sys.sleep(2)
-            updateProgress("job_search_progress_container_js", 20, "Checking job status")
+            updateProgressDownload("job_search_progress_container_js", 20, "Checking job status")
             compressed_job_files_list <- list.files(
                 path=job_wd,
                 pattern="\\.tar\\.gz$",
@@ -1925,7 +2011,7 @@ observeEvent(input$comfirm_job_search, {
                         )
                     }
 
-                    updateProgress(
+                    updateProgressDownload(
                         "job_search_progress_container_js",
                         20 + 10 * i,
                         "Checking job status"
@@ -1935,7 +2021,7 @@ observeEvent(input$comfirm_job_search, {
                     ""
                 })
             }else{
-                updateProgress(
+                updateProgressDownload(
                     "job_search_progress_container_js",
                     60,
                     "Checking job status"
@@ -2005,7 +2091,7 @@ observeEvent(input$comfirm_job_search, {
             })
 
             Sys.sleep(2)
-            updateProgress("job_search_progress_container_js", 100, "Done")
+            updateProgressDownload("job_search_progress_container_js", 100, "Done")
         }else{
             shinyalert(
                 "Oops",

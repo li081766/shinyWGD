@@ -2,6 +2,52 @@ Data_preparation_ui <- tabPanel(
     "Data Preparation",
     value="data_preparation",
     fluidRow(
+        tags$head(
+            tags$link(rel="stylesheet", type="text/css", href="sand_clock_loader.css"),
+        ),
+        tags$head(
+            tags$style(
+                HTML(
+                    "
+                    #progress_modal {
+                        display: none;
+                        position: fixed;
+                        width: 100%;
+                        height: 100%;
+                        background-color: none;
+                        left: 50%;
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2002;
+                    }
+
+                    #progress_container_parent {
+                        background-color: rgba(128, 128, 128, 0.1);
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2008;
+                    }
+                    "
+                )
+            )
+        ),
+        fluidRow(
+            div(
+                id="progress_modal",
+                div(
+                    id="progress_container_parent",
+                    class="modal-content",
+                    includeHTML("www/sand_clock_loader.html"),
+                )
+            )
+        )
+    ),
+    fluidRow(
         column(
             id="SettingPanel",
             width=6,
