@@ -245,6 +245,14 @@ observe({
     species_tree_data[["height"]] <- heightTreeReconSpacing$value[1]
     species_tree_data[["tree_plot_div"]] <- "speciesWhaleTreeRecon_plot"
     session$sendCustomMessage("speciesTreeUpdatedPlot", species_tree_data)
+    output$whaleReconTreeDesPanel <- renderUI({
+        fluidRow(
+            column(
+                10,
+                HTML("In the above plot, the WGD with the <b><font color='green'>solid green bars</font></b> are supported with <b>retention rates (q)</b> significantly different from zero, while the <b><font color='#6F6B0A'>hollow WGD bars</font></b> are the ones with retention rates not different from zero."),
+            )
+        )
+    })
 })
 
 output$whaleOutputPanel <- renderUI({
@@ -264,6 +272,83 @@ output$whaleOutputPanel <- renderUI({
     )
 })
 
+widthPosteriorSpacing <- reactiveValues(value=900)
+heightPosteriorSpacing <- reactiveValues(value=NULL)
+observeEvent(input$posterior_svg_vertical_spacing_add_species, {
+    heightPosteriorSpacing$value <- heightPosteriorSpacing$value + 50
+})
+observeEvent(input$posterior_svg_vertical_spacing_sub_species, {
+    heightPosteriorSpacing$value <- heightPosteriorSpacing$value - 50
+})
+observeEvent(input$posterior_svg_horizontal_spacing_add_species, {
+    widthPosteriorSpacing$value <- widthPosteriorSpacing$value + 50
+})
+observeEvent(input$posterior_svg_horizontal_spacing_sub_species, {
+    widthPosteriorSpacing$value <- widthPosteriorSpacing$value - 50
+})
+
+observe({
+    whaleAnalysisDir <- whale_analysis_dir_Val()
+
+    wgdNoteFile <- paste0(whaleAnalysisDir, "/wgdNodes.txt")
+    if( file.exists(wgdNoteFile) ){
+        wgdNoteFile_content <- readLines(wgdNoteFile)
+        wgdNoteFile_content <- wgdNoteFile_content[wgdNoteFile_content != ""]
+        heightPosteriorSpacing$value <- ceiling(length(wgdNoteFile_content) / 4) * 300
+    }
+})
+
+observe({
+    if( isTruthy(input$select_sub_study) && input$select_sub_study != "" ){
+        whaleAnalysisDir <- whale_analysis_dir_Val()
+
+        subStudyAnalysisDir <- paste0(whaleAnalysisDir, "/", input$select_sub_study)
+
+        whaleModelFile <- paste0(subStudyAnalysisDir, "/output/model.txt")
+        whaleBranchModelFile <- paste0(subStudyAnalysisDir, "/output/bmodel.txt")
+        whaleOutputFile <- paste0(
+            subStudyAnalysisDir,
+            "/output/",
+            "posterior_mean_of_duplicate_retention_rate_Bayes_factor.txt"
+        )
+
+        if( !file.exists(whaleOutputFile) ){
+            shinyalert(
+                "Opps",
+                "No correct result of Whale is detected. Please make sure the operation of Whale without errors...",
+                type="error"
+            )
+        }
+        else{
+            chain_files <- list.files(
+                path=subStudyAnalysisDir,
+                pattern="chain.*\\.csv$",
+                full.names=TRUE,
+                recursive=TRUE
+            )
+
+            suppressMessages(
+                chain_info_df <- vroom(
+                    chain_files[1],
+                    delim=",",
+                    col_names=TRUE
+                )
+            )
+
+            posterior_dist_df <- chain_info_df[, grepl("^q", names(chain_info_df))]
+            colnames(posterior_dist_df) <- gsub("^q", "wgd", colnames(posterior_dist_df))
+
+            posterior_dist_data <- list(
+                "width"=widthPosteriorSpacing$value[1]
+            )
+            posterior_dist_data[["posterior_dist_df"]] <- posterior_dist_df
+            posterior_dist_data[["height"]] <- heightPosteriorSpacing$value[1]
+            posterior_dist_data[["posterior_plot_div"]] <- "posterior_Dist_plot_div"
+            session$sendCustomMessage("posteriorDistPlot", posterior_dist_data)
+        }
+    }
+})
+
 observe({
     whaleAnalysisDir <- whale_analysis_dir_Val()
 
@@ -278,7 +363,6 @@ observe({
         })
     }
 
-
     if( isTruthy(input$select_sub_study) && input$select_sub_study != "" ){
         subStudyAnalysisDir <- paste0(whaleAnalysisDir, "/", input$select_sub_study)
 
@@ -290,7 +374,7 @@ observe({
             "posterior_mean_of_duplicate_retention_rate_Bayes_factor.txt"
         )
 
-        if( !file.exists(whaleModelFile) && !file.exists(whaleBranchModelFile) && !file.exists(whaleOutputFile) ){
+        if( !file.exists(whaleOutputFile) ){
             shinyalert(
                 "Opps",
                 "No correct result of Whale is detected. Please make sure the operation of Whale without errors...",
@@ -324,6 +408,27 @@ observe({
             whaleOut$K <- apply(whaleOut, 1, function(row) gsub("[><]", "", row["K"]))
             species_tree_updated_data[["wgdInfo"]] <- whaleOut
             session$sendCustomMessage("speciesTreeUpdatedPlotOLD", species_tree_updated_data)
+
+            whaleModel <- gsub("run_", "", input$select_sub_study)
+            whaleModel <- gsub("_model_\\d+", "", whaleModel)
+            panelTitle <- ""
+            if( whaleModel == "Constant_rates" ){
+                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>constant-rates DL + WGD model</i></b></font>"))
+                posteriorPanelTitleTexT <- h5(HTML("The <font color='#FA9B21'><b>posterior distributions</b></font> of the WGD <b>retention rates (q)</b> for the hypothetic WGDs in <font color='#FA9B21'><b><i>constant-rates DL + WGD model</i></b></font>"))
+            }else if( whaleModel == "Relaxed_branch" ){
+                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>relaxed branch-specific DL + WGD model</i></b></font>"))
+                posteriorPanelTitleTexT <- h5(HTML("The <font color='#FA9B21'><b>posterior distributions</b></font> of the WGD <b>retention rates (q)</b> for the hypothetic WGDs in <font color='#FA9B21'><b><i>relaxed branch-specific DL + WGD model</i></b></font>"))
+            }else{
+                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>critical branch-specific DL + WGD model</i></b></font>"))
+                posteriorPanelTitleTexT <- h5(HTML("The <font color='#FA9B21'><b>posterior distributions</b></font> of the WGD <b>retention rates (q)</b> for the hypothetic WGDs in <font color='#FA9B21'><b><i>critical branch-specific DL + WGD model</i></b></font>"))
+            }
+
+            output$posteriorPanelTitle <- renderUI({
+                column(
+                    12,
+                    posteriorPanelTitleTexT
+                )
+            })
 
             output$whaleModelTxt <- renderText({
                 whaleModelFile <- paste0(subStudyAnalysisDir, "/output/model.txt")
@@ -363,20 +468,11 @@ observe({
                     shinyalert(
                         "Error",
                         "The output of Whale is uncorrect. Please make sure that you have the proper input setting...",
-                        type="error"                )
+                        type="error"
+                    )
                 }
             })
 
-            whaleModel <- gsub("run_", "", input$select_sub_study)
-            whaleModel <- gsub("_model_\\d+", "", whaleModel)
-            panelTitle <- ""
-            if( whaleModel == "Constant_rates" ){
-                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>constant-rates model</i></b></font>"))
-            }else if( whaleModel == "Relaxed_branch" ){
-                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>relaxed branch-specific DLWGD model</i></b></font>"))
-            }else{
-                panelTitle <- h4(icon("poll"), HTML("Whale Output in <font color='#FA9B21'><b><i>critical branch-specific DLWGD model</i></b></font>"))
-            }
             output$whaleTextOutputPanel <- renderUI({
                 fluidRow(
                     column(

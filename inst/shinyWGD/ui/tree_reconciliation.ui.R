@@ -209,10 +209,88 @@ Tree_Reconciliation_ui <- tabPanel(
                             )
                         ),
                         column(
-                            12,
+                            9,
                             div(
                                 id="speciesWhaleTreeRecon_plot",
+                            ),
+                            uiOutput("whaleReconTreeDesPanel")
+                        )
+                    )
+                ),
+                column(
+                    12,
+                    hr(class="setting")
+                ),
+                column(
+                    12,
+                    uiOutput("posteriorPanelTitle"),
+                    fluidRow(
+                        column(
+                            9,
+                            # tags$style(
+                            #     HTML(".rotate-135 {
+                            #     transform: rotate(135deg);
+                            # }"),
+                            #     HTML(".rotate-45{
+                            #     transform: rotate(45deg);
+                            # }")
+                            # ),
+                            # actionButton(
+                            #     "posterior_svg_vertical_spacing_add_species",
+                            #     "",
+                            #     icon("arrows-alt-v"),
+                            #     title="Expand vertical spacing",
+                            #     style="border-color: #fff;"
+                            # ),
+                            # actionButton(
+                            #     "posterior_svg_vertical_spacing_sub_species",
+                            #     "",
+                            #     icon(
+                            #         "down-left-and-up-right-to-center",
+                            #         verify_fa=FALSE,
+                            #         class="rotate-135"
+                            #     ),
+                            #     title="Compress vertical spacing",
+                            #     style="border-color: #fff;"
+                            # ),
+                            # actionButton(
+                            #     "posterior_svg_horizontal_spacing_add_species",
+                            #     "",
+                            #     icon("arrows-alt-h"),
+                            #     title="Expand horizontal spacing",
+                            #     style="border-color: #fff;"
+                            # ),
+                            # actionButton(
+                            #     "posterior_svg_horizontal_spacing_sub_species",
+                            #     "",
+                            #     icon(
+                            #         "down-left-and-up-right-to-center",
+                            #         verify_fa=FALSE,
+                            #         class="rotate-45"
+                            #     ),
+                            #     title="Compress horizontal spacing",
+                            #     style="border-color: #fff; "
+                            # ),
+                            downloadButton_custom(
+                                "posteriorDistPlotDownload",
+                                status="secondary",
+                                icon=icon("download"),
+                                label=HTML(""),
+                                title="Download svg figure",
+                                class="my-download-button-class",
+                                style="color: #fff;
+                                       background-color: #6B8E23;
+                                       border-color: #fff;
+                                       padding: 5px 14px 5px 14px;
+                                       margin: 5px 5px 5px 5px;"
                             )
+                        ),
+                        column(
+                            8,
+                            div(
+                                id="posterior_Dist_plot_div",
+                            ),
+                            # uiOutput("whaleReconTreeDesPanel")
                         )
                     )
                 ),
