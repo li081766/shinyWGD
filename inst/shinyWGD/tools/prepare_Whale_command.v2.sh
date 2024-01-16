@@ -50,7 +50,17 @@ EOF
 			continue
 		fi
 
-		parts=$(echo "$line" | sed 's/ //g' |awk -F '[:-]' '{print "insertnode!(getlca(tree, \""$2"\", \""$3"\"), name=\""$1"\")"}')
+		name=$(echo "$line" | sed 's/ //g' | awk -F '[:-]' '{print $1}')
+    	value2=$(echo "$line" | sed 's/ //g' | awk -F '[:-]' '{print $2}')
+    	value3=$(echo "$line" | sed 's/ //g' | awk -F '[:-]' '{print $3}')
+
+	   	if [[ "$value2" == "$value3" ]]; then
+		   	parts="insertnode!(getlca(tree, \"$value2\"), name=\"$name\")"
+		else
+			parts="insertnode!(getlca(tree, \"$value2\", \"$value3\"), name=\"$name\")"
+		fi
+
+		#parts=$(echo "$line" | sed 's/ //g' |awk -F '[:-]' '{print "insertnode!(getlca(tree, \""$2"\", \""$3"\"), name=\""$1"\")"}')
 		echo ${parts} >> ${outFile}
 		((row_count++))
 		random_value=$(awk -v seed="${row_count}" 'BEGIN{srand(seed); r=rand(); printf "%.3f\n", r}')
@@ -124,7 +134,6 @@ EOF
 		echo "Kdf = summarize(chain0[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
-		echo "@info dfQK" >>$outFile
 
 	elif [ "$whaleModel" == "Critical_branch" ]; then
 		echo "param = DLWGD(λ=zeros(nn), μ=zeros(nn), η=0.9, q=${qList})" >>$outFile
@@ -183,7 +192,6 @@ EOF
 		echo "Kdf = summarize(chaincritical[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
-		echo "@info dfQK" >>$outFile
 
     else
 		echo "param = DLWGD(λ=zeros(nn), μ=zeros(nn), η=0.9, q=${qList})" >>$outFile
@@ -254,7 +262,6 @@ EOF
 		echo "Kdf = summarize(chainrelaxed[${qqK}], Whale.bayesfactor)" >>$outFile
 		echo "K = DataFrame(Kdf)" >>$outFile
 		echo "dfQK = DataFrame(q̅ = Q, K = K.bayesfactor)" >>$outFile
-		echo "@info dfQK" >>$outFile
     fi
 
 	echo "wgd_data = readlines(joinpath(out, \"../..\", \"wgdNodes.txt\"))" >>$outFile

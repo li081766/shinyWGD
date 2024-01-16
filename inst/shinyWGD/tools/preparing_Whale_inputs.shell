@@ -2,7 +2,7 @@
 
 # Check if the correct number of arguments is provided
 if [ $# -ne 3 ]; then
-	echo "Usage: $0 <Orthogroups.tsv> <focal_species> <num_threads>"
+	echo "Usage: $0 <Orthogroups.tsv> <MultipleSequenceAlignmentsDir> <num_threads>"
 	exit 1
 fi
 
@@ -187,15 +187,14 @@ EOF
 
 # Main body
 # determine_clade_filter_orthofinder $1 $2 $3 $4
-python script_dir/orthofilter.py $1 $2 orthogroups.filtered.tsv
+# python script_dir/orthofilter.py $1 $2 orthogroups.filtered.tsv
 
 #total_genefamily=$(wc -l < orthogroups.filtered.tsv)
 #if (( $total_genefamily >= 1000 )); then
 #	select_random_1000_genefamily orthogroups.filtered.tsv orthogroups.filtered_1000gf.tsv
 #fi
 
-orthogroup_dir=$(dirname "$1")
-align_dir=$(dirname $orthogroup_dir)
+align_dir=$2
 
 if [ ! -d "geneTreeCCD" ]; then
     mkdir "geneTreeCCD"
@@ -239,7 +238,6 @@ fi
 # Wait for all processes to complete
 wait
 
-
 # Move all ale_files into a new folder to filter
 if [ -d "all_tree_ALE_files" ]; then
 	rm -r "all_tree_ALE_files"
@@ -260,9 +258,8 @@ fi
 
 cat filtered_tree_ALE_files.tsv | while read i; do cp $i selected_tree_ALE_files; done
 
-#tar czf all_tree_ALE_files.tar.gz all_tree_ALE_files && rm -r all_tree_ALE_files
-#tar czf geneTreeCCD.tar.gz geneTreeCCD && rm -r geneTreeCCD
-
+tar czf all_tree_ALE_files.tar.gz all_tree_ALE_files && rm -r all_tree_ALE_files
+tar czf geneTreeCCD.tar.gz geneTreeCCD && rm -r geneTreeCCD
 
 # Get the end time of the script
 end_time=$(date +%s)

@@ -2,6 +2,52 @@ Whale_Preparation_ui <- tabPanel(
     "Whale Preparation",
     value="whale_preparation",
     fluidRow(
+        tags$head(
+            tags$link(rel="stylesheet", type="text/css", href="sand_clock_loader.css"),
+        ),
+        tags$head(
+            tags$style(
+                HTML(
+                    "
+                    #progress_modal_whale {
+                        display: none;
+                        position: fixed;
+                        width: 100%;
+                        height: 100%;
+                        background-color: none;
+                        left: 50%;
+                        top: 50%;
+                        transform: translate(-50%, -50%);
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2000;
+                    }
+
+                    #progress_container_parent_whale {
+                        background-color: rgba(128, 128, 128, 0.1);
+                        width: 100%;
+                        height: 100%;
+                        border: none;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2001;
+                    }
+                    "
+                )
+            )
+        ),
+        fluidRow(
+            div(
+                id="progress_modal_whale",
+                div(
+                    id="progress_container_parent_whale",
+                    class="modal-content",
+                    includeHTML("www/sand_clock_loader.html"),
+                )
+            )
+        )
+    ),
+    fluidRow(
         column(
             id="whalePreparationTitle",
             width=12,

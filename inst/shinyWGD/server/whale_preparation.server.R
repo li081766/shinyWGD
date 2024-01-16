@@ -370,7 +370,7 @@ observeEvent(input$svg_horizontal_spacing_sub_species, {
     widthSpacing$value <- widthSpacing$value - 30
 })
 
-species_in_Tree_list <- reactiveVal(NULL)
+# species_in_Tree_list <- reactiveVal(NULL)
 
 observe({
     if( isTruthy(input$uploadSpeciesTimeTree) ){
@@ -383,7 +383,7 @@ observe({
 
         species_tree_data[["speciesTree"]] <- speciesTree[1]
 
-        species_in_Tree_list(regmatches(speciesTree[1], gregexpr("[A-Za-z_]+", speciesTree[1]))[[1]])
+        # species_in_Tree_list(regmatches(speciesTree[1], gregexpr("[A-Za-z_]+", speciesTree[1]))[[1]])
 
         species_tree_data[["height"]] <- heightSpacing$value[1]
         species_tree_data[["tree_plot_div"]] <- "speciesTree_plot"
@@ -394,7 +394,7 @@ observe({
             "width"=widthSpacing$value
         )
         dome_tree <- "(Asparagus_officinalis:117.61,(Apostasia_shenzhenica:84.55,(Dendrobium_catenatum:52.11,Phalaenopsis_equestris:52.11):32.44):33.06);"
-        species_in_Tree_list(regmatches(dome_tree, gregexpr("[A-Za-z_]+", dome_tree))[[1]])
+        # species_in_Tree_list(regmatches(dome_tree, gregexpr("[A-Za-z_]+", dome_tree))[[1]])
 
         species_tree_data[["speciesTree"]] <- dome_tree
         species_tree_data[["height"]] <- heightSpacing$value[1]
@@ -449,29 +449,29 @@ observe({
                                         12,
                                         hr(class="setting")
                                     ),
-                                    column(
-                                        4,
-                                        div(
-                                            style="background-color: #F8F8FF;
-                                                   padding: 10px 10px 1px 10px;
-                                                   border-radius: 10px;",
-                                            pickerInput(
-                                                inputId="cladeSpecies",
-                                                label=HTML("Please set a <b>clade species</b> to select the proper gene families. See more <a href='https://github.com/arzwa/Whale.jl/blob/master/scripts/orthofilter.py' target='_blank'>click here</a>."),
-                                                options=list(
-                                                    title='Please select species below'
-                                                ),
-                                                choices=species_in_Tree_list(),
-                                                choicesOpt=list(
-                                                    content=lapply(species_in_Tree_list(), function(choice) {
-                                                        choice <- gsub("_", " ", choice)
-                                                        paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>")
-                                                    })
-                                                ),
-                                                multiple=FALSE
-                                            )
-                                        )
-                                    ),
+                                    # column(
+                                    #     4,
+                                    #     div(
+                                    #         style="background-color: #F8F8FF;
+                                    #                padding: 10px 10px 1px 10px;
+                                    #                border-radius: 10px;",
+                                    #         pickerInput(
+                                    #             inputId="cladeSpecies",
+                                    #             label=HTML("Please set a <b>clade species</b> to select the proper gene families. See more <a href='https://github.com/arzwa/Whale.jl/blob/master/scripts/orthofilter.py' target='_blank'>click here</a>."),
+                                    #             options=list(
+                                    #                 title='Please select species below'
+                                    #             ),
+                                    #             choices=species_in_Tree_list(),
+                                    #             choicesOpt=list(
+                                    #                 content=lapply(species_in_Tree_list(), function(choice) {
+                                    #                     choice <- gsub("_", " ", choice)
+                                    #                     paste0("<div style='color: steelblue; font-style: italic;'>", choice, "</div>")
+                                    #                 })
+                                    #             ),
+                                    #             multiple=FALSE
+                                    #         )
+                                    #     )
+                                    # ),
                                     column(
                                         4,
                                         div(
@@ -502,63 +502,99 @@ observe({
                                                 inputId="select_chain_num",
                                                 label=HTML("Set the <b><font color='orange'>Chain</font></b> for <b><i>Whale</b></i>:"),
                                                 min=100,
-                                                max=500,
-                                                step=50,
+                                                max=1000,
+                                                step=100,
                                                 value=200
+                                            )
+                                        )
+                                    ),
+                                    column(
+                                        4,
+                                        div(
+                                            style="background-color: #FAF0E6;
+                                                   padding: 10px 10px 1px 10px;
+                                                   border-radius: 10px;",
+                                            sliderInput(
+                                                inputId="input_gf_num",
+                                                label=HTML("Choose a subset of gene families to quickly check <b><i>Whale</b></i> (Optional, recommended: 50):"),
+                                                min=0,
+                                                max=100,
+                                                step=10,
+                                                value=0
                                             )
                                         )
                                     )
                                 )
                             ),
-                            column(
-                                12,
-                                fluidRow(
-                                    column(
-                                        12,
-                                        hr(class="setting")
-                                    ),
-                                    column(
-                                        7,
-                                        sliderInput(
-                                            inputId="input_gf_num",
-                                            label=HTML("Choose a small portion of gene families to quickly check the running of <b><i>Whale</b></i> (recommended: 50):"),
-                                            min=0,
-                                            max=200,
-                                            step=10,
-                                            value=0
-                                        )
-                                    )
-                                )
-                            ),
+                            # column(
+                            #     12,
+                            #     fluidRow(
+                            #         column(
+                            #             12,
+                            #             hr(class="setting")
+                            #         ),
+                            #         column(
+                            #             7,
+                            #             sliderInput(
+                            #                 inputId="input_gf_num",
+                            #                 label=HTML("Choose a small portion of gene families to quickly check the running of <b><i>Whale</b></i> (recommended: 50):"),
+                            #                 min=0,
+                            #                 max=200,
+                            #                 step=10,
+                            #                 value=0
+                            #             )
+                            #         )
+                            #     )
+                            # ),
                             column(
                                 12,
                                 hr(class="setting")
                             ),
                             column(
-                                6,
-                                div(class="float-left",
-                                    actionButton(
-                                        inputId="whale_configure_go",
-                                        HTML("Create <b><i>Whale</i></b> Codes"),
-                                        icon=icon("play"),
-                                        title="Start the confirguration process",
-                                        status="secondary",
-                                        class="my-start-button-class",
-                                        style="color: #fff;
-                                               background-color: #019858;
-                                               border-color: #fff;
-                                               padding: 5px 8px 5px 8px;"
-                                    )
-                                ),
-                                div(class="float-right",
-                                    style="padding: 5px 4px 5px 4px;",
-                                    actionLink(
-                                        "go_whale_codes",
-                                        HTML(
-                                            paste0(
-                                                "<font color='#5151A2'>",
-                                                icon("share"),
-                                                " Go to <i><b>Whale</b></i> Scripts</font>"
+                                width=10,
+                                div(
+                                    class="row",
+                                    div(
+                                        class="col text-left",
+                                        actionButton(
+                                            inputId="whale_configure_go",
+                                            HTML("Create <b><i>Whale</i></b> Codes"),
+                                            icon=icon("play"),
+                                            title="Start the configuration process",
+                                            status="secondary",
+                                            class="my-start-button-class",
+                                            style="color: #fff;
+                                                   background-color: #019858;
+                                                   border-color: #fff;
+                                                   padding: 5px 8px 5px 8px;"
+                                        )
+                                    ),
+                                    div(
+                                        class="col text-center",
+                                        downloadButton(
+                                            outputId="whale_prepared_data_download",
+                                            label="Download Data to operate Whale",
+                                            icon=icon("download"),
+                                            title="Click to download the data",
+                                            status="secondary",
+                                            class="my-download-button-class",
+                                            style="color: #fff;
+                                                   background-color: #6B8E23;
+                                                   border-color: #fff;
+                                                   padding: 5px 8px 5px 8px;"
+                                        )
+                                    ),
+                                    div(
+                                        class="col text-right",
+                                        style="padding: 5px 4px 5px 4px;",
+                                        actionLink(
+                                            "go_whale_codes",
+                                            HTML(
+                                                paste0(
+                                                    "<font color='#5151A2'>",
+                                                    icon("share"),
+                                                    " Go to <i><b>Whale</b></i> Instructions</font>"
+                                                )
                                             )
                                         )
                                     )
@@ -583,15 +619,15 @@ observeEvent(input$whale_configure_go, {
     if( !dir.exists(whale_dir) ){
         dir.create(whale_dir)
     }
-
-    if( is.null(input$cladeSpecies) || input$cladeSpecies == "" ){
-        shinyalert(
-            "Opps",
-            "Please add the clade species first...",
-            type="error"
-        )
-    }
-    else if( is.null(input$wgdInput) ){
+    # if( is.null(input$cladeSpecies) || input$cladeSpecies == "" ){
+    #     shinyalert(
+    #         "Opps",
+    #         "Please add the clade species first...",
+    #         type="error"
+    #     )
+    # }
+    # else
+    if( is.null(input$wgdInput) ){
         shinyalert(
             "Opps",
             "Please add the Hypothetical WGD events to the tree first...",
@@ -650,15 +686,15 @@ observeEvent(input$whale_configure_go, {
                         )
                     )
                 }
-                if( !file.exists(paste0(scriptPath, "/orthofilter.py")) ){
-                    system(
-                        paste(
-                            "cp",
-                            paste0(getwd()[1], "/tools/Whale.jl/scripts/orthofilter.py"),
-                            scriptPath
-                        )
-                    )
-                }
+                # if( !file.exists(paste0(scriptPath, "/orthofilter.py")) ){
+                #     system(
+                #         paste(
+                #             "cp",
+                #             paste0(getwd()[1], "/tools/Whale.jl/scripts/orthofilter.py"),
+                #             scriptPath
+                #         )
+                #     )
+                # }
                 if( !file.exists(paste0(scriptPath, "/ccddata.py")) ){
                     system(
                         paste(
@@ -695,14 +731,15 @@ observeEvent(input$whale_configure_go, {
                 )
 
                 # writeLines(paste0("cd ", whale_dir), cmd_con)
-                writeLines("orthogroupFile=$(ls ../orthofinderOutputDir/Results*/Orthogroups/Orthogroups.tsv)", cmd_con)
-                focal_species_w <- gsub(" ", "_", input$cladeSpecies)
+                writeLines("alignmentsDir=$(ls -d ../OrthoFinderOutputDir/Results_*)", cmd_con)
+                # focal_species_w <- gsub(" ", "_", input$cladeSpecies)
                 writeLines(
                     paste0(
                         "sh ",
                         "./script_bin/preparing_Whale_inputs.shell \\\n",
-                        "\t$orthogroupFile \\\n",
-                        "\t", focal_species_w, " \\\n",
+                        "\torthogroups.filtered.tsv \\\n",
+                        "\t$alignmentsDir \\\n",
+                        # "\t", focal_species_w, " \\\n",
                         "\t4"
                     ),
                     cmd_con
@@ -778,13 +815,8 @@ observeEvent(input$whale_configure_go, {
                 ),
                 whale_cmd_con
             )
-            writeLines(
-                "module load julia",
-                whale_cmd_con
-            )
-
             # writeLines(
-            #     paste0("cd ", "run_", whaleModel, "_model_", input$select_chain_num),
+            #     "module load julia",
             #     whale_cmd_con
             # )
 
@@ -807,9 +839,9 @@ observeEvent(input$whale_configure_go, {
                         "sh",
                         "../script_bin/prepare_Whale_command.v2.sh",
                         paste0("../", basename(speciesTreeFile)),
-                        "../selected_tree_ALE_files",
-                        "../wgdNodes.updated.txt",
-                        "whale.jl",
+                        paste0("../", basename(aleDirPath)),
+                        paste0("../", basename(wgdNodeFile)),
+                        paste0("whale.", whaleModel, "_", input$select_chain_num, ".jl"),
                         whaleModel,
                         input$select_chain_num,
                         input$input_gf_num
@@ -822,9 +854,9 @@ observeEvent(input$whale_configure_go, {
                         "sh",
                         "../script_bin/prepare_Whale_command.v2.sh",
                         paste0("../", basename(speciesTreeFile)),
-                        "../selected_tree_ALE_files",
-                        "../wgdNodes.updated.txt",
-                        "whale.jl",
+                        paste0("../", basename(aleDirPath)),
+                        paste0("../", basename(wgdNodeFile)),
+                        paste0("whale.", whaleModel, "_", input$select_chain_num, ".jl"),
                         whaleModel,
                         input$select_chain_num
                     ),
@@ -833,7 +865,10 @@ observeEvent(input$whale_configure_go, {
             }
 
             writeLines(
-                paste("julia", "whale.jl"),
+                paste(
+                    "julia",
+                    paste0("whale.", whaleModel, "_", input$select_chain_num, ".jl")
+                ),
                 whale_cmd_con
             )
 
@@ -883,7 +918,6 @@ observeEvent(input$go_whale_codes, {
             )
         })
 
-
         showModal(
             modalDialog(
                 title="",
@@ -902,6 +936,24 @@ observeEvent(input$go_whale_codes, {
                            overflow-x: auto;",
                     column(
                         12,
+                        h5(HTML(paste0("Instructions to initiate the <font color='green'><b><i>Whale</i></b></font> analysis."))),
+                        h6(
+                            HTML(
+                                paste0(
+                                    "After decompressing the download file, please navigate to the folder: ",
+                                    "<b><i><font color='#5F9EA0'>Whale_wd</b></i></font> ",
+                                    "and execute <b><font color='#CD853F'>run_ale_preparing.sh</b></font> to generate input files for <font color='green'><b><i>whale</i></b></font>.",
+                                    "<br><br><b><i>MrBayes</i></b> and <b><i>ALEobserve</i></b> are required for creating <b><i>ale</i></b> files. ",
+                                    "Ensure these tools are installed.",
+                                    "<br><br>After successfully generating <b><i>ale</i></b> files, proceed to the folder: <b><i><font color='#5F9EA0'>",
+                                    basename(running_dir), "</b></i></font> ",
+                                    "and run <b><font color='#CD853F'>run_Whale_", whaleModel, ".sh</b></font>.",
+                                    "This script will create and execute the <font color='green'><b><i>whale</i></b></font> script.",
+                                    "<br><br>Please ensure <b><i>Julia</i></b> is installed."
+                                )
+                            )
+                        ),
+                        hr(class="setting"),
                         h5(HTML(paste0("The command line to prepare the inputs for <font color='green'><b><i>whale</i></b></font>:"))),
                         verbatimTextOutput(
                             "alePreparingCommandTxt",
@@ -918,3 +970,62 @@ observeEvent(input$go_whale_codes, {
         })
     }
 })
+
+output$whale_prepared_data_download <- downloadHandler(
+    filename=function(){
+        OrthoFinderWhaleAnalysisDir <- orthofinder_whale_analysis_dir_Val()
+        paste0(basename(OrthoFinderWhaleAnalysisDir), ".tgz")
+    },
+    content=function(file){
+        OrthoFinderWhaleAnalysisDir <- orthofinder_whale_analysis_dir_Val()
+        whale_dir <- paste0(OrthoFinderWhaleAnalysisDir, "/Whale_wd")
+        alePreparingCommadFile <- paste0(whale_dir, "/run_ale_preparing.sh")
+
+        whaleModel <- ""
+        if( input$select_whale_model == "Constant-rates model" ){
+            whaleModel <- "Constant_rates"
+        }else if( input$select_whale_model == "Relaxed branch-specific DL+WGD model" ){
+            whaleModel <- "Relaxed_branch"
+        }else{
+            whaleModel <- "Critical_branch"
+        }
+
+        running_dir <- paste0(whale_dir, "/run_", whaleModel, "_model_", input$select_chain_num)
+
+        whaleCommandFile <- paste0(running_dir, "/run_Whale_", whaleModel, ".sh")
+
+        if( !file.exists(alePreparingCommadFile) & !file.exists(whaleCommandFile) ){
+            shinyalert(
+                "Oops",
+                "Please click the Create-Whale-Codes button first, then switch this on",
+                type="error"
+            )
+        }
+        else{
+            shinyjs::runjs('$("#progress_modal_whale").modal("show");')
+            withProgress(message='Downloading in progress', value=0, {
+                incProgress(amount=.1, message="Compressing files...")
+                # shinyalert(
+                #     "Note",
+                #     "Please wait for compressing the files. Do not close the page.",
+                #     type="info"
+                # )
+                run_dir <- getwd()
+                setwd(dirname(OrthoFinderWhaleAnalysisDir))
+                system(
+                    paste(
+                        "tar czf",
+                        file,
+                        basename(OrthoFinderWhaleAnalysisDir)
+                    )
+                )
+
+                incProgress(amount=.9, message="Downloading file ...")
+                incProgress(amount=1)
+                Sys.sleep(.1)
+                setwd(run_dir)
+            })
+            shinyjs::runjs('$("#progress_modal_whale").modal("hide");');
+        }
+    }
+)

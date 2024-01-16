@@ -8,7 +8,7 @@ def rename_species(input_string):
     def rename(match):
         return match.group(1) + match.group(2).capitalize()
 
-    updated_string = re.sub(pattern, rename, input_string)
+    updated_string = re.sub(pattern, rename, input_string, flags=re.MULTILINE)
     return updated_string
 
 def main(input_file, ale_folder, wgdInfo_file):
