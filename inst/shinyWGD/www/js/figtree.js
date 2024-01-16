@@ -260,6 +260,7 @@ function jointTreePlot(InputData) {
     }
     if (typeof wgdTable !== 'undefined') {
         var wgdTableInfo = convertShinyData(wgdTable);
+        console.log("wgdTableInfo", wgdTableInfo);
         if (timeScale === "100") {
             wgdTableInfo = wgdTableInfo.map(function (item) {
                 return {
@@ -272,7 +273,7 @@ function jointTreePlot(InputData) {
                 };
             });
         }
-        console.log("wgdTableInfo", wgdTableInfo);
+        console.log("renewed wgdTableInfo", wgdTableInfo);
     }
     if (typeof ultrametricTree !== 'undefined') {
         var ultrametricTreeJson = parseTreeTopology(ultrametricTree);
@@ -335,7 +336,6 @@ function speciesTreePlot(InputData) {
         }
     }
 }
-
 
 Shiny.addCustomMessageHandler("speciesTreeUpdatedPlot", speciesTreeUpdatedPlot)
 function speciesTreeUpdatedPlot(InputData) {
@@ -625,7 +625,7 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
         .style('border', '1px solid black')
         .style('padding', '5px');
 
-    console.log("node", nodes);
+    // console.log("node", nodes);
     var wgdInput = new Set();
     var link = vis.selectAll("path.link")
         .data(tree.links(nodes))
@@ -663,16 +663,24 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
     });
 
     function findCommonParentNode(treeNodes, species1, species2) {
-        for (var i = 0; i < treeNodes.length; i++) {
-            var eachNode = treeNodes[i];
-            if (eachNode.children) {
-                var commonParent = findCommonParentNode(eachNode.children, species1, species2);
-                if (commonParent) {
-                    return commonParent;
+        if (species1 === species2) {
+            for (var i = 0; i < treeNodes.length; i++) {
+                if (treeNodes[i].name === species1) {
+                    return treeNodes[i];
                 }
             }
-            if (eachNode.name === species1 || eachNode.name === species2) {
-                return eachNode;
+        } else {
+            for (var i = 0; i < treeNodes.length; i++) {
+                var eachNode = treeNodes[i];
+                if (eachNode.children) {
+                    var commonParent = findCommonParentNode(eachNode.children, species1, species2);
+                    if (commonParent) {
+                        return commonParent;
+                    }
+                }
+                if (eachNode.name === species1 || eachNode.name === species2) {
+                    return eachNode;
+                }
             }
         }
         return null;
@@ -683,8 +691,15 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
         var [species1, species2] = wgdInfoEach.comp.split(":");
         var parentNode = findCommonParentNode(nodes, species1, species2);
 
-        var x = parentNode.parent.x;
-        var y = (parentNode.parent.y + parentNode.parent.parent.y) / 2;
+        var x, y;
+
+        if (species1 == species2) {
+            x = parentNode.x;
+            y = (parentNode.y + parentNode.parent.y) / 2;
+        } else {
+            x = parentNode.parent.x;
+            y = (parentNode.parent.y + parentNode.parent.parent.y) / 2;
+        }
 
         vis.selectAll("wgds")
             .data([parentNode.parent])
@@ -705,7 +720,7 @@ function buildSpeciesTreeRecon(selector, vis, speciesTreeJson, wgdNodesInfo, w, 
         vis.append("text")
             .attr('class', 'testWgd-text')
             .attr("x", y + 9)
-            .attr("y", x - 20)
+            .attr("y", x - 18)
             .text(wgdInfoEach.wgd)
             .attr("text-anchor", "middle")
             .attr("font-size", "12px")
@@ -744,6 +759,7 @@ function speciesTreeUpdatedPlotOLD(InputData) {
             textElement.style("opacity", "0.7");
             textElement.style("font-weight", "bold");
         } else if (entry.K >= -2) {
+            rectElement.style("fill", "white");
             rectElement.style("stroke-dasharray", "4 1");
             rectElement.style("stroke-width", "1.46");
             rectElement.style("stroke", "#6F6B0A");
@@ -753,6 +769,112 @@ function speciesTreeUpdatedPlotOLD(InputData) {
 
     svgFile = "speciesTree.Plot.svg";
     downloadSVG("speciesTreePlotDownload", "speciesTree_plot", svgFile);
+}
+
+Shiny.addCustomMessageHandler("posteriorDistPlot", posteriorDistPlot)
+function posteriorDistPlot(InputData) {
+    var posteriorInfo = convertShinyData(InputData.posterior_dist_df);
+    var w = InputData.width;
+    var h = InputData.height;
+    var plotId = InputData.posterior_plot_div;
+
+    var wgdKeys = Object.keys(posteriorInfo[0]).filter(key => key.startsWith('wgd'));
+    var numWgds = wgdKeys.length;
+    var numRows = Math.ceil(numWgds / 4);
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
+        var margin = { top: 50, right: 50, bottom: 50, left: 50 },
+            subplotMargin = { top: 10, right: 30, bottom: 30, left: 30 },
+            subplotWidth = 200,
+            subplotHeight = 200;
+
+        d3.select("#" + plotId).select("svg").remove();
+        var svg = d3.select('#' + plotId)
+            .append('svg')
+            .attr('width', w)
+            .attr('height', h);
+
+        var totalSubplotHeight = numRows * subplotHeight + (numRows - 1) * subplotMargin.bottom;
+
+        var middleY = margin.top + totalSubplotHeight / 2;
+
+        svg.append("text")
+            .attr("x", margin.left - 35)
+            .attr("y", middleY)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .attr("transform", function () {
+                return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
+            })
+            .text("Density");
+
+        var totalSubplotWidth = numWgds * subplotWidth + (numWgds - 1) * margin.right;
+
+        var middleX = margin.left + totalSubplotWidth / 2;
+
+        svg.append("text")
+            .attr("x", middleX)
+            .attr("y", h - margin.bottom + 35)
+            .attr("text-anchor", "middle")
+            .style("font-size", "14px")
+            .text("Retention rates (q)");
+
+        for (var i = 0; i < numWgds; i++) {
+            var row = Math.floor(i / 4);
+            var col = i % 4;
+
+            var subplot = svg.append('g')
+                .attr('transform', 'translate(' + (margin.left + col * (subplotWidth + subplotMargin.right)) + ',' + (margin.top + row * (subplotHeight + subplotMargin.bottom)) + ')');
+
+            var x = d3.scaleLinear()
+                .domain([0, 0.5])
+                .range([0, subplotWidth]);
+
+            var xAxis = d3.axisBottom(x).ticks(5);
+
+            // Append x-axis to subplot
+            subplot.append('g')
+                .attr('transform', 'translate(0,' + subplotHeight + ')')
+                .call(xAxis);
+
+            var kde = kernelDensityEstimator(kernelEpanechnikov(0.05), x.ticks(100));
+
+            var density = kde(posteriorInfo.map(entry => entry[wgdKeys[i]]));
+
+            var y = d3.scaleLinear()
+                .domain([0, 40])
+                .range([subplotHeight, 0]);
+
+            var yAxis = d3.axisLeft(y).ticks(4);
+
+            subplot.append('g')
+                .call(yAxis);
+
+            subplot.append('path')
+                .data([density])
+                .attr('fill', 'steelblue')
+                .attr('opacity', 0.7)
+                .attr('stroke', '#000')
+                .attr('stroke-width', 0.5)
+                .attr('d', d3.area()
+                    .x(function (d) { return x(d[0]); })
+                    .y0(subplotHeight)
+                    .y1(function (d) { return y(d[1]); }));
+
+            subplot.append("text")
+                .attr("x", subplotWidth / 2)
+                .attr("y", -subplotMargin.top + 20)
+                .attr("text-anchor", "middle")
+                .style("font-size", "12px")
+                .style("font-weight", "bold")
+                .text(wgdKeys[i]);
+        }
+    }
+    downloadSVG("posteriorDistPlotDownload", plotId, "posteriorDist.svg");
 }
 
 // Covert shiny transferred data to desired format
@@ -2198,7 +2320,7 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
                             .attr('width', rectWidth)
                             .attr('height', 12)
                             .attr('fill', speciesColor)
-                            .attr('fill-opacity', 0.7)
+                            // .attr('fill-opacity', 0.7)
                             .attr("data-tippy-content", () => {
                                 // var x1 = parseFloat(d.branchHPD.match(/\{([\d\.]+),/)[1]);
                                 // var x2 = parseFloat(d.branchHPD.match(/, ([\d\.]+)\}/)[1]);
@@ -2236,7 +2358,7 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
                             .attr('y2', rectY + 6)
                             .attr("stroke-width", 2)
                             .attr('stroke', speciesColor)
-                            .attr('fill-opacity', 0.7)
+                            // .attr('fill-opacity', 0.7)
                             .attr("data-tippy-content", () => {
 
                                 return "WGD-" + Number(index + 1) + " in <font color='red'><i><b>" + item.species + "</b></i></font>" +
@@ -2282,7 +2404,7 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
                         .attr('width', rectWidth)
                         .attr('height', 12)
                         .attr('fill', speciesColor)
-                        .attr('fill-opacity', 0.7)
+                        // .attr('fill-opacity', 0.7)
                         .attr("data-tippy-content", () => {
                             return "WGD in <font color='red'><i><b>" + item.species + "</b></i></font>" +
                                 ": <br><font color='#73BF00'>" + numFormatter(min * 100) +
@@ -2315,7 +2437,7 @@ function buildTimeTree(selector, vis, timeTreeJson, wgdTableInfo, longestXLabelL
                         .attr('y2', rectY + 6)
                         .attr("stroke-width", 2)
                         .attr('stroke', speciesColor)
-                        .attr('fill-opacity', 0.7)
+                        // .attr('fill-opacity', 0.7)
                         .attr("data-tippy-content", () => {
                             return "WGD in <font color='red'><i><b>" + item.species + "</b></i></font>" +
                                 ": <br><font color='#73BF00'>" + numFormatter(range * 100) + "</font> MYA";

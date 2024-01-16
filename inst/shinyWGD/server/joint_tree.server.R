@@ -73,7 +73,7 @@ observeEvent(input$MCMC_tree_example, {
         "#NEXUS
 BEGIN TREES;
 
-        UTREE 1 = (((((Oryza_sativa: 0.976947, Ananas_comosus: 0.976947) [&95%HPD={0.926361, 1.05635}]: 0.182469, Elaeis_guineensis: 1.159417) [&95%HPD={1.05857, 1.26857}]: 0.118543, (Asparagus_officinalis: 1.122381, Phalaenopsis_equestris: 1.122381) [&95%HPD={1.00604, 1.20401}]: 0.155580) [&95%HPD={1.16136, 1.39443}]: 0.205808, (Spirodela_polyrhiza: 1.267766, Zostera_marina: 1.267766) [&95%HPD={1.06518, 1.44988}]: 0.216003) [&95%HPD={1.34808, 1.6164}]: 0.061015, Vitis_vinifera: 1.544783) [&95%HPD={1.429, 1.64351}];
+        UTREE 1=(((((Oryza_sativa: 0.976947, Ananas_comosus: 0.976947) [&95%HPD={0.926361, 1.05635}]: 0.182469, Elaeis_guineensis: 1.159417) [&95%HPD={1.05857, 1.26857}]: 0.118543, (Asparagus_officinalis: 1.122381, Phalaenopsis_equestris: 1.122381) [&95%HPD={1.00604, 1.20401}]: 0.155580) [&95%HPD={1.16136, 1.39443}]: 0.205808, (Spirodela_polyrhiza: 1.267766, Zostera_marina: 1.267766) [&95%HPD={1.06518, 1.44988}]: 0.216003) [&95%HPD={1.34808, 1.6164}]: 0.061015, Vitis_vinifera: 1.544783) [&95%HPD={1.429, 1.64351}];
 
 END;"
     })
@@ -147,6 +147,7 @@ observeEvent(input$uploadTimeTree, {
 widthSpacing <- reactiveValues(value=500)
 heightSpacing <- reactiveValues(value=NULL)
 
+preDateWGDsRef <- reactiveValues(value=NULL)
 observe({
     if( isTruthy(input$uploadTimeTree) ){
         timeTreeFile <- input$uploadTimeTree$datapath
@@ -211,6 +212,137 @@ observe({
             })
         }else{
             output$timeTreeSettingPanel <- renderUI({""})
+        }
+
+        if( any(grep("=", timeTreeInfo)) ){
+            timeTree <- timeTreeInfo[grep("=", timeTreeInfo)]
+            timeTree <- sub("^[^=]*=", "", timeTree)
+            tree <- read.tree(text=timeTree)
+            species_in_tree <- tree$tip.label
+        }else{
+            tree <- read.tree(timeTreeFile)
+            species_in_tree <- tree$tip.label
+        }
+
+        if( length(species_in_tree) > 0 ){
+            pre_dated_wgds <- suppressMessages(
+                vroom(
+                    file="www/content/validated_WGD_dates.info.xls",
+                    delim="\t",
+                    col_names=TRUE
+                )
+            )
+            pre_dated_wgds$Species <- gsub(" ", "_", pre_dated_wgds$Species)
+            filtered_pre_dated_wgds <- subset(pre_dated_wgds, Species %in% species_in_tree)
+            filtered_pre_dated_wgds <- pre_dated_wgds[grepl(paste(species_in_tree, collapse="|"), pre_dated_wgds$Species), ]
+
+            unique_dbs <- unique(filtered_pre_dated_wgds$Author)
+            preDateWGDsRef$value <- length(unique_dbs)
+            if( nrow(filtered_pre_dated_wgds) > 0 ){
+                dated_wgd_ui_parts <- c()
+                for( i in 1:length(unique_dbs) ){
+                    tmp_dated_wgds <- filtered_pre_dated_wgds[filtered_pre_dated_wgds$Author == unique_dbs[i], ]
+                    tmp_dated_wgds <- tmp_dated_wgds[order(tmp_dated_wgds$Species), ]
+                    tmp_author <- unique(tmp_dated_wgds$Author)
+                    tmp_DOI <- unique(tmp_dated_wgds$DOI)
+                    tmp_dated_wgds_list <- sapply(1:nrow(tmp_dated_wgds), function(x) {
+                        paste0(
+                            "<i><b><font color='#DAA520'>",
+                            gsub("_", " ", tmp_dated_wgds[x, "Species"]),
+                            "</i></b></font><br>90% CI: <b><font color='#6B8E23'>",
+                            tmp_dated_wgds[x, "90% CI"],
+                            "</font></b>",
+                            " MYA"
+                        )
+                    }, simplify="list")
+
+                    dated_wgd_ui_parts[[i]] <- fluidRow(
+                        column(
+                            12,
+                            HTML(
+                                paste0(
+                                    "Dated WGDs from <a href='", tmp_DOI, "' target='_blank'><b>",
+                                    tmp_author, "</b></a>"
+                                )
+                            )
+                        ),
+                        column(
+                            12,
+                            # pickerInput(
+                            #     inputId=paste0("dated_wgds_", i),
+                            #     label=HTML("<font color='orange'>Choose WGDs</font>:&nbsp;"),
+                            #     options=list(
+                            #         title='Please select dated WGDs below'
+                            #     ),
+                            #     choices=tmp_dated_wgds_list,
+                            #     choicesOpt=list(
+                            #         content=lapply(tmp_dated_wgds_list, function(choice) {
+                            #             HTML(choice)
+                            #         })
+                            #     ),
+                            #     selected=NULL,
+                            #     multiple=TRUE
+                            # ),
+                            div(
+                                style="padding-top: 10px;
+                                       padding-bottom: 10px;",
+                                bsButton(
+                                    inputId=paste0("dated_wgds_button_", i),
+                                    label=HTML("<font color='white'>&nbsp;Dated WGDs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</font>"),
+                                    icon=icon("list"),
+                                    style="success"
+                                ) %>%
+                                    bs_embed_tooltip(
+                                        title="Click to choose wgds",
+                                        placement="right",
+                                        trigger="hover",
+                                        options=list(container="body")
+                                    ) %>%
+                                    bs_attach_collapse(paste0("dated_wgds_button_collapse_", i)),
+                                bs_collapse(
+                                    id=paste0("dated_wgds_button_collapse_", i),
+                                    content=tags$div(
+                                        class="well",
+                                        checkboxGroupInput(
+                                            inputId=paste0("pre_wgds_select_", i),
+                                            label="",
+                                            choices=tmp_dated_wgds_list,
+                                            selected=FALSE
+                                        ),
+                                        tags$script(
+                                            HTML(paste0("
+                                                $(document).ready(function() {
+                                                  $('#pre_wgds_select_", i, " .checkbox label span').map(function(){
+                                                    this.innerHTML=$(this).text();
+                                                  });
+                                                });
+                                              ")
+                                            )
+                                        ),
+                                        colorPickr(
+                                            inputId=paste0("select_pre_wgds_color_", i),
+                                            label="Pick a color (swatches + opacity):",
+                                            swatches=scales::viridis_pal()(10),
+                                            opacity=TRUE
+                                        ),
+                                    )
+                                )
+                            )
+                        )
+                    )
+                }
+
+                output$preDatedWGDsSettingPanel <- renderUI({
+                    div(class="boxLike",
+                        style="background-color: #F5F5F5;",
+                        h5(icon("book"), HTML("Dated WGDs from Literatures")),
+                        hr(class="setting"),
+                        dated_wgd_ui_parts
+                    )
+                })
+            }else{
+                output$preDatedWGDsSettingPanel <- renderUI({""})
+            }
         }
     }
 })
@@ -277,6 +409,33 @@ observe({
                     joint_tree_data[["timeScale"]] <- vizTreeTimeScale
                     joint_tree_data[["timeTree"]] <- timeTreeInfo[1]
                 }
+                selected_pre_dated_wgd_df <- data.frame()
+                if( preDateWGDsRef$value >0 ){
+                    extract_info <- function(element) {
+                        split_string <- unlist(strsplit(element, ">"))
+                        species <- gsub("<.*", "", split_string[4])
+                        if( vizTreeTimeScale == "1" ){
+                            wgds_range <- gsub("</.*", "", split_string[10])
+                            wgds <- as.numeric(unlist(strsplit(wgds_range, "-"))) / 100
+                            wgds <- paste(wgds, collapse="-")
+                        }else{
+                            wgds <- gsub("</.*", "", split_string[10])
+                        }
+                        return(data.frame(species=species, wgds=wgds, stringsAsFactors=FALSE))
+                    }
+                    for( i in 1:preDateWGDsRef$value ){
+                        tmp_pre_id <- paste0("pre_wgds_select_", i)
+                        tmp_pre_color <- paste0("select_pre_wgds_color_", i)
+                        each_wgd_df <- do.call(rbind, lapply(input[[tmp_pre_id]], extract_info))
+                        if( !is.null(each_wgd_df) && ncol(each_wgd_df) > 1 ){
+                            each_wgd_df$color <- input[[tmp_pre_color]]
+                            selected_pre_dated_wgd_df <- rbind(
+                                selected_pre_dated_wgd_df,
+                                each_wgd_df
+                            )
+                        }
+                    }
+                }
                 if( isTruthy(input$uploadTimeTable) ){
                     timeTableFile <- input$uploadTimeTable$datapath
                     timeTable <- suppressMessages(
@@ -286,7 +445,17 @@ observe({
                             delim="\t"
                         )
                     )
-                    joint_tree_data[["wgdtable"]] <- timeTable
+                    if( ncol(selected_pre_dated_wgd_df) > 1 ){
+                        selected_pre_dated_wgd_df <- rbind(
+                            selected_pre_dated_wgd_df,
+                            timeTable
+                        )
+                    }else{
+                        selected_pre_dated_wgd_df <- timeTable
+                    }
+                }
+                if( ncol(selected_pre_dated_wgd_df) > 1 ){
+                    joint_tree_data[["wgdtable"]] <- selected_pre_dated_wgd_df
                 }
             }else{
                 joint_tree_data[["ultrametricTree"]] <- timeTreeInfo[1]

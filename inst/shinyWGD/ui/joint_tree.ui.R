@@ -174,6 +174,12 @@ Joint_Tree_ui <- tabPanel(
                     12,
                     uiOutput("timeTreeSettingPanel")
                 )
+            ),
+            fluidRow(
+                column(
+                    12,
+                    uiOutput("preDatedWGDsSettingPanel")
+                )
             )
         ),
         column(
