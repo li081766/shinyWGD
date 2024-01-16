@@ -23,6 +23,17 @@ function ParallelPlottingV2(InputData) {
     var subjectSpecies = InputData.subject_sp;
     var scaleRatio = width / 800;
 
+    segmentInfo = segmentInfo.map((item) => ({
+        ...item,
+        startX: item.seg_start_X,
+        endX: item.seg_end_X,
+        startY: item.seg_start_Y,
+        endY: item.seg_end_Y
+    }));
+
+    // console.log("sgeInfo", segmentInfo);
+    // console.log("queryChrInfo", queryChrInfo);
+
     var scriptV7 = document.createElement('script');
     scriptV7.src = 'https://d3js.org/d3.v7.min.js';
     document.head.appendChild(scriptV7);
@@ -56,8 +67,6 @@ function ParallelPlottingV2(InputData) {
         } else {
             var queryChrLenSum = d3.sum(queryChrInfo.map(e => e.len));
             var subjectChrLenSum = d3.sum(subjectChrInfo.map(e => e.len));
-            // console.log("queryChrLenSum", queryChrLenSum);
-            // console.log("subjectChrLenSum", subjectChrLenSum);
             if (queryChrLenSum * 0.8 > subjectChrLenSum) {
                 var innerPaddingSubject = 10 * queryChrLenSum / subjectChrLenSum * 0.8;
                 var innerPaddingQuery = 10;
@@ -94,7 +103,6 @@ function ParallelPlottingV2(InputData) {
             let acc_len = 0;
             let total_chr_len = d3.sum(inputChrInfo.map(e => e.len));
             let ratio = innerPadding_xScale.invert(innerPadding);
-            // console.log("ratio", ratio);
             inputChrInfo.forEach((e, i) => {
                 e.idx = i;
                 e.accumulate_start = acc_len + 1;
@@ -140,7 +148,7 @@ function ParallelPlottingV2(InputData) {
         }
 
         queryGroup.append("text")
-            .text(querySpecies)
+            .text(querySpecies.replace("_", " ").replace(/(\w)\w+\s(\w+)/, "$1. $2"))
             .attr("id", "queryMainLabel")
             .attr("x", 5 + leftPadding)
             .attr("y", topPadding - 10) // + d3.select("#queryMainLabel").node().getBBox().height)
@@ -240,7 +248,7 @@ function ParallelPlottingV2(InputData) {
             });
 
         subjectGroup.append("text")
-            .text(subjectSpecies)
+            .text(subjectSpecies.replace("_", " ").replace(/(\w)\w+\s(\w+)/, "$1. $2"))
             .attr("id", "subjectMainLabel")
             .attr("x", 5 + leftPadding)
             .attr("y", height - bottomPadding + 15)
@@ -404,9 +412,10 @@ function ParallelPlottingV2(InputData) {
             .attr("stroke-width", 0.79)
             .attr("stroke-opacity", 0.4)
             .attr("data-tippy-content", d => {
-                return "<b><font color='#FFE153'>Query:</font></b> " + d.firstX + " &#8594 " + d.lastX + "<br>" +
-                    "<font color='red'><b>&#8595</b></font><br>" +
-                    "<b><font color='#4DFFFF'>Subject:</font></b> " + d.firstY + " &#8594 " + d.lastY;
+                return "Multiplicon: <font color='#FFE153'><b>" + d.multiplicon + "</font></b><br>" +
+                    "Num_anchorpoints: <font color='#FFE153'><b>" + d.num_anchorpoints + "</font></b><br>" +
+                    "Average <i>K</i><sub>S</sub>: <font color='#FFE153'><b>" + numFormatter(d.Ks) + "</font></b><br>" +
+                    "Level: <font color='#FFE153'><b>" + d.level + "</font></b><br>";
             })
             .on("mouseover", function () {
                 ribbonEnterTime = new Date().getTime();
@@ -415,6 +424,16 @@ function ParallelPlottingV2(InputData) {
                     .delay(tooltipDelay)
                     .duration(50)
                     .style("fill", "red");
+                tippy(this, {
+                    theme: "light",
+                    placement: "right",
+                    allowHTML: true,
+                    animation: "scale",
+                    delay: [1000, 0],
+                    duration: [200, 200],
+                    followCursor: true,
+                    offset: [-15, 15]
+                });
             })
             .on("mouseout", function () {
                 ribbonOutTime = new Date().getTime();
@@ -432,7 +451,8 @@ function ParallelPlottingV2(InputData) {
                             }
                         })
                 }
-            })
+                tippy.hideAll();
+            });
         /* .on("click", function () {
             const data = d3.select(this)
                 .data();
@@ -588,7 +608,7 @@ function ParallelNumPlotting(InputData) {
         }
 
         queryGroup.append("text")
-            .text(querySpecies)
+            .text(querySpecies.replace("_", " "))
             .attr("id", "queryMainLabel")
             .attr("x", 5 + leftPadding)
             .attr("y", topPadding - 10)
@@ -685,7 +705,7 @@ function ParallelNumPlotting(InputData) {
             });
 
         subjectGroup.append("text")
-            .text(subjectSpecies)
+            .text(subjectSpecies.replace("_", " "))
             .attr("id", "subjectMainLabel")
             .attr("x", 5 + leftPadding)
             .attr("y", height - bottomPadding + 15)
@@ -873,6 +893,434 @@ function ParallelNumPlotting(InputData) {
             })
 
         tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    }
+    querySpecies = querySpecies.replace(" ", "_");
+    subjectSpecies = subjectSpecies.replace(" ", "_");
+    downloadSVG("download_" + plotId,
+        plotId,
+        querySpecies + "_vs_" + subjectSpecies + ".Parallel.svg");
+    // downloadSVGwithForeign("dotView_download", "dotView");
+}
+
+Shiny.addCustomMessageHandler("Marco_Number_Plotting", MarcoNumPlotting);
+function MarcoNumPlotting(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var queryChrInfo = convertShinyData(InputData.query_chr_nums);
+    var subjectChrInfo = convertShinyData(InputData.subject_chr_nums);
+    var width = InputData.width;
+    var height = InputData.height;
+    var querySpecies = InputData.query_sp;
+    var subjectSpecies = InputData.subject_sp;
+    var scaleRatio = width / 800;
+
+    // console.log("segmentInfo", segmentInfo);
+
+    // console.log("queryChrInfo", queryChrInfo);
+
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"
+    ];
+    const subject_chr_colors = ["#9D9D9D", "#3C3C3C"]
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
+        // draw a parallel syntenic plot
+        d3.select("#" + plotId).select("svg").remove();
+
+        var segsRibbonsId = "segsRibbons_" + plotId;
+
+        let topPadding = 50;
+        let bottomPadding = 20;
+        let leftPadding = 10;
+        let rightPadding = 50;
+        let chrRectHeight = 10;
+        var tooltipDelay = 500;
+
+        if (queryChrInfo === subjectChrInfo) {
+            var innerPaddingSubject = 10;
+            var innerPaddingQuery = 10;
+        } else {
+            var queryChrNumSum = d3.sum(queryChrInfo.map(e => e.gene_num));
+            var subjectChrNumSum = d3.sum(subjectChrInfo.map(e => e.gene_num));
+            if (queryChrNumSum * 0.8 > subjectChrNumSum) {
+                var innerPaddingSubject = 10 * queryChrNumSum / subjectChrNumSum * 0.8;
+                var innerPaddingQuery = 10;
+                var maxChrLen = queryChrNumSum * 0.8;
+            } else if (subjectChrNumSum * 0.8 > queryChrNumSum) {
+                var innerPaddingQuery = 10 * subjectChrNumSum / queryChrNumSum * 0.8;
+                var innerPaddingSubject = 10;
+                var maxChrLen = subjectChrNumSum * 0.8;
+            } else {
+                var innerPaddingSubject = 10;
+                var innerPaddingQuery = 10;
+                var maxChrLen = queryChrNumSum;
+            }
+        }
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+        const svg = d3.select("#" + plotId)
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const innerScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([
+                0,
+                width - leftPadding - rightPadding
+            ]);
+
+        function calc_accumulate_len_t(inputChrInfo, maxChrLen, innerPadding_xScale, innerPadding) {
+            let acc_len = 0;
+            let total_chr_num = d3.sum(inputChrInfo.map(e => e.gene_num));
+            let ratio = innerPadding_xScale.invert(innerPadding);
+            inputChrInfo.forEach((e, i) => {
+                e.idx = i;
+                e.accumulate_start = acc_len + 1;
+                e.accumulate_end = e.accumulate_start + e.gene_num - 1;
+                acc_len = e.accumulate_end + maxChrLen * ratio;
+            });
+            return inputChrInfo;
+        }
+
+        queryChrInfo = calc_accumulate_len_t(queryChrInfo, maxChrLen, innerScale, innerPaddingQuery);
+        subjectChrInfo = calc_accumulate_len_t(subjectChrInfo, maxChrLen, innerScale, innerPaddingSubject);
+
+        const queryGroup = svg.append("g").attr("class", "queryChrs");
+        const subjectGroup = svg.append("g").attr("class", "subjectChrs");
+
+        var queryWidth = d3.max(queryChrInfo, function (d) { return d.accumulate_end; });
+        var subjectWidth = d3.max(subjectChrInfo, function (d) { return d.accumulate_end; });
+        if (queryWidth >= subjectWidth) {
+            var scaleData = queryChrInfo;
+        } else {
+            var scaleData = subjectChrInfo;
+        }
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([
+                scaleData[0].accumulate_start,
+                scaleData[scaleData.length - 1].accumulate_end
+            ])
+            .range([
+                0 + leftPadding,
+                width - rightPadding
+            ]);
+
+        if (queryWidth > subjectWidth) {
+            var startX = middlePoint - ChrScaler(subjectWidth) / 2;
+        } else if (queryWidth < subjectWidth) {
+            var startX = middlePoint - ChrScaler(queryWidth) / 2;
+        } else {
+            var startX = 0;
+        }
+
+        queryGroup.append("text")
+            .text(querySpecies.replace("_", " ").replace(/(\w)\w+\s(\w+)/, "$1. $2"))
+            .attr("id", "queryMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", topPadding - 10)
+            .attr("font-weight", "bold")
+            .attr("font-size", 14 * scaleRatio + "px")
+            .attr("font-style", "italic")
+            .style("fill", "#68AC57");
+
+        queryGroup.selectAll("text")
+            .attr("class", "queryChrLabel")
+            .filter(":not(#queryMainLabel)")
+            .data(queryChrInfo)
+            .join("text")
+            .text((d) => d.seqchr)
+            .attr("text-anchor", "left")
+            .attr("transform", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return "rotate(-30 " + Number(30 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (topPadding + 30) + ")";
+                } else {
+                    return "rotate(-30 " + (Number(startX) + 30 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (topPadding + 30) + ")";
+                }
+            })
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
+            })
+            .attr("y", function () {
+                return Number(d3.select("#queryMainLabel").attr("y")) + Number(d3.select(this).node().getBBox().height) + 10;
+            })
+            .attr("font-size", 12 * scaleRatio + "px");
+
+        const query_chr_colorScale = d3.scaleOrdinal()
+            .domain(queryChrInfo.map((d) => d.idx))
+            .range(query_chr_colors);
+
+        queryGroup
+            .selectAll("rect")
+            .data(queryChrInfo)
+            .join("rect")
+            .attr("class", "queryChrShape")
+            .attr("id", (d) => "queryChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return ChrScaler(d.accumulate_start);
+                } else {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 1)
+            .attr("fill", (d) => query_chr_colorScale(d.idx))
+            .attr("ry", 3)
+            .on("mouseover", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonEnterTime = new Date().getTime();
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    //d3.selectAll(".from_" + plotId + "_" + selector_chrID)
+                    .filter(".from_" + plotId + "_" + selector_chrID)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50);
+
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.from_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .attr("opacity", 0);
+            })
+            .on("mouseout", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.selectAll(".from_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .duration(50);
+                }
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.from_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .duration(50)
+                    .attr("opacity", 0.6);
+            });
+
+        subjectGroup.append("text")
+            .text(subjectSpecies.replace("_", " ").replace(/(\w)\w+\s(\w+)/, "$1. $2"))
+            .attr("id", "subjectMainLabel")
+            .attr("x", 5 + leftPadding)
+            .attr("y", height - bottomPadding + 15)
+            .attr("font-weight", "bold")
+            .attr("font-size", 14 * scaleRatio + "px")
+            .attr("font-style", "italic")
+            // .attr("font-family", "times")
+            .style("fill", "#8E549E");
+
+        subjectGroup.selectAll("text")
+            .filter(":not(#subjectMainLabel)")
+            .data(subjectChrInfo)
+            .join("text")
+            .text((d) => d.seqchr)
+            .attr("text-anchor", "start")
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                } else {
+                    return d3.mean([ChrScaler(d.accumulate_end), ChrScaler(d.accumulate_start)]);
+                }
+            })
+            .attr("y", height - bottomPadding - 25)
+            .attr("transform", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return "rotate(30 " + Number(startX + 5 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (height - bottomPadding - 30) + ")";
+                } else {
+                    return "rotate(30 " + Number(5 + d3.mean([ChrScaler(d.accumulate_start), ChrScaler(d.accumulate_end)])) + "," + (height - bottomPadding - 30) + ")";
+                }
+            })
+            .attr("font-size", 12 * scaleRatio + "px")
+            .attr("class", "queryChrLabel");
+
+        const subject_chr_colorScale = d3.scaleOrdinal()
+            .domain(subjectChrInfo.map((d) => d.idx))
+            .range(subject_chr_colors);
+
+        subjectGroup
+            .selectAll("rect")
+            .data(subjectChrInfo)
+            .join("rect")
+            .attr("class", "subjectChrShape")
+            .attr("id", (d) => "subjectChr_" + d.idx)
+            .attr("x", function (d) {
+                if (queryWidth >= subjectWidth) {
+                    return Number(startX) + ChrScaler(d.accumulate_start);
+                } else {
+                    return ChrScaler(d.accumulate_start);
+                }
+            })
+            .attr("y", height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight)
+            .attr(
+                "width",
+                (d) => ChrScaler(d.accumulate_end) - ChrScaler(d.accumulate_start)
+            )
+            .attr("height", chrRectHeight)
+            .attr("opacity", 1)
+            .attr("fill", (d) => subject_chr_colorScale(d.idx))
+            .attr("ry", 3)
+            .on("mouseover", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonEnterTime = new Date().getTime();
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(".to_" + plotId + "_" + selector_chrID)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50);
+
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .attr("opacity", 0);
+            })
+            .on("mouseout", (e, d) => {
+                let selector_chrID = d.seqchr.replaceAll(".", "\\.");
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.selectAll(".to_" + plotId + "_" + selector_chrID)
+                        .transition()
+                        .duration(50)
+                }
+                d3.select("." + segsRibbonsId)
+                    .selectAll("path")
+                    .filter(":not(.to_" + plotId + "_" + selector_chrID + ")")
+                    .transition()
+                    .duration(50)
+                    .attr("opacity", 0.6);
+            });
+
+        if (querySpecies === subjectSpecies) {
+            segmentInfo = segmentInfo.concat(swapXYValues(segmentInfo));
+        }
+
+        segmentInfo.forEach((d) => {
+            let queryChr = queryChrInfo.find(e => e.seqchr === d.listX);
+            let subjectChr = subjectChrInfo.find(e => e.seqchr === d.listY);
+            let queryAccumulateStart = queryChr.accumulate_start + d.startX + 1;
+            let queryAccumulateEnd = queryChr.accumulate_start + d.endX + 1;
+            let subjectAccumulateStart = subjectChr.accumulate_start + d.startY + 1;
+            let subjectAccumulateEnd = subjectChr.accumulate_start + d.endY + 1;
+            if (queryWidth >= subjectWidth) {
+                queryX = ChrScaler(queryAccumulateStart);
+                queryX1 = ChrScaler(queryAccumulateEnd);
+                subjectX = startX + ChrScaler(subjectAccumulateStart);
+                subjectX1 = startX + ChrScaler(subjectAccumulateEnd);
+            } else {
+                queryX = startX + ChrScaler(queryAccumulateStart);
+                queryX1 = startX + ChrScaler(queryAccumulateEnd);
+                subjectX = ChrScaler(subjectAccumulateStart);
+                subjectX1 = ChrScaler(subjectAccumulateEnd);
+            }
+            d.ribbonPosition = {
+                source: {
+                    x: queryX,
+                    x1: queryX1,
+                    y: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight,
+                    y1: topPadding + d3.select("#queryMainLabel").node().getBBox().height + 5 + d3.selectAll(".queryChrs text").filter(":not(#queryMainLabel)").node().getBBox().height + 5 + chrRectHeight
+                },
+                target: {
+                    x: subjectX,
+                    x1: subjectX1,
+                    y: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight,
+                    y1: height - bottomPadding - d3.select("#subjectMainLabel").node().getBBox().height - 5 - d3.selectAll(".subjectChrs text").filter(":not(#subjectMainLabel)").node().getBBox().height - 5 - chrRectHeight
+                }
+            };
+        });
+
+        svg.append("g")
+            .attr("class", segsRibbonsId)
+            .selectAll("path")
+            .data(segmentInfo)
+            .join("path")
+            .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+            .attr("class", d => "from_" + plotId + "_" + d.listX + " to_" + plotId + "_" + d.listY)
+            //.attr("fill", (d) => query_chr_colorScale(d.idx))
+            .attr("fill", (d) => {
+                const seqchr = d.listX;
+                const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                if (matchingObj) {
+                    return query_chr_colorScale(matchingObj.idx);
+                } else {
+                    return "gray";
+                }
+            })
+            .attr("opacity", 0.6)
+            .attr("stroke", (d) => {
+                const seqchr = d.listX;
+                const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                return matchingObj ? query_chr_colorScale(matchingObj.idx) : "gray";
+            })
+            .attr("stroke-width", 0.79)
+            .attr("stroke-opacity", 0.4)
+            .attr("data-tippy-content", d => {
+                return "Multiplicon: <font color='#FFE153'><b>" + d.multiplicon + "</font></b><br>" +
+                    "Num_anchorpoints: <font color='#FFE153'><b>" + d.num_anchorpoints + "</font></b><br>" +
+                    "Average <i>K</i><sub>S</sub>: <font color='#FFE153'><b>" + numFormatter(d.Ks) + "</font></b><br>" +
+                    "Level: <font color='#FFE153'><b>" + d.level + "</font></b><br>";
+            })
+            .on("mouseover", function () {
+                ribbonEnterTime = new Date().getTime();
+                d3.select(this)
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .style("fill", "red");
+                tippy(this, {
+                    theme: "light",
+                    placement: "right",
+                    allowHTML: true,
+                    animation: "scale",
+                    delay: [1000, 0],
+                    duration: [200, 200],
+                    followCursor: true,
+                    offset: [-15, 15]
+                });
+            })
+            .on("mouseout", function () {
+                ribbonOutTime = new Date().getTime();
+                if (ribbonOutTime - ribbonEnterTime <= 8000) {
+                    d3.select(this)
+                        .transition()
+                        .duration(50)
+                        .style("fill", (d) => {
+                            const seqchr = d.listX;
+                            const matchingObj = queryChrInfo.find((obj) => obj.seqchr === seqchr);
+                            if (matchingObj) {
+                                return query_chr_colorScale(matchingObj.idx);
+                            } else {
+                                return "gray";
+                            }
+                        })
+                }
+                tippy.hideAll();
+            });
+
+        tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+
     }
     querySpecies = querySpecies.replace(" ", "_");
     subjectSpecies = subjectSpecies.replace(" ", "_");
@@ -2894,7 +3342,7 @@ function DotNumPlotting(InputData) {
             .attr("font-weight", "bold")
             .attr("font-style", "italic")
             // .attr("font-family", "times")
-            .text(querySpecies)
+            .text(querySpecies.replace("_", " "))
             .style("fill", "#68AC57");
 
         svg.append("g")
@@ -2911,7 +3359,7 @@ function DotNumPlotting(InputData) {
             .attr("transform", function () {
                 return `rotate(-90, ${ d3.select(this).attr("x") }, ${ d3.select(this).attr("y") })`;
             })
-            .text(subjectSpecies)
+            .text(subjectSpecies.replace("_", " "))
             .style("fill", "#8E549E");
 
         svg.append('g')
