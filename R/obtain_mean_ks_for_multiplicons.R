@@ -161,8 +161,23 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
             select(-tmp_pair1, -tmp_pair2, -geneA, -geneB, -pair1, -pair2) %>%
             distinct()
 
-        # merged_ks <- unique(merged_ks)
         merged_ks <- subset(merged_ks, Ks<=5)
+        merged_ks <- merged_ks[merged_ks$speciesX != merged_ks$speciesY, ]
+
+        final_merged_ks <- data.frame(matrix(ncol=ncol(merged_ks), nrow=nrow(merged_ks)))
+        for( i in 1:nrow(merged_ks) ){
+            each_row <- merged_ks[i, ]
+            if( each_row$speciesX != species1 ){
+                x_columns <- grep("X", names(each_row))
+                y_columns <- gsub("X", "Y", names(each_row[x_columns]))
+
+                temp_values <- each_row[x_columns]
+                each_row[x_columns] <- each_row[y_columns]
+                each_row[y_columns] <- temp_values
+            }
+            final_merged_ks[i,] <- each_row
+        }
+        names(final_merged_ks) <- names(merged_ks)
 
         mean_ks_for_each_multiplicon <- aggregate(
             Ks ~ multiplicon,
@@ -253,10 +268,11 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
             by="multiplicon"
         )
         merged_ks_multiplicons$Ks[is.na(merged_ks_multiplicons$Ks)] <- 0
+        final_merged_ks <- copy(merged_ks)
     }
-    merged_ks <- merged_ks %>%
+    final_merged_ks <- final_merged_ks %>%
         distinct()
-    write.table(merged_ks,
+    write.table(final_merged_ks,
                 file=anchorpointout_file,
                 sep="\t",
                 row.names=FALSE,
