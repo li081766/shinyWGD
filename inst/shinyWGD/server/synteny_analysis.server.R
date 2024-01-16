@@ -217,24 +217,27 @@ observe({
 
         output$iadhoreAnalysisPanel <- renderUI({
             div(class="boxLike",
-                style="background-color: #FBFEEC;
-                           padding-bottom: 10px;
-                           padding-top: 10px",
+                style="background-color: #FBFEEC;",
                 fluidRow(
                     div(
-                        style="padding-right: 5px;
-                               padding-left: 5px;",
-                        h5(icon("cog"), HTML("<font color='#bb5e00'>Synteny Analysis</font>")),
+                        style="padding-bottom: 5px;
+                               padding-top: 5px;
+                               padding-left: 10px;",
+                        h5(icon("cog"), HTML("Select a <font color='#bb5e00'><b>submodule</b></font> to start")),
+                        # column(
+                        #     12,
+                        #     hr(class="setting")
+                        # ),
                         column(
                             12,
                             uiOutput("iadhoreSettingPanel")
-                        ),
-                        hr(class="setting"),
-                        h5(icon("cog"), HTML("<font color='#bb5e00'>Clustering Analysis</font>")),
-                        column(
-                            12,
-                            uiOutput("clusteringSettingPanel")
-                        )
+                        ) #,
+                        # hr(class="setting"),
+                        # h5(icon("cog"), HTML("<font color='#bb5e00'>Clustering Analysis</font>")),
+                        # column(
+                        #     12,
+                        #     uiOutput("clusteringSettingPanel")
+                        # )
                     )
                 )
             )
@@ -259,10 +262,11 @@ observe({
                         column(
                             width=12,
                             div(
-                                style="padding-bottom: 10px;",
+                                style="padding-top: 10px;
+                                       padding-bottom: 10px;",
                                 bsButton(
                                     inputId="iadhore_intra_species_list_button",
-                                    label=HTML("<font color='white'><b>&nbsp;Intra-species comparing: &nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                    label=HTML("<font color='white'><b>&nbsp;Single species mode:&nbsp;&#x25BC;</b></font>"),
                                     icon=icon("list"),
                                     style="success"
                                 ) %>%
@@ -311,7 +315,7 @@ observe({
                                 style="padding-bottom: 10px;",
                                 bsButton(
                                     inputId="iadhore_inter_species_list_button",
-                                    label=HTML("<font color='white'><b>&nbsp;Inter-species comparing:&nbsp;&#x25BC;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</b></font>"),
+                                    label=HTML("<font color='white'><b>&nbsp;Pairwise mode:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                     icon=icon("list"),
                                     style="success"
                                 ) %>%
@@ -383,7 +387,7 @@ observe({
                                     style="padding-bottom: 10px;",
                                     bsButton(
                                         inputId="iadhore_multiple_species_list_button",
-                                        label=HTML("<font color='white'><b>&nbsp;Multiple species comparing: &nbsp;&#x25BC;</b></font>"),
+                                        label=HTML("<font color='white'><b>&nbsp;Multi-species mode: &nbsp;&nbsp;&#x25BC;</b></font>"),
                                         icon=icon("list"),
                                         style="success",
                                     ) %>%
@@ -430,77 +434,73 @@ observe({
                                     )
                                 )
                             )
-                        }
-                    )
-                )
-            })
-            output$clusteringSettingPanel <- renderUI({
-                fluidRow(
-                    column(
-                        width=12,
-                        div(
-                            style="padding-bottom: 10px;",
-                            bsButton(
-                                inputId="clustering_button",
-                                label=HTML("<font color='white'><b>&nbsp;Clustering analysis setting:&nbsp;&#x25BC;&nbsp;&nbsp;</b></font>"),
-                                icon=icon("list"),
-                                style="success"
-                            ) %>%
-                                bs_embed_tooltip(
-                                    title="Click to choose species",
-                                    placement="right",
-                                    trigger="hover",
-                                    options=list(container="body")
+                        },
+                        column(
+                            width=12,
+                            div(
+                                style="padding-bottom: 10px;",
+                                bsButton(
+                                    inputId="clustering_button",
+                                    label=HTML("<font color='white'><b>&nbsp;Clustering analysis: &nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
+                                    icon=icon("list"),
+                                    style="success"
                                 ) %>%
-                                bs_attach_collapse("clustering_files_collapse"),
-                            bs_collapse(
-                                id="clustering_files_collapse",
-                                content=tags$div(
-                                    class="well",
-                                    pickerInput(
-                                        inputId="cluster_species_A",
-                                        label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
-                                        options=list(
-                                            title='Please select species below'
+                                    bs_embed_tooltip(
+                                        title="Click to choose species",
+                                        placement="right",
+                                        trigger="hover",
+                                        options=list(container="body")
+                                    ) %>%
+                                    bs_attach_collapse("clustering_files_collapse"),
+                                bs_collapse(
+                                    id="clustering_files_collapse",
+                                    content=tags$div(
+                                        class="well",
+                                        pickerInput(
+                                            inputId="cluster_species_A",
+                                            label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
+                                            options=list(
+                                                title='Please select species below'
+                                            ),
+                                            choices=intra_list,
+                                            choicesOpt=list(
+                                                content=lapply(intra_list, function(choice) {
+                                                    species <- gsub("_", " ", choice)
+                                                    HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+                                                })
+                                            ),
+                                            multiple=FALSE
                                         ),
-                                        choices=intra_list,
-                                        choicesOpt=list(
-                                            content=lapply(intra_list, function(choice) {
-                                                species <- gsub("_", " ", choice)
-                                                HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
-                                            })
+                                        pickerInput(
+                                            inputId="cluster_species_B",
+                                            label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
+                                            options=list(
+                                                title='Please select species below',
+                                                `selected-text-format`="count > 1",
+                                                `actions-box`=TRUE
+                                            ),
+                                            choices=intra_list,
+                                            choicesOpt=list(
+                                                content=lapply(intra_list, function(choice) {
+                                                    species <- gsub("_", " ", choice)
+                                                    HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+                                                })
+                                            ),
+                                            multiple=FALSE
                                         ),
-                                        multiple=FALSE
-                                    ),
-                                    pickerInput(
-                                        inputId="cluster_species_B",
-                                        label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
-                                        options=list(
-                                            title='Please select species below',
-                                            `selected-text-format`="count > 1",
-                                            `actions-box`=TRUE
-                                        ),
-                                        choices=intra_list,
-                                        choicesOpt=list(
-                                            content=lapply(intra_list, function(choice) {
-                                                species <- gsub("_", " ", choice)
-                                                HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
-                                            })
-                                        ),
-                                        multiple=FALSE
-                                    ),
-                                    div(
-                                        class="d-flex justify-content-end",
-                                        actionButton(
-                                            inputId="confirm_clustering_go",
-                                            "Confirm analysis",
-                                            status="secondary",
-                                            class="my-confirm-button-class",
-                                            title="Confirm to click",
-                                            style="color: #fff;
+                                        div(
+                                            class="d-flex justify-content-end",
+                                            actionButton(
+                                                inputId="confirm_clustering_go",
+                                                "Confirm analysis",
+                                                status="secondary",
+                                                class="my-confirm-button-class",
+                                                title="Confirm to click",
+                                                style="color: #fff;
                                                    background-color: #C0C0C0;
                                                    border-color: #fff;
                                                    margin: 22px 0px 0px 0px; "
+                                            )
                                         )
                                     )
                                 )
@@ -509,6 +509,81 @@ observe({
                     )
                 )
             })
+            # output$clusteringSettingPanel <- renderUI({
+            #     fluidRow(
+            #         column(
+            #             width=12,
+            #             div(
+            #                 style="padding-bottom: 10px;",
+            #                 bsButton(
+            #                     inputId="clustering_button",
+            #                     label=HTML("<font color='white'><b>&nbsp;Clustering analysis: &nbsp;&#x25BC;&nbsp;&nbsp;</b></font>"),
+            #                     icon=icon("list"),
+            #                     style="success"
+            #                 ) %>%
+            #                     bs_embed_tooltip(
+            #                         title="Click to choose species",
+            #                         placement="right",
+            #                         trigger="hover",
+            #                         options=list(container="body")
+            #                     ) %>%
+            #                     bs_attach_collapse("clustering_files_collapse"),
+            #                 bs_collapse(
+            #                     id="clustering_files_collapse",
+            #                     content=tags$div(
+            #                         class="well",
+            #                         pickerInput(
+            #                             inputId="cluster_species_A",
+            #                             label=HTML("<b><font color='#38B0E4'>Species A</font></b>"),
+            #                             options=list(
+            #                                 title='Please select species below'
+            #                             ),
+            #                             choices=intra_list,
+            #                             choicesOpt=list(
+            #                                 content=lapply(intra_list, function(choice) {
+            #                                     species <- gsub("_", " ", choice)
+            #                                     HTML(paste0("<div style='color: #38B0E4; font-style: italic;'>", species, "</div>"))
+            #                                 })
+            #                             ),
+            #                             multiple=FALSE
+            #                         ),
+            #                         pickerInput(
+            #                             inputId="cluster_species_B",
+            #                             label=HTML("<b><font color='#B97D4B'>Species B</font></b>"),
+            #                             options=list(
+            #                                 title='Please select species below',
+            #                                 `selected-text-format`="count > 1",
+            #                                 `actions-box`=TRUE
+            #                             ),
+            #                             choices=intra_list,
+            #                             choicesOpt=list(
+            #                                 content=lapply(intra_list, function(choice) {
+            #                                     species <- gsub("_", " ", choice)
+            #                                     HTML(paste0("<div style='color: #B97D4B; font-style: italic;'>", species, "</div>"))
+            #                                 })
+            #                             ),
+            #                             multiple=FALSE
+            #                         ),
+            #                         div(
+            #                             class="d-flex justify-content-end",
+            #                             actionButton(
+            #                                 inputId="confirm_clustering_go",
+            #                                 "Confirm analysis",
+            #                                 status="secondary",
+            #                                 class="my-confirm-button-class",
+            #                                 title="Confirm to click",
+            #                                 style="color: #fff;
+            #                                        background-color: #C0C0C0;
+            #                                        border-color: #fff;
+            #                                        margin: 22px 0px 0px 0px; "
+            #                             )
+            #                         )
+            #                     )
+            #                 )
+            #             )
+            #         )
+            #     )
+            # })
         }
         rds_file <- paste0(collinearAnalysisDir, "/synteny.comparing.RData")
         if( !file.exists(rds_file) ){
@@ -516,13 +591,6 @@ observe({
                 save(path_df, file=rds_file)
             }
         }
-        # path_df <- path_df
-        # path_df$comparing_Path <- gsub(
-        #     "/Users/jiali/Desktop/Projects/ShinyWGD/packing/ShinyWGD/inst/shinyWGD/demo_data/Example_Collinear_Visualization/i-ADHoRe_wd/",
-        #     "/www/bioinformatics01_rw/ShinyWGD/Example_4Sp/Example_Collinear_Visualization/i-ADHoRe_wd/",
-        #     path_df$comparing_Path
-        # )
-        # save(path_df, file=paste0(collinearAnalysisDir, "/synteny.comparing.server.RData"))
     }
     else{
         shinyalert(
@@ -643,7 +711,6 @@ observeEvent(input$confirm_intra_comparing_go, {
                                 "#FBFBFF", "#FFFFF4", "#FFFCEC", "#FFFAF4", "#FFF3EE")
                 color_list_selected <- rep(color_list, length.out=nrow(path_df))
 
-
                 panelTitle <- paste0("<font color='#DCFEE3'><b><i>", intra_species, "</i></b></font>")
                 queryChrPanelTitle <- HTML(paste("Select <font color='#68AC57'><i><b>", intra_species, "</b></i></font> chromosomes:"))
 
@@ -729,7 +796,7 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                     fluidRow(
                                                         column(
                                                             2,
-                                                            h5(HTML("<font color='orange'>Anchor points</font> setting:"))
+                                                            h5(HTML("<font color='orange'>Anchor points</font> setting"))
                                                         ),
                                                         column(
                                                             4,
@@ -828,14 +895,14 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                     fluidRow(
                                                         column(
                                                             12,
-                                                            h6(HTML("<b>The Parallel Link Plot:</b>"))
+                                                            h6(HTML("<b>The Macro-synteny  Plot:</b>"))
                                                         ),
                                                         column(
                                                             4,
                                                             div(
                                                                 style="/*display: flex; align-items: center;*/
                                                                    text-align: center;
-                                                                   margin-bottom: 10px;                                                   border-radius: 10px;
+                                                                   margin-bottom: 10px;
                                                                    border-radius: 10px;
                                                                    padding: 10px 10px 0px 10px;
                                                                    background-color: #FFF5EE;",
@@ -914,7 +981,7 @@ observeEvent(input$confirm_intra_comparing_go, {
                                                     fluidRow(
                                                         column(
                                                             12,
-                                                            h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
+                                                            h5(HTML("<font color='#00DB00'><b>Micro-synteny</b></font>"))
                                                         )
                                                     ),
                                                     fluidRow(
@@ -1133,6 +1200,7 @@ observeEvent(input$synplot_go_intra, {
             anchorpoint_merged_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos.txt")
             anchorpointout_file <- paste0(iadhoreDir, "/anchorpoints.merged_pos_ks.txt")
             ks_file <- paste0(iadhoreDir, "/anchorpoints.ks.txt")
+            multiplicon_orientation_file <- paste0(iadhoreDir, "/multiplicons.orientation.txt")
 
             withProgress(message='Analyzing in progress', value=0, {
                 Sys.sleep(.2)
@@ -1158,6 +1226,54 @@ observeEvent(input$synplot_go_intra, {
                             outfile=multiplicon_ks_file
                         )
                     }
+
+                    if( !file.exists(multiplicon_orientation_file) ){
+                        tmp_anchorpoints <- suppressMessages(
+                            vroom(
+                                anchorpointfile,
+                                col_names=TRUE,
+                                delim="\t"
+                            )
+                        )
+
+                        tmp_anchorpoints <- tmp_anchorpoints[order(tmp_anchorpoints$multiplicon, tmp_anchorpoints$coord_x), ]
+                        tmp_anchorpoints <- tmp_anchorpoints[tmp_anchorpoints$is_real_anchorpoint != 0, ]
+
+                        calculate_differences <- function(subgroup) {
+                            if( nrow(subgroup) > 1 ){
+                                diff_x <- subgroup[nrow(subgroup), "coord_x"] - subgroup[1, "coord_x"]
+                                diff_y <- subgroup[nrow(subgroup), "coord_y"] - subgroup[1, "coord_y"]
+                                return(c(diff_x, diff_y))
+                            }else{
+                                return(c(NA, NA))
+                            }
+                        }
+
+                        tmp_multiplicon_groups <- split(tmp_anchorpoints, tmp_anchorpoints$multiplicon)
+
+                        tmp_ori_result <- sapply(tmp_multiplicon_groups, calculate_differences)
+
+                        tmp_ori_result <- t(tmp_ori_result)
+
+                        tmp_ori_result_df <- data.frame(
+                            multiplicon=as.numeric(seq_along(tmp_ori_result[, 1])),
+                            diff_x=as.numeric(tmp_ori_result[, 1]),
+                            diff_y=as.numeric(tmp_ori_result[, 2]),
+                            stringsAsFactors=FALSE
+                        )
+
+                        tmp_ori_result_df$orientation <- ifelse(tmp_ori_result_df$diff_x == tmp_ori_result_df$diff_y, 'same',
+                                                        ifelse((tmp_ori_result_df$diff_x > 0 & tmp_ori_result_df$diff_y < 0) |
+                                                                   (tmp_ori_result_df$diff_x < 0 & tmp_ori_result_df$diff_y > 0), 'diff', 'same'))
+
+                        write.table(
+                            tmp_ori_result_df,
+                            file=multiplicon_orientation_file,
+                            sep="\t",
+                            row.names=FALSE,
+                            quote=FALSE
+                        )
+                    }
                 }
                 else{
                     shinyalert(
@@ -1170,7 +1286,15 @@ observeEvent(input$synplot_go_intra, {
                 Sys.sleep(.2)
                 incProgress(amount=.3, message="Calculating Done")
 
-                final_multiplicons <- suppressMessages(
+                multiplcon_ori <- suppressMessages(
+                    vroom(
+                        multiplicon_orientation_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                multiplicons_df <- suppressMessages(
                     vroom(
                         multiplicon_ks_file,
                         col_names=TRUE,
@@ -1178,12 +1302,40 @@ observeEvent(input$synplot_go_intra, {
                     )
                 )
 
+                final_multiplicons <- merge(multiplicons_df, multiplcon_ori, by="multiplicon")
+
+                final_multiplicons <- within(final_multiplicons, {
+                    temp_startX <- ifelse(orientation == "diff", endX, startX)
+                    endX <- ifelse(orientation == "diff", startX, endX)
+                    startX <- temp_startX
+                })
+
                 final_anchorpoints <- suppressMessages(
                     vroom(
                         anchorpointout_file,
                         col_names=TRUE,
                         delim="\t"
                     )
+                )
+
+                genes <- suppressMessages(
+                    vroom(
+                        genesFile,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                final_anchorpoints$coordX <- ifelse(
+                    final_anchorpoints$geneX %in% genes$id,
+                    genes$coordinate[match(final_anchorpoints$geneX, genes$id)],
+                    final_anchorpoints$coordX
+                )
+
+                final_anchorpoints$coordY <- ifelse(
+                    final_anchorpoints$geneY %in% genes$id,
+                    genes$coordinate[match(final_anchorpoints$geneY, genes$id)],
+                    final_anchorpoints$coordY
                 )
 
                 query_chr_num_df <- gene_num_df %>%
@@ -1195,11 +1347,7 @@ observeEvent(input$synplot_go_intra, {
                 # Sort the dataframe based on seqchr
                 # query_chr_num_df_sorted <- query_chr_num_df[gtools::mixedsort(query_chr_num_df$seqchr), ]
 
-                # print(query_chr_num_df)
-                # print(query_chr_num_df_sorted)
-                # print(as.numeric(gsub("[^[:digit:]]+", "", query_chr_num_df$seqchr)))
                 query_chr_num_df <- query_chr_num_df[order(as.numeric(gsub("[^[:digit:]]+", "", query_chr_num_df$seqchr))),]
-
 
                 anchoredPointScutoff <- "anchoredPointsCutoff_intra"
 
@@ -1209,109 +1357,225 @@ observeEvent(input$synplot_go_intra, {
                     filter(num_anchorpoints >= input[[anchoredPointScutoff]])
                 selected_multiplicons_Id <- selected_multiplicons$multiplicon
 
-                # source(file="tools/computeAnchorPointDepth.R", local=T, encoding="UTF-8")
-                depth_list <- computing_depth_paranome(
-                    anchorpoint_ks_file=anchorpointout_file,
-                    multiplicon_id=selected_multiplicons_Id,
-                    selected_query_chr=query_selected_chr_list
-                )
-                query_selected_depth_list <- depth_list$depth
-                subject_selected_depth_list <- depth_list$depth
-
-                selected_anchorpoints <- final_anchorpoints %>%
-                    filter(listX %in% query_selected_chr_list) %>%
-                    filter(listY %in% query_selected_chr_list) %>%
-                    filter(multiplicon %in% selected_multiplicons_Id)
-
-                plotSize <- reactiveValues(
-                    value=400
-                )
-                observeEvent(input[["svg_spacing_add_dot_intra"]], {
-                    plotSize$value <- plotSize$value + 50
-                })
-                observeEvent(input[["svg_spacing_sub_dot_intra"]], {
-                    plotSize$value <- plotSize$value - 50
-                })
-                Sys.sleep(.2)
-                incProgress(amount=.3, message="Drawing Dot Plot...")
-
-                observe({
-                    plot_dot_num_data <- list(
-                        "plot_id"="dotView_intra",
-                        "multiplicons"=selected_multiplicons,
-                        "anchorpoints"=selected_anchorpoints,
-                        "query_sp"=querySpecies,
-                        "query_chr_gene_nums"=query_chr_num_df,
-                        "query_depths"=query_selected_depth_list,
-                        "subject_sp"=subjectSpecies,
-                        "subject_chr_gene_nums"=query_chr_num_df,
-                        "subject_depths"=subject_selected_depth_list,
-                        "size"=plotSize$value
+                if( nrow(selected_multiplicons) == 0 ){
+                    shinyalert(
+                        "Oops",
+                        "No collinear block identified. Please choose other chromosomes...",
+                        type="error"
                     )
-                    session$sendCustomMessage("Dot_Num_Plotting_paranome", plot_dot_num_data)
-                })
-                Sys.sleep(.2)
-                incProgress(amount=1, message="Drawing Dot Plot Done")
-            })
+                }else{
+                    selected_anchorpoints <- final_anchorpoints %>%
+                        filter(listX %in% query_selected_chr_list) %>%
+                        filter(listY %in% query_selected_chr_list) %>%
+                        filter(multiplicon %in% selected_multiplicons_Id)
 
-            # plot parallel figure
-            withProgress(message='Parallel Syntenty Figure in progress', value=0, {
-                Sys.sleep(.2)
-                incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
-                segmentsfile <- paste0(iadhoreDir, "/segments.txt")
-                segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
-                subject_chr_len_df <- query_chr_len_df
+                    write.table(
+                        selected_anchorpoints,
+                        file=paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt"),
+                        row.names=FALSE,
+                        sep="\t",
+                        quote=FALSE
+                    )
 
-                observe({
-                    widthSpacingRainbow <- reactiveValues(
-                        value=800
+                    print(paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt"))
+
+                    depth_list <- computing_depth_paranome(
+                        anchorpoint_ks_file=paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt"),
+                        multiplicon_id=selected_multiplicons_Id,
+                        selected_query_chr=query_selected_chr_list
                     )
-                    heightSpacingRainbow <- reactiveValues(
-                        value=300
-                    )
-                    observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
-                        heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
-                    })
-                    observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
-                        heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                    })
-                    observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
-                        widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
-                    })
-                    observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
-                        widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
-                    })
-                    if( input$scale_link_intra == "True length" ){
-                        plot_parallel_data <- list(
-                            "plot_id"="SyntenicBlock_intra",
-                            "segs"=selected_anchorpoints,
-                            "query_sp"=querySpecies,
-                            "query_chr_lens"=query_chr_len_df,
-                            "subject_sp"=subjectSpecies,
-                            "subject_chr_lens"=subject_chr_len_df,
-                            "width"=widthSpacingRainbow$value,
-                            "height"=heightSpacingRainbow$value,
-                            "anchor_pair"="anchor_pair"
+
+                    query_selected_depth_list <- depth_list$depth
+                    subject_selected_depth_list <- depth_list$depth
+
+                    system(
+                        paste(
+                            "rm",
+                            paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt")
                         )
-                        session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                    }
-                    else{
-                        plot_parallel_data <- list(
-                            "plot_id"="SyntenicBlock_intra",
+                    )
+
+                    plotSize <- reactiveValues(
+                        value=400
+                    )
+                    observeEvent(input[["svg_spacing_add_dot_intra"]], {
+                        plotSize$value <- plotSize$value + 50
+                    })
+                    observeEvent(input[["svg_spacing_sub_dot_intra"]], {
+                        plotSize$value <- plotSize$value - 50
+                    })
+                    Sys.sleep(.2)
+                    incProgress(amount=.3, message="Drawing Dot Plot...")
+
+                    filtered_query_chr <- query_chr_num_df %>%
+                        filter(seqchr %in% c(selected_anchorpoints$listY, selected_anchorpoints$listX)) #%>%
+                        # arrange(desc(gene_num))
+
+                    observe({
+                        plot_dot_num_data <- list(
+                            "plot_id"="dotView_intra",
+                            "multiplicons"=selected_multiplicons,
                             "anchorpoints"=selected_anchorpoints,
                             "query_sp"=querySpecies,
-                            "query_chr_nums"=query_chr_num_df,
+                            "query_chr_gene_nums"=filtered_query_chr,
+                            "query_depths"=query_selected_depth_list,
                             "subject_sp"=subjectSpecies,
-                            "subject_chr_nums"=query_chr_num_df,
-                            "width"=widthSpacingRainbow$value,
-                            "height"=heightSpacingRainbow$value
+                            "subject_chr_gene_nums"=filtered_query_chr,
+                            "subject_depths"=subject_selected_depth_list,
+                            "size"=plotSize$value
                         )
-                        session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
-                    }
-                })
+                        session$sendCustomMessage("Dot_Num_Plotting_paranome", plot_dot_num_data)
+                    })
+                    Sys.sleep(.2)
+                    incProgress(amount=1, message="Drawing Dot Plot Done")
 
-                Sys.sleep(.3)
-                incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+                    # plot parallel figure
+                    withProgress(message='Parallel Syntenty Figure in progress', value=0, {
+                        Sys.sleep(.2)
+                        incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
+                        segmentsfile <- paste0(iadhoreDir, "/segments.txt")
+                        segs_pos_file <- paste0(iadhoreDir, "/segments.merged_pos.txt")
+                        subject_chr_len_df <- query_chr_len_df
+
+                        multiplicon_true_pos_file <- paste0(iadhoreDir, "/multiplicons.true_pos.txt")
+                        if( !file.exists(multiplicon_true_pos_file) ){
+                            merged_data <- merge(final_multiplicons, genes, by.x=c("listX", "startX"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_start_X"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listX", "endX"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_end_X"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listY", "startY"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "gene_end_X", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_start_Y"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listY", "endY"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "gene_end_X", "gene_start_Y", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_end_Y"
+                            subset_data <- subset_data[complete.cases(subset_data[, c("gene_start_X", "gene_end_X", "gene_start_Y", "gene_end_Y")]), ]
+
+                            gff_df <- suppressMessages(
+                                vroom(
+                                    sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                                    delim="\t",
+                                    comment="#",
+                                    col_names=FALSE
+                                )
+                            )
+                            # gff_df <- gff_df[gff_df$X3 == "mRNA", ]
+                            gff_df <- gff_df[, c("X9", "X4", "X5")]
+                            colnames(gff_df) <- c("gene", "start", "end")
+                            gff_df$gene <- gsub("ID=([^;]+).*", "\\1", gff_df$gene)
+
+                            get_start_end_values <- function(gene, gff_df) {
+                                gene_info <- gff_df[gff_df$gene == gene, c("start", "end")]
+                                return(list(start=gene_info$start, end=gene_info$end))
+                            }
+
+                            start_end_values <- list()
+
+                            for( gene in unique(c(subset_data$gene_start_X, subset_data$gene_end_X, subset_data$gene_start_Y, subset_data$gene_end_Y)) ){
+                                start_end_values[[gene]] <- get_start_end_values(gene, gff_df)
+                            }
+
+                            subset_data$seg_start_X <- sapply(subset_data$gene_start_X, function(gene) start_end_values[[gene]]$start)
+                            subset_data$seg_end_X <- sapply(subset_data$gene_end_X, function(gene) start_end_values[[gene]]$end)
+                            subset_data$seg_start_Y <- sapply(subset_data$gene_start_Y, function(gene) start_end_values[[gene]]$start)
+                            subset_data$seg_end_Y <- sapply(subset_data$gene_end_Y, function(gene) start_end_values[[gene]]$end)
+
+                            columns_with_lists <- sapply(subset_data, function(column) is.list(column))
+                            #print(columns_with_lists)
+                            # Save the entire data frame to a table
+
+                            write.table(
+                                subset_data,
+                                file=multiplicon_true_pos_file,
+                                sep="\t",
+                                row.names=FALSE,
+                                quote=FALSE
+                            )
+                        }
+
+                        multiplicon_true_pos <- suppressMessages(
+                            vroom(
+                                multiplicon_true_pos_file,
+                                delim="\t"
+                            )
+                        )
+
+                        selected_sge_true_data <- multiplicon_true_pos[multiplicon_true_pos$multiplicon %in% selected_multiplicons_Id, ]
+
+                        query_chr_len_df$seqchr <- as.character(query_chr_len_df$seqchr)
+
+                        query_chr_len_df <- query_chr_len_df[order(as.numeric(gsub("[^[:digit:]]+", "", query_chr_len_df$seqchr))),]
+
+                        observe({
+                            widthSpacingRainbow <- reactiveValues(
+                                value=800
+                            )
+                            heightSpacingRainbow <- reactiveValues(
+                                value=300
+                            )
+                            observeEvent(input[["svg_vertical_spacing_add_rainbow_intra"]], {
+                                heightSpacingRainbow$value <- heightSpacingRainbow$value + 20
+                            })
+                            observeEvent(input[["svg_vertical_spacing_sub_rainbow_intra"]], {
+                                heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_add_rainbow_intra"]], {
+                                widthSpacingRainbow$value <- widthSpacingRainbow$value + 20
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_sub_rainbow_intra"]], {
+                                widthSpacingRainbow$value <- widthSpacingRainbow$value - 20
+                            })
+                            if( input$scale_link_intra == "True length" ){
+                                plot_parallel_data <- list(
+                                    "plot_id"="SyntenicBlock_intra",
+                                    "segs"=selected_sge_true_data,
+                                    "query_sp"=querySpecies,
+                                    "query_chr_lens"=query_chr_len_df,
+                                    "subject_sp"=subjectSpecies,
+                                    "subject_chr_lens"=subject_chr_len_df,
+                                    "width"=widthSpacingRainbow$value,
+                                    "height"=heightSpacingRainbow$value,
+                                    "anchor_pair"="anchor_pair"
+                                )
+                                session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+
+                            }
+                            else{
+                                plot_parallel_data <- list(
+                                    "plot_id"="SyntenicBlock_intra",
+                                    "segs"=selected_multiplicons,
+                                    "query_sp"=querySpecies,
+                                    "query_chr_nums"=filtered_query_chr,
+                                    "subject_sp"=subjectSpecies,
+                                    "subject_chr_nums"=filtered_query_chr,
+                                    "width"=widthSpacingRainbow$value,
+                                    "height"=heightSpacingRainbow$value
+                                )
+                                session$sendCustomMessage("Marco_Number_Plotting", plot_parallel_data)
+                            }
+                        })
+
+                        Sys.sleep(.3)
+                        incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+                    })
+                }
             })
         }
         else{
@@ -1328,7 +1592,7 @@ observeEvent(input[["searchButton_intra"]], {
     collinearAnalysisDir <- collinear_analysis_dir_Val()
     if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
-            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+            # shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
             withProgress(message='Searching Gene in progress', value=0, {
                 Sys.sleep(.8)
                 incProgress(amount=.2, message="Preparing Data...")
@@ -1580,7 +1844,7 @@ observeEvent(input[["searchButton_intra"]], {
                             fluidRow(
                                 column(
                                     12,
-                                    h6(HTML("<b>The Synteny Link Plot:</b>")),
+                                    h6(HTML("<b>The Micro-synteny Plot:</b>")),
                                     actionButton(
                                         "svg_vertical_spacing_add_micro_intra",
                                         "",
@@ -1936,18 +2200,6 @@ observeEvent(input[["plotMicro_intra"]], {
                                 widthSpacingMicro$value <- widthSpacingMicro$value - 50
                             })
 
-                            #selectedGene_df <- rbind(selectedQueryGenes, selectedSubjectGenes)
-
-                            # write.table(
-                            #     searched_chrs_coord_df,
-                            #     file=paste0(intra_species_dir, "/test.chr_coord.txt"),
-                            #     col.names=T,
-                            #     row.names=F,
-                            #     quote=F,
-                            #     sep="\t"
-                            # )
-                            # print(input$multiplicon_choose_intra)
-                            # print(input[["gene_intra"]])
                             observe({
                                 selected_multiplicons_df <- searched_multiplicon_df %>%
                                     filter(searched_multiplicon == input$multiplicon_choose_intra)
@@ -2198,7 +2450,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                 fluidRow(
                                                     column(
                                                         2,
-                                                        h5(HTML("<font color='orange'>Anchor points</font> setting:"))
+                                                        h5(HTML("<font color='orange'>Anchor points</font> setting"))
                                                     ),
                                                     column(
                                                         3,
@@ -2284,7 +2536,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                 fluidRow(
                                                     column(
                                                         12,
-                                                        h6(HTML("<b>The Parallel Link Plot:</b>"))
+                                                        h6(HTML("<b>The Macro-synteny  Plot:</b>"))
                                                     ),
                                                     column(
                                                         4,
@@ -2389,7 +2641,7 @@ observeEvent(input$confirm_inter_comparing_go, {
                                                 fluidRow(
                                                     column(
                                                         12,
-                                                        h5(HTML("<font color='#00DB00'><b>Multiplicon-level Synteny</b></font>"))
+                                                        h5(HTML("<font color='#00DB00'><b>Micro-synteny</b></font>"))
                                                     )
                                                 ),
                                                 fluidRow(
@@ -2628,6 +2880,7 @@ observeEvent(input$synplot_go_inter, {
                 anchorpoint_merged_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos.txt")
                 anchorpointout_file <- paste0(inter_species_dir, "/anchorpoints.merged_pos_ks.txt")
                 ks_file <- paste0(inter_species_dir, "/anchorpoints.ks.txt")
+                multiplicon_orientation_file <- paste0(inter_species_dir, "/multiplicons.orientation.txt")
 
                 if( file.exists(ks_file) ){
                     if( !file.exists(anchorpointout_file) ){
@@ -2652,6 +2905,54 @@ observeEvent(input$synplot_go_inter, {
                             outfile=multiplicon_ks_file
                         )
                     }
+
+                    if( !file.exists(multiplicon_orientation_file) ){
+                        tmp_anchorpoints <- suppressMessages(
+                            vroom(
+                                anchorpointfile,
+                                col_names=TRUE,
+                                delim="\t"
+                            )
+                        )
+
+                        tmp_anchorpoints <- tmp_anchorpoints[order(tmp_anchorpoints$multiplicon, tmp_anchorpoints$coord_x), ]
+                        tmp_anchorpoints <- tmp_anchorpoints[tmp_anchorpoints$is_real_anchorpoint != 0, ]
+
+                        calculate_differences <- function(subgroup) {
+                            if( nrow(subgroup) > 1 ){
+                                diff_x <- subgroup[nrow(subgroup), "coord_x"] - subgroup[1, "coord_x"]
+                                diff_y <- subgroup[nrow(subgroup), "coord_y"] - subgroup[1, "coord_y"]
+                                return(c(diff_x, diff_y))
+                            }else{
+                                return(c(NA, NA))
+                            }
+                        }
+
+                        tmp_multiplicon_groups <- split(tmp_anchorpoints, tmp_anchorpoints$multiplicon)
+
+                        tmp_ori_result <- sapply(tmp_multiplicon_groups, calculate_differences)
+
+                        tmp_ori_result <- t(tmp_ori_result)
+
+                        tmp_ori_result_df <- data.frame(
+                            multiplicon=as.numeric(seq_along(tmp_ori_result[, 1])),
+                            diff_x=as.numeric(tmp_ori_result[, 1]),
+                            diff_y=as.numeric(tmp_ori_result[, 2]),
+                            stringsAsFactors=FALSE
+                        )
+
+                        tmp_ori_result_df$orientation <- ifelse(tmp_ori_result_df$diff_x == tmp_ori_result_df$diff_y, 'same',
+                                                                ifelse((tmp_ori_result_df$diff_x > 0 & tmp_ori_result_df$diff_y < 0) |
+                                                                           (tmp_ori_result_df$diff_x < 0 & tmp_ori_result_df$diff_y > 0), 'diff', 'same'))
+
+                        write.table(
+                            tmp_ori_result_df,
+                            file=multiplicon_orientation_file,
+                            sep="\t",
+                            row.names=FALSE,
+                            quote=FALSE
+                        )
+                    }
                 }
                 else{
                     shinyalert(
@@ -2664,7 +2965,15 @@ observeEvent(input$synplot_go_inter, {
                 Sys.sleep(.2)
                 incProgress(amount=.3, message="Calculating Done")
 
-                final_multiplicons <- suppressMessages(
+                multiplcon_ori <- suppressMessages(
+                    vroom(
+                        multiplicon_orientation_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                multiplicons_df <- suppressMessages(
                     vroom(
                         multiplicon_ks_file,
                         col_names=TRUE,
@@ -2672,12 +2981,60 @@ observeEvent(input$synplot_go_inter, {
                     )
                 )
 
+                final_multiplicons <- merge(multiplicons_df, multiplcon_ori, by="multiplicon")
+
+                final_multiplicons <- within(final_multiplicons, {
+                    temp_startX <- ifelse(orientation == "diff", endX, startX)
+                    endX <- ifelse(orientation == "diff", startX, endX)
+                    startX <- temp_startX
+                })
+
+                final_multiplicons <- final_multiplicons[final_multiplicons$genomeX != final_multiplicons$genomeY, ]
+
+                final_multiplicons$temp_startX <- NULL
+                selected_multiplicons_df <- data.frame(matrix(ncol=ncol(final_multiplicons), nrow=nrow(final_multiplicons)))
+                for( i in 1:nrow(final_multiplicons) ){
+                    each_row <- final_multiplicons[i, ]
+                    if( each_row$genomeX != gsub(" ", "_", querySpecies) ){
+                        x_columns <- grep("X", names(each_row))
+                        y_columns <- gsub("X", "Y", names(each_row[x_columns]))
+
+                        temp_values <- each_row[x_columns]
+                        each_row[x_columns] <- each_row[y_columns]
+                        each_row[y_columns] <- temp_values
+                    }
+                    selected_multiplicons_df[i, ] <- each_row
+                }
+                names(selected_multiplicons_df) <- names(final_multiplicons)
+
+                final_multiplicons <- copy(selected_multiplicons_df)
+
                 final_anchorpoints <- suppressMessages(
                     vroom(
                         anchorpointout_file,
                         col_names=TRUE,
                         delim="\t"
                     )
+                )
+
+                genes <- suppressMessages(
+                    vroom(
+                        genesFile,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                final_anchorpoints$coordX <- ifelse(
+                    final_anchorpoints$geneX %in% genes$id,
+                    genes$coordinate[match(final_anchorpoints$geneX, genes$id)],
+                    final_anchorpoints$coordX
+                )
+
+                final_anchorpoints$coordY <- ifelse(
+                    final_anchorpoints$geneY %in% genes$id,
+                    genes$coordinate[match(final_anchorpoints$geneY, genes$id)],
+                    final_anchorpoints$coordY
                 )
 
                 query_chr_num_df <- gene_num_df %>%
@@ -2695,111 +3052,252 @@ observeEvent(input$synplot_go_inter, {
                     filter(listY %in% subject_selected_chr_list) %>%
                     filter(num_anchorpoints >= input[[anchoredPointScutoff]])
 
-                selected_multiplicons_Id <- selected_multiplicons$multiplicon
-
-                depth_list <- computing_depth(
-                    anchorpoint_ks_file=anchorpointout_file,
-                    multiplicon_id=selected_multiplicons_Id,
-                    selected_query_chr=query_selected_chr_list,
-                    selected_subject_chr=subject_selected_chr_list
-                )
-                query_selected_depth_list <- depth_list$query_depth
-                subject_selected_depth_list <- depth_list$subject_depth
-
-                selected_anchorpoints <- final_anchorpoints %>%
-                    filter(listX %in% query_selected_chr_list) %>%
-                    filter(listY %in% subject_selected_chr_list) %>%
-                    filter(multiplicon %in% selected_multiplicons_Id)
-
-                plotSize <- reactiveValues(
-                    value=400
-                )
-                observeEvent(input[["svg_spacing_add_dot_inter"]], {
-                    plotSize$value <- plotSize$value + 50
-                })
-                observeEvent(input[["svg_spacing_sub_dot_inter"]], {
-                    plotSize$value <- plotSize$value - 50
-                })
-                Sys.sleep(.2)
-                incProgress(amount=.3, message="Drawing Dot Plot...")
-
-                observe({
-                    plot_dot_num_data <- list(
-                        "plot_id"="dotView_inter",
-                        "multiplicons"=selected_multiplicons,
-                        "anchorpoints"=selected_anchorpoints,
-                        "query_sp"=querySpecies,
-                        "query_chr_gene_nums"=query_chr_num_df,
-                        "query_depths"=query_selected_depth_list,
-                        "subject_sp"=subjectSpecies,
-                        "subject_chr_gene_nums"=subject_chr_num_df,
-                        "subject_depths"=subject_selected_depth_list,
-                        "size"=plotSize$value
+                if( nrow(selected_multiplicons) == 0 ){
+                    shinyalert(
+                        "Oops",
+                        "No collinear block identified. Please choose other chromosomes...",
+                        type="error"
                     )
-                    session$sendCustomMessage("Dot_Num_Plotting", plot_dot_num_data)
-                })
-                Sys.sleep(.2)
-                incProgress(amount=1, message="Drawing Dot Plot Done")
-            })
+                }else{
+                    selected_multiplicons_Id <- selected_multiplicons$multiplicon
 
-            # plot parallel figure
-            withProgress(message='Parallel Syntenty Figure in progress', value=0, {
-                Sys.sleep(.2)
-                incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
-                segmentsfile <- paste0(inter_species_dir, "/segments.txt")
-                segs_pos_file <- paste0(inter_species_dir, "/segments.merged_pos.txt")
+                    selected_anchorpoints <- final_anchorpoints %>%
+                        filter(listX %in% query_selected_chr_list) %>%
+                        filter(listY %in% subject_selected_chr_list) %>%
+                        filter(multiplicon %in% selected_multiplicons_Id) %>%
+                        filter(is_real_anchorpoint == -1)
 
-                observe({
-                        widthSpacingRainbow <- reactiveValues(
-                            value=800
+                    key_columns <- c("geneX", "geneY")
+
+                    selected_anchorpoints <- selected_anchorpoints[!duplicated(selected_anchorpoints[, key_columns]), ]
+
+                    write.table(
+                        selected_anchorpoints,
+                        file=paste0(inter_species_dir, "/anchorpoints.merged_pos_ks_for_depth.txt"),
+                        sep="\t",
+                        row.names=FALSE,
+                        quote=FALSE
+                    )
+
+                    depth_list <- computing_depth(
+                        anchorpoint_ks_file=paste0(inter_species_dir, "/anchorpoints.merged_pos_ks_for_depth.txt"),
+                        multiplicon_id=selected_multiplicons_Id,
+                        selected_query_chr=query_selected_chr_list,
+                        selected_subject_chr=subject_selected_chr_list
+                    )
+                    # system(
+                    #     paste(
+                    #         "rm",
+                    #         paste0(inter_species_dir, "/anchorpoints.merged_pos_ks_for_depth.txt")
+                    #     )
+                    # )
+                    query_selected_depth_list <- depth_list$query_depth
+                    subject_selected_depth_list <- depth_list$subject_depth
+
+                    plotSize <- reactiveValues(
+                        value=400
+                    )
+                    observeEvent(input[["svg_spacing_add_dot_inter"]], {
+                        plotSize$value <- plotSize$value + 50
+                    })
+                    observeEvent(input[["svg_spacing_sub_dot_inter"]], {
+                        plotSize$value <- plotSize$value - 50
+                    })
+                    Sys.sleep(.2)
+                    incProgress(amount=.3, message="Drawing Dot Plot...")
+
+                    # filtered_query_chr <- query_chr_num_df %>%
+                    #     filter((sp == gsub(" ", "_", unique(selected_anchorpoints$speciesX)) & seqchr %in% selected_anchorpoints$listX) |
+                    #                (sp == gsub(" ", "_", unique(selected_anchorpoints$speciesY)) & seqchr %in% selected_anchorpoints$listY))
+                    #
+                    # filtered_subject_chr <- subject_chr_num_df %>%
+                    #     filter((sp == gsub(" ", "_", unique(selected_anchorpoints$speciesX)) & seqchr %in% selected_anchorpoints$listX) |
+                    #                (sp == gsub(" ", "_", unique(selected_anchorpoints$speciesY)) & seqchr %in% selected_anchorpoints$listY))
+
+                    observe({
+                        plot_dot_num_data <- list(
+                            "plot_id"="dotView_inter",
+                            "multiplicons"=selected_multiplicons,
+                            "anchorpoints"=selected_anchorpoints,
+                            "query_sp"=querySpecies,
+                            "query_chr_gene_nums"=query_chr_num_df, # filtered_query_chr,
+                            "query_depths"=query_selected_depth_list,
+                            "subject_sp"=subjectSpecies,
+                            "subject_chr_gene_nums"=subject_chr_num_df, #filtered_subject_chr,
+                            "subject_depths"=subject_selected_depth_list,
+                            "size"=plotSize$value
                         )
-                        heightSpacingRainbow <- reactiveValues(
-                            value=300
-                        )
-                        observeEvent(input[["svg_vertical_spacing_add_rainbow_inter"]], {
-                            heightSpacingRainbow$value <- heightSpacingRainbow$value + 50
-                        })
-                        observeEvent(input[["svg_vertical_spacing_sub_rainbow_inter"]], {
-                            heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
-                        })
-                        observeEvent(input[["svg_horizontal_spacing_add_rainbow_inter"]], {
-                            widthSpacingRainbow$value <- widthSpacingRainbow$value + 50
-                        })
-                        observeEvent(input[["svg_horizontal_spacing_sub_rainbow_inter"]], {
-                            widthSpacingRainbow$value <- widthSpacingRainbow$value - 50
-                        })
-                        if( input$scale_link_inter == "True length" ){
-                            plot_parallel_data <- list(
-                                "plot_id"="SyntenicBlock_inter",
-                                "segs"=selected_anchorpoints,
-                                "query_sp"=querySpecies,
-                                "query_chr_lens"=query_chr_len_df,
-                                "subject_sp"=subjectSpecies,
-                                "subject_chr_lens"=subject_chr_len_df,
-                                "width"=widthSpacingRainbow$value,
-                                "height"=heightSpacingRainbow$value #,
-                                # "anchor_pair"="anchor_pair"
-                            )
-                            session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-                        }
-                        else{
-                            plot_parallel_data <- list(
-                                "plot_id"="SyntenicBlock_inter",
-                                "anchorpoints"=selected_anchorpoints,
-                                "query_sp"=querySpecies,
-                                "query_chr_nums"=query_chr_num_df,
-                                "subject_sp"=subjectSpecies,
-                                "subject_chr_nums"=subject_chr_num_df,
-                                "width"=widthSpacingRainbow$value,
-                                "height"=heightSpacingRainbow$value
-                            )
-                            session$sendCustomMessage("Parallel_Number_Plotting", plot_parallel_data)
-                        }
-                    # }
-                })
+                        session$sendCustomMessage("Dot_Num_Plotting", plot_dot_num_data)
+                    })
+                    Sys.sleep(.2)
+                    incProgress(amount=1, message="Drawing Dot Plot Done")
 
-                Sys.sleep(.3)
-                incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+                    # plot parallel figure
+                    withProgress(message='Parallel Syntenty Figure in progress', value=0, {
+                        Sys.sleep(.2)
+                        incProgress(amount=.3, message="Drawing Parallel Syntenty Plot...")
+                        segmentsfile <- paste0(inter_species_dir, "/segments.txt")
+                        segs_pos_file <- paste0(inter_species_dir, "/segments.merged_pos.txt")
+
+                        multiplicon_true_pos_file <- paste0(inter_species_dir, "/multiplicons.true_pos.txt")
+                        if( !file.exists(multiplicon_true_pos_file) ){
+                            merged_data <- merge(final_multiplicons, genes, by.x=c("listX", "startX"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_start_X"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listX", "endX"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_end_X"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listY", "startY"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "gene_end_X", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_start_Y"
+
+                            merged_data <- merge(subset_data, genes, by.x=c("listY", "endY"), by.y=c("list", "coordinate"), all.x=TRUE)
+                            subset_data <- merged_data[, c("multiplicon", "genomeX", "listX", "parent", "genomeY", "listY",
+                                                           "level", "num_anchorpoints", "profile_len", "startX", "endX",
+                                                           "startY", "endY", "is_redundant", "Ks", "diff_x", "diff_y",
+                                                           "orientation.x", "gene_start_X", "gene_end_X", "gene_start_Y", "id")]
+                            colnames(subset_data)[which(names(subset_data) == "id")] <- "gene_end_Y"
+                            subset_data <- subset_data[complete.cases(subset_data[, c("gene_start_X", "gene_end_X", "gene_start_Y", "gene_end_Y")]), ]
+
+                            gff_df <- suppressMessages(
+                                vroom(
+                                    sp_gff_info_df[sp_gff_info_df$species==querySpecies, ]$gffPath,
+                                    delim="\t",
+                                    comment="#",
+                                    col_names=FALSE
+                                )
+                            )
+                            # gff_df <- gff_df[gff_df$X3 == "mRNA", ]
+                            gff_df <- gff_df[, c("X9", "X4", "X5")]
+                            colnames(gff_df) <- c("gene", "start", "end")
+                            gff_df$gene <- gsub("ID=([^;]+).*", "\\1", gff_df$gene)
+
+                            gff_df2 <- suppressMessages(
+                                vroom(
+                                    sp_gff_info_df[sp_gff_info_df$species==subjectSpecies, ]$gffPath,
+                                    delim="\t",
+                                    comment="#",
+                                    col_names=FALSE
+                                )
+                            )
+                            gff_df2 <- gff_df2[, c("X9", "X4", "X5")]
+                            colnames(gff_df2) <- c("gene", "start", "end")
+                            gff_df2$gene <- gsub("ID=([^;]+).*", "\\1", gff_df2$gene)
+
+                            gff_df <- rbind(gff_df, gff_df2)
+
+                            get_start_end_values <- function(gene, gff_df) {
+                                gene_info <- gff_df[gff_df$gene == gene, c("start", "end")]
+                                return(list(start=gene_info$start, end=gene_info$end))
+                            }
+
+                            start_end_values <- list()
+
+                            for( gene in unique(c(subset_data$gene_start_X, subset_data$gene_end_X, subset_data$gene_start_Y, subset_data$gene_end_Y)) ){
+                                start_end_values[[gene]] <- get_start_end_values(gene, gff_df)
+                            }
+
+                            subset_data$seg_start_X <- sapply(subset_data$gene_start_X, function(gene) start_end_values[[gene]]$start)
+                            subset_data$seg_end_X <- sapply(subset_data$gene_end_X, function(gene) start_end_values[[gene]]$end)
+                            subset_data$seg_start_Y <- sapply(subset_data$gene_start_Y, function(gene) start_end_values[[gene]]$start)
+                            subset_data$seg_end_Y <- sapply(subset_data$gene_end_Y, function(gene) start_end_values[[gene]]$end)
+
+                            write.table(
+                                subset_data,
+                                file=multiplicon_true_pos_file,
+                                sep="\t",
+                                row.names=FALSE,
+                                quote=FALSE
+                            )
+                        }
+
+                        multiplicon_true_pos <- suppressMessages(
+                            vroom(
+                                multiplicon_true_pos_file,
+                                delim="\t"
+                            )
+                        )
+
+                        selected_sge_true_data <- multiplicon_true_pos[multiplicon_true_pos$multiplicon %in% selected_multiplicons_Id, ]
+
+                        # swaping data
+                        selected_sge_true_df <- data.frame(matrix(ncol=ncol(selected_sge_true_data), nrow=nrow(selected_sge_true_data)))
+                        for( i in 1:nrow(selected_sge_true_data) ){
+                            each_row <- selected_sge_true_data[i, ]
+                            if( each_row$genomeX != gsub(" ", "_", querySpecies) ){
+                                x_columns <- grep("X", names(each_row))
+                                y_columns <- gsub("X", "Y", names(each_row[x_columns]))
+
+                                temp_values <- each_row[x_columns]
+                                each_row[x_columns] <- each_row[y_columns]
+                                each_row[y_columns] <- temp_values
+                            }
+                            selected_sge_true_df[i,] <- each_row
+                        }
+                        names(selected_sge_true_df) <- names(selected_sge_true_data)
+
+                        observe({
+                            widthSpacingRainbow <- reactiveValues(
+                                value=800
+                            )
+                            heightSpacingRainbow <- reactiveValues(
+                                value=300
+                            )
+                            observeEvent(input[["svg_vertical_spacing_add_rainbow_inter"]], {
+                                heightSpacingRainbow$value <- heightSpacingRainbow$value + 50
+                            })
+                            observeEvent(input[["svg_vertical_spacing_sub_rainbow_inter"]], {
+                                heightSpacingRainbow$value <- heightSpacingRainbow$value - 20
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_add_rainbow_inter"]], {
+                                widthSpacingRainbow$value <- widthSpacingRainbow$value + 50
+                            })
+                            observeEvent(input[["svg_horizontal_spacing_sub_rainbow_inter"]], {
+                                widthSpacingRainbow$value <- widthSpacingRainbow$value - 50
+                            })
+                            if( input$scale_link_inter == "True length" ){
+                                plot_parallel_data <- list(
+                                    "plot_id"="SyntenicBlock_inter",
+                                    "segs"=selected_sge_true_df,
+                                    "query_sp"=querySpecies,
+                                    "query_chr_lens"=query_chr_len_df,
+                                    "subject_sp"=subjectSpecies,
+                                    "subject_chr_lens"=subject_chr_len_df,
+                                    "width"=widthSpacingRainbow$value,
+                                    "height"=heightSpacingRainbow$value
+                                )
+                                session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
+                            }
+                            else{
+                                plot_parallel_data <- list(
+                                    "plot_id"="SyntenicBlock_inter",
+                                    "segs"=selected_multiplicons,
+                                    "query_sp"=querySpecies,
+                                    "query_chr_nums"=query_chr_num_df,
+                                    "subject_sp"=subjectSpecies,
+                                    "subject_chr_nums"=subject_chr_num_df,
+                                    "width"=widthSpacingRainbow$value,
+                                    "height"=heightSpacingRainbow$value
+                                )
+                                session$sendCustomMessage("Marco_Number_Plotting", plot_parallel_data)
+                            }
+                        })
+
+                        Sys.sleep(.3)
+                        incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+                    })
+                }
             })
         }
     }
@@ -3083,7 +3581,7 @@ observeEvent(input[["searchButton_inter"]], {
                             fluidRow(
                                 column(
                                     12,
-                                    h6(HTML("<b>The Synteny Link Plot:</b>")),
+                                    h6(HTML("<b>The Micro-synteny Plot:</b>")),
                                     actionButton(
                                         "svg_vertical_spacing_add_micro_inter",
                                         "",
@@ -3183,7 +3681,7 @@ observeEvent(input[["plotMicro_inter"]], {
     if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$multiplicon_choose_inter) && !is.null(input$multiplicon_choose_inter) ){
             if( isTruthy(input$gene_inter) && input$gene_inter != "" ){
-                shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+                # shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)
                     load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
@@ -3466,7 +3964,7 @@ observeEvent(input[["plotMicro_inter"]], {
                                 selected_multiplicons_df <- searched_multiplicon_df %>%
                                     filter(searched_multiplicon == input$multiplicon_choose_inter)
 
-                                heightMicroPlot_intra <- 150 * nrow(selected_multiplicons_df) + 100
+                                heightMicroPlot_intra <- 150 * nrow(selected_multiplicons_df) # + 100
 
                                 selected_gene_df <- searched_genes_df %>%
                                     filter(searched_multiplicon == input$multiplicon_choose_inter)
@@ -3804,7 +4302,7 @@ observeEvent(input$confirm_multi_comparing_go, {
                                     hr(class="setting")
                                 ),
                                 div(
-                                    h6(HTML("<b>The Multiple Species Parallel Link Plot:</b><br></br>")),
+                                    h6(HTML("<b>The Multiple Species Macro-synteny  Plot:</b><br></br>")),
                                     column(
                                         12,
                                         actionButton(
@@ -4625,6 +5123,52 @@ observeEvent(input$cluster_go, {
                     each_PAR[["par_id"]] <- paste0("PAR ", identified_cluster_list[[i]]$par_id)
                     PARs_info <- c(PARs_info, each_PAR)
                 }
+
+                ratio_df <- data.frame(
+                    id=integer(),
+                    genome_order=character(),
+                    ratio=character(),
+                    stringsAsFactors=FALSE
+                )
+                for( i in seq_along(identified_cluster_list) ){
+                    cluster <- identified_cluster_list[[i]]
+                    genome_counts <- table(cluster$cluster_chr$genome)
+
+                    if( length(genome_counts) == 2 ){
+                        original_genomes <- unique(cluster$cluster_chr$genome)
+                        sorted_genomes <- sort(original_genomes)
+
+                        genome_order <- paste0(sorted_genomes[1], ":", sorted_genomes[2])
+                        ratio <- paste0(genome_counts[sorted_genomes[1]], ":", genome_counts[sorted_genomes[2]])
+
+                        ratio_df <- rbind(
+                            ratio_df,
+                            data.frame(
+                                id=cluster$par_id,
+                                genome_order=genome_order,
+                                ratio=ratio
+                            )
+                        )
+                    }
+                }
+                # Count unique ratios and generate the output without dplyr
+                unique_ratios <- unique(ratio_df$ratio)
+                summary_list <- lapply(unique_ratios, function(r) {
+                    subset_df <- ratio_df[ratio_df$ratio == r, ]
+                    list(
+                        ratio=r,
+                        number=nrow(subset_df),
+                        par_ids=toString(subset_df$id),
+                        genome_order=subset_df$genome_order[1]
+                    )
+                })
+
+                # Convert the list to a data frame
+                summary_ratio_df <- do.call(rbind, summary_list)
+                summary_ratio_df[] <- lapply(summary_ratio_df, function(x) gsub("\"", "", x))
+
+                # Print the summary_ratio_df
+                print(summary_ratio_df)
             }
 
             if( is.null(PARs_info) ){

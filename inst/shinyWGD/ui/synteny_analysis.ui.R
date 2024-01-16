@@ -1,5 +1,5 @@
 Synteny_Analysis_ui <- tabPanel(
-    "Collinearity",
+    "Collinear",
     value="synteny_analysis",
     fluidRow(
         column(
@@ -30,7 +30,7 @@ Synteny_Analysis_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("<font color='green'><b><i>shinyWGD</i> Collinear Analysis</b></font> Data")),
+                h5(HTML("<font color='green'><i>shinyWGD</i> <b>Collinear Analysis</b></font> Data")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 15px;
@@ -42,7 +42,7 @@ Synteny_Analysis_ui <- tabPanel(
                                    position: relative;",
                             fileInput(
                                 'collinear_data_zip_file',
-                                label=h6(icon("file-zipper"), HTML("Upload the <b>.tar.gz</b> File")),
+                                label=h6(icon("file-zipper"), HTML("Upload the <b>zipped</b> File")),
                                 multiple=FALSE,
                                 accept=c(
                                     ".zip",
