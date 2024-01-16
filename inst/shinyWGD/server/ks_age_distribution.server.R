@@ -214,18 +214,19 @@ output$ksanalysisPanel <- renderUI({
                     style="padding-bottom: 5px;
                            padding-top: 5px;
                            padding-left: 10px;",
-                    h5(icon("cog"), HTML("Select <font color='#bb5e00'><b><i>K</i><sub>s</sub></b></font> to analyze")),
-                    column(
-                        12,
-                        hr(class="setting")
-                    ),
+                    h5(icon("cog"), HTML("Select a <font color='#bb5e00'><b>submodule</b></font> to start")),
+                    # column(
+                    #     12,
+                    #     hr(class="setting")
+                    # ),
                     column(
                         width=12,
                         div(
-                            style="padding-bottom: 10px;",
+                            style="padding-top: 10px;
+                                   padding-bottom: 10px;",
                             bsButton(
                                 inputId="paralogous_ks_button",
-                                label=HTML("<font color='white'><b>&nbsp;Paralogous <i>K</i><sub>s</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Paralogous <i>K</i><sub>s</sub> distribution&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -278,7 +279,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="orthologous_ks_button",
-                                label=HTML("<font color='white'><b>&nbsp;Orthologous <i>K</i><sub>s</sub>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Orthologous <i>K</i><sub>s</sub> distribution&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -347,7 +348,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="rate_correct_button",
-                                label=HTML("<font color='white'><b>&nbsp;Rate Correction&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Relative rate test analysis&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%
@@ -430,7 +431,7 @@ output$ksanalysisPanel <- renderUI({
                             style="padding-bottom: 10px;",
                             bsButton(
                                 inputId="phylo_ks_button",
-                                label=HTML("<font color='white'><b>&nbsp;Phylo-<i>K</i><sub>s</sub> Analysis&nbsp;&#x25BC;</b></font>"),
+                                label=HTML("<font color='white'><b>&nbsp;Phylo-<i>K</i><sub>s</sub> analysis&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                 icon=icon("list"),
                                 style="success"
                             ) %>%

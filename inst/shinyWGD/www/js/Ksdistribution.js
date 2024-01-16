@@ -3716,7 +3716,7 @@ function DensityTreePlotting(InputData) {
 
         var legend = svg.append("g")
             .attr("class", "legend")
-            .attr("transform", "translate(" + (width / 2 - longestLabel.length * 10) + ", 20)");
+            .attr("transform", "translate(" + (width / 2 - longestLabel.length * 8) + ", 20)");
 
         var legendItems = legend.selectAll(".legend-item")
             .data(legendData)
@@ -3866,7 +3866,7 @@ function DensityTreePlotting(InputData) {
 
             var paraloglegend = svg.append("g")
                 .attr("class", "legend")
-                .attr("transform", "translate(" + (width / 2 - longestLabel.length * 10) + "," + (20 + 20 * orthologLegendNum) + ")");
+                .attr("transform", "translate(" + (width / 2 - longestLabel.length * 8) + "," + (20 + 20 * orthologLegendNum) + ")");
 
             var legendItems = paraloglegend.selectAll(".legend-item-paralog")
                 .data(titles)
@@ -4094,7 +4094,7 @@ function DensityTreePlotting(InputData) {
 
                                     var paraloglegend = svg.append("g")
                                         .attr("class", "legend")
-                                        .attr("transform", "translate(" + (width / 2 - longestLabel.length * 10) + "," + (20 + 20 * orthologLegendNum) + ")");
+                                        .attr("transform", "translate(" + (width / 2 - longestLabel.length * 8) + "," + (20 + 20 * orthologLegendNum) + ")");
 
                                     var legendItems = paraloglegend.selectAll(".legend-item-paralog")
                                         .data(titles)
@@ -4271,7 +4271,7 @@ function DensityTreePlotting(InputData) {
                                         svg.selectAll(".legend-item-paralog").remove();
                                         var paraloglegend = svg.append("g")
                                             .attr("class", "legend")
-                                            .attr("transform", "translate(" + (width / 2 - longestLabel.length * 10) + "," + (20 + 20 * orthologLegendNum) + ")");
+                                            .attr("transform", "translate(" + (width / 2 - longestLabel.length * 8) + "," + (20 + 20 * orthologLegendNum) + ")");
 
                                         var legendItems = paraloglegend.selectAll(".legend-item-paralog")
                                             .data(titles)

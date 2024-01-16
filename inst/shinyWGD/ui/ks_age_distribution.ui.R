@@ -44,7 +44,7 @@ Ks_Age_Distribution_ui <- tabPanel(
                             # shinyDirButton("dir", "Select a Folder", "Upload"),
                             fileInput(
                                 'Ks_data_zip_file',
-                                label=h6(icon("file-zipper"), "Upload the Zipped File"),
+                                label=h6(icon("file-zipper"), HTML("Upload the <b>zipped</b> File")),
                                 multiple=FALSE,
                                 accept=c(
                                     ".zip",
