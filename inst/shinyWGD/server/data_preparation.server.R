@@ -818,6 +818,28 @@ observe({
                 })
             }
         })
+
+        if( !is.null(input$proteome_1) ){
+            # for server
+            # base_dir <- "/www/bioinformatics01_rw/ShinyWGD"
+            # timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+            # working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+
+            base_dir <- tempdir()
+            timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+            working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+
+            while( dir.exists(working_wd) ){
+                Sys.sleep(1)
+                timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
+                working_wd <- file.path(base_dir, paste0("Analysis_", gsub("[ :\\-]", "_", timestamp)))
+            }
+
+            dir.create(working_wd)
+
+            data_preparation_dir_Val(working_wd)
+            # system(paste("chmod -R 777", working_wd))
+        }
     }
 })
 
