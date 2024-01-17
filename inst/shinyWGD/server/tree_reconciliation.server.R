@@ -45,7 +45,7 @@ if( !dir.exists(whale_TreeRecon_example_dir) ){
     dir.create(whale_TreeRecon_example_dir)
     downloadAndExtractData <- function() {
         download.file(
-            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Ks_Data_for_Visualization.tar.gz",
+            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Example_Whale_TreeRecon.tar.gz",
             destfile=file.path(getwd(), "data.zip"),
             mode="wb"
         )
