@@ -2206,53 +2206,53 @@ output$wgd_ksrates_data_download <- downloadHandler(
 )
 
 # remove the folder created two weeks ago
-find_folders_two_weeks_ago <- function(base_dir) {
-    folders <- list.files(base_dir, full.names=TRUE)
-
-    pattern <- "\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}"
-    matching_folders <- grep(pattern, folders, value=TRUE)
-
-    folder_dates <- as.Date(
-        sub(".*_(\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}).*", "\\1", matching_folders),
-        format="%Y_%m_%d_%H_%M_%S"
-    )
-
-    two_weeks_ago <- Sys.Date() - 14
-
-    two_weeks_ago_folders <- matching_folders[folder_dates <= two_weeks_ago]
-
-    sapply(two_weeks_ago_folders, function(folder) system(paste("rm -rf", shQuote(folder))))
-
-    return(two_weeks_ago_folders)
-}
-
-timer <- reactiveTimer(60 * 1000)
-
-observe({
-    timer()
-
-    data_dir <- "/var/folders/dm/nv89839s3dngv7d76s59n0rr0000gn/T/RtmpmsMCLT"
-    removed_projects_log <- paste0(data_dir, "/removed_projects.xls")
-    if( format(Sys.time(), "%H:%M") == "17:22"){
-        folders_needed_to_be_removed <- find_folders_two_weeks_ago(data_dir)
-        if( file.exists(removed_projects_log)) {
-            write.table(
-                folders_needed_to_be_removed,
-                removed_projects_log,
-                append=TRUE,
-                col.names=FALSE,
-                row.names=FALSE,
-                quote=FALSE
-            )
-        }else{
-            write.table(
-                folders_needed_to_be_removed,
-                removed_projects_log,
-                col.names=FALSE,
-                row.names=FALSE,
-                quote=FALSE
-            )
-        }
-    }
-})
+# find_folders_two_weeks_ago <- function(base_dir) {
+#     folders <- list.files(base_dir, full.names=TRUE)
+#
+#     pattern <- "\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}"
+#     matching_folders <- grep(pattern, folders, value=TRUE)
+#
+#     folder_dates <- as.Date(
+#         sub(".*_(\\d{4}_\\d{2}_\\d{2}_\\d{2}_\\d{2}_\\d{2}).*", "\\1", matching_folders),
+#         format="%Y_%m_%d_%H_%M_%S"
+#     )
+#
+#     two_weeks_ago <- Sys.Date() - 14
+#
+#     two_weeks_ago_folders <- matching_folders[folder_dates <= two_weeks_ago]
+#
+#     sapply(two_weeks_ago_folders, function(folder) system(paste("rm -rf", shQuote(folder))))
+#
+#     return(two_weeks_ago_folders)
+# }
+#
+# timer <- reactiveTimer(60 * 1000)
+#
+# observe({
+#     timer()
+#
+#     data_dir <- "/var/folders/dm/nv89839s3dngv7d76s59n0rr0000gn/T/RtmpmsMCLT"
+#     removed_projects_log <- paste0(data_dir, "/removed_projects.xls")
+#     if( format(Sys.time(), "%H:%M") == "17:22"){
+#         folders_needed_to_be_removed <- find_folders_two_weeks_ago(data_dir)
+#         if( file.exists(removed_projects_log)) {
+#             write.table(
+#                 folders_needed_to_be_removed,
+#                 removed_projects_log,
+#                 append=TRUE,
+#                 col.names=FALSE,
+#                 row.names=FALSE,
+#                 quote=FALSE
+#             )
+#         }else{
+#             write.table(
+#                 folders_needed_to_be_removed,
+#                 removed_projects_log,
+#                 col.names=FALSE,
+#                 row.names=FALSE,
+#                 quote=FALSE
+#             )
+#         }
+#     }
+# })
 
