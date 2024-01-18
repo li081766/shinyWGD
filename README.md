@@ -17,12 +17,6 @@ After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFi
 
 ### Installation
 
-* Install from CRAN:
-
-```r
-install.packages("shinyWGD")
-```
-
 * Install the latest development version from GitHub (requires [devtools](https://github.com/hadley/devtools) package):
 
 ```r
