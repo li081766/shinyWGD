@@ -105,10 +105,7 @@ Data_preparation_ui <- tabPanel(
                             width="100%",
                             accept=c(
                                 ".txt",
-                                ".xls",
-                                ".txt.gz",
-                                ".xls.gz",
-                                ".gz"
+                                ".xls"
                             )
                         )
                     ),
