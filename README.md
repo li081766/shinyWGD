@@ -1,9 +1,8 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![license](https://img.shields.io/pypi/l/wgd.svg)](https://pypi.python.org/pypi/wgd)
-[![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
+[![GitHub Downloads](https://img.shields.io/github/downloads/smithlabcode/falco/total.svg?style=social&logo=github&label=Download)](https://github.com/li081766/shinyWGD)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
 <!-- badges: end -->
 
