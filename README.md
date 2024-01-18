@@ -3,6 +3,7 @@
 <!-- badges: start -->
 [![license](https://img.shields.io/pypi/l/wgd.svg)](https://pypi.python.org/pypi/wgd)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
+[![Supported Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20OSX%20%7C%20Windows-brightgreen.svg)]
 [![Visit Server](https://img.shields.io/badge/Visit%20Server-blue.svg)](https://bioinformatics.psb.ugent.be/shiny/ShinyWGD/)
 <!-- badges: end -->
 
