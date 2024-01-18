@@ -1,10 +1,10 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/shinyWGD?color=blue)](https://cran.r-project.org/web/packages/shinyWGD)
 [![license](https://img.shields.io/pypi/l/wgd.svg)](https://pypi.python.org/pypi/wgd)
-[![Downloads](https://cranlogs.r-pkg.org/badges/shinyWGD?color=blue)](https://cran.rstudio.com/package=shinyWGD)
+![Supported Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20OSX%20%7C%20Windows-brightgreen.svg)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
+[![Visit Server](https://img.shields.io/badge/Visit%20Server-blue.svg)](https://bioinformatics.psb.ugent.be/shiny/ShinyWGD/)
 <!-- badges: end -->
 
 ### Overview
@@ -16,12 +16,6 @@
 After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFinder`, `shinyWGD` can study the whole genome duplication events (WGDs).
 
 ### Installation
-
-* Install from CRAN:
-
-```r
-install.packages("shinyWGD")
-```
 
 * Install the latest development version from GitHub (requires [devtools](https://github.com/hadley/devtools) package):
 
