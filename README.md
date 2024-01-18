@@ -2,7 +2,7 @@
 
 <!-- badges: start -->
 [![license](https://img.shields.io/pypi/l/wgd.svg)](https://pypi.python.org/pypi/wgd)
-[![GitHub Downloads](https://img.shields.io/github/downloads/smithlabcode/falco/total.svg?style=social&logo=github&label=Download)](https://github.com/li081766/shinyWGD)
+[![GitHub Downloads](https://img.shields.io/github/downloads/li081766/shinyWGD/total.svg?style=social&logo=github&label=Download)](https://github.com/li081766/shinyWGD)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
 <!-- badges: end -->
 
