@@ -1704,6 +1704,7 @@ function parallelMultiplePlotting(InputData) {
                     .transition()
                     .delay(tooltipDelay)
                     .duration(50)
+                    .style('stroke', 'none')
                     .attr("fill", function (otherPathData) {
                         if (otherPathData === d) {
                             return "red";
@@ -1852,7 +1853,7 @@ function parallelMultiplePlotting(InputData) {
                                             d.startX < pathData.startY && d.endX > pathData.endY ||
                                             d.startX > pathData.startY && d.endX < pathData.endY))
                                 ) {
-                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.95);
+                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.95).style('stroke', 'none');
                                 }
                             });
                         });
@@ -2250,6 +2251,7 @@ function parallelMultipleGeneNumPlotting(InputData) {
                     .selectAll("path")
                     .transition()
                     .duration(50)
+                    .style('stroke', 'none')
                     .attr("fill", function (otherPathData) {
                         if (otherPathData === d) {
                             return "red";
@@ -2397,7 +2399,7 @@ function parallelMultipleGeneNumPlotting(InputData) {
                                             d.startX < pathData.startY && d.endX > pathData.endY ||
                                             d.startX > pathData.startY && d.endX < pathData.endY))
                                 ) {
-                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.91);
+                                    d3.select(this).raise().style('fill', color).style('stroke', 'none').attr("opacity", 0.91);
                                 }
                             });
                         });
