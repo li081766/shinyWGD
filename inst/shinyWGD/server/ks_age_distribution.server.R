@@ -45,32 +45,75 @@ observeEvent(input$ks_data_example, {
 
 example_data_dir <- file.path(getwd(), "demo_data")
 ks_example_dir <- file.path(example_data_dir, "Example_Ks_Visualization")
+ks_check_file <- paste0(ks_example_dir, "/ksrates_wd/ortholog_distributions/wgd_Oryza2_Vitis4/Oryza2_Vitis4.ks.tsv")
 
-if( !dir.exists(ks_example_dir) ){
-    if( !dir.exists(example_data_dir) ){
-        dir.create(example_data_dir)
-    }
-    dir.create(ks_example_dir)
-    downloadAndExtractData <- function() {
-        download.file(
-            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Ks_Data_for_Visualization.tar.gz",
-            destfile=file.path(getwd(), "data.zip"),
-            mode="wb"
-        )
+if( !dir.exists(ks_example_dir) & !file.exists(ks_check_file) ){
+    withProgress(message='Downloading Ks demo data...', value=0, {
+        if( !dir.exists(example_data_dir) ){
+            dir.create(example_data_dir)
+        }
+        dir.create(ks_example_dir)
 
-        system(
-            paste(
-                "tar xzf",
-                shQuote(file.path(getwd(), "data.zip")),
-                "-C",
-                shQuote(ks_example_dir)
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
+
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Ks_Data_for_Visualization.tar.gz",
+                destfile=file.path(getwd(), "data.zip"),
+                mode="wb"
             )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "data.zip")),
+                    "-C",
+                    shQuote(ks_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "data.zip"))
+        }
+
+        downloadAndExtractData()
+
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
+}else if( dir.exists(ks_example_dir) & !file.exists(ks_check_file) ){
+    withProgress(message='Downloading Ks demo data...', value=0, {
+        system(
+            paste("rm -rf ", ks_example_dir)
         )
+        dir.create(ks_example_dir)
 
-        file.remove(file.path(getwd(), "data.zip"))
-    }
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
 
-    downloadAndExtractData()
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Ks_Data_for_Visualization.tar.gz",
+                destfile=file.path(getwd(), "data.zip"),
+                mode="wb"
+            )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "data.zip")),
+                    "-C",
+                    shQuote(ks_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "data.zip"))
+        }
+
+        downloadAndExtractData()
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
 }
 
 buttonClicked <- reactiveVal(NULL)

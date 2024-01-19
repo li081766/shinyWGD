@@ -37,32 +37,76 @@ observeEvent(input$whale_TreeRecon_example, {
 # example_data_dir <- "/www/bioinformatics01_rw/ShinyWGD/Example_4Sp/"
 example_data_dir <- file.path(getwd(), "demo_data")
 whale_TreeRecon_example_dir <- file.path(example_data_dir, "Example_Whale_TreeRecon")
+whale_check_file <- paste0(whale_TreeRecon_example_dir, "/run_Critical_branch_model_200/output/chaincritical.csv")
 
-if( !dir.exists(whale_TreeRecon_example_dir) ){
-    if( !dir.exists(example_data_dir) ){
-        dir.create(example_data_dir)
-    }
-    dir.create(whale_TreeRecon_example_dir)
-    downloadAndExtractData <- function() {
-        download.file(
-            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Example_Whale_TreeRecon.tar.gz",
-            destfile=file.path(getwd(), "data.zip"),
-            mode="wb"
-        )
+if( !dir.exists(whale_TreeRecon_example_dir) & !file.exists(whale_check_file) ){
+    withProgress(message='Downloading tree reconciliation demo data...', value=0, {
+        if( !dir.exists(example_data_dir) ){
+            dir.create(example_data_dir)
+        }
+        dir.create(whale_TreeRecon_example_dir)
 
-        system(
-            paste(
-                "tar xzf",
-                shQuote(file.path(getwd(), "data.zip")),
-                "-C",
-                shQuote(whale_TreeRecon_example_dir)
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
+
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Example_Whale_TreeRecon.tar.gz",
+                destfile=file.path(getwd(), "data.zip"),
+                mode="wb"
             )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "data.zip")),
+                    "-C",
+                    shQuote(whale_TreeRecon_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "data.zip"))
+        }
+
+        downloadAndExtractData()
+
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
+}else if( dir.exists(whale_TreeRecon_example_dir) & !file.exists(whale_check_file) ){
+    withProgress(message='Downloading tree reconciliation demo data...', value=0, {
+        system(
+            paste("rm -rf ", whale_TreeRecon_example_dir)
         )
+        dir.create(whale_TreeRecon_example_dir)
 
-        file.remove(file.path(getwd(), "data.zip"))
-    }
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
 
-    downloadAndExtractData()
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Example_Whale_TreeRecon.tar.gz",
+                destfile=file.path(getwd(), "data.zip"),
+                mode="wb"
+            )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "data.zip")),
+                    "-C",
+                    shQuote(whale_TreeRecon_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "data.zip"))
+        }
+
+        downloadAndExtractData()
+
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
 }
 
 buttonTreeReconClicked <- reactiveVal(NULL)
@@ -489,7 +533,7 @@ observe({
                                     "posteriorMeanBayesFactorTxT",
                                     placeholder=TRUE
                                 ),
-                                h6(HTML("This is the log10 Bayes factor in favor of the <i>q</i> = 0 model. A Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> ≠ 0 model compared to the <i>q</i> = 0 mode."))
+                                h6(HTML("This is the log10 Bayes factor in favor of the <i>q</i> = 0 model. A Bayes factor <font color='red'><b>smaller than -2</b></font> could be considered as evidence in favor of the <i>q</i> &#x2260; 0 model compared to the <i>q</i> = 0 mode."))
                             )
                         ),
                         hr(class="setting"),

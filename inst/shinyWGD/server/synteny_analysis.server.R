@@ -45,32 +45,76 @@ observeEvent(input$collinear_data_example, {
 
 example_data_dir <- file.path(getwd(), "demo_data")
 collinear_example_dir <- file.path(example_data_dir, "Example_Collinear_Visualization")
+collinear_check_file <- paste0(collinear_example_dir, "/i-ADHoRe_wd/i-adhore.Elaeis_guineensis_vs_Oryza_sativa/segments.txt")
 
-if( !dir.exists(collinear_example_dir) ){
-    if( !dir.exists(example_data_dir) ){
-        dir.create(example_data_dir)
-    }
-    dir.create(collinear_example_dir)
-    downloadAndExtractData <- function() {
-        download.file(
-            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Collinear_Data_for_Visualization.tar.gz",
-            destfile=file.path(getwd(), "collinear.data.zip"),
-            mode="wb"
-        )
+if( !dir.exists(collinear_example_dir) & !file.exists(collinear_check_file) ){
+    withProgress(message='Downloading collinear demo data...', value=0, {
+        if( !dir.exists(example_data_dir) ){
+            dir.create(example_data_dir)
+        }
+        dir.create(collinear_example_dir)
 
-        system(
-            paste(
-                "tar xzf",
-                shQuote(file.path(getwd(), "collinear.data.zip")),
-                "-C",
-                shQuote(collinear_example_dir)
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
+
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Collinear_Data_for_Visualization.tar.gz",
+                destfile=file.path(getwd(), "collinear.data.zip"),
+                mode="wb"
             )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "collinear.data.zip")),
+                    "-C",
+                    shQuote(collinear_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "collinear.data.zip"))
+        }
+
+        downloadAndExtractData()
+
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
+}else if( dir.exists(collinear_example_dir) & !file.exists(collinear_check_file) ){
+    withProgress(message='Downloading collinear demo data...', value=0, {
+        system(
+            paste("rm -rf", collinear_example_dir)
         )
+        dir.create(collinear_example_dir)
 
-        file.remove(file.path(getwd(), "collinear.data.zip"))
-    }
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
 
-    downloadAndExtractData()
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_Collinear_Data_for_Visualization.tar.gz",
+                destfile=file.path(getwd(), "collinear.data.zip"),
+                mode="wb"
+            )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "collinear.data.zip")),
+                    "-C",
+                    shQuote(collinear_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "collinear.data.zip"))
+        }
+
+        downloadAndExtractData()
+
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
 }
 
 buttonCollinearClicked <- reactiveVal(NULL)
