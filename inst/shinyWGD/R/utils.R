@@ -58,12 +58,12 @@ downloadButton_custom <- function(
 #'
 #' @return A data frame containing the data from the uploaded file.
 #'
-read_data_file <- function(uploadfile){
-    dataframe <- read.table(
+read_data_file <- function(uploadfile) {
+    dataframe <- read.delim(
         uploadfile$datapath,
         sep="\t",
         header=FALSE,
-        fill=T,
+        fill=TRUE,
         na.strings=""
     )
     return(dataframe)
