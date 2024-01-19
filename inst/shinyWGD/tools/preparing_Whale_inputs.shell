@@ -194,6 +194,7 @@ EOF
 #	select_random_1000_genefamily orthogroups.filtered.tsv orthogroups.filtered_1000gf.tsv
 #fi
 
+orthogroups_file=$1
 align_dir=$2
 
 if [ ! -d "geneTreeCCD" ]; then
@@ -216,7 +217,7 @@ if [ -f orthogroups.filtered_1000gf.tsv ]; then
 		} &
 	done
 else
-	cut -f 1 orthogroups.filtered.tsv | grep -v Orthogroup | while read -r gf;
+	cut -f 1 $orthogroups_file | grep -v Orthogroup | while read -r gf;
 	do
 		read -u6
 		{
@@ -246,8 +247,8 @@ else
 fi
 
 mv geneTreeCCD/*/*ale "all_tree_ALE_files"
-python script_dir/ccddata.py all_tree_ALE_files > all_tree_ALE_files.tsv
-python script_dir/ccdfilter.py all_tree_ALE_files.tsv 2 >filtered_tree_ALE_files.tsv
+python script_bin/ccddata.py all_tree_ALE_files > all_tree_ALE_files.tsv
+python script_bin/ccdfilter.py all_tree_ALE_files.tsv 2 >filtered_tree_ALE_files.tsv
 
 # Move filtered ale_files into the final output folder
 if [ -d "selected_tree_ALE_files" ]; then

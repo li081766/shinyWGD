@@ -171,32 +171,74 @@ observeEvent(input$orthofinder_data_example, {
 
 example_data_dir <- file.path(getwd(), "demo_data")
 whale_example_dir <- file.path(example_data_dir, "Example_Whale_Preparation")
+og_check_file <- paste0(whale_example_dir, "/OrthoFinderOutputDir/Results_Nov18/MultipleSequenceAlignments/OG0002009.fa")
 
-if( !dir.exists(whale_example_dir) ){
-    if( !dir.exists(example_data_dir) ){
-        dir.create(example_data_dir)
-    }
-    dir.create(whale_example_dir)
-    downloadAndExtractData <- function() {
-        download.file(
-            "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_OrthoFinderOutput_for_Whale.tar.gz",
-            destfile=file.path(getwd(), "whale.data.zip"),
-            mode="wb"
-        )
+if( !dir.exists(whale_example_dir) & !file.exists(og_check_file) ){
+    withProgress(message='Downloading Whale preparation demo data...', value=0, {
+        if( !dir.exists(example_data_dir) ){
+            dir.create(example_data_dir)
+        }
+        dir.create(whale_example_dir)
 
-        system(
-            paste(
-                "tar xzf",
-                shQuote(file.path(getwd(), "whale.data.zip")),
-                "-C",
-                shQuote(whale_example_dir)
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
+
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_OrthoFinderOutput_for_Whale.tar.gz",
+                destfile=file.path(getwd(), "whale.data.zip"),
+                mode="wb"
             )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "whale.data.zip")),
+                    "-C",
+                    shQuote(whale_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "whale.data.zip"))
+        }
+
+        downloadAndExtractData()
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
+}else if( dir.exists(whale_example_dir) & !file.exists(og_check_file) ){
+    withProgress(message='Downloading Whale preparation demo data...', value=0, {
+        system(
+            paste("rm -rf ", whale_example_dir)
         )
+        dir.create(whale_example_dir)
 
-        file.remove(file.path(getwd(), "whale.data.zip"))
-    }
+        Sys.sleep(.2)
+        incProgress(amount=.3, message="Downloading in progress. Please wait...")
 
-    downloadAndExtractData()
+        downloadAndExtractData <- function() {
+            download.file(
+                "https://github.com/li081766/shinyWGD_Demo_Data/raw/main/4sp_OrthoFinderOutput_for_Whale.tar.gz",
+                destfile=file.path(getwd(), "whale.data.zip"),
+                mode="wb"
+            )
+
+            system(
+                paste(
+                    "tar xzf",
+                    shQuote(file.path(getwd(), "whale.data.zip")),
+                    "-C",
+                    shQuote(whale_example_dir)
+                )
+            )
+
+            file.remove(file.path(getwd(), "whale.data.zip"))
+        }
+
+        downloadAndExtractData()
+        Sys.sleep(.2)
+        incProgress(amount=1, message="Done")
+    })
 }
 
 buttonWhalePreparationClicked <- reactiveVal(NULL)
@@ -209,12 +251,12 @@ observeEvent(input$orthofinder_data_zip_file, {
     timestamp <- format(Sys.time(), "%Y_%m_%d_%H_%M_%S")
     OrthoFinderWhaleAnalysisDir <- file.path(base_dir, paste0("Whale_Preparation_data_", gsub("[ :\\-]", "_", timestamp)))
     dir.create(OrthoFinderWhaleAnalysisDir)
+    orthofinder_output_file <- "OrthoFinder_result.tar.gz"
     system(
         paste(
-            "tar xzf",
+            "cp",
             input$orthofinder_data_zip_file$datapath,
-            "-C",
-            OrthoFinderWhaleAnalysisDir
+            paste0(OrthoFinderWhaleAnalysisDir, "/", orthofinder_output_file)
         )
     )
     orthofinder_whale_analysis_dir_Val(OrthoFinderWhaleAnalysisDir)
@@ -731,13 +773,17 @@ observeEvent(input$whale_configure_go, {
                 )
 
                 # writeLines(paste0("cd ", whale_dir), cmd_con)
+                writeLines(
+                    "tar xzf ../OrthoFinder_result.tar.gz -C ../",
+                    cmd_con
+                )
                 writeLines("alignmentsDir=$(ls -d ../OrthoFinderOutputDir/Results_*)", cmd_con)
                 # focal_species_w <- gsub(" ", "_", input$cladeSpecies)
                 writeLines(
                     paste0(
                         "sh ",
                         "./script_bin/preparing_Whale_inputs.shell \\\n",
-                        "\torthogroups.filtered.tsv \\\n",
+                        "\t../orthogroups.filtered.tsv \\\n",
                         "\t$alignmentsDir \\\n",
                         # "\t", focal_species_w, " \\\n",
                         "\t4"
@@ -763,7 +809,7 @@ observeEvent(input$whale_configure_go, {
                                 "python",
                                 "./script_bin/rename_species.py",
                                 "species_timetree.nwk",
-                                "selected_tree_ALE_file",
+                                "selected_tree_ALE_files",
                                 "wgdNodes.txt"
                             ),
                             cmd_con
