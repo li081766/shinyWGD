@@ -1421,8 +1421,6 @@ observeEvent(input$synplot_go_intra, {
                         quote=FALSE
                     )
 
-                    print(paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt"))
-
                     depth_list <- computing_depth_paranome(
                         anchorpoint_ks_file=paste0(iadhoreDir, "/anchorpoints.merged_pos_ks_for_depth.txt"),
                         multiplicon_id=selected_multiplicons_Id,
@@ -1541,10 +1539,6 @@ observeEvent(input$synplot_go_intra, {
                             subset_data$seg_start_Y <- sapply(subset_data$gene_start_Y, function(gene) start_end_values[[gene]]$start)
                             subset_data$seg_end_Y <- sapply(subset_data$gene_end_Y, function(gene) start_end_values[[gene]]$end)
 
-                            columns_with_lists <- sapply(subset_data, function(column) is.list(column))
-                            #print(columns_with_lists)
-                            # Save the entire data frame to a table
-
                             write.table(
                                 subset_data,
                                 file=multiplicon_true_pos_file,
@@ -1599,7 +1593,6 @@ observeEvent(input$synplot_go_intra, {
                                     "anchor_pair"="anchor_pair"
                                 )
                                 session$sendCustomMessage("Parallel_Plotting", plot_parallel_data)
-
                             }
                             else{
                                 plot_parallel_data <- list(
@@ -3129,12 +3122,12 @@ observeEvent(input$synplot_go_inter, {
                         selected_query_chr=query_selected_chr_list,
                         selected_subject_chr=subject_selected_chr_list
                     )
-                    # system(
-                    #     paste(
-                    #         "rm",
-                    #         paste0(inter_species_dir, "/anchorpoints.merged_pos_ks_for_depth.txt")
-                    #     )
-                    # )
+                    system(
+                        paste(
+                            "rm",
+                            paste0(inter_species_dir, "/anchorpoints.merged_pos_ks_for_depth.txt")
+                        )
+                    )
                     query_selected_depth_list <- depth_list$query_depth
                     subject_selected_depth_list <- depth_list$subject_depth
 
@@ -4414,7 +4407,6 @@ observeEvent(input$synplot_multiple_go, {
         Sys.sleep(.2)
         incProgress(amount=.3, message="Computing Multiple Species Alignment...")
 
-        # display multiple species alignment
         order_list <- input[["order_of_display"]]
         if( is.null(order_list) ){
             shinyalert(
@@ -4424,312 +4416,374 @@ observeEvent(input$synplot_multiple_go, {
             )
         }
         else{
-            shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
-
-            collinearAnalysisDir <- collinear_analysis_dir_Val()
-            load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
-            multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
-
-            sp_gff_info_xls <- paste0(
-                dirname(dirname(dirname(file.path(multiple_species_df$comparing_Path)))),
-                "/Species.info.xls"
-            )
-            sp_gff_info_df <- suppressMessages(
-                vroom(sp_gff_info_xls,
-                      col_names=c("species", "cdsPath", "gffPath"),
-                      delim="\t")
-            ) %>%
-                filter(species %in% gsub("_", " ", input$iadhore_multiple_species_list))
-
-            cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
-            gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
-            new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
-            new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
-            sp_gff_info_df$cdsPath <- new_cds_files
-            sp_gff_info_df$gffPath <- new_gff_files
-
-            chr_len_df <- obtain_chromosome_length_filter(
-                sp_gff_info_df
-            )
-
-            multiplicon_file <- paste0(dirname(multiple_species_df$comparing_Path), "/multiplicons.txt")
-            multiplicon_df <- suppressMessages(
-                vroom(
-                    multiplicon_file,
-                    col_names=TRUE,
-                    delim="\t"
+            all_selected_chrs <- c()
+            for( species in input$iadhore_multiple_species_list ){
+                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
+                if( !is.null(selected_chrs) ){
+                    all_selected_chrs <- c(all_selected_chrs, selected_chrs)
+                }
+            }
+            if( length(all_selected_chrs) == 0 ){
+                shinyalert(
+                    "Oops!",
+                    paste0("Please select the chromosomes for each species first..."),
+                    type="error"
                 )
-            ) %>%
-                filter(genome_x != genome_y) %>%
-                filter(number_of_anchorpoints >= input[["anchoredPointsCutoff_multiple"]])
+            }else{
+                shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
-            segments_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.txt")
-            segs_df <- suppressMessages(
-                vroom(
-                    segments_file,
-                    col_names=TRUE,
-                    delim="\t"
+                collinearAnalysisDir <- collinear_analysis_dir_Val()
+                load(paste0(collinearAnalysisDir, "/synteny.comparing.RData"))
+                multiple_species_df <- path_df[path_df$comparing_ID == "Multiple", ]
+
+                sp_gff_info_xls <- paste0(
+                    dirname(dirname(dirname(file.path(multiple_species_df$comparing_Path)))),
+                    "/Species.info.xls"
                 )
-            )
+                sp_gff_info_df <- suppressMessages(
+                    vroom(sp_gff_info_xls,
+                          col_names=c("species", "cdsPath", "gffPath"),
+                          delim="\t")
+                )
+                cds_files <- gsub(".*/", "", sp_gff_info_df$cdsPath)
+                gff_files <- gsub(".*/", "", sp_gff_info_df$gffPath)
+                new_cds_files <- paste0(dirname(sp_gff_info_xls), "/", cds_files)
+                new_gff_files <- paste0(dirname(sp_gff_info_xls), "/", gff_files)
+                sp_gff_info_df$cdsPath <- new_cds_files
+                sp_gff_info_df$gffPath <- new_gff_files
 
-            genes_file <- paste0(dirname(multiple_species_df$comparing_Path), "/genes.txt")
-            chr_gene_num_file <- paste0(dirname(multiple_species_df$comparing_Path), "/chr_gene_nums.txt")
-            if( !file.exists(chr_gene_num_file) ){
-                if( file.exists(genes_file) ){
-                    genes <- suppressMessages(
+                seg_merged_pos_coord_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.merged_pos_coord.txt")
+                genes_file <- paste0(dirname(multiple_species_df$comparing_Path), "/genes.txt")
+                segments_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.txt")
+                multiplicon_file <- paste0(dirname(multiple_species_df$comparing_Path), "/multiplicons.txt")
+
+                if( !file.exists(seg_merged_pos_coord_file) ){
+                    genes_df <- suppressMessages(
                         vroom(
                             genes_file,
-                            delim="\t",
-                            col_names=TRUE
+                            delim="\t"
                         )
                     )
-                    gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
-                    colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
-                    gene_num_df$gene_num <- gene_num_df$gene_num + 1
-                    write.table(
-                        gene_num_df,
-                        file=chr_gene_num_file,
-                        sep="\t",
-                        quote=F,
-                        row.names=FALSE
-                    )
-                }
-                else{
-                    shinyalert(
-                        "Oops",
-                        "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
-                        type="error"
-                    )
-                }
-            }else{
-                gene_num_df <- read.table(
-                    chr_gene_num_file,
-                    sep="\t",
-                    header=TRUE
-                )
-            }
+                    genes_df <- select(genes_df, id, coordinate)
 
-            if( file.exists(genes_file) ){
-                genes_df <- suppressMessages(
+                    multiplicon_df <- suppressMessages(
+                        vroom(
+                            multiplicon_file,
+                            delim="\t"
+                        )
+                    )
+
+                    multiplicon_df <- tidyr::fill(multiplicon_df, genome_x, list_x, .direction="down")
+                    multiplicon_df <- multiplicon_df[multiplicon_df$genome_x != multiplicon_df$genome_y, ]
+                    selected_multiplicon_id <- multiplicon_df$id
+
+                    seg_df <- suppressMessages(
+                        vroom(
+                            segments_file,
+                            delim="\t"
+                        )
+                    )
+                    selected_seg_df <- seg_df[seg_df$multiplicon %in% selected_multiplicon_id, ]
+
+                    selected_seg_df$first <- as.character(selected_seg_df$first)
+                    selected_seg_df$last <- as.character(selected_seg_df$last)
+
+                    # merge coordinate
+                    merged_df <- merge(selected_seg_df, genes_df, by.x="first", by.y="id", all.x=TRUE)
+                    merged_df <- merged_df[c("id", "multiplicon", "genome", "list",
+                                             "first",  "coordinate",
+                                             "last", "order")]
+                    colnames(merged_df) <- c("id", "multiplicon", "genome", "list",
+                                             "first", "coordStart",
+                                             "last", "order")
+                    merged_df <- merge(merged_df, genes_df, by.x="last", by.y="id", all.x=TRUE)
+                    merged_df <- merged_df[c("id", "multiplicon", "genome", "list",
+                                             "first",  "coordStart",
+                                             "last", "coordinate", "order")]
+                    colnames(merged_df) <- c("id", "multiplicon", "genome", "list",
+                                             "first", "coordStart",
+                                             "last", "coordEnd", "order")
+
+                    true_position_df <- data.frame()
+                    for( x in 1:nrow(sp_gff_info_df) ){
+                        each_row <- sp_gff_info_df[x, ]
+                        gff_df_tmp <- suppressMessages(
+                            vroom(
+                                each_row$gffPath,
+                                delim="\t",
+                                comment="#",
+                                col_names=FALSE
+                            )
+                        )
+
+                        gff_df_tmp <- gff_df_tmp %>%
+                            filter(gff_df_tmp$X3 == "mRNA") %>%
+                            select(X1, X9, X4, X5, X7) %>%
+                            mutate(X9=gsub("ID=([^;]+).*", "\\1", X9))
+                        colnames(gff_df_tmp) <- c("list", "gene", "start", "end", "strand")
+                        gff_df_tmp$sp <- each_row$species
+                        true_position_df <- rbind(true_position_df, gff_df_tmp)
+                    }
+
+                    start_subset <- select(true_position_df, gene, start)
+                    pos_merged_data <- left_join(merged_df, start_subset, by=c("first"="gene"))
+                    end_subset <- select(true_position_df, gene, end)
+                    pos_merged_data <- left_join(pos_merged_data, end_subset, by=c("last"="gene"))
+
+                    write.table(
+                        pos_merged_data,
+                        file=seg_merged_pos_coord_file,
+                        sep="\t",
+                        row.names=FALSE,
+                        quote=FALSE
+                    )
+                }
+
+                seg_merged_pos_coord_df <- suppressMessages(
                     vroom(
-                        genes_file,
-                        col_names=T,
+                        seg_merged_pos_coord_file,
                         delim="\t"
                     )
                 )
-            }
 
-            # map coordinates to genes
-            genes_coord_subset <- select(genes_df, id, coordinate)
-            merged_data_tmp <- left_join(
-                segs_df,
-                genes_coord_subset,
-                by=c("first"="id")
-            )
-
-            merged_data_tmp <- left_join(
-                merged_data_tmp,
-                genes_coord_subset,
-                by=c("last"="id")
-            )
-            segs_df <- merged_data_tmp %>%
-                select(-id)
-
-            colnames(segs_df) <- c(
-                "multiplicon", "genome", "list",
-                "first", "last", "order",
-                "min", "max"
-            )
-
-            for( species in input$iadhore_multiple_species_list ){
-                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
-                if( is.null(selected_chrs) ){
-                    shinyalert(
-                        "Oops!",
-                        paste0("Please select the chromosome of ", species, " first..."),
-                        type="error"
+                multiplicon_df <- suppressMessages(
+                    vroom(
+                        multiplicon_file,
+                        delim="\t"
                     )
+                )
+                multiplicon_df <- tidyr::fill(multiplicon_df, genome_x, list_x, .direction="down")
+                multiplicon_df <- multiplicon_df[multiplicon_df$genome_x != multiplicon_df$genome_y &
+                                                     multiplicon_df$number_of_anchorpoints >= input[["anchoredPointsCutoff_multiple"]], ]
+                selected_multiplicon_df <- subset(multiplicon_df, genome_x %in% gsub(" ", "_", order_list) &
+                                             genome_y %in% gsub(" ", "_", order_list))
+                selected_multiplicon_id <- selected_multiplicon_df$id
+
+                segs_df <- seg_merged_pos_coord_df[seg_merged_pos_coord_df$multiplicon %in% selected_multiplicon_id, ]
+
+                selected_segs_df <- data.frame()
+                for( species in gsub(" ", "_", order_list) ){
+                    selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
+
+                    filtered_df <- segs_df %>%
+                        filter(genome == species) %>%
+                        filter(list %in% selected_chrs)
+                    selected_segs_df <- rbind(selected_segs_df, filtered_df)
                 }
-            }
 
-            selected_multiplicon_df1 <- data.frame()
-            selected_segs_df <- data.frame()
-            for( species in input$iadhore_multiple_species_list ){
-                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
+                selected_segs_df$plot_order <- match(selected_segs_df$genome, gsub(" ", "_", order_list))
 
-                filtered_df <- segs_df %>%
-                    filter(genome == species) %>%
-                    filter(list %in% selected_chrs)
-                selected_segs_df <- rbind(selected_segs_df, filtered_df)
+                final_seg_df <- data.frame()
+                for( each in unique(selected_segs_df$multiplicon) ){
+                    current_multiplicon_df <- selected_segs_df[selected_segs_df$multiplicon == each, ]
 
-                filtered_df1 <- multiplicon_df %>%
-                    filter(genome_x == species) %>%
-                    filter(list_x %in% selected_chrs)
-                selected_multiplicon_df1 <- rbind(selected_multiplicon_df1, filtered_df1)
-            }
+                    if( nrow(current_multiplicon_df) > 1 ){
+                        current_multiplicon_df <- current_multiplicon_df[order(current_multiplicon_df$plot_order), ]
+                        for( i in 1:(nrow(current_multiplicon_df) - 1) ){
+                            current_row <- current_multiplicon_df[i, ]
+                            rows_to_append <- current_multiplicon_df[current_multiplicon_df$plot_order == current_row$plot_order + 1, ]
 
-            selected_multiplicon_df <- data.frame()
-            for( species in input$iadhore_multiple_species_list ){
-                selected_chrs <- input[[paste0("multiple_synteny_query_chr_", species)]]
-                filtered_df <- selected_multiplicon_df1 %>%
-                    filter(genome_y == species) %>%
-                    filter(list_y %in% selected_chrs)
-                selected_multiplicon_df <- rbind(selected_multiplicon_df, filtered_df)
-            }
-            selected_multiplicons <- selected_multiplicon_df %>% select(id)
+                            if( nrow(rows_to_append) > 0 ){
+                                for( j in 1:(nrow(rows_to_append)) ){
+                                    new_row <- rows_to_append[j, ]
+                                    new_row_names <- paste0(names(new_row), "_y")
+                                    new_row <- setNames(new_row, new_row_names)
 
-            selected_segs_df <- selected_segs_df %>%
-                filter(multiplicon %in% selected_multiplicons$id)
-
-            rm(selected_multiplicon_df1, multiplicon_df)
-
-            segments_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.txt")
-            segs_pos_file <- paste0(dirname(multiple_species_df$comparing_Path), "/segments.merged_pos.txt")
-            # source("tools/obtain_coordinates_for_segments.multiple_species.R", local=T, encoding="UTF-8")
-            #if( !file.exists(segs_pos_file) ){
-            obtain_coordinates_for_segments_multiple(
-                seg_df=selected_segs_df,
-                gff_df=sp_gff_info_df,
-                input=input,
-                out_file=segs_pos_file
-            )
-
-            segs_pos_df <- suppressMessages(
-                vroom(
-                    segs_pos_file,
-                    delim="\t",
-                    col_names=TRUE
-                )
-            )
-
-            chr_len_df <- chr_len_df$len_df
-
-            selected_chr_len_data <- data.frame()
-            selected_chr_order_data <- data.frame()
-            selected_segs_data <- data.frame()
-            for( i in 1:(length(order_list) - 1) ){
-                incProgress(
-                    amount=0.5/length(order_list),
-                    message=paste0(
-                        "Computing synteny between ",
-                        gsub("_", " ", order_list[[i]]),
-                        " and ",
-                        gsub("_", " ", order_list[[i+1]]),
-                        "..."
-                    )
-                )
-
-                order_list[[i]]=gsub(" ", "_", order_list[[i]]);
-                order_list[[i+1]]=gsub(" ", "_", order_list[[i+1]])
-                query_info <- paste0("multiple_synteny_query_chr_", order_list[[i]])
-                subject_info <- paste0("multiple_synteny_query_chr_", order_list[[i+1]])
-                query_selected_chr_list <- gtools::mixedsort(input[[query_info]])
-                query_chr_len_df <- chr_len_df[chr_len_df$sp==gsub(" ", "_", order_list[[i]]), ] %>%
-                    filter(seqchr %in% query_selected_chr_list)
-                subject_selected_chr_list <- gtools::mixedsort(input[[subject_info]])
-
-                subject_chr_len_df <- chr_len_df[chr_len_df$sp==sub(" ", "_", order_list[[i+1]]), ] %>%
-                    filter(seqchr %in% subject_selected_chr_list)
-
-                selected_chr_len_data <- rbind(selected_chr_len_data, query_chr_len_df)
-                selected_chr_len_data <- rbind(selected_chr_len_data, subject_chr_len_df)
-                tmp_query_chr_order <- data.frame(
-                    "species"=order_list[[i]],
-                    "chrOrder"=paste0(query_selected_chr_list, collapse=",")
-                )
-                tmp_subject_chr_order <- data.frame(
-                    "species"=order_list[[i+1]],
-                    "chrOrder"=paste0(subject_selected_chr_list, collapse=",")
-                )
-                selected_chr_order_data <- rbind(selected_chr_order_data, tmp_query_chr_order)
-                selected_chr_order_data <- rbind(selected_chr_order_data, tmp_subject_chr_order)
-                # deal segments data
-                selected_segs <- segs_pos_df %>%
-                    filter((genomeX == order_list[[i]] & genomeY == order_list[[i+1]])
-                           | (genomeX == order_list[[i+1]] & genomeY == order_list[[i]]))
-
-                selected_segs_re <- data.frame()
-                if( length(unique(selected_segs$genomeX)) == 2 ){
-                    for( i in 1:nrow(selected_segs) ){
-                        each_row <- selected_segs[i, ]
-                        if( each_row$genomeX != order_list[[i+1]] ){
-                            tmp <- each_row[2:8]
-                            each_row[2:8] <- each_row[9:15]
-                            each_row[9:15] <- tmp
+                                    final_seg_df <- rbind(final_seg_df, cbind(current_row, new_row))
+                                }
+                            }
                         }
-                        selected_segs_re <- rbind(selected_segs_re, each_row)
                     }
-                    selected_segs_data <- rbind(selected_segs_data, selected_segs_re)
                 }
-                else{
-                    selected_segs_data <- rbind(selected_segs_data, selected_segs)
-                }
-            }
 
-            selected_chr_len_data <- selected_chr_len_data[!duplicated(selected_chr_len_data), ]
-            selected_chr_order_data <- selected_chr_order_data[!duplicated(selected_chr_order_data), ]
+                final_seg_df <- final_seg_df[c("id", "multiplicon",
+                                               "genome", "list", "first", "coordStart", "last", "coordEnd", "start", "end",
+                                               "genome_y", "list_y", "first_y", "coordStart_y", "last_y", "coordEnd_y", "start_y", "end_y",
+                                               "plot_order", "plot_order_y")]
 
-            selected_chr_num_df <- left_join(
-                selected_chr_len_data,
-                gene_num_df,
-                by=c("sp"="sp", "seqchr"="seqchr")
-            )
+                colnames(final_seg_df) <- c("id", "multiplicon",
+                                            "genome_x", "list_x", "first_x", "coordStart_x", "last_x", "coordEnd_x", "start_x", "end_x",
+                                            "genome_y", "list_y", "first_y", "coordStart_y", "last_y", "coordEnd_y", "start_y", "end_y",
+                                            "plot_order_x", "plot_order_y")
 
-            Sys.sleep(.2)
-            incProgress(amount=.6, message="Computing Done")
 
-            Sys.sleep(.2)
-            incProgress(amount=.8, message="Drawing Parallel Syntenty Plot for Multiple Species Alignment...")
+                chr_len_df <- obtain_chromosome_length_filter(
+                    sp_gff_info_df
+                )
 
-            widthSpacingMultiple <- reactiveValues(
-                value=800
-            )
-            heightSpacingMultiple <- reactiveValues(
-                value=100 * nrow(sp_gff_info_df)
-            )
-            observeEvent(input[["svg_vertical_spacing_add_multiple"]], {
-                heightSpacingMultiple$value <- heightSpacingMultiple$value + 50
-            })
-            observeEvent(input[["svg_vertical_spacing_sub_multiple"]], {
-                heightSpacingMultiple$value <- heightSpacingMultiple$value - 50
-            })
-            observeEvent(input[["svg_horizontal_spacing_add_multiple"]], {
-                widthSpacingMultiple$value <- widthSpacingMultiple$value + 50
-            })
-            observeEvent(input[["svg_horizontal_spacing_sub_multiple"]], {
-                widthSpacingMultiple$value <- widthSpacingMultiple$value - 50
-            })
-
-            observe({
-                if( input$scale_multiple == "True length" ){
-                    plot_parallel_multiple_data <- list(
-                        "plot_id"="multiple",
-                        "segs"=selected_segs_data,
-                        "sp_order"=order_list,
-                        "chr_order"=selected_chr_order_data,
-                        "overlap_cutoff"=input[["overlapCutoff_multiple"]],
-                        "chr_lens"=selected_chr_len_data,
-                        "width"=widthSpacingMultiple$value,
-                        "height"=heightSpacingMultiple$value
+                multiplicon_df <- suppressMessages(
+                    vroom(
+                        multiplicon_file,
+                        col_names=TRUE,
+                        delim="\t"
                     )
-                    session$sendCustomMessage("Parallel_Multiple_Plotting", plot_parallel_multiple_data)
+                ) %>%
+                    filter(genome_x != genome_y) %>%
+                    filter(number_of_anchorpoints >= input[["anchoredPointsCutoff_multiple"]])
+
+                segs_df <- suppressMessages(
+                    vroom(
+                        segments_file,
+                        col_names=TRUE,
+                        delim="\t"
+                    )
+                )
+
+                chr_gene_num_file <- paste0(dirname(multiple_species_df$comparing_Path), "/chr_gene_nums.txt")
+                if( !file.exists(chr_gene_num_file) ){
+                    if( file.exists(genes_file) ){
+                        genes <- suppressMessages(
+                            vroom(
+                                genes_file,
+                                delim="\t",
+                                col_names=TRUE
+                            )
+                        )
+                        gene_num_df <- aggregate(coordinate ~ genome + list, genes, max)
+                        colnames(gene_num_df) <- c("sp", "seqchr", "gene_num")
+                        gene_num_df$gene_num <- gene_num_df$gene_num + 1
+                        write.table(
+                            gene_num_df,
+                            file=chr_gene_num_file,
+                            sep="\t",
+                            quote=F,
+                            row.names=FALSE
+                        )
+                    }
+                    else{
+                        shinyalert(
+                            "Oops",
+                            "Fail to find correct ouputs of i-ADHoRe for ", intra_list,". Please ensure the output of i-ADHoRe, and then try again...",
+                            type="error"
+                        )
+                    }
                 }else{
-                    plot_parallel_multiple_data <- list(
-                        "plot_id"="multiple",
-                        "segs"=selected_segs_data,
-                        "sp_order"=order_list,
-                        "chr_order"=selected_chr_order_data,
-                        "overlap_cutoff"=input[["overlapCutoff_multiple"]],
-                        "chr_nums"=selected_chr_num_df,
-                        "width"=widthSpacingMultiple$value,
-                        "height"=heightSpacingMultiple$value
+                    gene_num_df <- read.table(
+                        chr_gene_num_file,
+                        sep="\t",
+                        header=TRUE
                     )
-                    session$sendCustomMessage("Parallel_Multiple_Gene_Num_Plotting", plot_parallel_multiple_data)
                 }
-            })
+
+                if( file.exists(genes_file) ){
+                    genes_df <- suppressMessages(
+                        vroom(
+                            genes_file,
+                            col_names=T,
+                            delim="\t"
+                        )
+                    )
+                }
+
+                chr_len_df <- chr_len_df$len_df
+
+                selected_chr_len_data <- data.frame()
+                selected_chr_order_data <- data.frame()
+                selected_segs_data <- data.frame()
+                for( i in 1:(length(order_list) - 1) ){
+                    incProgress(
+                        amount=0.5/length(order_list),
+                        message=paste0(
+                            "Computing synteny between ",
+                            gsub("_", " ", order_list[[i]]),
+                            " and ",
+                            gsub("_", " ", order_list[[i+1]]),
+                            "..."
+                        )
+                    )
+
+                    order_list[[i]]=gsub(" ", "_", order_list[[i]]);
+                    order_list[[i+1]]=gsub(" ", "_", order_list[[i+1]])
+                    query_info <- paste0("multiple_synteny_query_chr_", order_list[[i]])
+                    subject_info <- paste0("multiple_synteny_query_chr_", order_list[[i+1]])
+                    query_selected_chr_list <- gtools::mixedsort(input[[query_info]])
+                    query_chr_len_df <- chr_len_df[chr_len_df$sp==gsub(" ", "_", order_list[[i]]), ] %>%
+                        filter(seqchr %in% query_selected_chr_list)
+                    subject_selected_chr_list <- gtools::mixedsort(input[[subject_info]])
+
+                    subject_chr_len_df <- chr_len_df[chr_len_df$sp==sub(" ", "_", order_list[[i+1]]), ] %>%
+                        filter(seqchr %in% subject_selected_chr_list)
+
+                    selected_chr_len_data <- rbind(selected_chr_len_data, query_chr_len_df)
+                    selected_chr_len_data <- rbind(selected_chr_len_data, subject_chr_len_df)
+                    tmp_query_chr_order <- data.frame(
+                        "species"=order_list[[i]],
+                        "chrOrder"=paste0(query_selected_chr_list, collapse=",")
+                    )
+                    tmp_subject_chr_order <- data.frame(
+                        "species"=order_list[[i+1]],
+                        "chrOrder"=paste0(subject_selected_chr_list, collapse=",")
+                    )
+                    selected_chr_order_data <- rbind(selected_chr_order_data, tmp_query_chr_order)
+                    selected_chr_order_data <- rbind(selected_chr_order_data, tmp_subject_chr_order)
+                }
+
+                selected_chr_len_data <- selected_chr_len_data[!duplicated(selected_chr_len_data), ]
+                selected_chr_order_data <- selected_chr_order_data[!duplicated(selected_chr_order_data), ]
+
+                selected_chr_num_df <- left_join(
+                    selected_chr_len_data,
+                    gene_num_df,
+                    by=c("sp"="sp", "seqchr"="seqchr")
+                )
+
+                Sys.sleep(.2)
+                incProgress(amount=.6, message="Computing Done")
+
+                Sys.sleep(.2)
+                incProgress(amount=.8, message="Drawing Parallel Syntenty Plot for Multiple Species Alignment...")
+
+                widthSpacingMultiple <- reactiveValues(
+                    value=800
+                )
+                heightSpacingMultiple <- reactiveValues(
+                    value=100 * nrow(sp_gff_info_df)
+                )
+                observeEvent(input[["svg_vertical_spacing_add_multiple"]], {
+                    heightSpacingMultiple$value <- heightSpacingMultiple$value + 50
+                })
+                observeEvent(input[["svg_vertical_spacing_sub_multiple"]], {
+                    heightSpacingMultiple$value <- heightSpacingMultiple$value - 50
+                })
+                observeEvent(input[["svg_horizontal_spacing_add_multiple"]], {
+                    widthSpacingMultiple$value <- widthSpacingMultiple$value + 50
+                })
+                observeEvent(input[["svg_horizontal_spacing_sub_multiple"]], {
+                    widthSpacingMultiple$value <- widthSpacingMultiple$value - 50
+                })
+
+                observe({
+                    if( input$scale_multiple == "True length" ){
+                        plot_parallel_multiple_data <- list(
+                            "plot_id"="multiple",
+                            "segs"=final_seg_df,
+                            "sp_order"=order_list,
+                            "chr_order"=selected_chr_order_data,
+                            "overlap_cutoff"=input[["overlapCutoff_multiple"]],
+                            "chr_lens"=selected_chr_len_data,
+                            "width"=widthSpacingMultiple$value,
+                            "height"=heightSpacingMultiple$value
+                        )
+                        session$sendCustomMessage("Parallel_Multiple_Plotting_update", plot_parallel_multiple_data)
+                    }else{
+                        plot_parallel_multiple_data <- list(
+                            "plot_id"="multiple",
+                            "segs"=final_seg_df,
+                            "sp_order"=order_list,
+                            "chr_order"=selected_chr_order_data,
+                            "overlap_cutoff"=input[["overlapCutoff_multiple"]],
+                            "chr_nums"=selected_chr_num_df,
+                            "width"=widthSpacingMultiple$value,
+                            "height"=heightSpacingMultiple$value
+                        )
+                        session$sendCustomMessage("Parallel_Multiple_Gene_Num_Plotting_update", plot_parallel_multiple_data)
+                    }
+                })
+            }
+            Sys.sleep(.3)
+            incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
         }
-        Sys.sleep(.3)
-        incProgress(amount=1, message="Drawing Parallel Syntenty Plot Done")
+
     })
 })
 

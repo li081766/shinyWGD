@@ -1874,6 +1874,980 @@ function parallelMultiplePlotting(InputData) {
     // downloadSVGwithForeign("dotView_download", "dotView");
 }
 
+Shiny.addCustomMessageHandler("Parallel_Multiple_Plotting_update", parallelMultiplePlottingUpdate);
+function parallelMultiplePlottingUpdate(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var chrLenInfo = convertShinyData(InputData.chr_lens);
+    var chrOrder = convertShinyData(InputData.chr_order);
+    // var overlapCutOff = Number(InputData.overlap_cutoff) / 100;
+    var spOrder = InputData.sp_order;
+    var width = InputData.width;
+    var height = InputData.height;
+
+    var overlapCutOff = 0.1;
+
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
+    const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
+
+        // draw a parallel syntenic plot
+        d3.select("#parallel_plot_multiple_species").select("svg").remove();
+
+        // define syntenic plot dimension
+        // let width = 850;
+        var heightOriginal = 150 * (spOrder.length - 1);
+        var heightRatio = height / heightOriginal;
+        let topPadding = 20;
+        let bottomPadding = 20;
+        let leftPadding = 50;
+        let rightPadding = 50;
+        let innerPadding = 10;
+        let chrRectHeight = 15;
+        var tooltipDelay = 100;
+
+        var middlePoint = width / 2;
+        const innerScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([0, width - leftPadding - rightPadding]);
+
+        function calc_accumulate_len(inputChrInfo, chrOrder, innerPadding_xScale, innerPadding) {
+            chrOrder.forEach(d => {
+                chrList = d.chrOrder.split(',');
+                var chrOrderLenData = inputChrInfo.filter(a => chrList.includes(a.seqchr) && a.sp === d.species); // .replace(/\_/, " "));
+                var chrSortedLenData = chrOrderLenData.sort((a, b) => {
+                    return chrList.indexOf(a.seqchr) - chrList.indexOf(b.seqchr);
+                });
+                let acc_len = 0;
+                let total_chr_len = d3.sum(chrSortedLenData.map(e => e.len));
+                let ratio = innerPadding_xScale.invert(innerPadding);
+                chrSortedLenData.forEach((e, i) => {
+                    e.idx = i;
+                    e.accumulate_start = acc_len + 1;
+                    e.accumulate_end = e.accumulate_start + e.len - 1;
+                    acc_len = e.accumulate_end + total_chr_len * ratio;
+                });
+                d.accumulateLen = chrSortedLenData;
+            });
+            return chrOrder;
+        }
+        // calculate accumulate chromosome length
+        var accumulateLenInfo = calc_accumulate_len(chrLenInfo, chrOrder, innerScale, innerPadding);
+        var maxChrLen = 0;
+        accumulateLenInfo.forEach(d => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            maxChrLen = Math.max(maxChrLen, maxLen);
+        })
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([1, maxChrLen])
+            .range([
+                0,
+                width - rightPadding - leftPadding * 2
+            ]);
+
+        // decide the start point for each species
+        accumulateLenInfo.forEach((d, i) => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            if (maxLen === maxChrLen) {
+                d.startX = 0;
+            } else {
+                d.startX = middlePoint - ChrScaler(maxLen) / 2 - leftPadding - rightPadding;
+            }
+            d.idx = i;
+        });
+
+
+        const svg = d3.select("#parallel_plot_multiple_species")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        d3.select('.pop-up-menu').remove();
+        var popUpMenu = d3.select('body').append('div')
+            .classed('pop-up-menu', true)
+            .style('position', 'absolute')
+            .style('top', 0)
+            .style('left', 0)
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', '1px solid black')
+            .style('padding', '5px');
+
+        const speciesColorScale = d3.scaleOrdinal()
+            .domain(accumulateLenInfo.map((d) => d.species))
+            .range(subject_chr_colors);
+
+        const speciesGroup = svg.append("g").attr("class", "species");
+        // add species name
+        speciesGroup.selectAll("text")
+            .data(accumulateLenInfo)
+            .join("text")
+            .attr("class", "myText")
+            .text(function (d) {
+                var tmpLabel = d.species.replace("_", " ");
+                tmpLabel = tmpLabel.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                return tmpLabel;
+            })
+            .attr("x", function (d) {
+                return d.startX + leftPadding * 3 - 4;
+            })
+            .attr("y", function (d, i) {
+                return i * 90 * heightRatio + 10 + topPadding;
+            })
+            .attr("font-weight", "bold")
+            .attr("font-size", "14px")
+            .attr("font-style", "italic")
+            .attr("text-anchor", "end")
+            .style("fill", (d) => speciesColorScale(d.species))
+            .on('click', function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
+                    popUpMenu.style('visibility', 'hidden');
+                } else {
+                    var name = d.species.replace(/\_/, " ");
+                    popUpMenu.html("<p>Set a Color for <i><b>" + name +
+                        "</i></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<div id='color-options'></div>");
+
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                    };
+
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080', '#FFC0CB', '#008080'];
+                    var textElement = d3.select(this)._groups[0][0];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            d3.select(textElement).style('fill', color);
+                            // closePopUp();
+                        });
+
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                }
+            });
+
+        const chrGroup = svg.append("g")
+            .attr("class", "chrRect");
+
+        accumulateLenInfo.forEach((d, i) => {
+            const rects = chrGroup.selectAll(".chrRect")
+                .data(d.accumulateLen);
+
+            var spColor = speciesColorScale(d.species);
+            rects.enter()
+                .append("rect")
+                .merge(rects)
+                .attr("x", (e) => leftPadding * 3 + Number(d.startX) + ChrScaler(e.accumulate_start))
+                .attr("y", i * 90 * heightRatio - 1 + topPadding)
+                .attr("width", (e) => ChrScaler(e.accumulate_end) - ChrScaler(e.accumulate_start))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 1)
+                .attr("fill", spColor)
+                .attr("ry", 3)
+                .attr("data-tippy-content", (e) => "chrId: " + e.seqchr)
+                .on("mouseover", (e, z) => {
+                    let species = z.sp.replace(/(\w)\w+_(\w)\w+/, "$1$2");
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50);
+
+                    d3.select(".segsRibbons")
+                        .selectAll("path")
+                        .filter(":not([class*='" + species + "-" + selector_chrID + "'])")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50)
+                        .attr("opacity", 0);
+
+                    let selectedElements = d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50);
+
+                    let multipliconValues = selectedElements.nodes().map(extractMultipliconValue).filter(Boolean);
+
+                    function extractMultipliconValue(element) {
+                        let classList = element.classList;
+                        let values = [];
+
+                        for (let className of classList) {
+                            if (className.includes("M-")) {
+                                let multipliconValue = className.split("M-")[1];
+                                values.push(multipliconValue);
+                            }
+                        }
+
+                        return values;
+                    }
+
+                    if (multipliconValues.length > 0) {
+                        for (let value of multipliconValues) {
+                            d3.selectAll("[class$='M-" + value + "']")
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50);
+                        }
+                    }
+                })
+                .on("mouseout", (e, z) => {
+                    let species = z.sp.replace(/(\w)\w+_(\w)\w+/, "$1$2");
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .duration(50)
+
+                    d3.select(".segsRibbons")
+                        .selectAll("path")
+                        .filter(":not([class*='" + species + "-" + selector_chrID + "'])")
+                        .transition()
+                        .duration(50)
+                        .attr("opacity", 0.69);
+                });
+            rects.exit().remove();
+        });
+
+        const chrLabel = svg.append("g")
+            .attr("class", "chrLabel")
+
+        function getCommonPart(inArray) {
+            if (inArray.length > 1) {
+                const minLength = Math.min(...inArray.map(str => str.length));
+                const minLenStrings = inArray.filter(str => str.length === minLength);
+
+                if (minLenStrings.length > 1) {
+                    let commonPrefix = "";
+
+                    for (let i = 0; i < minLength; i++) {
+                        const char = minLenStrings[0][i];
+
+                        for (let j = 1; j < minLenStrings.length; j++) {
+                            if (minLenStrings[j][i] !== char) {
+                                if (j === minLenStrings.length - 1) {
+                                    commonPrefix = minLenStrings[0].substring(0, i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (commonPrefix !== "") {
+                            break;
+                        }
+                    }
+
+                    return commonPrefix;
+                } else {
+                    const singleString = minLenStrings[0];
+                    const match = singleString.match(/^[^a-zA-Z_.]+(\d*)$/);
+                    return match ? match[1] : singleString;
+                }
+            }
+        }
+
+        accumulateLenInfo.forEach((d, i) => {
+            // Append text labels
+            var seqchrArray = d.accumulateLen.map(function (e) {
+                return e.seqchr;
+            });
+            var commonPart = getCommonPart(seqchrArray);
+            /* console.log("seqchrArray", seqchrArray);
+            console.log("commonPart", commonPart); */
+            const lables = chrGroup.selectAll(".chrLabel")
+                .data(d.accumulateLen);
+            var labelAarry = lables.enter()
+                .append("text")
+                .merge(lables)
+                .attr("x", function (e) {
+                    return Number(d.startX) + leftPadding * 3 +
+                        d3.mean([ChrScaler(e.accumulate_end), ChrScaler(e.accumulate_start)])
+                })
+                .attr("y", i * 90 * heightRatio + chrRectHeight / 2 + 3 + topPadding)
+                .text(function (e) {
+                    if (e.seqchr.includes("_")) {
+                        var parts = e.seqchr.split("_");
+                        var label = parts[parts.length - 1].replace(/^chr/i, "");
+                        label = label.replace(/^0+/, "");
+                        return label;
+                    } else {
+                        if (typeof commonPart !== 'undefined') {
+                            var label = e.seqchr.replace(commonPart, "").replace(/^0+/, "");;
+                        } else {
+                            var labelTmp = e.seqchr.match(/\d*$/);
+                            label = labelTmp[0].replace(/^0+/, "");
+                        }
+                        return label;
+                    }
+                })
+                .attr("font-size", "12px")
+                .attr("fill", "#FFF7FB")
+                .attr("text-anchor", "middle");
+        });
+
+        // console.log(segmentInfo);
+        console.log("accumulateLenInfo", accumulateLenInfo);
+        segmentInfo.forEach((d, i) => {
+            let queryChrLen = accumulateLenInfo.find(e => e.species === d.genome_x);
+            let queryChr = queryChrLen.accumulateLen.find(e => e.seqchr === d.list_x);
+            let queryAccumulateStart = leftPadding * 3 + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start + d.start_x + 1);
+            let queryAccumulateEnd = leftPadding * 3 + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start + d.end_x + 1);
+
+            let subjectChrLen = accumulateLenInfo.find(e => e.species === d.genome_y);
+            let subjectChr = subjectChrLen.accumulateLen.find(e => e.seqchr === d.list_y);
+            let subjectAccumulateStart = leftPadding * 3 + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start + d.start_y + 1);
+            let subjectAccumulateEnd = leftPadding * 3 + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start + d.end_y + 1);
+
+            if (queryChrLen.idx > subjectChrLen.idx) {
+                var queryY = queryChrLen.idx * 90 * heightRatio - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+            } else {
+                var queryY = queryChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio - 1 + topPadding;
+            }
+            d.ribbonPosition = {
+                source: {
+                    x: queryAccumulateStart,
+                    x1: queryAccumulateEnd,
+                    y: queryY,
+                    y1: queryY
+                },
+                target: {
+                    x: subjectAccumulateStart,
+                    x1: subjectAccumulateEnd,
+                    y: subjectY,
+                    y1: subjectY
+                }
+            }
+        })
+
+        svg.append("g")
+            .attr("class", "segsRibbons")
+            .selectAll("path")
+            .data(segmentInfo)
+            .join("path")
+            .attr("d", d => createLinkPolygonPath(d.ribbonPosition))
+            .attr("class", function (d) {
+                var speciesX = d.genome_x.replace("_", " ");
+                speciesX = speciesX.replace(/(\w)\w+\s(\w)\w+/, "$1$2");
+                var speciesY = d.genome_y.replace("_", " ");
+                speciesY = speciesY.replace(/(\w)\w+\s(\w)\w+/, "$1$2");
+                return "from_" + plotId + "_" + speciesX + "-" + d.list_x +
+                    " to_" + plotId + "_" + speciesY + "-" + d.list_y + "_M-" + d.multiplicon;
+            })
+            .attr("fill", "#BEBEBE")
+            .attr("opacity", 0.69)
+            .attr("stroke", "#BEBEBE")
+            .attr("data-tippy-content", d => {
+                return "Multiplicon: <font color='#FFE153'>" + d.multiplicon + "</font>"; // + d.firstX + " &#8594 " + d.lastX + "<br>" +
+                // "<font color='red'><b>&#8595</b></font><br>" +
+                // "<b><font color='#4DFFFF'>" + d.listY + ":</font></b> " + d.firstY + " &#8594 " + d.lastY;
+            })
+            .on("mouseover", function (e, d) {
+                d3.selectAll("path")
+                    .transition()
+                    .delay(tooltipDelay)
+                    .duration(50)
+                    .style('stroke', 'none')
+                    .attr("fill", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return "red";
+                        } else if (otherPathData.multiplicon === d.multiplicon) {
+                            return "blue";
+                        } else {
+                            return "#BEBEBE";
+                        }
+                    })
+                    .attr("opacity", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return 0.91;
+                        } else if (otherPathData.multiplicon === d.multiplicon) {
+                            return 0.91;
+                        } else {
+                            return 0.1;
+                        }
+                    });
+            })
+            .on("mouseout", function (e, d) {
+                d3.selectAll(".segsRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .attr("fill", "#BEBEBE")
+                    .attr("opacity", 0.69);
+            })
+            .on("click", function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
+                    popUpMenu.style('visibility', 'hidden');
+                    popUpMenu.style('opacity', 1);
+                } else {
+                    popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<p><div id='color-options'></div>");
+
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                        popUpMenu.style('opacity', 1);
+                    };
+
+                    var selectedPath = d3.select(this.parentNode).selectAll("path");
+                    var testPath = d3.select("this");
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            selectedPath.each(function (pathData) {
+                                if (pathData === d ||
+                                    pathData.multiplicon === d.multiplicon) {
+                                    d3.select(this).raise().style('fill', color).attr("opacity", 0.95).style('stroke', 'none');
+                                }
+                            });
+                        });
+
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                        .style('opacity', 0.9);
+                }
+            });
+        tippy(".segsRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    }
+
+    downloadSVG("parallel_download_multiple",
+        "parallel_plot_multiple_species",
+        "Multiple_Species_Alignment.Parallel.svg");
+    // downloadSVGwithForeign("dotView_download", "dotView");
+}
+
+Shiny.addCustomMessageHandler("Parallel_Multiple_Gene_Num_Plotting_update", parallelMultipleGeneNumPlottingUpdate);
+function parallelMultipleGeneNumPlottingUpdate(InputData) {
+    var plotId = InputData.plot_id;
+    var segmentInfo = convertShinyData(InputData.segs);
+    var chrNumInfo = convertShinyData(InputData.chr_nums);
+    var chrOrder = convertShinyData(InputData.chr_order);
+    var spOrder = InputData.sp_order;
+    var width = InputData.width;
+    var height = InputData.height;
+
+    var overlapCutOff = 0.1;
+
+    const query_chr_colors = [
+        "#9B3A4D", "#32AEEC", "#E2AE79", "#8E549E", "#EA7500",
+        "#566CA5", "#D2352C", "#394A92", "#68AC57", "#F4C28F"];
+    const subject_chr_colors = ["#9D9D9D", "#6C6C6C"]
+
+    var scriptV7 = document.createElement('script');
+    scriptV7.src = 'https://d3js.org/d3.v7.min.js';
+    document.head.appendChild(scriptV7);
+
+    scriptV7.onload = function () {
+        // draw a parallel syntenic plot
+        d3.select("#parallel_plot_multiple_species").select("svg").remove();
+
+        // define syntenic plot dimension
+        // let width = 850;
+        var heightOriginal = 150 * (spOrder.length - 1);
+        var heightRatio = height / heightOriginal;
+        let topPadding = 20;
+        let bottomPadding = 20;
+        let leftPadding = 150;
+        let rightPadding = 50;
+        let innerPadding = 10;
+        let chrRectHeight = 15;
+        var tooltipDelay = 100;
+
+        var middlePoint = (width - leftPadding - rightPadding) / 2;
+        const innerScale = d3.scaleLinear()
+            .domain([0, 1])
+            .range([
+                0,
+                width - leftPadding - rightPadding
+            ]);
+
+        function calc_accumulate_len(inputChrInfo, chrOrder, innerPadding_xScale, innerPadding) {
+            chrOrder.forEach(d => {
+                chrList = d.chrOrder.split(',');
+                var chrOrderLenData = inputChrInfo.filter(a => chrList.includes(a.seqchr) && a.sp === d.species); // .replace(/\_/, " "));
+                var chrSortedLenData = chrOrderLenData.sort((a, b) => {
+                    return chrList.indexOf(a.seqchr) - chrList.indexOf(b.seqchr);
+                });
+                let acc_len = 0;
+                // let total_chr_len = d3.sum(chrSortedLenData.map(e => e.gene_num));
+                // let ratio = innerPadding_xScale.invert(innerPadding);
+                chrSortedLenData.forEach((e, i) => {
+                    e.idx = i;
+                    e.accumulate_start = acc_len;
+                    e.accumulate_end = e.accumulate_start + e.gene_num;
+                    acc_len = e.accumulate_end + 50; // total_chr_len * ratio;
+                });
+                d.accumulateLen = chrSortedLenData;
+            });
+            return chrOrder;
+        }
+        // calculate accumulate chromosome length
+        var accumulateLenInfo = calc_accumulate_len(chrNumInfo, chrOrder, innerScale, innerPadding);
+        var maxChrLen = 0;
+        accumulateLenInfo.forEach(d => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            maxChrLen = Math.max(maxChrLen, maxLen);
+        })
+
+        const ChrScaler = d3
+            .scaleLinear()
+            .domain([1, maxChrLen])
+            .range([
+                0,
+                width - rightPadding - leftPadding
+            ]);
+
+        // decide the start point for each species
+        accumulateLenInfo.forEach((d, i) => {
+            var maxLen = d.accumulateLen.reduce((maxEnd, obj) => {
+                return Math.max(maxEnd, obj.accumulate_end);
+            }, -Infinity);
+            if (maxLen === maxChrLen) {
+                d.startX = 0;
+            } else {
+                d.startX = middlePoint - ChrScaler(maxLen) / 2;
+            }
+            d.idx = i;
+            d.endX = ChrScaler(maxLen) + d.startX + leftPadding;
+        });
+
+        // console.log("accumulateLenInfo", accumulateLenInfo);
+
+        const svg = d3.select("#parallel_plot_multiple_species")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        d3.select('.pop-up-menu').remove();
+        var popUpMenu = d3.select('body').append('div')
+            .classed('pop-up-menu', true)
+            .style('position', 'absolute')
+            .style('top', 0)
+            .style('left', 0)
+            .style('visibility', 'hidden')
+            .style('background-color', 'white')
+            .style('border', '1px solid black')
+            .style('padding', '5px');
+
+        const speciesColorScale = d3.scaleOrdinal()
+            .domain(accumulateLenInfo.map((d) => d.species))
+            .range(subject_chr_colors);
+
+        const speciesGroup = svg.append("g").attr("class", "species");
+        // add species name
+        speciesGroup.selectAll("text")
+            .data(accumulateLenInfo)
+            .join("text")
+            .attr("class", "myText")
+            .text(function (d) {
+                var tmpLabel = d.species.replace("_", " ");
+                tmpLabel = tmpLabel.replace(/(\w)\w+\s(\w+)/, "$1. $2");
+                return tmpLabel;
+            })
+            .attr("x", function (d) {
+                return d.startX + leftPadding - 4;
+            })
+            .attr("y", function (d, i) {
+                return i * 90 * heightRatio + 10 + topPadding;
+            })
+            .attr("font-weight", "bold")
+            .attr("font-size", "14px")
+            .attr("font-style", "italic")
+            .attr("text-anchor", "end")
+            .style("fill", (d) => speciesColorScale(d.species))
+            .on('click', function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
+                    popUpMenu.style('visibility', 'hidden');
+                } else {
+                    var name = d.species.replace(/\_/, " ");
+                    popUpMenu.html("<p>Set a Color for <i><b>" + name +
+                        "</i></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<div id='color-options'></div>");
+
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                    };
+
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#800080', '#FFC0CB', '#008080'];
+                    var textElement = d3.select(this)._groups[0][0];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            d3.select(textElement).style('fill', color);
+                            // closePopUp();
+                        });
+
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                }
+            });
+
+        const chrGroup = svg.append("g")
+            .attr("class", "chrRect");
+
+        accumulateLenInfo.forEach((d, i) => {
+            const rects = chrGroup.selectAll(".chrRect")
+                .data(d.accumulateLen);
+
+            var spColor = speciesColorScale(d.species);
+            rects.enter()
+                .append("rect")
+                .merge(rects)
+                .attr("x", (e) => leftPadding + Number(d.startX) + ChrScaler(e.accumulate_start))
+                .attr("y", i * 90 * heightRatio - 1 + topPadding)
+                .attr("width", (e) => ChrScaler(e.accumulate_end - e.accumulate_start))
+                .attr("height", chrRectHeight)
+                .attr("opacity", 1)
+                .attr("fill", spColor)
+                .attr("ry", 3)
+                .attr("data-tippy-content", (e) => "chrId: " + e.seqchr)
+                .on("mouseover", (e, z) => {
+                    let species = z.sp.replace(/(\w)\w+_(\w)\w+/, "$1$2");
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50);
+
+                    d3.select(".segsNumRibbons")
+                        .selectAll("path")
+                        .filter(":not([class*='" + species + "-" + selector_chrID + "'])")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50)
+                        .attr("opacity", 0);
+
+                    let selectedElements = d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .delay(tooltipDelay)
+                        .duration(50);
+
+                    let multipliconValues = selectedElements.nodes().map(extractMultipliconValue).filter(Boolean);
+
+                    function extractMultipliconValue(element) {
+                        let classList = element.classList;
+                        let values = [];
+
+                        for (let className of classList) {
+                            if (className.includes("M-")) {
+                                let multipliconValue = className.split("M-")[1];
+                                values.push(multipliconValue);
+                            }
+                        }
+
+                        return values;
+                    }
+
+                    if (multipliconValues.length > 0) {
+                        for (let value of multipliconValues) {
+                            d3.selectAll("[class$='M-" + value + "']")
+                                .transition()
+                                .delay(tooltipDelay)
+                                .duration(50);
+                        }
+                    }
+
+                })
+                .on("mouseout", (e, z) => {
+                    let species = z.sp.replace(/(\w)\w+_(\w)\w+/, "$1$2");
+                    let selector_chrID = z.seqchr.replaceAll(".", "\\.");
+                    d3.selectAll("[class*='" + species + "-" + selector_chrID + "']")
+                        .transition()
+                        .duration(50);
+
+                    d3.select(".segsNumRibbons")
+                        .selectAll("path")
+                        .filter(":not([class*='" + species + "-" + selector_chrID + "'])")
+                        .transition()
+                        .duration(50)
+                        .attr("opacity", 0.69);
+                });
+            rects.exit().remove();
+        });
+
+        const chrLabel = svg.append("g")
+            .attr("class", "chrLabel")
+
+        function getCommonPart(inArray) {
+            if (inArray.length > 1) {
+                const minLength = Math.min(...inArray.map(str => str.length));
+                const minLenStrings = inArray.filter(str => str.length === minLength);
+
+                if (minLenStrings.length > 1) {
+                    let commonPrefix = "";
+
+                    for (let i = 0; i < minLength; i++) {
+                        const char = minLenStrings[0][i];
+
+                        for (let j = 1; j < minLenStrings.length; j++) {
+                            if (minLenStrings[j][i] !== char) {
+                                if (j === minLenStrings.length - 1) {
+                                    commonPrefix = minLenStrings[0].substring(0, i);
+                                    break;
+                                }
+                            }
+                        }
+
+                        if (commonPrefix !== "") {
+                            break;
+                        }
+                    }
+
+                    return commonPrefix;
+                } else {
+                    const singleString = minLenStrings[0];
+                    const match = singleString.match(/^[^a-zA-Z_.]+(\d*)$/);
+                    return match ? match[1] : singleString;
+                }
+            }
+        }
+
+        accumulateLenInfo.forEach((d, i) => {
+            var seqchrArray = d.accumulateLen.map(function (e) {
+                return e.seqchr;
+            });
+            var commonPart = getCommonPart(seqchrArray);
+            const lables = chrGroup.selectAll(".chrLabel")
+                .data(d.accumulateLen);
+            var labelAarry = lables.enter()
+                .append("text")
+                .merge(lables)
+                .attr("x", function (e) {
+                    return Number(d.startX) + leftPadding +
+                        d3.mean([ChrScaler(e.accumulate_end), ChrScaler(e.accumulate_start)])
+                })
+                .attr("y", i * 90 * heightRatio + chrRectHeight / 2 + 3 + topPadding)
+                .text(function (e) {
+                    if (e.seqchr.includes("_")) {
+                        var parts = e.seqchr.split("_");
+                        var label = parts[parts.length - 1].replace(/^chr/i, "");
+                        label = label.replace(/^0+/, "");
+                        return label;
+                    } else {
+                        if (typeof commonPart !== 'undefined') {
+                            var label = e.seqchr.replace(commonPart, "").replace(/^0+/, "");;
+                        } else {
+                            var labelTmp = e.seqchr.match(/\d*$/);
+                            label = labelTmp[0].replace(/^0+/, "");
+                        }
+                        return label;
+                    }
+                })
+                .attr("font-size", "12px")
+                .attr("fill", "#FFF7FB")
+                .attr("text-anchor", "middle");
+        });
+
+        // console.log(segmentInfo);
+        segmentInfo.forEach((d) => {
+            let queryChrLen = accumulateLenInfo.find(e => e.species === d.genome_x);
+            let queryChr = queryChrLen.accumulateLen.find(e => e.seqchr === d.list_x);
+            let queryAccumulateStart = leftPadding + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start) + ChrScaler(d.coordStart_x + 1);
+            let queryAccumulateEnd = leftPadding + Number(queryChrLen.startX) + ChrScaler(queryChr.accumulate_start) + ChrScaler(d.coordEnd_x + 1);
+
+            let subjectChrLen = accumulateLenInfo.find(e => e.species === d.genome_y);
+            let subjectChr = subjectChrLen.accumulateLen.find(e => e.seqchr === d.list_y);
+            let subjectAccumulateStart = leftPadding + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start) + ChrScaler(d.coordStart_y + 1);
+            let subjectAccumulateEnd = leftPadding + Number(subjectChrLen.startX) + ChrScaler(subjectChr.accumulate_start) + ChrScaler(d.coordEnd_y + 1);
+
+            if (queryChrLen.idx > subjectChrLen.idx) {
+                var queryY = queryChrLen.idx * 90 * heightRatio - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+            } else {
+                var queryY = queryChrLen.idx * 90 * heightRatio + chrRectHeight - 1 + topPadding;
+                var subjectY = subjectChrLen.idx * 90 * heightRatio - 1 + topPadding;
+            }
+
+            d.ribbonPosition = {
+                source: {
+                    x: queryAccumulateStart,
+                    x1: queryAccumulateEnd,
+                    y: queryY,
+                    y1: queryY
+                },
+                target: {
+                    x: subjectAccumulateStart,
+                    x1: subjectAccumulateEnd,
+                    y: subjectY,
+                    y1: subjectY
+                }
+            }
+        })
+        // console.log("segmentInfo", segmentInfo);
+
+        svg.append("g")
+            .attr("class", "segsNumRibbons")
+            .selectAll("path")
+            .data(segmentInfo)
+            .join("path")
+            .attr("d", function (d) {
+                if (d.ribbonPosition) {
+                    return createLinkPolygonPath(d.ribbonPosition);
+                }
+            })
+            .attr("class", function (d) {
+                var speciesX = d.genome_x.replace("_", " ");
+                speciesX = speciesX.replace(/(\w)\w+\s(\w)\w+/, "$1$2");
+                var speciesY = d.genome_y.replace("_", " ");
+                speciesY = speciesY.replace(/(\w)\w+\s(\w)\w+/, "$1$2");
+                return "from_" + plotId + "_" + speciesX + "-" + d.list_x +
+                    " to_" + plotId + "_" + speciesY + "-" + d.list_y + "_M-" + d.multiplicon;
+            })
+            .attr("fill", "#BEBEBE")
+            .attr("opacity", 0.69)
+            .attr("data-tippy-content", d => {
+                return "Multiplicon: <font color='#FFE153'>" + d.multiplicon + "</font>";
+            })
+            .on("mouseover", function (e, d) {
+                d3.selectAll(".segsNumRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .style('stroke', 'none')
+                    .attr("fill", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return "red";
+                        } else if (otherPathData.multiplicon === d.multiplicon) {
+                            return "blue";
+                        } else {
+                            return "#BEBEBE"
+                        }
+                    })
+                    .attr("opacity", function (otherPathData) {
+                        if (otherPathData === d) {
+                            return 0.91;
+                        } else if (otherPathData.multiplicon === d.multiplicon) {
+                            return 0.91;
+                        } else {
+                            return 0.1;
+                        }
+                    });
+            })
+            .on("mouseout", function (e, d) {
+                d3.selectAll(".segsNumRibbons")
+                    .selectAll("path")
+                    .transition()
+                    .duration(50)
+                    .attr("fill", "#BEBEBE")
+                    .attr("opacity", 0.69);
+            })
+            .on("click", function (e, d) {
+                if (popUpMenu.style('visibility') == 'visible') {
+                    popUpMenu.style('visibility', 'hidden');
+                    popUpMenu.style('opacity', 1);
+                } else {
+                    popUpMenu.html("<p><font color='#3C3C3C'>Set a Color for the Link</font>: " +
+                        "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" +
+                        "<button id='close-btn' onclick='closePopUp()'>&times;</button></p>" +
+                        "<p><div id='color-options'></div>");
+
+                    d3.select('#close-btn').on('click', closePopUp);
+                    function closePopUp() {
+                        popUpMenu.style('visibility', 'hidden');
+                        popUpMenu.style('opacity', 1);
+                    };
+
+                    var selectedPath = d3.select(this.parentNode).selectAll("path");
+                    var colors = ['#FF0000', '#00FF00', '#0000FF', '#FFA500', '#BEBEBE'];
+                    var colorOptions = d3.select('#color-options')
+                        .selectAll('div')
+                        .data(colors)
+                        .enter()
+                        .append('div')
+                        .style('cursor', 'pointer')
+                        .style('background-color', function (d) { return d; })
+                        .style('width', '20px')
+                        .style('height', '20px')
+                        .style('margin-right', '5px')
+                        .style('display', 'inline-block')
+                        .on('click', function () {
+                            var color = d3.select(this).style('background-color');
+                            selectedPath.each(function (pathData) {
+                                if (pathData === d ||
+                                    (pathData.multiplicon === d.multiplicon)
+                                ) {
+                                    d3.select(this).raise().style('fill', color).style('stroke', 'none').attr("opacity", 0.91);
+                                }
+                            });
+                        });
+
+                    var mouseX = event.pageX || event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
+                    var mouseY = event.pageY || event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
+                    popUpMenu.style('left', (mouseX + 10) + 'px')
+                        .style('top', (mouseY - 10) + 'px')
+                        .style('visibility', 'visible')
+                        .style('opacity', 0.9);
+                }
+            });
+        tippy(".segsNumRibbons path", { trigger: "mouseenter", followCursor: "initial", allowHTML: true, delay: [tooltipDelay, null] });
+    }
+
+    downloadSVG("parallel_download_multiple",
+        "parallel_plot_multiple_species",
+        "Multiple_Species_Alignment.Parallel.svg");
+}
+
 Shiny.addCustomMessageHandler("Parallel_Multiple_Gene_Num_Plotting", parallelMultipleGeneNumPlotting);
 function parallelMultipleGeneNumPlotting(InputData) {
     var plotId = InputData.plot_id;
