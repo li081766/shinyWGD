@@ -835,7 +835,7 @@ map_informal_name_to_latin_name <- function(sp_gff_info_xls){
         sp_gff_info_xls,
         sep="\t",
         header=FALSE,
-        fill=T,
+        fill=TRUE,
         na.strings="",
         col.names=c("latin_name", "informal_name", "gff")
     )

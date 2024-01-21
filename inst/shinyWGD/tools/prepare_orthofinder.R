@@ -12,7 +12,7 @@ args <- parser$parse_args()
 input_data <- fread(args$input_file,
                     header=FALSE,
                     col.names=c("species", "fasta_file", "gff_file"),
-                    fill=T,
+                    fill=TRUE,
                     sep="\t",
                     na.strings=c("", "NA"))
 for( i in seq_len(nrow(input_data)) ){

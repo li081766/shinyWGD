@@ -19,7 +19,7 @@ computing_depth <- function(anchorpoint_ks_file,
             anchorpoint_ks_file,
             sep="\t",
             header=TRUE,
-            fill=T,
+            fill=TRUE,
             na.strings=""
         ) %>%
             dplyr::filter(multiplicon %in% multiplicon_id) %>%
@@ -46,7 +46,7 @@ computing_depth <- function(anchorpoint_ks_file,
             anchorpoint_ks_file,
             sep="\t",
             header=TRUE,
-            fill=T,
+            fill=TRUE,
             na.strings=""
         ) %>%
             dplyr::filter(listX %in% selected_query_chr)
@@ -79,7 +79,7 @@ computing_depth_paranome <- function(
         anchorpoint_ks_file,
         sep="\t",
         header=TRUE,
-        fill=T,
+        fill=TRUE,
         na.strings=""
     )
 
