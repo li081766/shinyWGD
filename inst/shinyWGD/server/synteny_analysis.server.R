@@ -1,7 +1,7 @@
 observeEvent(input$collinear_data_example, {
     showModal(
         modalDialog(
-            title=HTML("The description of the demo data used in the <b>Collinear Analysis</b>"),
+            title=HTML("The description of the demo data used in the <b>Collinearity Analysis</b>"),
             size="xl",
             uiOutput("collinear_data_example_panel")
         )
@@ -22,7 +22,7 @@ observeEvent(input$collinear_data_example, {
                             "<p>In the demo data, we selected four species: <i>Elaeis guineensis</i>, <i>Oryza sativa</i>, <i>Asparagus officinalis</i>, and <i>Vitis vinifera</i>, as also used in <b><i>K</i><sub>s</sub>Dist</b> module, to generate the data.</p>",
                             "<p>First, we followed the preparation steps in the Data Preparation Page of the <b>shinyWGD</b> server to create the script for the corresponding package, <b>i-ADHoRe</b>. ",
                             "We then submitted the job to the PSB computing server to obtain the output.</p>",
-                            "<p>After obtaining the output, the <b>Collinear Analysis</b> module reads the data and continues the analysis. ",
+                            "<p>After obtaining the output, the <b>Collinearity Analysis</b> module reads the data and continues the analysis. ",
                             "Users can choose the type and combinations of the data to study the <b>intra-</b> and <b>inter-species</b> collinear relationships. ",
                             "Additionally, users have the option to use the <b>multiple-spcies alignment</b> module to find the collinear blocks across several species.</p>",
                             "<p>To download the demo data, <a href='https://github.com/li081766/shinyWGD_Demo_Data/blob/main/4sp_Collinear_Data_for_Visualization.tar.gz' target='_blank'>click here</a>.</p>",
@@ -35,7 +35,7 @@ observeEvent(input$collinear_data_example, {
                         )
                     ),
                     HTML(
-                        "<p>Users should upload the zipped-file, named as <b><i>Collinear_Data_for_Visualization.tar.gz</i></b> in the <b>Analysis-*</b> folder created by <b>shinyWGD</b>, to start the <b>Collinear Analysis</b>.</p>"
+                        "<p>Users should upload the zipped-file, named as <b><i>Collinear_Data_for_Visualization.tar.gz</i></b> in the <b>Analysis-*</b> folder created by <b>shinyWGD</b>, to start the <b>Collinearity Analysis</b>.</p>"
                     )
                 )
             )
@@ -157,7 +157,7 @@ observe({
                                padding: 10px 10px 1px 10px;
                                border-radius: 10px;
                                text-align: center;",
-                        HTML(paste("<b>Example:<br><font color='#EE82EE'>Collinear Analysis</font></b>"))
+                        HTML(paste("<b>Example:<br><font color='#EE82EE'>Collinearity Analysis</font></b>"))
                     )
                 )
             })
@@ -195,7 +195,7 @@ observe({
                                padding: 10px 10px 1px 10px;
                                border-radius: 10px;
                                text-align: center;",
-                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>Collinear Analysis</font></b>"))
+                        HTML(paste("Selected Directory:<br><b><font color='#EE82EE'>Collinearity Analysis</font></b>"))
                     )
                 )
             })
@@ -485,7 +485,7 @@ observe({
                                 style="padding-bottom: 10px;",
                                 bsButton(
                                     inputId="clustering_button",
-                                    label=HTML("<font color='white'><b>&nbsp;Clustering analysis: &nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
+                                    label=HTML("<font color='white'><b>&nbsp;PAR clustering: &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25BC;</b></font>"),
                                     icon=icon("list"),
                                     style="success"
                                 ) %>%
@@ -1981,7 +1981,7 @@ observeEvent(input[["plotMicro_intra"]], {
     if( length(collinearAnalysisDir) > 0 ){
         if( isTruthy(input$multiplicon_choose_intra) && !is.null(input$multiplicon_choose_intra) ){
             if( isTruthy(input$gene_intra) && input$gene_intra != "" ){
-                shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
+                #shinyjs::runjs("document.querySelectorAll('svg').forEach(function(svg) { svg.remove() })")
 
                 withProgress(message='Drawing Micro Synteny in progress', value=0, {
                     Sys.sleep(.5)

@@ -86,10 +86,17 @@ writeLines(
 writeLines("cd ..", cmd_con)
 writeLines("# Prepare data for Whale", cmd_con)
 filter_script <- paste0(getwd()[1], "/tools/Whale.jl/scripts/orthofilter.py")
+system(
+    paste(
+        "cp",
+        filter_script,
+        dirname(cmd_file)
+    )
+)
 writeLines(
     paste(
         "python",
-        filter_script,
+        "./orthofilter.py",
         "OrthoFinderOutputDir/$folder/Orthogroups/Orthogroups.tsv",
         args$select_clade,
         "orthogroups.filtered.tsv",

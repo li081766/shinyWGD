@@ -1,5 +1,5 @@
 Synteny_Analysis_ui <- tabPanel(
-    "Collinear",
+    "Collinearity",
     value="synteny_analysis",
     fluidRow(
         column(
@@ -17,7 +17,7 @@ Synteny_Analysis_ui <- tabPanel(
                     display: inline-block;
                     vertical-align: middle;"
                 ),
-                "Collinear Analysis"
+                "Collinearity Analysis"
             ),
             style="padding-bottom: 5px;
                    padding-top: 5px;
@@ -30,7 +30,7 @@ Synteny_Analysis_ui <- tabPanel(
                 style="background-color: #FAF9F6;",
                 h4(icon("upload"), "Uploading"),
                 hr(class="setting"),
-                h5(HTML("<font color='green'><i>shinyWGD</i> <b>Collinear Analysis</b></font> Data")),
+                h5(HTML("<font color='green'><i>shinyWGD</i> <b>Collinearity Analysis</b></font> Data")),
                 fluidRow(
                     class="justify-content-left",
                     style="padding-bottom: 15px;
@@ -56,7 +56,7 @@ Synteny_Analysis_ui <- tabPanel(
                                 icon=icon("question"),
                                 status="secondary",
                                 class="my-start-button-class",
-                                title="Click to use the example data to demo run the Collinear Analysis",
+                                title="Click to use the example data to demo run the Collinearity Analysis",
                                 style="color: #fff;
                                        background-color: #87CEEB;
                                        border-color: #fff;
