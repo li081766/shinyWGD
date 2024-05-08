@@ -91,9 +91,9 @@ EOF
 		echo "@info \"ccd data\" data" >>$outFile
 
 		echo "@model constantrates(model, data) = begin" >>$outFile
-		echo "\tλ  ~ Exponential()" >>$outFile
-		echo "\tμ  ~ Exponential()" >>$outFile
-		echo "\tη  ~ Beta(3,1)" >>$outFile
+		echo -e "\tλ  ~ Exponential()" >>$outFile
+		echo -e "\tμ  ~ Exponential()" >>$outFile
+		echo -e "\tη  ~ Beta(3,1)" >>$outFile
 
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
@@ -101,12 +101,12 @@ EOF
 				qq+=", "
 			fi
 			j=$((i+1))
-			echo "\tq$j ~ Beta()" >>$outFile
+			echo -e "\tq$j ~ Beta()" >>$outFile
 			qq+="q$j"
 		done
 		qq+="]"
 
-		echo "\tdata ~ model((λ=λ, μ=μ, η=η, q=${qq}))" >>$outFile
+		echo -e "\tdata ~ model((λ=λ, μ=μ, η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
 
 		echo "chain0 = sample(constantrates(model, data), NUTS(), ${whaleChain})" >>$outFile
@@ -145,11 +145,11 @@ EOF
 		echo "@info \"ccd data\" data" >>$outFile
 
 		echo "@model critical(model, X, nn) = begin" >>$outFile
-		echo "\tη ~ Beta(3,1)" >>$outFile
-		echo "\tr ~ Turing.Flat()" >>$outFile
-		echo "\tσ ~ Exponential(0.1)" >>$outFile
-		echo "\tλ ~ MvNormal(repeat([r], nn-1), σ)" >>$outFile
-		echo "\tl = [λ; r]" >>$outFile
+		echo -e "\tη ~ Beta(3,1)" >>$outFile
+		echo -e "\tr ~ Turing.Flat()" >>$outFile
+		echo -e "\tσ ~ Exponential(0.1)" >>$outFile
+		echo -e "\tλ ~ MvNormal(repeat([r], nn-1), σ)" >>$outFile
+		echo -e "\tl = [λ; r]" >>$outFile
 
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
@@ -157,12 +157,12 @@ EOF
 				qq+=", "
 			fi
 			j=$((i+1))
-			echo "\tq$j ~ Beta()" >>$outFile
+			echo -e "\tq$j ~ Beta()" >>$outFile
 			qq+="q$j"
 		done
 		qq+="]"
 
-		echo "\tX ~ model((λ=l, μ=l, η=η, q=${qq}))" >>$outFile
+		echo -e "\tX ~ model((λ=l, μ=l, η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
 
 		echo "cmodel = critical(model, data, nn)" >>$outFile
@@ -203,21 +203,21 @@ EOF
 		echo "@info \"ccd data\" data" >>$outFile
 
 		echo "@model branchrates(model, X, n, τmean=1.) = begin" >>$outFile
-		echo "\tη ~ Beta(3,1)" >>$outFile
-		echo "\tρ ~ Uniform(-1, 1.)" >>$outFile
-		echo "\tτ ~ Exponential(τmean)" >>$outFile
-		echo "\tT = typeof(ρ)" >>$outFile
-		echo "\tS = [τ 0. ; 0. τ]" >>$outFile
-		echo "\tR = [1.  ρ; ρ 1.]" >>$outFile
-		echo "\tΣ = S*R*S" >>$outFile
-		echo "\t!isposdef(Σ) && return -Inf" >>$outFile
-		echo "\tr = Matrix{T}(undef, 2, n)" >>$outFile
-		echo "\to = id(getroot(model))" >>$outFile
-		echo "\tr[:,o] ~ MvNormal(zeros(2), ones(2))" >>$outFile
-		echo "\tfor i=1:n" >>$outFile
-		echo "\t\ti == o && continue" >>$outFile
-		echo "\t\tr[:,i] ~ MvNormal(r[:,o], Σ)" >>$outFile
-		echo "\tend" >>$outFile
+		echo -e "\tη ~ Beta(3,1)" >>$outFile
+		echo -e "\tρ ~ Uniform(-1, 1.)" >>$outFile
+		echo -e "\tτ ~ Exponential(τmean)" >>$outFile
+		echo -e "\tT = typeof(ρ)" >>$outFile
+		echo -e "\tS = [τ 0. ; 0. τ]" >>$outFile
+		echo -e "\tR = [1.  ρ; ρ 1.]" >>$outFile
+		echo -e "\tΣ = S*R*S" >>$outFile
+		echo -e "\t!isposdef(Σ) && return -Inf" >>$outFile
+		echo -e "\tr = Matrix{T}(undef, 2, n)" >>$outFile
+		echo -e "\to = id(getroot(model))" >>$outFile
+		echo -e "\tr[:,o] ~ MvNormal(zeros(2), ones(2))" >>$outFile
+		echo -e "\tfor i=1:n" >>$outFile
+		echo -e "\t\ti == o && continue" >>$outFile
+		echo -e "\t\tr[:,i] ~ MvNormal(r[:,o], Σ)" >>$outFile
+		echo -e "\tend" >>$outFile
 
 		qq="["
 		for ((i=0; i<${#random_list[@]}; i++)); do
@@ -225,12 +225,12 @@ EOF
 				qq+=", "
 			fi
 			j=$((i+1))
-			echo "\tq$j ~ Beta()" >>$outFile
+			echo -e "\tq$j ~ Beta()" >>$outFile
 			qq+="q$j"
 		done
 		qq+="]"
 
-		echo "\tX ~ model((λ=r[1,:], μ=r[2,:], η=η, q=${qq}))" >>$outFile
+		echo -e "\tX ~ model((λ=r[1,:], μ=r[2,:], η=η, q=${qq}))" >>$outFile
 		echo "end" >>$outFile
 
 		echo "bmodel = branchrates(model, data, nn)" >>$outFile
@@ -267,10 +267,10 @@ EOF
 	echo "wgd_data = readlines(joinpath(out, \"../..\", \"wgdNodes.txt\"))" >>$outFile
 	echo "wgd_names = String[]" >>$outFile
 	echo "for line in wgd_data" >>$outFile
-	echo "\tline = strip(line)" >>$outFile
-	echo "\tisempty(line) && continue" >>$outFile
-	echo "\tparts = split(line, \":\")" >>$outFile
-    echo "\tname = strip(parts[1])" >>$outFile
+	echo -e "\tline = strip(line)" >>$outFile
+	echo -e "\tisempty(line) && continue" >>$outFile
+	echo -e "\tparts = split(line, \":\")" >>$outFile
+    echo -e "\tname = strip(parts[1])" >>$outFile
 	echo "push!(wgd_names, name)" >>$outFile
 	echo "end" >>$outFile
 	echo "dfQK_modified = hcat(DataFrame(Hypotheses = wgd_names), dfQK)" >>$outFile
