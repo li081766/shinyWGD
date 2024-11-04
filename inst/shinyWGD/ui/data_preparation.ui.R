@@ -177,61 +177,61 @@ Data_preparation_ui <- tabPanel(
                 )
             ),
             # This div container only works for a remote server mode
-            div(class="boxLike",
-                style="background-color: #FFFFF4;",
-                h4(icon("play"), "Script Executing"),
-                hr(class="setting"),
-                fluidRow(
-                    column(
-                        12,
-                        div(
-                            style="padding-left: 5px;",
-							  HTML("The scripts will be submited in the <b><font color='#9F5000'>PSB computing cluster</b></font> if you click the sumbit button below. A <b>unique identifier</b> will be generated."),
-                    		  column(
-                        	  	  12,
-                        		  uiOutput("WgdKsratesIadhoreScriptRun")
-                    		  )
-                        )
-                    ),
-                    column(
-                        12,
-						hr(class="setting"),
-						h5(HTML("<b>OR</b>")),
-						HTML("You can put you email address below. A confirmation email will be sent to the provided email address when the job is done"),
-                        div(
-                            style="padding-top: 10px;
-                                   padding-bottom: 10px;",
-                            fluidRow(
-                                column(
-                                    5,
-                                    textInput(
-                                        inputId="users_email_address",
-                                        label=HTML("<b>Your email</b>:&nbsp;&nbsp;"),
-                                        value="",
-                                        width="100%",
-                                        placeholder="your_name@mail.com"
-                                    )
-                                ),
-                                column(
-                                    1,
-                                    actionButton(
-                                        inputId="comfirm_email",
-                                        "",
-                                        width="40px",
-                                        icon=icon("check"),
-                                        status="secondary",
-                                        class="my-start-button-class",
-                                        style="color: #fff;
-                                               background-color: #8080C0;
-                                               border-color: #fff;
-                                               margin: 30px 0px 0px 0px;"
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
+#             div(class="boxLike",
+#                 style="background-color: #FFFFF4;",
+#                 h4(icon("play"), "Script Executing"),
+#                 hr(class="setting"),
+#                 fluidRow(
+#                     column(
+#                         12,
+#                         div(
+#                             style="padding-left: 5px;",
+# 							  HTML("The scripts will be submited in the <b><font color='#9F5000'>PSB computing cluster</b></font> if you click the sumbit button below. A <b>unique identifier</b> will be generated."),
+#                     		  column(
+#                         	  	  12,
+#                         		  uiOutput("WgdKsratesIadhoreScriptRun")
+#                     		  )
+#                         )
+#                     ),
+#                     column(
+#                         12,
+# 						hr(class="setting"),
+# 						h5(HTML("<b>OR</b>")),
+# 						HTML("You can put you email address below. A confirmation email will be sent to the provided email address when the job is done"),
+#                         div(
+#                             style="padding-top: 10px;
+#                                    padding-bottom: 10px;",
+#                             fluidRow(
+#                                 column(
+#                                     5,
+#                                     textInput(
+#                                         inputId="users_email_address",
+#                                         label=HTML("<b>Your email</b>:&nbsp;&nbsp;"),
+#                                         value="",
+#                                         width="100%",
+#                                         placeholder="your_name@mail.com"
+#                                     )
+#                                 ),
+#                                 column(
+#                                     1,
+#                                     actionButton(
+#                                         inputId="comfirm_email",
+#                                         "",
+#                                         width="40px",
+#                                         icon=icon("check"),
+#                                         status="secondary",
+#                                         class="my-start-button-class",
+#                                         style="color: #fff;
+#                                                background-color: #8080C0;
+#                                                border-color: #fff;
+#                                                margin: 30px 0px 0px 0px;"
+#                                     )
+#                                 )
+#                             )
+#                         )
+#                     )
+#                 )
+#             ),
             # div(class="boxLike",
             #     style="background-color: #FFFFF4;",
             #     h4(icon("download"), "Data Downloading"),
