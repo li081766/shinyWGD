@@ -99,16 +99,16 @@ ui <- tagList(
         ),
         Gallery_ui,
         Help_ui,
-        tabPanel(
-            "Downlaod",
-            icon=icon("download"),
-            fluidRow(
-                column(
-                    6,
-                    uiOutput("search_download_page")
-                )
-            )
-        )
+        #tabPanel(
+        #    "Downlaod",
+        #    icon=icon("download"),
+        #    fluidRow(
+        #        column(
+        #            6,
+        #            uiOutput("search_download_page")
+        #        )
+        #    )
+        #)
     ),
     tags$head(
         tags$style(HTML("
