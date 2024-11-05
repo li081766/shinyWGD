@@ -53,12 +53,12 @@ help(package="shinyWGD")
 
 ### Gallery
 
-[Gallery](https://github.com/li081766/shinyWGD_Demo_Data/blob/main/gallery.html)
-
+[Gallery](https://li081766.github.io/shinyWGD_Demo_Data/gallery.html)
 
 ### Help
 
-[Intro to ShinyWGD](https://github.com/li081766/shinyWGD_Demo_Data/blob/main/intro_to_shinywgd.html)
+[Intro to ShinyWGD](https://li081766.github.io/shinyWGD_Demo_Data/intro_to_shinywgd.html)
+
 
 ### Dependencies
 
