@@ -51,9 +51,10 @@ help(package="shinyWGD")
   - <img src="inst/shinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis
 - ##### <img src="inst/shinyWGD/www/images/question-solid.svg" alt="Icon" width="15" height="15"> Help
 
-####[Gallery](https://li081766.github.io/shinyWGD_Demo_Data/gallery.html)
+[Usage](https://li081766.github.io/shinyWGD_Demo_Data/intro_to_shinywgd.html)
 
-####[Intro to ShinyWGD](https://li081766.github.io/shinyWGD_Demo_Data/intro_to_shinywgd.html)
+[Gallery](https://li081766.github.io/shinyWGD_Demo_Data/gallery.html)
+
 
 
 ### Dependencies
