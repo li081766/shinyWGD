@@ -38,7 +38,7 @@ runshinyWGD()
 help(package="shinyWGD")
 ```
 
-### The structure of`shinyWGD`
+### The structure of `shinyWGD`
 
 - ##### <img src="inst/shinyWGD/www/images/house-solid.svg" alt="Icon" width="15" height="15"> Home
 - ##### <img src="inst/shinyWGD/www/images/terminal-solid.svg" alt="Icon" width="15" height="15"> Scripts
@@ -50,6 +50,15 @@ help(package="shinyWGD")
   - <img src="inst/shinyWGD/www/images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> Tree Building
   - <img src="inst/shinyWGD/www/images/treeReconciliationIcon.svg" alt="Icon" width="20" height="20"> Gene Tree – Species Tree Reconciliation Analysis
 - ##### <img src="inst/shinyWGD/www/images/question-solid.svg" alt="Icon" width="15" height="15"> Help
+
+### Gallery
+
+[Gallery](https://github.com/li081766/shinyWGD_Demo_Data/blob/main/gallery.html)
+
+
+### Help
+
+[Intro to ShinyWGD](https://github.com/li081766/shinyWGD_Demo_Data/blob/main/intro_to_shinywgd.html)
 
 ### Dependencies
 
