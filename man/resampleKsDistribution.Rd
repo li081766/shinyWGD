@@ -17,13 +17,3 @@ A numeric vector containing a resampled Ks distribution.
 \description{
 This function resamples a given Ks (synonymous substitution rates) distribution.
 }
-\examples{
-# Load or obtain a Ks distribution (replace with your data)
-ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-
-# Resample the Ks distribution
-resampled_ks <- resampleKsDistribution(ks=ks_distribution, maxK=2.5)
-
-# Print the resampled Ks distribution
-print(resampled_ks)
-}

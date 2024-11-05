@@ -10,12 +10,6 @@
 #'
 #' @return The function does not return anything. It logs information about removed directories and errors.
 #'
-#' @examples
-#' \dontrun{
-#' # Remove directories older than 3 days in the specified directory
-#' remove_old_dirs("~/path/to/base/directory", max_age_in_days=3)
-#' }
-#'
 remove_old_dirs <- function(base_dir, max_age_in_days=3, log_file="remove_old_dirs.log") {
     current_time <- Sys.time()
 

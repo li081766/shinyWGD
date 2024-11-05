@@ -25,8 +25,3 @@ A data frame with seven variables.
 \description{
 Log-Normal mixturing analyses of a Ks distributions for the whole paranome
 }
-\examples{
-ksv <- c(0.1, 0.3, 0.12, 0.34, 0.45, 0.32, 0.33)
-mix_logNormal_Ks <- function(ksv)
-
-}

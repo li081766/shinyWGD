@@ -6,9 +6,6 @@
 #'
 #' @return A logical value indicating whether the object is not NULL.
 #'
-#' @examples
-#' is.not.null(5)
-#' is.not.null(NULL)
 is.not.null <- function(x) {
     !is.null(x)
 }
@@ -56,6 +53,8 @@ downloadButton_custom <- function(
 #'
 #' @param uploadfile The object representing the uploaded file obtained through the Shiny upload function.
 #'
+#' @importFrom utils read.delim
+#'
 #' @return A data frame containing the data from the uploaded file.
 #'
 read_data_file <- function(uploadfile) {
@@ -75,6 +74,7 @@ read_data_file <- function(uploadfile) {
 #'
 #' @param gff_input_name A descriptive name for the GFF/GTF file.
 #' @param gff_input_path The file path to the GFF/GTF file.
+#' @param working_wd A character string specifying the working directory to be used.
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
@@ -109,6 +109,7 @@ check_gff_input <- function(gff_input_name, gff_input_path, working_wd){
 #'
 #' @param gff_input_name The informal name of the GFF input file.
 #' @param gff_input_path The path to the GFF input file.
+#' @param working_wd A character string specifying the working directory to be used.
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
@@ -197,12 +198,6 @@ extract_first_part <- function(name) {
 #'
 #' @return A character string or NULL.
 #'
-#' @examples
-#' sequence <- "ATGTAACTAGTGAAGTAGCTAACATAG"
-#' modified_sequence <- remove_inner_stop_codon_sequence(sequence)
-#' modified_sequence
-#' # [1] NULL
-#'
 remove_inner_stop_codon_sequence <- function(sequence) {
     is_stop_codon <- function(codon) {
         stop_codons <- c("TAA", "TAG", "TGA", "taa", "tag", "tga")
@@ -227,6 +222,7 @@ remove_inner_stop_codon_sequence <- function(sequence) {
 #'
 #' @param proteome_name The informal name of the proteome input file.
 #' @param proteome_input The proteome input data.
+#' @param working_wd A character string specifying the working directory to be used.
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
@@ -311,6 +307,7 @@ check_proteome_input <- function(proteome_name, proteome_input, working_wd){
 #'
 #' @param proteome_name The informal name of the proteome input file.
 #' @param proteome_input The proteome input data.
+#' @param working_wd A character string specifying the working directory to be used.
 #'
 #' @importFrom stringr str_detect
 #' @importFrom stringr regex
@@ -397,13 +394,6 @@ check_proteome_from_file <- function(proteome_name, proteome_input, working_wd){
 #'
 #' @return This function has no return value. It prints messages to the console.
 #'
-#' @examples
-#' data_table <- read.table(text="V1 V2 V3
-#'         'Apostasia fujianica'    '../Apostasia1.fa'    '../Apostasia1.gff'
-#'         'Apostasia shenzhenica'    '../Apostasia2.fa'    '../Apostasia2.gff'
-#'         'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header=TRUE)
-#'
-#' checkFileExistence(data_table)
 checkFileExistence <- function(data_table, working_wd){
     for( i in 1:nrow(data_table) ){
         file1 <- as.character(data_table[i, "V2"])
@@ -477,7 +467,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
 
             proteome_temp <- check_proteome_input(
                 informal_name_temp,
-                input[[proteome]],
+                input[["proteome"]],
                 workdirname
             )
             if( is.null(proteome_temp) ){
@@ -561,6 +551,7 @@ create_ksrates_configure_file_v2 <- function(input, ksrates_conf_file, species_i
 #' @param newick_tree_file The path to the Newick tree file.
 #' @param ksrates_conf_file The path to the Ksrates configuration file to be generated.
 #' @param species_info_file The path to the species information file.
+#' @param working_wd A character string specifying the working directory to be used.
 #'
 create_ksrates_configure_file_based_on_table <- function(
         data_table,
@@ -883,4 +874,3 @@ replace_informal_name_to_latin_name <- function(names_df, input){
         return(input)
     }
 }
-

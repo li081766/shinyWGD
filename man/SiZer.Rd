@@ -21,11 +21,3 @@ A list containing SiZer results, including the SiZer curve, the SiZer map, and t
 \description{
 The SiZer (Significant Zero Crossings) method is a technique used for assessing the statistical significance of zero crossings in data density estimation.
 }
-\examples{
-ks_value_tmp <- c(81.3724, 77.5539, 76.6121, 3.5945, 3.3308, -1, 15.4158, 2.7786, 1.8054)
-df_sizer <- SiZer(
-    ks_value_tmp,
-    gridsize=c(500, 50),
-    bw=c(0.01, 5)
-)
-}

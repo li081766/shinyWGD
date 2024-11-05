@@ -15,7 +15,3 @@ A logical value indicating whether the object is not NULL.
 \description{
 This function checks if an object is not NULL.
 }
-\examples{
-is.not.null(5)
-is.not.null(NULL)
-}

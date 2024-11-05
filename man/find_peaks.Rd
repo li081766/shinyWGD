@@ -17,13 +17,3 @@ A numeric vector containing the indices of the identified peaks in the input vec
 \description{
 This function identifies peaks in a numeric vector by analyzing the shape of the curve.
 }
-\examples{
-# Generate some example data
-x <- c(1, 3, 7, 2, 6, 8, 5, 4, 9, 3, 2, 1)
-
-# Find peaks in the data with a half-width of 2
-peaks <- find_peaks(x, m=2)
-
-# Print the indices of the identified peaks
-print(peaks)
-}

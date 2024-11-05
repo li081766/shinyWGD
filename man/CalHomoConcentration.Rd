@@ -21,7 +21,3 @@ The -log10 of the p-value.
 \description{
 This function calculates the -log10 of the p-value of a Poisson distribution given the parameters.
 }
-\examples{
-# Example usage:
-p_value <- CalHomoConcentration(m=100, n=1000, q=10, k=1)
-}

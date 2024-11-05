@@ -22,8 +22,3 @@ The computed P-value.
 \description{
 This function computes the P-value of a cluster using the Poisson distribution.
 }
-\examples{
-# Example usage:
-p_value <- CalPvalue(m=100, n=10000, q=5, k=250)
-cat("P-value:", p_value, "\n")
-}

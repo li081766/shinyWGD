@@ -17,7 +17,3 @@ Returns TRUE if the object is of class "ksv"; otherwise, returns FALSE.
 \description{
 This function checks if the provided object is of class "ksv."
 }
-\examples{
-x <- c(0.1, 0.3, 0.8, 1,1, 0.8, 0.9)
-is.ksv(x)
-}

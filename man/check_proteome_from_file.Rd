@@ -10,6 +10,8 @@ check_proteome_from_file(proteome_name, proteome_input, working_wd)
 \item{proteome_name}{The informal name of the proteome input file.}
 
 \item{proteome_input}{The proteome input data.}
+
+\item{working_wd}{A character string specifying the working directory to be used.}
 }
 \value{
 A string containing the processed proteome file's path.

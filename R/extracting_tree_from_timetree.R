@@ -7,16 +7,16 @@
 #'
 #' @return A timetree object representing the estimated divergence times between species.
 #'
-#' @import httr jsonlite
+#' @importFrom jsonlite fromJSON
+#' @importFrom httr GET content
+#' @importFrom stringr str_trim
+#' @importFrom shiny incProgress
+#' @importFrom ape write.nexus
 #'
 #' @export
 #'
 #' @seealso \code{\link{httr}}, \code{\link{jsonlite}}
 TimeTreeFecher <- function(input_file, prefix){
-    suppressPackageStartupMessages({
-        library(httr)
-        library(jsonlite)
-    })
     base_url <- "https://timetree.org/api"
 
     taxon_names <- readLines(input_file)

@@ -16,10 +16,3 @@ A character string or NULL.
 This function removes the gene contains stop codons (TAA, TAG, TGA, taa, tag, tga)
 within its sequence.
 }
-\examples{
-sequence <- "ATGTAACTAGTGAAGTAGCTAACATAG"
-modified_sequence <- remove_inner_stop_codon_sequence(sequence)
-modified_sequence
-# [1] NULL
-
-}

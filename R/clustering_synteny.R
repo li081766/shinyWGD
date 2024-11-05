@@ -322,9 +322,6 @@ cluster_synteny <- function(
 #' @return The -log10 of the p-value.
 #'
 #'
-#' @examples
-#' # Example usage:
-#' p_value <- CalHomoConcentration(m=100, n=1000, q=10, k=1)
 CalHomoConcentration <- function(m, n, q, k) {
     p <- m / n
     mean <- k * p
@@ -462,10 +459,6 @@ analysisEachCluster <- function(
 #'
 #' @return The computed P-value.
 #'
-#' @examples
-#' # Example usage:
-#' p_value <- CalPvalue(m=100, n=10000, q=5, k=250)
-#' cat("P-value:", p_value, "\n")
 CalPvalue <- function(m, n, q, k) {
     p <- m / n
     mean <- p * k

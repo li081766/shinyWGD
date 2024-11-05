@@ -5,10 +5,8 @@ Help_ui <- tabPanel(
     fluidRow(
         column(
             12,
-            uiOutput("myMarkdown")
-            #includeMarkdown("www/content/help.md") #, options = list(render = FALSE, sanitize = FALSE))
+			HTML('<iframe src="https://li081766.github.io/shinyWGD_Demo_Data/intro_to_shinywgd.html" style="width:100%; height:800px; border:none;"></iframe>')
         ),
-        #column(3)
     ),
     icon=icon("question")
 )

@@ -14,6 +14,7 @@
 #' @importFrom vroom vroom
 #' @importFrom stats median
 #' @importFrom tidyr fill
+#' @importFrom data.table copy
 #'
 #' @return None. The function saves the results to the specified outfile and anchorpointout_file.
 #'
@@ -33,7 +34,8 @@ obtain_mean_ks_for_each_multiplicon <- function(multiplicon_file, anchorpoint_fi
         )
     )
 
-    Ks <- genome_x <- list_x <- genome_y <- NULL
+    Ks <- genome_x <- list_x <- genome_y <- geneX <- geneY <- NULL
+	tmp_pair1 <- tmp_pair2 <- geneA <- geneB <- pair1 <- pair2 <- NULL
 
     if( !is.null(species2) ){
         ks_value_df <- suppressMessages(

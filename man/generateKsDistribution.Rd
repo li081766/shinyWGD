@@ -19,13 +19,3 @@ A numeric vector containing the binned Ks distribution.
 \description{
 This function generates a Ks (synonymous substitution rates) distribution from raw Ks values.
 }
-\examples{
-# Load or obtain raw Ks values (replace with your data)
-raw_ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-
-# Generate the Ks distribution
-ks_distribution <- generateKsDistribution(ksraw=raw_ks_values, maxK=2.5)
-
-# Print the binned Ks distribution
-print(ks_distribution)
-}

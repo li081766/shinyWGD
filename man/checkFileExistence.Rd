@@ -17,11 +17,3 @@ This function has no return value. It prints messages to the console.
 \description{
 This function checks the existence of files specified in a data table.
 }
-\examples{
-data_table <- read.table(text="V1 V2 V3
-        'Apostasia fujianica'    '../Apostasia1.fa'    '../Apostasia1.gff'
-        'Apostasia shenzhenica'    '../Apostasia2.fa'    '../Apostasia2.gff'
-        'Asparagus officinalis'    '../Asparagus3.fa'    '../Asparagus3.gff'", header=TRUE)
-
-checkFileExistence(data_table)
-}

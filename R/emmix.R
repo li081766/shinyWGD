@@ -65,10 +65,6 @@ run_emmix_kmeas <- function(v, k.centers=2, k.nstart=500) {
 #'
 #' @return A data frame with seven variables.
 #'
-#' @examples
-#' ksv <- c(0.1, 0.3, 0.12, 0.34, 0.45, 0.32, 0.33)
-#' mix_logNormal_Ks <- function(ksv)
-#'
 mix_logNormal_Ks <- function(ksv, G=1:5, k.nstart=500, maxK=5) {
 
   if (maxK <= ksv$ks_dist$maxK) {

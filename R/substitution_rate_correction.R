@@ -1,8 +1,5 @@
 #' ksv class
 #'
-#' @examples
-#' x <- c(0.1, 0.3, 0.8, 1,1, 0.8, 0.9)
-#' is.ksv(x)
 is.ksv <- function(x) {
     # if (class(x) == "ksv") {
     if (inherits(x, "ksv")) {
@@ -23,9 +20,6 @@ is.ksv <- function(x) {
 #'
 #' @return The mode (peak) of the distribution.
 #'
-#' @examples
-#' x <- c(1.1, 1.1, 1.2, 1.4, 1.8, 0.9, 0.8, 0.7)
-#' modeFinder(x)
 modeFinder <- function(x, bw = 0.1, from = 0, to = 5) {
     if (is.ksv(x)) {
         k <- x$ks.value

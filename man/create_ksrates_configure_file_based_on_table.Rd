@@ -23,6 +23,8 @@ create_ksrates_configure_file_based_on_table(
 \item{ksrates_conf_file}{The path to the Ksrates configuration file to be generated.}
 
 \item{species_info_file}{The path to the species information file.}
+
+\item{working_wd}{A character string specifying the working directory to be used.}
 }
 \description{
 This function generates a Ksrates configuration file based on a data table and other parameters.

@@ -45,18 +45,3 @@ A numeric vector containing bootstrapped peak estimates.
 This function performs bootstrapping on a given Ks (synonymous substitution rates) distribution
 to estimate peaks within the distribution.
 }
-\examples{
-# Load or obtain a Ks distribution (replace with your data)
-ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-
-# Bootstrap peak estimation
-bootstrap_peaks <- bootStrapPeaks(
-    ksRaw=ks_distribution,
-    peak.index=1,
-    rep=10,
-    peak.maxK=2.5
-)
-
-# Print the bootstrapped peak estimates
-print(bootstrap_peaks)
-}

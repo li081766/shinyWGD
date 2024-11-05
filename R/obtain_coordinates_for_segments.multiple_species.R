@@ -51,6 +51,7 @@ obtain_coordinates_for_segments_multiple <- function(
     gene <- start <- end <- multiplicon <- genome <- list <- first <- last <- NULL
     genome.1 <- list.1 <- first.1 <- last.1 <- start.1 <- end.1 <- order.1 <- NULL
     genomeX <- genomeY <- NULL
+	min.1 <- max.1 <- NULL
 
     segs <- seg_df
     start_subset <- select(position_df, gene, start)

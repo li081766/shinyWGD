@@ -25,10 +25,3 @@ This function removes directories in the specified base directory that are
 older than a specified maximum age in days. It logs the removed directories
 and any errors encountered during removal.
 }
-\examples{
-\dontrun{
-# Remove directories older than 3 days in the specified directory
-remove_old_dirs("~/path/to/base/directory", max_age_in_days=3)
-}
-
-}

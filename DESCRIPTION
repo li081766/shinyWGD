@@ -1,10 +1,9 @@
 Package: shinyWGD
 Type: Package
 Title: Shiny Application for Whole Genome Duplication Analysis
-Version: 1.0.5
-Authors@R: 
-    person("Jia", "Li", email = "li081766@gmail.com", role = c("cre", "aut"))
-Maintainer: Jia Li <jiali@psb.vib-ugent.be>
+Version: 1.0.0
+Author: Jia Li <li081766@gmail.com>
+Maintainer: Jia Li <li081766@gmail.com>
 Description: shinyWGD is a comprehensive Shiny-R package that simplifies 
     and streamlines the analysis of Whole Genome Duplication (WGD) events. 
     This package provides a user-friendly Shiny web application for 
@@ -24,7 +23,6 @@ Description: shinyWGD is a comprehensive Shiny-R package that simplifies
     5) User-Friendly Interface The Shiny web application provides an intuitive and accessible interface, making WGD analysis accessible to researchers and bioinformaticians of all levels.
 License: GPL-3 + file LICENSE
 Encoding: UTF-8
-LazyData: true
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
@@ -32,20 +30,10 @@ SystemRequirements: pandoc (>= 1.12.3), pandoc-citeproc
 Imports:
     shiny,
     shinyalert,
-    shinyjs,
-    shinyFiles,
-    bslib,
-    shinyBS,
-    bsplus,
-    shinyWidgets,
-    igraph,
-    stringi,
     stringr,
     vroom,
     fs,
     tidyr,
-    tidyverse,
-    english,
     data.table,
     dplyr,
     ape,
@@ -54,12 +42,22 @@ Imports:
     htmltools,
     seqinr,
     httr,
-    jsonlite,
-    tools,
-    argparse,
-    DT,
-    knitr,
-    markdown,
-    rmarkdown,
-    fontawesome,
+    jsonlite
+Suggests: 
+    tidyverse,
+	knitr, 
+	rmarkdown,
+	DT,
+	argparse,
+	bslib,
+	bsplus,
+	english,
+	fontawesome,
+	igraph,
+	shinyBS,
+	shinyFiles,
+	shinyWidgets,
+	shinyjs,
+	stringi,
+	tools,
     testthat (>= 3.0.0)

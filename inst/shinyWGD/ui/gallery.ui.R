@@ -4,7 +4,8 @@ Gallery_ui <- tabPanel(
     fluidRow(
         column(
             12,
-            uiOutput("galleryPanel")
+            #uiOutput("galleryPanel")
+			HTML('<iframe src="https://li081766.github.io/shinyWGD_Demo_Data/gallery.html" style="width:100%; height:800px; border:none;"></iframe>')
         )
     ),
     icon=icon("image")

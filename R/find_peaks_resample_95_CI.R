@@ -8,15 +8,6 @@
 #' @return A numeric vector containing the indices of the identified peaks in the input vector `x`.
 #'
 #'
-#' @examples
-#' # Generate some example data
-#' x <- c(1, 3, 7, 2, 6, 8, 5, 4, 9, 3, 2, 1)
-#'
-#' # Find peaks in the data with a half-width of 2
-#' peaks <- find_peaks(x, m=2)
-#'
-#' # Print the indices of the identified peaks
-#' print(peaks)
 find_peaks <- function (x, m=3){
     shape <- diff(sign(diff(x, na.pad=FALSE)))
     pks <- sapply(which(shape < 0), FUN=function(i){
@@ -50,22 +41,6 @@ find_peaks <- function (x, m=3){
 #'
 #' @return A numeric vector containing the identified peaks in the Ks distribution.
 #'
-#' @examples
-#' # Generate a vector of Ks values (replace with your data)
-#' ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-#'
-#' # Find peaks in the Ks distribution
-#' peaks <- PeaksInKsDistributionValues(
-#'   ks=ks_values,
-#'   binWidth=0.1,
-#'   maxK=2.5,
-#'   m=3,
-#'   peak.maxK=2.0,
-#'   spar=0.25
-#' )
-#'
-#' # Print the identified peaks
-#' print(peaks)
 PeaksInKsDistributionValues <- function(ks, binWidth=0.1, maxK=5,
                                         m=3, peak.maxK=2, spar=0.25) {
 
@@ -97,15 +72,6 @@ PeaksInKsDistributionValues <- function(ks, binWidth=0.1, maxK=5,
 #'
 #' @return A numeric vector containing the binned Ks distribution.
 #'
-#' @examples
-#' # Load or obtain raw Ks values (replace with your data)
-#' raw_ks_values <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-#'
-#' # Generate the Ks distribution
-#' ks_distribution <- generateKsDistribution(ksraw=raw_ks_values, maxK=2.5)
-#'
-#' # Print the binned Ks distribution
-#' print(ks_distribution)
 generateKsDistribution <- function(ksraw, speciesName=NULL, maxK=5) {
     ksDist <- hist(ksraw, seq(0, maxK, 0.01), plot=F)$counts
     ksDistBinned <- NULL
@@ -130,15 +96,6 @@ generateKsDistribution <- function(ksraw, speciesName=NULL, maxK=5) {
 #'
 #' @return A numeric vector containing a resampled Ks distribution.
 #'
-#' @examples
-#' # Load or obtain a Ks distribution (replace with your data)
-#' ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-#'
-#' # Resample the Ks distribution
-#' resampled_ks <- resampleKsDistribution(ks=ks_distribution, maxK=2.5)
-#'
-#' # Print the resampled Ks distribution
-#' print(resampled_ks)
 resampleKsDistribution <- function(ks, maxK=5) {
     ksDist <- generateKsDistribution(ks, maxK=maxK)
     return(sample(x=ksDist, size=length(ksDist), replace=T))
@@ -162,20 +119,6 @@ resampleKsDistribution <- function(ks, maxK=5) {
 #'
 #' @return A numeric vector containing bootstrapped peak estimates.
 #'
-#' @examples
-#' # Load or obtain a Ks distribution (replace with your data)
-#' ks_distribution <- c(0.1, 0.2, 0.3, 0.4, 0.5, 1.0, 1.2, 1.5, 2.0, 2.5)
-#'
-#' # Bootstrap peak estimation
-#' bootstrap_peaks <- bootStrapPeaks(
-#'     ksRaw=ks_distribution,
-#'     peak.index=1,
-#'     rep=10,
-#'     peak.maxK=2.5
-#' )
-#'
-#' # Print the bootstrapped peak estimates
-#' print(bootstrap_peaks)
 bootStrapPeaks <- function(ksRaw, binWidth=0.1, maxK=5, m=3, peak.index=1,
                            peak.maxK=2, spar=0.25, rep=1000, from=0, to=maxK) {
     peaks <- c()

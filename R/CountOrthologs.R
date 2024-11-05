@@ -21,28 +21,6 @@
 #'
 #' @return A data frame summarizing the counts of ortholog genes for each chromosome.
 #'
-#' @examples
-#' # Example usage:
-#' # Create a sample atomic.df data frame
-#' atomic.df <- data.frame(
-#'   multiplicon=c(2, 2, 2),
-#'   geneX=c("GSVIVT01016360001", "GSVIVT01016362001", "GSVIVT01016362001"),
-#'   speciesX=c("Vitis_vinifera", "Vitis_vinifera", "Vitis_vinifera"),
-#'   listX=c("chr13:181-369", "chr13:181-369", "chr13:181-369"),
-#'   coordX=c(188, 187, 1875),
-#'   geneY=c("Os01t0854500-01", "Os01t0854000-01", "Os05t0449200-01"),
-#'   speciesY=c("Oryza_sativa", "Oryza_sativa", "Oryza_sativa"),
-#'   listY=c("chr01:3463-3614", "chr01:3463-3614", "chr05:1610-1714"),
-#'   coordY=c(135, 133, 14),
-#'   level=c(10000, 10000, 10000),
-#'   num_anchors=c(10000, 10000, 10000),
-#'   is_real=c(-1, -1, -1),
-#'   Ks=c(81.3724, 77.5539, 76.6121)
-#' )
-#'
-#' # Calculate ortholog gene counts for "Vitis_vinifera"
-#' ortholog_counts <- CountOrthologs(atomic.df, species="Vitis_vinifera")
-#' ortholog_counts
 CountOrthologs <- function(atomic.df, species) {
   if (length(unique(atomic.df$speciesX)) > 1) {
     stop ("atomatic.df is not ordered")

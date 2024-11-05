@@ -10,6 +10,8 @@ check_gff_input(gff_input_name, gff_input_path, working_wd)
 \item{gff_input_name}{A descriptive name for the GFF/GTF file.}
 
 \item{gff_input_path}{The file path to the GFF/GTF file.}
+
+\item{working_wd}{A character string specifying the working directory to be used.}
 }
 \value{
 The path to the prepared GFF file for analysis.
