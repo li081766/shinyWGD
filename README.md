@@ -1,7 +1,7 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![license](https://img.shields.io/pypi/l/wgd.svg)](https://pypi.python.org/pypi/wgd)
+[![license](https://img.shields.io/pypi/l/wgd.svg)]
 ![Supported Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20OSX%20%7C%20Windows-brightgreen.svg)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
 [![Visit Server](https://img.shields.io/badge/Visit%20Server-blue.svg)](https://bioinformatics.psb.ugent.be/shiny/ShinyWGD/)
@@ -9,7 +9,7 @@
 
 ### Overview
 
-`shinyWGD` can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30), and [`OrthoFinder`](https://github.com/davidemms/OrthoFinder). 
+`shinyWGD` can prepare the input and command lines for [`wgd`](https://github.com/arzwa/wgd), [`ksrates`](https://github.com/VIB-PSB/ksrates), [`i-ADHoRe`](https://github.com/VIB-PSB/i-ADHoRe), and [`OrthoFinder`](https://github.com/davidemms/OrthoFinder). 
 
 `shinyWGD` can also assist users in using [`Whale`](https://github.com/arzwa/whaleprep/tree/master) to infer reconciled gene trees and parameters of a model of gene family evolution given a known species tree.
 
@@ -17,7 +17,7 @@ After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFi
 
 ### Installation
 
-* Install the latest development version from GitHub (requires [devtools](https://github.com/hadley/devtools) package):
+* Install the latest development version from GitHub (requires [devtools](https://github.com/r-lib/devtools) package):
 
 ```r
 if (!require("devtools")) {
@@ -62,12 +62,12 @@ help(package="shinyWGD")
 - ##### External software
   - [`wgd`](https://github.com/arzwa/wgd)
   - [`ksrates`](https://github.com/VIB-PSB/ksrates)
-  - [`i-ADHoRe`](https://www.vandepeerlab.org/?q=tools/i-adhore30)
+  - [`i-ADHoRe`](https://github.com/VIB-PSB/i-ADHoRe)
   - [`Whale`](https://github.com/arzwa/Whale.jl/tree/master)
   - [`OrthoFinder`](https://github.com/davidemms/OrthoFinder)
   - [`diamond`](https://github.com/bbuchfink/diamond)
   - [`MAFFT`](https://mafft.cbrc.jp/alignment/software/)
-  - [`trimAl`](http://trimal.cgenomics.org/)
+  - [`trimAl`](https://trimal.cgenomics.org/)
   - [`PAML`](http://abacus.gene.ucl.ac.uk/software/paml.html)
   - [`MrBayes`](https://nbisweden.github.io/MrBayes/)
   - [`ALE`](https://github.com/ssolo/ALE)
