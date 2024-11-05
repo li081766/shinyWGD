@@ -33,5 +33,5 @@ Dive into the world of WGD analysis with **`shinyWGD`** Server – freely distri
     - This module visualizes [`Whale`](https://github.com/arzwa/Whale.jl/tree/master) output and posterior distributions of WGD retention rates (q) for potential WGDs under selected models.
   - <a href="javascript:void(0);" onclick="switchToTreeBuildingTab()"><font color="orange"><img src="images/ksTreeIcon.svg" alt="Icon" width="20" height="20"> VizWGD </font></a>
     - This module lets users customize the MCMCtree's time tree, or a ultrametic tree. Upload a tree file, click branches to add WGD events, and adjust colors and symbols. Highlight geological time regions with ease.
-- ##### <a href="javascript:void(0);" onclick="switchToDataPreparationTab()"><font color="#6650C9"><i class="fa-solid fa-image"></i> Gallery</font></a>
+- ##### <a href="javascript:void(0);" onclick="switchToGalleryTab()"><font color="#6650C9"><i class="fa-solid fa-image"></i> Gallery</font></a>
 - ##### <a href="javascript:void(0);" onclick="switchToHelpTab()"><font color="#6650C9"><i class="fa-solid fa-question"></i> Help</font></a>
