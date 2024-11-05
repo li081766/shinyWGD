@@ -25,7 +25,6 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
-VignetteBuilder: knitr
 SystemRequirements: pandoc (>= 1.12.3), pandoc-citeproc
 Imports:
     shiny,

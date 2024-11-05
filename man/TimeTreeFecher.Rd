@@ -17,6 +17,3 @@ A timetree object representing the estimated divergence times between species.
 \description{
 This function takes a file with species names as input and a prefix to define the output.
 }
-\seealso{
-\code{\link{httr}}, \code{\link{jsonlite}}
-}

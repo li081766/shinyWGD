@@ -15,7 +15,6 @@
 #'
 #' @export
 #'
-#' @seealso \code{\link{httr}}, \code{\link{jsonlite}}
 TimeTreeFecher <- function(input_file, prefix){
     base_url <- "https://timetree.org/api"
 
