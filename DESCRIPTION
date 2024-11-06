@@ -10,23 +10,29 @@ Authors@R: person(
 		email = "li081766@gmail.com"
 	)
 Description: Provides a comprehensive Shiny application for analyzing 
-    Whole Genome Duplication (WGD) events.
+    Whole Genome Duplication ('WGD') events.
     This package provides a user-friendly Shiny web application for 
     non-experienced researchers to prepare input data and execute command lines 
-    for several well-known WGD analysis tools, including wgd, ksrates, 
-    i-ADHoRe, OrthoFinder, and Whale. This package also provides the source code 
+    for several well-known 'WGD' analysis tools, including 'wgd', 'ksrates', 
+    'i-ADHoRe', 'OrthoFinder', and 'Whale'. This package also provides the source code 
     for experienced researchers to adjust and install the package to their own server. 
     Key Features
     1) Input Data Preparation 
-    shinyWGD allows users to conveniently upload and format their data, making it compatible with various WGD analysis tools.
+    This package allows users to conveniently upload and format their data, 
+	making it compatible with various 'WGD' analysis tools.
     2) Command Line Generation
-    The package automatically generates the necessary command lines for selected WGD analysis tools, reducing manual errors and saving time.
+    This package automatically generates the necessary command lines for 
+	selected 'WGD' analysis tools, reducing manual errors and saving time.
     3) Visualization
-    shinyWGD offers interactive visualizations to explore and interpret WGD results, facilitating in-depth WGD analysis.
+    This package offers interactive visualizations to explore and interpret 'WGD' results, 
+	facilitating in-depth 'WGD' analysis.
     4) Comparative Genomics
-    Users can study and compare WGD events across different species, aiding in evolutionary and comparative genomics studies.
-    5) User-Friendly Interface The Shiny web application provides an intuitive and accessible interface, making WGD analysis accessible to researchers and bioinformaticians of all levels.
-License: GPL-3 + file LICENSE
+    Users can study and compare 'WGD' events across different species, 
+	aiding in evolutionary and comparative genomics studies.
+    5) User-Friendly Interface 
+	This Shiny web application provides an intuitive and accessible interface, 
+	making 'WGD' analysis accessible to researchers and 'bioinformaticians' of all levels.
+License: GPL-3 
 Encoding: UTF-8
 RoxygenNote: 7.2.3
 Roxygen: list(markdown = TRUE)
