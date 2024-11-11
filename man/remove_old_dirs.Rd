@@ -7,7 +7,8 @@
 remove_old_dirs(
   base_dir,
   max_age_in_days = 3,
-  log_file = "remove_old_dirs.log"
+  log_file = "remove_old_dirs.log",
+  verbose = FALSE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ remove_old_dirs(
 \item{max_age_in_days}{The maximum age (in days) for directories to be considered old.}
 
 \item{log_file}{The name of the log file to store information about removed directories and errors.}
+
+\item{verbose}{A logical value indicating whether to print messages to the console.}
 }
 \value{
 The function does not return anything. It logs information about removed directories and errors.

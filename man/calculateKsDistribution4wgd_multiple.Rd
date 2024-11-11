@@ -9,7 +9,7 @@ calculateKsDistribution4wgd_multiple(
   binWidth = 0.1,
   maxK = 5,
   plot.mode = "weighted",
-  include.outliers = F,
+  include.outliers = FALSE,
   minK = 0,
   minAlnLen = 0,
   minIdn = 0,

@@ -3,15 +3,13 @@ Type: Package
 Title: Shiny Application for Whole Genome Duplication Analysis
 Version: 1.0.0
 Maintainer: Jia Li <li081766@gmail.com>
-Authors@R: person(
-		given = "Jia",
-		family = "Li",
-		role = c("aut", "cre"),
-		email = "li081766@gmail.com"
-	)
-Description: Provides a comprehensive Shiny application for analyzing 
+Authors@R: c(
+    person("Jia", "Li", email = "li081766@gmail.com", role = c("aut", "cre")),
+    person("Zhen", "Li", email = "zhen.li@psb.vib-ugent.be", role = "ctb"),
+    person("Arthur", "Zwaenepoel", email = "arthur.zwaenepoel@gmail.com", role = "ctb"))
+Description: Provides a comprehensive 'Shiny' application for analyzing 
     Whole Genome Duplication ('WGD') events.
-    This package provides a user-friendly Shiny web application for 
+    This package provides a user-friendly 'Shiny' web application for 
     non-experienced researchers to prepare input data and execute command lines 
     for several well-known 'WGD' analysis tools, including 'wgd', 'ksrates', 
     'i-ADHoRe', 'OrthoFinder', and 'Whale'. This package also provides the source code 
@@ -30,7 +28,7 @@ Description: Provides a comprehensive Shiny application for analyzing
     Users can study and compare 'WGD' events across different species, 
 	aiding in evolutionary and comparative genomics studies.
     5) User-Friendly Interface 
-	This Shiny web application provides an intuitive and accessible interface, 
+	This 'Shiny' web application provides an intuitive and accessible interface, 
 	making 'WGD' analysis accessible to researchers and 'bioinformaticians' of all levels.
 License: GPL-3 
 Encoding: UTF-8

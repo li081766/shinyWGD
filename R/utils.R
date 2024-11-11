@@ -23,8 +23,6 @@ is.not.null <- function(x) {
 #'
 #' @importFrom htmltools tags
 #'
-#' @export
-#'
 #' @return An HTML tag to allow users to download the object.
 #'
 downloadButton_custom <- function(

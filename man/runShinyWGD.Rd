@@ -7,5 +7,10 @@
 runshinyWGD()
 }
 \description{
-The main code to run shinyWGD
+The main function to launch the Shiny application for whole genome duplication analysis.
+This function initializes the app and opens a Shiny interface that allows users to interactively analyze whole-genome duplication data.
+}
+\value{
+No return value. This function is called for side effects, which include starting the Shiny application.
+The function launches a Shiny app in a web browser, where users can interact with the whole genome duplication analysis.
 }
