@@ -1,7 +1,7 @@
 # shinyWGD <img src="inst/shinyWGD/www/images/sticker_github.png" align="right" width="120" />
 
 <!-- badges: start -->
-[![license](https://img.shields.io/pypi/l/wgd.svg)]
+![license](https://img.shields.io/pypi/l/wgd.svg)
 ![Supported Platforms](https://img.shields.io/badge/Platforms-Linux%20%7C%20OSX%20%7C%20Windows-brightgreen.svg)
 [![GitHub issues](https://img.shields.io/github/issues/li081766/shinyWGD)](https://github.com/li081766/shinyWGD/issues)
 [![Visit Server](https://img.shields.io/badge/Visit%20Server-blue.svg)](https://bioinformatics.psb.ugent.be/shiny/ShinyWGD/)
