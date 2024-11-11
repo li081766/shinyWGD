@@ -48,11 +48,11 @@ modeFinder <- function(x, bw = 0.1, from = 0, to = 5) {
 #' @return A list containing computed relative rates and their confidence intervals.
 #'
 relativeRate <- function(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax, low = 0.025, up = 0.975, bs = 1000) {
-    ksv2out_1 <- read.table(ksv2out_1_file, sep="\t", header=T)
+    ksv2out_1 <- read.table(ksv2out_1_file, sep="\t", header=TRUE)
     ksv2out_1 <- ksv2out_1[ksv2out_1$Ks <= KsMax, ]
-    ksv2out_2 <- read.table(ksv2out_2_file, sep="\t", header=T)
+    ksv2out_2 <- read.table(ksv2out_2_file, sep="\t", header=TRUE)
     ksv2out_2 <- ksv2out_2[ksv2out_2$Ks <= KsMax, ]
-    ksv_between <- read.table(ksv_between_file, sep="\t", header=T)
+    ksv_between <- read.table(ksv_between_file, sep="\t", header=TRUE)
     ksv_between <- ksv_between[ksv_between$Ks <= KsMax, ]
 
     outgroup.d1 <- ksv2out_1$Ks
@@ -63,9 +63,9 @@ relativeRate <- function(ksv2out_1_file, ksv2out_2_file, ksv_between_file, KsMax
     b.dist <- vector()
     c.dist <- vector()
     for (i in seq(1:bs)) {
-        a <- sample(outgroup.d1, size = length(outgroup.d1), replace = T)
-        b <- sample(outgroup.d2, size = length(outgroup.d2), replace = T)
-        c <- sample(ingroup.d, size = length(ingroup.d), replace = T)
+        a <- sample(outgroup.d1, size = length(outgroup.d1), replace = TRUE)
+        b <- sample(outgroup.d2, size = length(outgroup.d2), replace = TRUE)
+        c <- sample(ingroup.d, size = length(ingroup.d), replace = TRUE)
         a_mode <- .5 * (modeFinder(c) + modeFinder(a) - modeFinder(b))
         b_mode <- .5 * (modeFinder(c) + modeFinder(b) - modeFinder(a))
         c_mode <- .5 * (modeFinder(a) + modeFinder(b) - modeFinder(c))

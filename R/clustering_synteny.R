@@ -325,7 +325,7 @@ cluster_synteny <- function(
 CalHomoConcentration <- function(m, n, q, k) {
     p <- m / n
     mean <- k * p
-    return(-log10(ppois(q, mean, lower.tail=F)))
+    return(-log10(ppois(q, mean, lower.tail=FALSE)))
 }
 
 #' Perform synteny analysis for identified clusters
@@ -462,7 +462,7 @@ analysisEachCluster <- function(
 CalPvalue <- function(m, n, q, k) {
     p <- m / n
     mean <- p * k
-    return(ppois(q, mean, lower.tail=F))
+    return(ppois(q, mean, lower.tail=FALSE))
 }
 
 #' Extract clusters based on specified scaffolds

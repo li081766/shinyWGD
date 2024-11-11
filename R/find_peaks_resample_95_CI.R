@@ -44,7 +44,7 @@ find_peaks <- function (x, m=3){
 PeaksInKsDistributionValues <- function(ks, binWidth=0.1, maxK=5,
                                         m=3, peak.maxK=2, spar=0.25) {
 
-    ksDist <- hist(ks, seq(0, maxK, 0.01), plot=F)$counts
+    ksDist <- hist(ks, seq(0, maxK, 0.01), plot=FALSE)$counts
 
     ksDistBinned <- NULL
     valuesPerBin <- binWidth / 0.01
@@ -73,7 +73,7 @@ PeaksInKsDistributionValues <- function(ks, binWidth=0.1, maxK=5,
 #' @return A numeric vector containing the binned Ks distribution.
 #'
 generateKsDistribution <- function(ksraw, speciesName=NULL, maxK=5) {
-    ksDist <- hist(ksraw, seq(0, maxK, 0.01), plot=F)$counts
+    ksDist <- hist(ksraw, seq(0, maxK, 0.01), plot=FALSE)$counts
     ksDistBinned <- NULL
     valuesPerBin <- 1
     maxCount <- maxK * 100
@@ -98,7 +98,7 @@ generateKsDistribution <- function(ksraw, speciesName=NULL, maxK=5) {
 #'
 resampleKsDistribution <- function(ks, maxK=5) {
     ksDist <- generateKsDistribution(ks, maxK=maxK)
-    return(sample(x=ksDist, size=length(ksDist), replace=T))
+    return(sample(x=ksDist, size=length(ksDist), replace=TRUE))
 }
 
 #' Bootstrap Peaks in the Ks Distribution

@@ -89,7 +89,7 @@ generate_ksd <- function(ks_df, bin_width=0.01, maxK=5) {
 
     valuesPerBin <- bin_width / 0.01
     full_df$Ks.bin <- cut(full_df$Ks, seq(0, maxK, bin_width),
-                          right=F, include.lowest=T)
+                          right=FALSE, include.lowest=TRUE)
     maxBin <- length(levels(full_df$Ks.bin))
 
     ks.aggregate <- stats::aggregate(full_df$Weight,
@@ -98,7 +98,7 @@ generate_ksd <- function(ks_df, bin_width=0.01, maxK=5) {
 
     ks.bin.df <- data.frame(
         ks.bin=cut(seq(0, maxK, bin_width)[1:maxBin] + bin_width / 2,
-                     seq(0, 5, bin_width),right=F, include.lowest=T),
+                     seq(0, 5, bin_width),right=FALSE, include.lowest=TRUE),
         ks=seq(0, maxK, bin_width)[1:maxBin] + bin_width / 2)
 
     ks.dist <- merge(ks.aggregate, ks.bin.df, by="ks.bin", all=TRUE)

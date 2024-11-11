@@ -21,7 +21,7 @@
 calculateKsDistribution4wgd_multiple <- function(
         files_list, binWidth=0.1, maxK=5,
         plot.mode="weighted",
-        include.outliers=F, minK=0, minAlnLen=0, minIdn=0, minCov=0){
+        include.outliers=FALSE, minK=0, minAlnLen=0, minIdn=0, minCov=0){
     # library(dplyr)
 
     full.data <- data.frame()
@@ -33,18 +33,18 @@ calculateKsDistribution4wgd_multiple <- function(
         title <- basename(i)
         title <- gsub(".tsv", "", title)
         plottitle <- gsub("wgd_", "", title)
-        df <- read.table(i, sep="\t", header=T)
+        df <- read.table(i, sep="\t", header=TRUE)
         df <- df[df$Ks>=minK
                  & df$AlignmentCoverage>=minCov
                  & df$AlignmentLength>=minAlnLen
                  & df$AlignmentIdentity>=minIdn, ]
 
-        if (include.outliers == F) {
+        if( include.outliers == FALSE ){
             df <- df[df$WeightOutliersExcluded>0,]
         }
 
         if (plot.mode == "weighted") {
-            if (include.outliers == T) {
+            if (include.outliers == TRUE) {
                 df$Weight <- df$WeightOutliersIncluded
             } else {
                 df$Weight <- df$WeightOutliersExcluded
@@ -70,7 +70,7 @@ calculateKsDistribution4wgd_multiple <- function(
         df <- df[complete.cases(df$Ks), ]
 
         valuesPerBin <- binWidth / 0.01
-        df$Ks.bin <- cut(df$Ks, seq(0, maxK, binWidth), right=F, include.lowest=T)
+        df$Ks.bin <- cut(df$Ks, seq(0, maxK, binWidth), right=FALSE, include.lowest=TRUE)
         maxBin <- length(levels(df$Ks.bin))
 
         df$title <- plottitle
@@ -80,7 +80,7 @@ calculateKsDistribution4wgd_multiple <- function(
         ks.aggregate <- aggregate(df$Weight, by=list(ks.bin=df$Ks.bin), FUN=sum)
         ks.bin.df <- data.frame(ks.bin=cut(seq(minK, maxK, binWidth)[1:maxBin] + binWidth / 2,
                                            seq(minK, maxK, binWidth),
-                                           right=F, include.lowest=T),
+                                           right=FALSE, include.lowest=TRUE),
                                 ks=seq(minK, maxK, binWidth)[1:maxBin] + binWidth / 2)
         ks.dist <- merge(ks.aggregate, ks.bin.df, by="ks.bin")
 

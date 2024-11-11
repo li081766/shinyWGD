@@ -18,7 +18,7 @@ obtain_chromosome_length <- function(species_info_file){
         species_info_file,
         sep="\t",
         header=FALSE,
-        fill=T,
+        fill=TRUE,
         na.strings="",
 		col.names=c("sp", "cds", "gff")
     )
