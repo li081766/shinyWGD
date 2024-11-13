@@ -1,6 +1,6 @@
 Package: shinyWGD
 Type: Package
-Title: Shiny Application for Whole Genome Duplication Analysis
+Title: 'Shiny' Application for Whole Genome Duplication Analysis
 Version: 1.0.0
 Maintainer: Jia Li <li081766@gmail.com>
 Authors@R: c(

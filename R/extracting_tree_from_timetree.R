@@ -20,7 +20,7 @@ TimeTreeFecher <- function(input_file, prefix){
 
     taxon_names <- readLines(input_file)
     taxon_names <- str_trim(taxon_names, side="right")
-    print(taxon_names)
+    message(taxon_names)
 
     get_taxon_id <- function(name_t){
         name <- gsub(" ", "+", name_t)
