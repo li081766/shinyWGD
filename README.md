@@ -22,7 +22,7 @@ After directly uploading the output of `wgd`, `ksrates`, `i-ADHoRe`, or `OrthoFi
 * Install from [CRAN](https://cran.r-project.org/web/packages/shinyWGD/index.html):
 
 ```r
-install.packages("shinyWGD")
+install.packages("shinyWGD", dependencies = TRUE)
 ```
 
 * Install the latest development version from GitHub (requires [devtools](https://github.com/r-lib/devtools) package):
